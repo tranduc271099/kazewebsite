@@ -58,7 +58,11 @@ const Login = () => {
                 navigate('/');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Đăng nhập không thành công');
+            if (err.response?.data?.message === 'Tài khoản của bạn đã bị khóa') {
+                setError('Tài khoản của bạn đã bị khóa');
+            } else {
+                setError(err.response?.data?.message || 'Đăng nhập không thành công');
+            }
         } finally {
             setLoading(false);
         }

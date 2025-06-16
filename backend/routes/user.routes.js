@@ -1,17 +1,35 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { register, login, getProfile, updateProfile, changePassword } = require('../controllers/user.controller');
-const auth = require('../middleware/auth');
+const {
+  register,
+  login,
+  getProfile,
+  updateProfile,
+  changePassword,
+  getUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  saveUserHistory,
+} = require("../controllers/user.controller");
+const auth = require("../middleware/auth");
 
 // Đăng ký và đăng nhập
-router.post('/register', register);
-router.post('/login', login);
+router.post("/register", register);
+router.post("/login", login);
 
 // Thông tin cá nhân
-router.get('/me', auth, getProfile);
-router.put('/me', auth, updateProfile);
+router.get("/profile", auth, getProfile);
+router.put("/profile", auth, updateProfile);
 
 // Đổi mật khẩu
-router.put('/change-password', auth, changePassword);
+router.put("/profile/password", auth, changePassword);
+
+// API quản lý người dùng (chỉ admin)
+router.get("/admin/users", auth, getUsers);
+router.post("/admin/users", auth, createUser);
+router.put("/admin/users/:id", auth, updateUser);
+router.delete("/admin/users/:id", auth, deleteUser);
+router.post("/admin/users/history", auth, saveUserHistory);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
     address: String,
     vouchers: [{ type: String }],
-}, { timestamps: true })
+    isLocked: { type: Boolean, default: false },
+}, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema); 

@@ -291,4 +291,11 @@ export const CartProvider = ({ children }) => {
             {children}
         </CartContext.Provider>
     );
-}; 
+};
+
+export function handleApiError(error) {
+    if (error?.response?.data?.message === 'Tài khoản của bạn đã bị khóa') {
+        const event = new CustomEvent('user-locked', { detail: 'Tài khoản của bạn đã bị khóa' });
+        window.dispatchEvent(event);
+    }
+} 

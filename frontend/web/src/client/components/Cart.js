@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
+import ApplyVoucher from './ApplyVoucher';
 
 function Cart() {
     const { cartItems, removeFromCart, updateQuantity, clearCart, updateCartItemAttributes } = useContext(CartContext);
@@ -211,17 +212,6 @@ function Cart() {
                                     </div>
                                 );
                             })}
-                            {/* Coupon and actions */}
-                            <div className="d-flex justify-content-between align-items-center mt-4">
-                                <div className="input-group" style={{ maxWidth: 300 }}>
-                                    <input type="text" className="form-control" placeholder="Mã giảm giá" />
-                                    <button className="btn btn-primary" type="button">Áp dụng</button>
-                                </div>
-                                <div>
-                                    <button className="btn btn-outline-primary me-2" type="button">Cập nhật</button>
-                                    <button className="btn btn-outline-danger" type="button" onClick={clearCart}>Xóa hết</button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,6 +220,10 @@ function Cart() {
                     <div className="card shadow-sm border-0">
                         <div className="card-body p-4">
                             <h5 className="mb-4" style={{ fontWeight: 600 }}>Thông tin đơn hàng</h5>
+                            <ApplyVoucher
+                                cartTotal={subtotalDisplay}
+                                onDiscountApplied={(discountValue) => setDiscount(discountValue)}
+                            />
                             <div className="d-flex justify-content-between mb-2">
                                 <span>Tạm tính</span>
                                 <span>{subtotalDisplay.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>

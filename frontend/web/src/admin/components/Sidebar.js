@@ -96,6 +96,18 @@ const Sidebar = () => {
                                         <p>Quản lý sản phẩm</p>
                                     </NavLink>
                                 </li>
+                                <li className="nav-item">
+                                    <NavLink to="/dashboard/user-management" className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}>
+                                        <i className="nav-icon fas fa-users"></i>
+                                        <p>Quản lý tài khoản</p>
+                                    </NavLink>
+                                </li>
+                                <li className="nav-item">
+                                    <NavLink to="/dashboard/vouchers" className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}>
+                                        <i className="nav-icon fas fa-ticket-alt"></i>
+                                        <p>Mã giảm giá</p>
+                                    </NavLink>
+                                </li>
                             </ul>
                         </li>
                         <li className="nav-item">
