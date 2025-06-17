@@ -26,8 +26,8 @@ import AdminCategory from './admin/pages/Category';
 import AdminOrder from './admin/pages/Order';
 import AdminProduct from './admin/pages/Product';
 // import AdminUser from './admin/pages/User';
-import UserManagement from './admin/User/UserManagement';
-import VoucherManagement from './admin/Voucher/VoucherManagement';
+import UserManagement from './admin/pages/User/UserManagement';
+import Vouchers from './admin/pages/Voucher/Vouchers';
 
 // Admin Components
 import AdminLayout from './admin/components/Layout';
@@ -113,7 +113,7 @@ function App() {
               <Route path="products" element={<AdminProduct />} />
               {/* <Route path="users" element={<AdminUser />} /> */}
               <Route path="user-management" element={<UserManagement />} />
-              <Route path="vouchers" element={<VoucherManagement />} />
+              <Route path="vouchers" element={<Vouchers />} />
             </Route>
           </Routes>
         </div>

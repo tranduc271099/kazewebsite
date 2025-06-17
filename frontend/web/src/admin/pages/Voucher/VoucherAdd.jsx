@@ -1,6 +1,6 @@
 import React from 'react';
 
-const VoucherForm = ({ form, setForm, handleSubmit, editingId, setEditingId, initialForm, error, success }) => (
+const VoucherAdd = ({ form, setForm, handleSubmit, editingId, setEditingId, initialForm, error, success }) => (
   <form onSubmit={handleSubmit} style={{marginBottom: 24}}>
     <input
       type="text"
@@ -57,4 +57,4 @@ const VoucherForm = ({ form, setForm, handleSubmit, editingId, setEditingId, ini
   </form>
 );
 
-export default VoucherForm; 
+export default VoucherAdd; 

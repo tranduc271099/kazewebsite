@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import VoucherList from './VoucherList';
-import VoucherForm from './VoucherForm';
+import VoucherAdd from './VoucherAdd';
 import VoucherEdit from './VoucherEdit';
 
 const initialForm = {
@@ -13,7 +13,7 @@ const initialForm = {
   endDate: ''
 };
 
-const VoucherManagement = () => {
+const Vouchers = () => {
   const [vouchers, setVouchers] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
@@ -120,7 +120,7 @@ const VoucherManagement = () => {
           success={success}
         />
       ) : (
-        <VoucherForm
+        <VoucherAdd
           form={form}
           setForm={setForm}
           handleSubmit={handleSubmit}
@@ -136,4 +136,4 @@ const VoucherManagement = () => {
   );
 };
 
-export default VoucherManagement; 
+export default Vouchers; 

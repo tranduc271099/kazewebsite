@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/UserManagement.css';
+import '../../styles/UserManagement.css';
 import { handleApiError } from '../../client/context/CartContext';
 import ListUser from './listUser';
 import EditUserModal from './EditUserModal';

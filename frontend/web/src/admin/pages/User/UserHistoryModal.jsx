@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import '../styles/UserHistoryModal.css';
+import '../../styles/UserHistoryModal.css';
 
 const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
     const [history, setHistory] = useState([]);
