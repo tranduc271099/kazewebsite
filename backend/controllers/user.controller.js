@@ -303,3 +303,18 @@ exports.saveUserHistory = async (req, res) => {
     res.status(500).json({ message: "Lỗi khi lưu lịch sử chỉnh sửa" });
   }
 };
+
+// Lấy lịch sử chỉnh sửa của một user
+exports.getUserHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const history = await UserHistory.find({ userId })
+      .populate('updatedBy', 'name email')
+      .sort({ updatedAt: -1 });
+    
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi khi lấy lịch sử chỉnh sửa" });
+  }
+};

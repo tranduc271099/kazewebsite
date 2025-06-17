@@ -5,6 +5,7 @@ import { handleApiError } from '../../client/context/CartContext';
 import ListUser from './listUser';
 import EditUserModal from './EditUserModal';
 import AddUserModal from './AddUserModal';
+import UserHistoryModal from './UserHistoryModal';
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -14,6 +15,8 @@ const UserManagement = () => {
     const [editHistory, setEditHistory] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showHistoryModal, setShowHistoryModal] = useState(false);
+    const [selectedUserForHistory, setSelectedUserForHistory] = useState(null);
     const [newUser, setNewUser] = useState({
         name: '',
         email: '',
@@ -105,7 +108,7 @@ const UserManagement = () => {
 
             // Gửi lịch sử chỉnh sửa lên server
             await axios.post(
-                'http://localhost:5000/api/users/admin/users/history',
+                'http://localhost:5000/api/users/admin/user-history',
                 historyEntry,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -138,16 +141,45 @@ const UserManagement = () => {
         if (user.role !== 'user') return;
         try {
             const token = localStorage.getItem('token');
+            const newLockedStatus = !user.isLocked;
+            
             await axios.put(
                 `http://localhost:5000/api/users/admin/users/${user._id}`,
-                { ...user, isLocked: !user.isLocked },
+                { ...user, isLocked: newLockedStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
+            // Lưu lịch sử khóa/mở khóa
+            const historyEntry = {
+                userId: user._id,
+                updatedBy: currentUser?._id,
+                updatedAt: new Date(),
+                changes: {
+                    isLocked: newLockedStatus
+                }
+            };
+
+            await axios.post(
+                'http://localhost:5000/api/users/admin/user-history',
+                historyEntry,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
             fetchUsers();
         } catch (err) {
             setError('Không thể cập nhật trạng thái khóa');
             handleApiError(err);
         }
+    };
+
+    const handleViewHistory = (user) => {
+        setSelectedUserForHistory(user);
+        setShowHistoryModal(true);
+    };
+
+    const handleCloseHistoryModal = () => {
+        setShowHistoryModal(false);
+        setSelectedUserForHistory(null);
     };
 
     if (loading) return <div>Đang tải...</div>;
@@ -173,6 +205,7 @@ const UserManagement = () => {
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
                     handleToggleLock={handleToggleLock}
+                    handleViewHistory={handleViewHistory}
                     loading={loading}
                     error={error}
                 />
@@ -188,6 +221,12 @@ const UserManagement = () => {
                     newUser={newUser}
                     setNewUser={setNewUser}
                     handleAddUser={handleAddUser}
+                />
+                <UserHistoryModal
+                    isOpen={showHistoryModal}
+                    onClose={handleCloseHistoryModal}
+                    userId={selectedUserForHistory?._id}
+                    userName={selectedUserForHistory?.name}
                 />
             </div>
         </div>

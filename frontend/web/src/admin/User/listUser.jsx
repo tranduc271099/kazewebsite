@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleToggleLock, loading, error }) => {
+const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleToggleLock, handleViewHistory, loading, error }) => {
     if (loading) return <div>Đang tải...</div>;
     return (
         <div className="table-responsive">
@@ -29,6 +29,13 @@ const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleToggleLo
                                     disabled={currentUser?.role === 'admin' && user.role === 'admin' && currentUser._id !== user._id}
                                 >
                                     Sửa
+                                </button>
+                                <button
+                                    className="btn btn-info btn-sm me-2"
+                                    onClick={() => handleViewHistory(user)}
+                                    title="Xem lịch sử chỉnh sửa"
+                                >
+                                    <i className="fas fa-history"></i> Lịch sử
                                 </button>
                                 <button
                                     className="btn btn-danger btn-sm me-2"

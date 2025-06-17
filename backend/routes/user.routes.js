@@ -11,6 +11,7 @@ const {
   updateUser,
   deleteUser,
   saveUserHistory,
+  getUserHistory,
 } = require("../controllers/user.controller");
 const auth = require("../middleware/auth");
 
@@ -30,6 +31,7 @@ router.get("/admin/users", auth, getUsers);
 router.post("/admin/users", auth, createUser);
 router.put("/admin/users/:id", auth, updateUser);
 router.delete("/admin/users/:id", auth, deleteUser);
-router.post("/admin/users/history", auth, saveUserHistory);
+router.get("/admin/users/:userId/history", auth, getUserHistory);
+router.post("/admin/user-history", auth, saveUserHistory);
 
 module.exports = router;

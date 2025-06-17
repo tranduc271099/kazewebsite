@@ -18,7 +18,8 @@ const userHistorySchema = new mongoose.Schema({
     changes: {
         name: String,
         email: String,
-        role: String
+        role: String,
+        isLocked: Boolean
     }
 });
 
