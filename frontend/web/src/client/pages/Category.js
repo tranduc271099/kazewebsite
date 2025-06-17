@@ -4,6 +4,79 @@ import { Link } from "react-router-dom";
 import { toast } from 'react-toastify';
 import '../../admin/styles/Category.css';
 import { CartContext } from '../context/CartContext';
+import '../styles/CategoryDropdown.css';
+
+// CategoryDropdown Component
+const CategoryDropdown = ({ 
+    selectedCategory, 
+    onCategoryChange, 
+    placeholder = "Chọn danh mục",
+    showAllOption = true,
+    className = "form-select",
+    disabled = false
+}) => {
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('http://localhost:5000/api/categories');
+            setCategories(response.data);
+        } catch (err) {
+            setError('Không thể tải danh mục');
+            console.error('Error fetching categories:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleChange = (e) => {
+        const value = e.target.value;
+        onCategoryChange(value === '*' ? '*' : value);
+    };
+
+    if (loading) {
+        return (
+            <select className={className} disabled>
+                <option>Đang tải...</option>
+            </select>
+        );
+    }
+
+    if (error) {
+        return (
+            <select className={className} disabled>
+                <option>Lỗi tải danh mục</option>
+            </select>
+        );
+    }
+
+    return (
+        <div className="category-dropdown-container">
+            <select 
+                className={`category-dropdown ${className}`}
+                value={selectedCategory || '*'}
+                onChange={handleChange}
+                disabled={disabled}
+            >
+                {showAllOption && (
+                    <option value="*">Tất cả danh mục</option>
+                )}
+                {categories.map(category => (
+                    <option key={category._id} value={category.name.toLowerCase()}>
+                        {category.name}
+                    </option>
+                ))}
+            </select>
+        </div>
+    );
+};
 
 const Category = () => {
     // State cho price range
@@ -357,6 +430,16 @@ const Category = () => {
                                         </div>
                                         <div className="col-12 col-md-6 col-lg-2">
                                             <div className="filter-item">
+                                                <label htmlFor="categorySelect" className="form-label">Danh mục</label>
+                                                <CategoryDropdown
+                                                    selectedCategory={selectedCategorySidebar}
+                                                    onCategoryChange={setSelectedCategorySidebar}
+                                                    placeholder="Chọn danh mục"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-12 col-md-6 col-lg-2">
+                                            <div className="filter-item">
                                                 <label htmlFor="priceRange" className="form-label">Price Range</label>
                                                 <select className="form-select" id="priceRange">
                                                     <option>All Prices</option>
@@ -410,13 +493,41 @@ const Category = () => {
                                             <div className="active-filters d-flex align-items-center">
                                                 <span className="active-filter-label me-2">Active Filters:</span>
                                                 <div className="filter-tags d-flex flex-wrap align-items-center">
-                                                    <span className="filter-tag me-2 mb-2">
-                                                        Electronics <button className="filter-remove"><i className="bi bi-x"></i></button>
-                                                    </span>
-                                                    <span className="filter-tag me-2 mb-2">
-                                                        $50 to $100 <button className="filter-remove"><i className="bi bi-x"></i></button>
-                                                    </span>
-                                                    <button className="clear-all-btn btn btn-link ms-2">Clear All</button>
+                                                    {selectedCategorySidebar !== '*' && (
+                                                        <span className="filter-tag me-2 mb-2">
+                                                            {categories.find(cat => cat.name.toLowerCase() === selectedCategorySidebar)?.name || selectedCategorySidebar} 
+                                                            <button 
+                                                                className="filter-remove" 
+                                                                onClick={() => setSelectedCategorySidebar('*')}
+                                                            >
+                                                                <i className="bi bi-x"></i>
+                                                            </button>
+                                                        </span>
+                                                    )}
+                                                    {minPrice > 0 || maxPrice < 1000 ? (
+                                                        <span className="filter-tag me-2 mb-2">
+                                                            ${minPrice} to ${maxPrice} 
+                                                            <button 
+                                                                className="filter-remove"
+                                                                onClick={() => {
+                                                                    setMinPrice(0);
+                                                                    setMaxPrice(1000);
+                                                                }}
+                                                            >
+                                                                <i className="bi bi-x"></i>
+                                                            </button>
+                                                        </span>
+                                                    ) : null}
+                                                    <button 
+                                                        className="clear-all-btn btn btn-link ms-2"
+                                                        onClick={() => {
+                                                            setSelectedCategorySidebar('*');
+                                                            setMinPrice(0);
+                                                            setMaxPrice(1000);
+                                                        }}
+                                                    >
+                                                        Clear All
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

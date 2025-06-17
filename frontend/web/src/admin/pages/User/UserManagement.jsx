@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../styles/UserManagement.css';
-import { handleApiError } from '../../client/context/CartContext';
+import { handleApiError } from '../../../client/context/CartContext';
 import ListUser from './listUser';
 import EditUserModal from './EditUserModal';
 import AddUserModal from './AddUserModal';
@@ -106,13 +106,6 @@ const UserManagement = () => {
                 }
             };
 
-            // Gửi lịch sử chỉnh sửa lên server
-            await axios.post(
-                'http://localhost:5000/api/users/admin/user-history',
-                historyEntry,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
             setEditHistory([...editHistory, historyEntry]);
             setEditingUser(null);
             fetchUsers();
@@ -149,22 +142,6 @@ const UserManagement = () => {
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            // Lưu lịch sử khóa/mở khóa
-            const historyEntry = {
-                userId: user._id,
-                updatedBy: currentUser?._id,
-                updatedAt: new Date(),
-                changes: {
-                    isLocked: newLockedStatus
-                }
-            };
-
-            await axios.post(
-                'http://localhost:5000/api/users/admin/user-history',
-                historyEntry,
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
             fetchUsers();
         } catch (err) {
             setError('Không thể cập nhật trạng thái khóa');
@@ -193,11 +170,12 @@ const UserManagement = () => {
                         className="btn btn-primary"
                         onClick={() => setShowAddModal(true)}
                     >
+                        <i className="fas fa-user-plus me-1"></i>
                         Thêm người dùng mới
                     </button>
                 </div>
 
-                {error && <div className="error-message">{error}</div>}
+                {error && <div className="alert alert-danger">{error}</div>}
 
                 <ListUser
                     users={users}

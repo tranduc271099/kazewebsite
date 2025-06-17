@@ -41,13 +41,13 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
 
     const getChangeDescription = (changes) => {
         const descriptions = [];
-        if (changes.name) descriptions.push(`Tên: ${changes.name}`);
-        if (changes.email) descriptions.push(`Email: ${changes.email}`);
-        if (changes.role) descriptions.push(`Vai trò: ${changes.role}`);
+        if (changes.name) descriptions.push(`Tên: "${changes.name}"`);
+        if (changes.email) descriptions.push(`Email: "${changes.email}"`);
+        if (changes.role) descriptions.push(`Vai trò: "${changes.role}"`);
         if (changes.isLocked !== undefined) {
-            descriptions.push(`Trạng thái: ${changes.isLocked ? 'Đã khóa' : 'Đã mở khóa'}`);
+            descriptions.push(`Trạng thái: "${changes.isLocked ? 'Đã khóa' : 'Đã mở khóa'}"`);
         }
-        return descriptions.join(', ');
+        return descriptions.join(' | ');
     };
 
     if (!isOpen) return null;
@@ -108,7 +108,10 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
                                                 <tr>
                                                     <th>Thời gian</th>
                                                     <th>Chỉnh sửa bởi</th>
-                                                    <th>Thay đổi</th>
+                                                    <th>Tên</th>
+                                                    <th>Email</th>
+                                                    <th>Vai trò</th>
+                                                    <th>Trạng thái</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -135,9 +138,40 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
                                                             )}
                                                         </td>
                                                         <td>
-                                                            <span className="badge bg-info">
-                                                                {getChangeDescription(entry.changes)}
-                                                            </span>
+                                                            {entry.changes.name ? (
+                                                                <span className="badge bg-info">
+                                                                    {entry.changes.name}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-muted">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {entry.changes.email ? (
+                                                                <span className="badge bg-info">
+                                                                    {entry.changes.email}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-muted">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {entry.changes.role ? (
+                                                                <span className="badge bg-info">
+                                                                    {entry.changes.role}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-muted">-</span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            {entry.changes.isLocked !== undefined ? (
+                                                                <span className={`badge ${entry.changes.isLocked ? 'bg-danger' : 'bg-success'}`}>
+                                                                    {entry.changes.isLocked ? 'Đã khóa' : 'Đã mở khóa'}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-muted">-</span>
+                                                            )}
                                                         </td>
                                                     </tr>
                                                 ))}

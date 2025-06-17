@@ -11,5 +11,6 @@ router.post('/', voucherController.createVoucher);
 router.post('/apply', voucherController.applyVoucher);
 router.put('/:id', voucherController.updateVoucher);
 router.delete('/:id', voucherController.deleteVoucher);
+router.get('/available', voucherController.getAvailableVouchers);
 
 module.exports = router; 

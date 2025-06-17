@@ -1,17 +1,39 @@
 .user-management-container {
     padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0 20px 20px;
+    width: 80%;
+    overflow-x: auto;
 }
 
 .user-management-header {
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 10px;
 }
 
 .user-management-header h2 {
-    color: #333;
-    font-size: 24px;
     margin: 0;
+    font-size: 2rem;
+    color: #2c3e50;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.user-management-header h2::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    height: 3px;
+    background-color: #007bff;
+    border-radius: 1.5px;
 }
 
 .error-message {
@@ -24,26 +46,41 @@
 
 .table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.table th,
-.table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    margin-bottom: 0;
 }
 
 .table th {
     background-color: #f8f9fa;
-    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+    padding: 12px;
 }
 
-.table tr:hover {
-    background-color: #f5f5f5;
+.table td {
+    vertical-align: middle;
+    padding: 12px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.action-buttons button {
+    padding: 4px 8px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.content-inner {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .btn {
@@ -150,4 +187,39 @@
 
 .me-2 {
     margin-right: 8px;
+}
+
+.table-responsive {
+    margin: 0;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table td:last-child {
+    white-space: nowrap;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    min-width: 120px;
+    max-width: 160px;
+    justify-content: flex-start;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-management-container {
+        margin: 10px;
+        padding: 15px;
+        max-width: calc(100% - 20px);
+    }
+
+    .user-management-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .action-buttons {
+        flex-wrap: wrap;
+    }
 } 

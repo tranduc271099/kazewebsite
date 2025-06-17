@@ -9,6 +9,15 @@ exports.getAllVouchers = async (req, res) => {
   }
 };
 
+exports.getAvailableVouchers = async (req, res) => {
+  try {
+    const vouchers = await Voucher.find();
+    res.json(vouchers);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher khả dụng' });
+  }
+};
+
 exports.createVoucher = async (req, res) => {
   try {
     const voucher = new Voucher(req.body);
@@ -42,15 +51,25 @@ exports.deleteVoucher = async (req, res) => {
 exports.applyVoucher = async (req, res) => {
   try {
     const { code, cartTotal } = req.body;
-    const voucher = await Voucher.findOne({ name: code });
-    if (!voucher) return res.status(404).json({ message: 'Mã giảm giá không tồn tại' });
+    const voucher = await Voucher.findOne({ code, isActive: true });
+    
+    if (!voucher) {
+      return res.status(404).json({ message: 'Mã giảm giá không tồn tại hoặc đã bị vô hiệu hóa' });
+    }
 
     const now = new Date();
-    if (now < voucher.startDate || now > voucher.endDate) {
-      return res.status(400).json({ message: 'Mã giảm giá chưa hoặc không còn hiệu lực' });
+    if (now < voucher.startDate) {
+      return res.status(400).json({ message: 'Mã giảm giá chưa có hiệu lực' });
     }
+    
+    if (now > voucher.endDate) {
+      return res.status(400).json({ message: 'Mã giảm giá đã hết hạn' });
+    }
+
     if (cartTotal < voucher.minOrder) {
-      return res.status(400).json({ message: 'Đơn hàng chưa đủ điều kiện áp dụng mã' });
+      return res.status(400).json({ 
+        message: `Đơn hàng tối thiểu ${voucher.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`
+      });
     }
 
     let discountAmount = 0;
@@ -59,7 +78,12 @@ exports.applyVoucher = async (req, res) => {
     } else if (voucher.discountType === 'percent') {
       discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
     }
-    res.json({ discountAmount, voucher });
+
+    res.json({ 
+      discountAmount, 
+      voucher,
+      message: `Áp dụng mã giảm giá thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`
+    });
   } catch (err) {
     res.status(500).json({ message: 'Lỗi khi áp dụng mã giảm giá' });
   }

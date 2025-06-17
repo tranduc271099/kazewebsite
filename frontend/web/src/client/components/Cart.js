@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
-import ApplyVoucher from './ApplyVoucher';
+import ApplyVoucher from '../pages/ApplyVoucher';
 
 function Cart() {
     const { cartItems, removeFromCart, updateQuantity, clearCart, updateCartItemAttributes } = useContext(CartContext);
@@ -12,6 +12,10 @@ function Cart() {
     const [tax, setTax] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [selectedItems, setSelectedItems] = useState({});
+    const [selectAll, setSelectAll] = useState(true);
+    const [voucherModalOpen, setVoucherModalOpen] = useState(false);
+    const [selectedVoucher, setSelectedVoucher] = useState('');
+    const [voucherDiscount, setVoucherDiscount] = useState(0);
 
     // Helper to find matching variant (similar to ProductDetail)
     const findMatchingVariant = useCallback((productId, newColor, newSize) => {
@@ -106,170 +110,133 @@ function Cart() {
         );
     }
 
-    // Calculate subtotal for display, ignoring selection for now for this specific var
-    const subtotalDisplay = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    // Calculate subtotal for display, chỉ tính sản phẩm được chọn
+    const subtotalDisplay = cartItems.reduce((acc, item) => {
+        const itemId = `${item.id}-${item.color}-${item.size}`;
+        if (selectedItems[itemId]) {
+            return acc + (item.price * item.quantity);
+        }
+        return acc;
+    }, 0);
+
+    // Giả lập giá gốc cao hơn 1% để hiển thị giá gạch ngang
+    const getOldPrice = (price) => Math.round(price * 1.01);
 
     return (
-        <div className="container py-5" style={{ paddingBottom: '100px' }}>
-            <div className="row justify-content-center" style={{ marginTop: '20px' }}>
-                {/* Cart Items */}
-                <div className="col-lg-8 mb-4">
-                    <div className="card shadow-sm border-0">
-                        <div className="card-body p-4">
-                            <h4 className="mb-4" style={{ fontWeight: 600 }}>GIỎ HÀNG</h4>
-                            {cartItems.map((item) => {
-                                const itemId = `${item.id}-${item.color}-${item.size}`;
-                                return (
-                                    <div key={itemId} className="d-flex align-items-center mb-4 p-3 rounded" style={{ background: '#fafbfc', border: '1px solid #e5e7eb' }}>
-                                        <input
-                                            type="checkbox"
-                                            className="form-check-input me-3"
-                                            checked={selectedItems[itemId] || false}
-                                            onChange={(e) => handleItemSelection(itemId, e.target.checked)}
-                                            style={{ transform: 'scale(1.5)' }}
-                                        />
-                                        <img src={item.image} alt={item.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, background: '#fff', border: '1px solid #eee' }} />
-                                        <div className="flex-grow-1 ms-3">
-                                            <div style={{ fontWeight: 500, fontSize: 18 }}>{item.name}</div>
-                                            <div className="d-flex gap-3 mt-1 mb-2">
-                                                {/* Color Dropdown */}
-                                                {item.availableColors && item.availableColors.length > 0 && (
-                                                    <div className="d-flex align-items-center">
-                                                        <span className="me-2">Màu:</span>
-                                                        <select
-                                                            className="form-select form-select-sm"
-                                                            style={{ width: 'auto' }}
-                                                            value={item.color || ''}
-                                                            onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'color', e.target.value)}
-                                                        >
-                                                            {item.availableColors.map((colorOption) => (
-                                                                <option key={colorOption} value={colorOption}>{colorOption}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                )}
-
-                                                {/* Size Dropdown */}
-                                                {item.availableSizes && item.availableSizes.length > 0 && (
-                                                    <div className="d-flex align-items-center ms-3">
-                                                        <span className="me-2">Kích thước:</span>
-                                                        <select
-                                                            className="form-select form-select-sm"
-                                                            style={{ width: 'auto' }}
-                                                            value={item.size || ''}
-                                                            onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'size', e.target.value)}
-                                                        >
-                                                            {item.availableSizes.map((sizeOption) => (
-                                                                <option key={sizeOption} value={sizeOption}>{sizeOption}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <button className="btn btn-link text-danger p-0" style={{ fontSize: 15 }} onClick={() => handleRemoveFromCart(item.id, item.color, item.size)}>
-                                                <i className="bi bi-trash"></i> Xóa
-                                            </button>
-                                        </div>
-                                        <div className="text-center me-3">
-                                            <div style={{ fontWeight: 600, fontSize: 18 }}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
-                                        </div>
-                                        <div className="d-flex align-items-center">
-                                            <button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleUpdateQuantity(item.id, item.color, item.size, Math.max(1, item.quantity - 1))}>
-                                                <i className="bi bi-dash"></i>
-                                            </button>
-                                            <input
-                                                type="number"
-                                                className="form-control text-center"
-                                                style={{ width: 80 }}
-                                                value={item.quantity}
-                                                min="1"
-                                                max={item.stock}
-                                                onChange={e => {
-                                                    const rawValue = parseInt(e.target.value, 10);
-                                                    const newQuantity = isNaN(rawValue) ? 1 : Math.max(1, Math.min(item.stock, rawValue));
-                                                    if (newQuantity !== item.quantity) {
-                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
-                                                    }
-                                                }}
-                                            />
-                                            <button
-                                                className="btn btn-outline-secondary btn-sm ms-1"
-                                                onClick={() => {
-                                                    const newQuantity = item.quantity + 1;
-                                                    if (newQuantity <= item.stock) {
-                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
-                                                    } else {
-                                                        toast.warning(`Số lượng đã đạt tối đa! Tồn kho hiện tại: ${item.stock}`);
-                                                    }
-                                                }}
-                                            >
-                                                <i className="bi bi-plus"></i>
-                                            </button>
-                                        </div>
-                                        <div className="text-end ms-3">
-                                            {(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+        <div className="cart-main-container">
+            <div className="cart-kaze-container" style={{ background: '#f5f5f5', minHeight: '100vh', padding: '30px 0' }}>
+                <div className="cart-promo-box" style={{ background: '#fffbe7', border: '1px solid #ffe58f', padding: 16, marginBottom: 16, borderRadius: 4 }}>
+                    <span className="cart-promo-label" style={{ color: '#ee4d2d', fontWeight: 600, border: '1px solid #ee4d2d', borderRadius: 2, padding: '2px 8px', marginRight: 8, background: '#fff' }}>Combo khuyến mãi</span>
+                    Mua thêm <b>2 sản phẩm</b> để giảm <b>₫5.000</b>
+                </div>
+                <div className="cart-main-box" style={{ background: '#fff', borderRadius: 4, boxShadow: '0 1px 2px rgba(0,0,0,0.03)', padding: 0 }}>
+                    {/* Header */}
+                    <div className="cart-header-row" style={{ display: 'flex', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid #f0f0f0' }}>
+                        <input type="checkbox" checked={selectAll} onChange={e => {
+                            setSelectAll(e.target.checked);
+                            const newSelected = {};
+                            if (e.target.checked) {
+                                cartItems.forEach(item => {
+                                    newSelected[`${item.id}-${item.color}-${item.size}`] = true;
+                                });
+                            }
+                            setSelectedItems(newSelected);
+                        }} style={{ marginRight: 16 }} />
+                        <span style={{ flex: 1.2 }}>Sản phẩm</span>
+                        <span style={{ flex: 0.7, textAlign: 'center' }}>Đơn giá</span>
+                        <span style={{ flex: 0.7, textAlign: 'center' }}>Số lượng</span>
+                        <span style={{ flex: 0.7, textAlign: 'center' }}>Thành tiền</span>
+                        <span style={{ width: 70, textAlign: 'center' }}>Thao tác</span>
+                    </div>
+                    {/* Cart Items */}
+                    {cartItems.map((item) => {
+                        const itemId = `${item.id}-${item.color}-${item.size}`;
+                        return (
+                            <div key={itemId} className="cart-item-row" style={{ display: 'flex', alignItems: 'center', padding: '24px', borderBottom: '1px solid #f0f0f0', background: '#fff' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={selectedItems[itemId] || false}
+                                    onChange={e => setSelectedItems(prev => ({ ...prev, [itemId]: e.target.checked }))}
+                                    style={{ marginRight: 16 }}
+                                />
+                                <div style={{ flex: 2, display: 'flex', alignItems: 'center' }}>
+                                    <img src={item.image} alt={item.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4, border: '1px solid #eee', marginRight: 16 }} />
+                                    <div>
+                                        <div style={{ fontWeight: 500 }}>{item.name}</div>
+                                        <div style={{ fontSize: 13, color: '#888', margin: '4px 0' }}>Phân Loại Hàng: <b>{item.color}, size {item.size}</b></div>
+                                        <div style={{ display: 'flex', gap: 8, margin: '4px 0' }}>
+                                            <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/9c49e1e2e6e7b1e7b6e2b7e7b7e7b7e7.png" alt="Voucher" style={{ height: 18 }} />
+                                            <img src="https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/cart/2e49e1e2e6e7b1e7b6e2b7e7b7e7b7e7.png" alt="Kaze Siêu Rẻ" style={{ height: 18 }} />
                                         </div>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'center' }}>
+                                    <span style={{ color: '#888', textDecoration: 'line-through', marginRight: 4 }}>{getOldPrice(item.price).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                                    <span style={{ color: '#ee4d2d', fontWeight: 600 }}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleUpdateQuantity(item.id, item.color, item.size, Math.max(1, item.quantity - 1))}>-</button>
+                                    <input type="number" className="form-control text-center" style={{ width: 60, display: 'inline-block' }} value={item.quantity} min="1" max={item.stock} onChange={e => {
+                                        const rawValue = parseInt(e.target.value, 10);
+                                        const newQuantity = isNaN(rawValue) ? 1 : Math.max(1, Math.min(item.stock, rawValue));
+                                        if (newQuantity !== item.quantity) {
+                                            handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
+                                        }
+                                    }} />
+                                    <button className="btn btn-outline-secondary btn-sm ms-1" onClick={() => handleUpdateQuantity(item.id, item.color, item.size, Math.min(item.stock, item.quantity + 1))}>+</button>
+                                </div>
+                                <div style={{ flex: 1, textAlign: 'center', color: '#ee4d2d', fontWeight: 600 }}>
+                                    {(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                </div>
+                                <div style={{ width: 70, textAlign: 'center' }}>
+                                    <button className="btn btn-link text-danger p-0" style={{ fontSize: 15 }} onClick={() => handleRemoveFromCart(item.id, item.color, item.size)}>Xóa</button>
+                                    <div style={{ fontSize: 13, color: '#ee4d2d', cursor: 'pointer' }}>Tìm sản phẩm tương tự</div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    {/* Vận chuyển */}
+                    <div className="cart-shipping-info" style={{ background: '#fafdff', borderTop: '1px solid #f0f0f0', padding: 16, color: '#222', fontSize: 15 }}>
+                        <span style={{ color: '#26aa99', fontWeight: 500 }}>Giảm ₫700.000 phí vận chuyển đơn tối thiểu ₫0; Giảm ₫1.000.000 phí vận chuyển đơn tối thiểu ₫500.000 </span>
+                        <Link to="#" style={{ marginLeft: 8, color: '#05a', textDecoration: 'underline' }}>Tìm hiểu thêm</Link>
                     </div>
                 </div>
-                {/* Order Summary */}
-                <div className="col-lg-4">
-                    <div className="card shadow-sm border-0">
-                        <div className="card-body p-4">
-                            <h5 className="mb-4" style={{ fontWeight: 600 }}>Thông tin đơn hàng</h5>
-                            <ApplyVoucher
-                                cartTotal={subtotalDisplay}
-                                onDiscountApplied={(discountValue) => setDiscount(discountValue)}
-                            />
-                            <div className="d-flex justify-content-between mb-2">
-                                <span>Tạm tính</span>
-                                <span>{subtotalDisplay.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
-                            </div>
-                            <div className="mb-2">
-                                <span>Vận chuyển</span>
-                                <div className="form-check mt-2">
-                                    <input className="form-check-input" type="radio" name="shipping" id="standard" checked={shipping === 4990} onChange={() => setShipping(4990)} />
-                                    <label className="form-check-label" htmlFor="standard">Giao hàng tiêu chuẩn - {(4990).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</label>
-                                </div>
-                                <div className="form-check">
-                                    <input className="form-check-input" type="radio" name="shipping" id="express" checked={shipping === 12990} onChange={() => setShipping(12990)} />
-                                    <label className="form-check-label" htmlFor="express">Giao hàng nhanh - {(12990).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</label>
-                                </div>
-                                <div className="form-check">
-                                    <input className="form-check-input" type="radio" name="shipping" id="free" checked={shipping === 0} onChange={() => setShipping(0)} disabled={total < 300000} />
-                                    <label className="form-check-label" htmlFor="free">Miễn phí vận chuyển (Đơn trên {(300000).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })})</label>
-                                </div>
-                            </div>
-                            <div className="d-flex justify-content-between mb-2">
-                                <span>Thuế</span>
-                                <span>{tax.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
-                            </div>
-                            <div className="d-flex justify-content-between mb-2">
-                                <span>Giảm giá</span>
-                                <span className="text-success">-{discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
-                            </div>
-                            <hr />
-                            <div className="d-flex justify-content-between align-items-center mb-3">
-                                <span style={{ fontWeight: 600, fontSize: 18 }}>Tổng cộng</span>
-                                <span style={{ fontWeight: 700, fontSize: 22 }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
-                            </div>
-                            <button className="btn btn-primary w-100 mb-2" style={{ fontWeight: 600, fontSize: 16 }}>Thanh toán &rarr;</button>
-                            <Link to="/products" className="btn btn-link w-100">&larr; Tiếp tục mua sắm</Link>
-                            <div className="mt-4">
-                                <span className="text-muted">Chấp nhận thanh toán</span>
-                                <div className="d-flex gap-2 mt-2">
-                                    <i className="bi bi-credit-card-2-front" style={{ fontSize: 24 }}></i>
-                                    <i className="bi bi-paypal" style={{ fontSize: 24 }}></i>
-                                    <i className="bi bi-wallet2" style={{ fontSize: 24 }}></i>
-                                    <i className="bi bi-apple" style={{ fontSize: 24 }}></i>
-                                    <i className="bi bi-google" style={{ fontSize: 24 }}></i>
-                                </div>
-                            </div>
-                        </div>
+                {/* Footer: Chọn tất cả, xóa, lưu, voucher, tổng tiền, mua hàng */}
+                <div className="cart-footer-bar" style={{ background: '#fff', borderRadius: 4, marginTop: 16, padding: '24px', display: 'flex', alignItems: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                    <input type="checkbox" checked={selectAll} onChange={e => {
+                        setSelectAll(e.target.checked);
+                        const newSelected = {};
+                        if (e.target.checked) {
+                            cartItems.forEach(item => {
+                                newSelected[`${item.id}-${item.color}-${item.size}`] = true;
+                            });
+                        }
+                        setSelectedItems(newSelected);
+                    }} style={{ marginRight: 16 }} />
+                    <span style={{ marginRight: 16 }}>Chọn Tất Cả ({cartItems.length})</span>
+                    <button className="btn btn-link text-danger p-0 me-3" onClick={clearCart}>Xóa</button>
+                    <span className="me-3" style={{ color: '#ee4d2d', cursor: 'pointer' }}>Lưu vào mục Đã thích</span>
+                    <div style={{ flex: 1 }}></div>
+                    <div className="cart-voucher-box me-4">
+                        <span style={{ color: '#ee4d2d', fontWeight: 500, marginRight: 8 }}><i className="bi bi-ticket"></i> Kaze Voucher</span>
+                        <ApplyVoucher
+                            cartTotal={subtotalDisplay}
+                            onDiscountApplied={(discountValue) => setVoucherDiscount(discountValue)}
+                            voucherCode={selectedVoucher}
+                        />
                     </div>
+                    <div className="cart-total-box me-4" style={{ fontSize: 18, fontWeight: 600, color: '#ee4d2d' }}>
+                        Tổng cộng ({Object.values(selectedItems).filter(Boolean).length} Sản phẩm): 
+                        <span style={{ fontSize: 22 }}>
+                            {(subtotalDisplay - voucherDiscount > 0 ? subtotalDisplay - voucherDiscount : 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                        </span>
+                        {voucherDiscount > 0 && (
+                            <div style={{ fontSize: 15, color: '#16a34a', fontWeight: 400 }}>
+                                Đã giảm: -{voucherDiscount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            </div>
+                        )}
+                    </div>
+                    <button className="btn btn-danger btn-lg" style={{ minWidth: 140 }}>Mua Hàng</button>
                 </div>
             </div>
         </div>
