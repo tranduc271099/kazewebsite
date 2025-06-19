@@ -1,36 +1,22 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const {
-  register,
-  login,
-  getProfile,
-  updateProfile,
-  changePassword,
-  getUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-  lockUser,
-} = require("../controllers/user.controller");
-const auth = require("../middleware/auth");
+const { getAllUsers, lockUser, register, login, getProfile, updateProfile, changePassword } = require('../controllers/user.controller');
+const auth = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 // Đăng ký và đăng nhập
-router.post("/register", register);
-router.post("/login", login);
+router.post('/register', register);
+router.post('/login', login);
 
 // Thông tin cá nhân
-router.get("/profile", auth, getProfile);
-router.put("/profile", auth, upload.single('image'), updateProfile);
+router.get('/me', auth, getProfile);
+router.put('/me', auth, upload.single('image'), updateProfile);
 
 // Đổi mật khẩu
-router.put("/profile/password", auth, changePassword);
+router.put('/change-password', auth, changePassword);
 
-// API quản lý người dùng (chỉ admin)
-router.get("/admin/users", auth, getUsers);
-router.post("/admin/users", auth, createUser);
-router.put("/admin/users/:id", auth, updateUser);
-router.delete("/admin/users/:id", auth, deleteUser);
-router.put("/admin/users/:id/lock", auth, lockUser);
+// Lấy danh sách user và khóa/mở khóa user
+router.get('/', auth, getAllUsers);
+router.put('/:id/lock', auth, lockUser);
 
 module.exports = router;

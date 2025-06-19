@@ -10,6 +10,7 @@ const Product = () => {
     const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
         name: '',
+        description: '',
         brand: '',
         category: '',
         price: '',
@@ -29,6 +30,8 @@ const Product = () => {
         price: '',
         images: []
     });
+    const [editingVariantIdx, setEditingVariantIdx] = useState(null);
+    const [editingVariant, setEditingVariant] = useState(null);
 
     useEffect(() => {
         fetchProducts();
@@ -145,11 +148,31 @@ const Product = () => {
         }
     };
 
-    const handleVariantImageChange = (e) => {
+    // Hàm upload ảnh lên server
+    const uploadImage = async (file) => {
+        const formData = new FormData();
+        formData.append('images', file);
+        const token = localStorage.getItem('token');
+        const res = await axios.post('http://localhost:5000/api/products/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return res.data.urls[0];
+    };
+
+    // Khi thêm biến thể mới
+    const handleVariantImageChange = async (e) => {
         const files = Array.from(e.target.files);
+        const uploadedUrls = [];
+        for (const file of files) {
+            const url = await uploadImage(file);
+            uploadedUrls.push(url);
+        }
         setCurrentVariant(prev => ({
             ...prev,
-            images: files.map(file => URL.createObjectURL(file))
+            images: uploadedUrls.length > 0 ? uploadedUrls : []
         }));
     };
 
@@ -157,6 +180,15 @@ const Product = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        // Validate tất cả biến thể
+        for (const v of formData.variants) {
+            if (!v.attributes.size || !v.attributes.color || !v.stock || !v.price) {
+                setError('Tất cả biến thể phải có đủ size, màu, tồn kho, giá!');
+                setLoading(false);
+                return;
+            }
+        }
 
         try {
             const token = localStorage.getItem('token');
@@ -196,6 +228,7 @@ const Product = () => {
         setEditingId(product._id);
         setFormData({
             name: product.name,
+            description: product.description,
             brand: product.brand,
             category: product.category?._id || '',
             attributes: {
@@ -228,6 +261,7 @@ const Product = () => {
     const resetForm = () => {
         setFormData({
             name: '',
+            description: '',
             brand: '',
             category: '',
             price: '',
@@ -263,6 +297,29 @@ const Product = () => {
             ...prev,
             variants: newVariants
         }));
+    };
+
+    // Hàm bắt đầu sửa biến thể
+    const handleEditVariant = (idx) => {
+        setEditingVariantIdx(idx);
+        setEditingVariant({ ...formData.variants[idx] });
+    };
+
+    // Hàm lưu biến thể đã sửa
+    const handleSaveVariant = (idx) => {
+        setFormData(prev => {
+            const newVariants = [...prev.variants];
+            newVariants[idx] = editingVariant;
+            return { ...prev, variants: newVariants };
+        });
+        setEditingVariantIdx(null);
+        setEditingVariant(null);
+    };
+
+    // Hàm hủy sửa biến thể
+    const handleCancelEditVariant = () => {
+        setEditingVariantIdx(null);
+        setEditingVariant(null);
     };
 
     return (
@@ -304,6 +361,10 @@ const Product = () => {
                                 <option value={false}>Không</option>
                             </select>
                         </div>
+                        <div className={styles.formGroup} style={{ gridColumn: '1 / span 3' }}>
+                            <label className={styles.label}>Mô tả</label>
+                            <textarea className={styles.input} name="description" value={formData.description} onChange={handleChange} placeholder="Nhập mô tả" />
+                        </div>
                     </div>
                     <div className={styles.sectionTitle}>Ảnh sản phẩm</div>
                     <div className={styles.formGrid2}>
@@ -326,19 +387,60 @@ const Product = () => {
                     <div className={styles.formGrid2}>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Size</label>
-                            <input className={styles.input} type="text" name="attributes.size" value={currentVariant.attributes.size} onChange={handleVariantChange} placeholder="Nhập size" />
+                            <select
+                                className={styles.input}
+                                name="attributes.size"
+                                value={currentVariant.attributes.size}
+                                onChange={handleVariantChange}
+                            >
+                                <option value="">Chọn size</option>
+                                {formData.attributes.sizes.map((size, idx) => (
+                                    <option key={idx} value={size}>{size}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Màu</label>
-                            <input className={styles.input} type="text" name="attributes.color" value={currentVariant.attributes.color} onChange={handleVariantChange} placeholder="Nhập màu" />
+                            <select
+                                className={styles.input}
+                                name="attributes.color"
+                                value={currentVariant.attributes.color}
+                                onChange={handleVariantChange}
+                            >
+                                <option value="">Chọn màu</option>
+                                {formData.attributes.colors.map((color, idx) => (
+                                    <option key={idx} value={color}>{color}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Tồn kho</label>
-                            <input className={styles.input} type="number" name="stock" value={currentVariant.stock} onChange={handleVariantChange} placeholder="Tồn kho" />
+                            <input
+                                className={styles.input}
+                                type="number"
+                                name="stock"
+                                value={currentVariant.stock}
+                                onChange={e => {
+                                    let value = Number(e.target.value);
+                                    if (formData.stock && value > Number(formData.stock)) value = Number(formData.stock);
+                                    handleVariantChange({ target: { name: 'stock', value } });
+                                }}
+                                placeholder="Tồn kho"
+                                min={0}
+                                max={formData.stock || ''}
+                            />
                         </div>
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Giá</label>
-                            <input className={styles.input} type="number" name="price" value={currentVariant.price} onChange={handleVariantChange} placeholder="Giá" />
+                            <input
+                                className={styles.input}
+                                type="number"
+                                name="price"
+                                value={currentVariant.price}
+                                onChange={handleVariantChange}
+                                placeholder="Giá"
+                                min={0}
+                            />
                         </div>
                         <div className={styles.formGroup}>
                             <input className={styles.input} type="file" multiple onChange={handleVariantImageChange} />
@@ -349,16 +451,127 @@ const Product = () => {
                     </div>
                     <div className={styles.formGrid}>
                         {formData.variants.length > 0 && (
-                            <div className={styles.formGroup} style={{ width: '100%' }}>
-                                <div>Danh sách biến thể:</div>
-                                <ul>
-                                    {formData.variants.map((v, idx) => (
-                                        <li key={idx} style={{ marginBottom: 4 }}>
-                                            Size: {v.attributes.size}, Màu: {v.attributes.color}, Giá: {v.price}, Tồn kho: {v.stock}
-                                            <button type="button" className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => removeVariant(idx)}>Xóa</button>
-                                        </li>
-                                    ))}
-                                </ul>
+                            <div className={styles.tableCard} style={{ marginTop: 16 }}>
+                                <div className={styles.tableTitle}>Danh sách biến thể</div>
+                                <table className={styles.table}>
+                                    <thead>
+                                        <tr>
+                                            <th>Ảnh</th>
+                                            <th>Size</th>
+                                            <th>Màu</th>
+                                            <th>Giá</th>
+                                            <th>Tồn kho</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {formData.variants.map((v, idx) => (
+                                            <tr key={idx}>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <>
+                                                            {editingVariant.images && editingVariant.images.length > 0 && (
+                                                                <img
+                                                                    src={editingVariant.images[0]}
+                                                                    alt="Ảnh biến thể"
+                                                                    style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6, marginBottom: 4 }}
+                                                                />
+                                                            )}
+                                                            <input
+                                                                type="file"
+                                                                multiple
+                                                                onChange={async e => {
+                                                                    const files = Array.from(e.target.files);
+                                                                    const uploadedUrls = [];
+                                                                    for (const file of files) {
+                                                                        const url = await uploadImage(file);
+                                                                        uploadedUrls.push(url);
+                                                                    }
+                                                                    setEditingVariant({
+                                                                        ...editingVariant,
+                                                                        images: uploadedUrls.length > 0 ? uploadedUrls : []
+                                                                    });
+                                                                }}
+                                                            />
+                                                        </>
+                                                    ) : (
+                                                        v.images && v.images.length > 0 && (
+                                                            <img
+                                                                src={v.images[0]}
+                                                                alt="Ảnh biến thể"
+                                                                style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
+                                                            />
+                                                        )
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <select
+                                                            value={editingVariant.attributes.size}
+                                                            onChange={e => setEditingVariant({ ...editingVariant, attributes: { ...editingVariant.attributes, size: e.target.value } })}
+                                                        >
+                                                            <option value="">Chọn size</option>
+                                                            {formData.attributes.sizes.map((size, i) => (
+                                                                <option key={i} value={size}>{size}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : v.attributes.size}
+                                                </td>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <select
+                                                            value={editingVariant.attributes.color}
+                                                            onChange={e => setEditingVariant({ ...editingVariant, attributes: { ...editingVariant.attributes, color: e.target.value } })}
+                                                        >
+                                                            <option value="">Chọn màu</option>
+                                                            {formData.attributes.colors.map((color, i) => (
+                                                                <option key={i} value={color}>{color}</option>
+                                                            ))}
+                                                        </select>
+                                                    ) : v.attributes.color}
+                                                </td>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <input
+                                                            type="number"
+                                                            value={editingVariant.price}
+                                                            min={0}
+                                                            onChange={e => setEditingVariant({ ...editingVariant, price: e.target.value })}
+                                                        />
+                                                    ) : v.price}
+                                                </td>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <input
+                                                            type="number"
+                                                            value={editingVariant.stock}
+                                                            min={0}
+                                                            max={formData.stock || ''}
+                                                            onChange={e => {
+                                                                let value = Number(e.target.value);
+                                                                if (formData.stock && value > Number(formData.stock)) value = Number(formData.stock);
+                                                                setEditingVariant({ ...editingVariant, stock: value });
+                                                            }}
+                                                        />
+                                                    ) : v.stock}
+                                                </td>
+                                                <td>
+                                                    {editingVariantIdx === idx ? (
+                                                        <>
+                                                            <button type="button" className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleSaveVariant(idx)}>Lưu</button>
+                                                            <button type="button" className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={handleCancelEditVariant}>Hủy</button>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <button type="button" className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleEditVariant(idx)}>Sửa</button>
+                                                            <button type="button" className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => removeVariant(idx)}>Xóa</button>
+                                                        </>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         )}
                     </div>
@@ -401,8 +614,10 @@ const Product = () => {
                                 <td>{product.stock}</td>
                                 <td>{product.isActive ? 'Công khai' : 'Ẩn'}</td>
                                 <td>
-                                    <button className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleEdit(product)}>Sửa</button>
-                                    <button className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => handleDelete(product._id)}>Xóa</button>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <button className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleEdit(product)}>Sửa</button>
+                                        <button className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => handleDelete(product._id)}>Xóa</button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

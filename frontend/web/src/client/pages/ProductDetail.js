@@ -28,8 +28,13 @@ function ProductDetail() {
     };
 
     // Thêm hàm chuẩn hóa đường dẫn ảnh
-    const normalizeImageUrl = (img) =>
-        img && img.startsWith('/uploads/') ? `http://localhost:5000${img}` : img;
+    const normalizeImageUrl = (img) => {
+        if (!img) return '/assets/img/no-image.png';
+        if (img.startsWith('http')) return img;
+        if (img.startsWith('/uploads/')) return `http://localhost:5000${img}`;
+        // Nếu chỉ là tên file
+        return `http://localhost:5000/uploads/${img}`;
+    };
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -118,31 +123,28 @@ function ProductDetail() {
     // thumbnails luôn ưu tiên ảnh biến thể, fallback về ảnh sản phẩm chung
     const thumbnails = (selectedVariant && selectedVariant.images && selectedVariant.images.length > 0)
         ? selectedVariant.images.map(normalizeImageUrl)
-        : (product?.images && product.images.length > 0 ? product.images : ['/assets/img/no-image.png']);
+        : (product?.images && product.images.length > 0 ? product.images.map(normalizeImageUrl) : ['/assets/img/no-image.png']);
 
     // Khi click vào thumbnail, đổi mainImage
     const handleThumbnailClick = (thumb) => {
         setMainImage(thumb);
     };
 
+    useEffect(() => {
+        console.log('selectedVariant:', selectedVariant);
+        console.log('mainImage:', mainImage);
+        if (selectedVariant && selectedVariant.images) {
+            console.log('selectedVariant.images:', selectedVariant.images);
+        }
+    }, [selectedVariant, mainImage]);
+
     if (fetchError) return <div>Không tìm thấy sản phẩm hoặc có lỗi xảy ra.</div>;
     if (!product) return <div>Loading...</div>;
 
+    console.log('Render ảnh:', mainImage, normalizeImageUrl(mainImage));
+
     return (
         <main className="main">
-            {/* Breadcrumb */}
-            <div className="page-title light-background">
-                <div className="container d-lg-flex justify-content-between align-items-center">
-                    <h1 className="mb-2 mb-lg-0">Chi tiết sản phẩm</h1>
-                    <nav className="breadcrumbs">
-                        <ol>
-                            <li><a href="/">Trang chủ</a></li>
-                            <li className="current">Chi tiết sản phẩm</li>
-                        </ol>
-                    </nav>
-                </div>
-            </div>
-
             {/* Product Details Section */}
             <section id="product-details" className="product-details section">
                 <div className="container" data-aos="fade-up" data-aos-delay="100">
@@ -164,7 +166,7 @@ function ProductDetail() {
                                         }}
                                     >
                                         <img
-                                            src={mainImage || '/assets/img/no-image.png'}
+                                            src={normalizeImageUrl(mainImage)}
                                             alt="Product"
                                             className="img-fluid main-image"
                                             style={{
@@ -192,7 +194,7 @@ function ProductDetail() {
                                             onClick={() => handleThumbnailClick(thumb)}
                                         >
                                             <img
-                                                src={thumb || '/assets/img/no-image.png'}
+                                                src={normalizeImageUrl(thumb || '/assets/img/no-image.png')}
                                                 alt="Product Thumbnail"
                                                 className="img-fluid"
                                                 style={{
@@ -243,7 +245,13 @@ function ProductDetail() {
                                 <div className="product-options mb-4">
                                     {Object.entries(product.attributes || {}).map(([attrName, attrValues]) => (
                                         <div key={attrName} className="option-group mb-3">
-                                            <label className="option-label">{attrName}:</label>
+                                            <label className="option-label">{
+                                                attrName === "sizes"
+                                                    ? "Kích cỡ"
+                                                    : attrName === "colors"
+                                                        ? "Màu sắc"
+                                                        : attrName.charAt(0).toUpperCase() + attrName.slice(1)
+                                            }:</label>
                                             <div className="d-flex gap-2 flex-wrap">
                                                 {attrValues.map((value, index) => (
                                                     <button

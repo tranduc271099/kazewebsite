@@ -124,7 +124,7 @@ const Category = () => {
                         <div className="widgets-container">
                             {/* Product Categories Widget */}
                             <div className="product-categories-widget widget-item">
-                                <h3 className="widget-title">Categories</h3>
+                                <h3 className="widget-title">Danh mục</h3>
                                 <ul className="category-tree list-unstyled mb-0">
                                     <li className={`category-item${selectedCategorySidebar === '*' ? ' active' : ''}`}
                                         style={{ cursor: 'pointer' }}

@@ -16,6 +16,7 @@ import Register from './client/pages/Register';
 import About from './client/pages/About';
 import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
+import ChangePassword from './client/pages/ChangePassword';
 
 // Components
 import Footer from './client/components/Footer';
@@ -82,7 +83,7 @@ function App() {
                 <Footer />
               </>
             } />
-            <Route path="/categories" element={
+            <Route path="/category" element={
               <>
                 <Header />
                 <ClientCategory />
@@ -93,6 +94,13 @@ function App() {
               <>
                 <Header />
                 <Profile />
+                <Footer />
+              </>
+            } />
+            <Route path="/change-password" element={
+              <>
+                <Header />
+                <ChangePassword />
                 <Footer />
               </>
             } />

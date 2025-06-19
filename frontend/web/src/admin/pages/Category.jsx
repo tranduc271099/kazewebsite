@@ -104,9 +104,9 @@ const Category = () => {
                     </div>
                 </form>
             </div>
-            <div className={styles.card}>
-                <div className={styles.header}>Danh sách danh mục</div>
-                {error && <div className={styles.error}>{error}</div>}
+
+            <div className={styles.tableCard}>
+                <div className={styles.tableTitle}>Danh sách danh mục</div>
                 <table className={styles.table}>
                     <thead>
                         <tr>
@@ -119,8 +119,18 @@ const Category = () => {
                             <tr key={category._id}>
                                 <td>{category.name}</td>
                                 <td>
-                                    <button className={styles.btnEdit} onClick={() => handleEdit(category)}>Sửa</button>
-                                    <button className={styles.btnDelete} onClick={() => handleDelete(category._id)}>Xóa</button>
+                                    <button
+                                        className={`${styles.actionBtn} ${styles.editBtn}`}
+                                        onClick={() => handleEdit(category)}
+                                    >
+                                        Sửa
+                                    </button>
+                                    <button
+                                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                                        onClick={() => handleDelete(category._id)}
+                                    >
+                                        Xóa
+                                    </button>
                                 </td>
                             </tr>
                         ))}

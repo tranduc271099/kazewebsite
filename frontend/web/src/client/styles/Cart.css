@@ -124,3 +124,21 @@
 .btn-checkout:hover {
     background-color: #218838;
 }
+
+.cart-page-container {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    background: #fff;
+    overflow-x: hidden;
+}
+
+.page-title,
+.page-title * {
+    color: #222 !important;
+    opacity: 1 !important;
+    display: block !important;
+}

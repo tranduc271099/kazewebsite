@@ -4,6 +4,7 @@ import InfoCardsSection from "../components/InfoCardsSection";
 import CategorySliderSection from "../components/CategorySliderSection";
 import BestSellersSection from "../components/BestSellersSection";
 import ProductListSection from "../components/ProductListSection";
+import "../styles/Home.css";
 // import { useNavigate } from "react-router-dom"; // Comment out or remove if not needed
 
 function Home() {

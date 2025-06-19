@@ -88,7 +88,7 @@ const ProductListSection = () => {
             <div className="container isotope-layout" data-aos="fade-up" data-aos-delay="100">
                 <div className="row">
                     <div className="col-12">
-                        <div className="product-filters isotope-filters mb-5 d-flex justify-content-center">
+                        <div className="product-filters isotope-filters mb-5 d-flex justify-content-center product-category-filters">
                             <ul className="d-flex flex-wrap gap-2 list-unstyled">
                                 <li
                                     className={selectedCategory === '*' ? 'filter-active' : ''}

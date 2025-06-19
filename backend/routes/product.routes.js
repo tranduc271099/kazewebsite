@@ -19,4 +19,10 @@ router.put('/:id', auth, upload.array('images'), productController.updateProduct
 // Delete a product (requires auth)
 router.delete('/:id', auth, productController.deleteProduct);
 
+// Upload variant images
+router.post('/upload', auth, upload.array('images'), (req, res) => {
+    const urls = req.files.map(file => '/uploads/' + file.filename);
+    res.json({ urls });
+});
+
 module.exports = router; 
