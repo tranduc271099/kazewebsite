@@ -10,10 +10,10 @@ const {
   createUser,
   updateUser,
   deleteUser,
-  saveUserHistory,
-  getUserHistory,
+  lockUser,
 } = require("../controllers/user.controller");
 const auth = require("../middleware/auth");
+const upload = require('../middleware/upload');
 
 // Đăng ký và đăng nhập
 router.post("/register", register);
@@ -21,7 +21,7 @@ router.post("/login", login);
 
 // Thông tin cá nhân
 router.get("/profile", auth, getProfile);
-router.put("/profile", auth, updateProfile);
+router.put("/profile", auth, upload.single('image'), updateProfile);
 
 // Đổi mật khẩu
 router.put("/profile/password", auth, changePassword);
@@ -31,7 +31,6 @@ router.get("/admin/users", auth, getUsers);
 router.post("/admin/users", auth, createUser);
 router.put("/admin/users/:id", auth, updateUser);
 router.delete("/admin/users/:id", auth, deleteUser);
-router.get("/admin/users/:userId/history", auth, getUserHistory);
-router.post("/admin/user-history", auth, saveUserHistory);
+router.put("/admin/users/:id/lock", auth, lockUser);
 
 module.exports = router;

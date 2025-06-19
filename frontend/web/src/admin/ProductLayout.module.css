@@ -1,0 +1,231 @@
+.card,
+.tableCard {
+    background: var(--card-bg, #fff);
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+    padding: 40px 32px 32px 32px;
+    margin-bottom: 32px;
+    border: 1px solid var(--card-border, #ececec);
+    max-width: 900px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 32px;
+    text-align: center;
+    letter-spacing: -1px;
+}
+
+.sectionTitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 24px 0 12px 0;
+    color: #7c3aed;
+    text-align: left;
+}
+
+.formGrid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.label {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 4px;
+}
+
+.input,
+.textarea,
+.select {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 1.08rem;
+    background: var(--input-bg, #fafbfc);
+    color: var(--input-color, #222);
+    transition: border 0.2s, background 0.2s, color 0.2s;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+    border-color: #7c3aed;
+    outline: none;
+}
+
+.btnRow {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.btnPrimary {
+    background: #7c3aed;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: 1.08rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btnPrimary:disabled {
+    background: #e0e0e0;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.tableCard {
+    padding: 32px 24px 24px 24px;
+}
+
+.tableTitle {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    text-align: left;
+    letter-spacing: -0.5px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+}
+
+.table th,
+.table td {
+    padding: 16px 18px;
+    text-align: left;
+}
+
+.table th {
+    background: #f3f4f6;
+    color: #222;
+    font-weight: 700;
+    border-bottom: 2.5px solid #d1d5db;
+    font-size: 1.08rem;
+    letter-spacing: 0.5px;
+}
+
+.table tr {
+    border-radius: 8px;
+}
+
+.table tr:not(:last-child) td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.actionBtn {
+    border: none;
+    border-radius: 6px;
+    padding: 7px 18px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-right: 8px;
+    transition: background 0.2s;
+}
+
+.editBtn {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.editBtn:hover {
+    background: #d1c4e9;
+}
+
+.deleteBtn {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.deleteBtn:hover {
+    background: #fecaca;
+}
+
+:global(body.dark) .card,
+:global(body.dark) .tableCard {
+    background: #23272f !important;
+    border-color: #333 !important;
+    color: #fff !important;
+}
+
+:global(body.dark) .input,
+:global(body.dark) .textarea,
+:global(body.dark) .select {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #444 !important;
+}
+
+:global(body.dark) .label {
+    color: #fff !important;
+}
+
+:global(body.dark) .btnPrimary {
+    background: #a78bfa !important;
+    color: #23272f !important;
+}
+
+:global(body.dark) .table th {
+    background: #23272f !important;
+    color: #fff !important;
+    border-bottom: 2.5px solid #444 !important;
+}
+
+:global(body.dark) .table td {
+    color: #fff !important;
+}
+
+.formGrid3 {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px 32px;
+    margin-bottom: 24px;
+}
+
+.formGrid2 {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 32px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 900px) {
+
+    .formGrid3,
+    .formGrid2 {
+        grid-template-columns: 1fr;
+        gap: 20px 0;
+    }
+}

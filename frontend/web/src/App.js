@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CartProvider } from './client/context/CartContext';
+import './admin/index.css'; // Import admin CSS
 // import Navbar from './components/Navbar'; // Đã xóa Navbar
 
 // Pages
@@ -21,17 +22,8 @@ import Footer from './client/components/Footer';
 import Header from './client/components/Header';
 import AuthLayout from './client/components/AuthLayout';
 
-// Admin Pages
-import AdminCategory from './admin/pages/Category';
-import AdminOrder from './admin/pages/Order';
-import AdminProduct from './admin/pages/Product';
-// import AdminUser from './admin/pages/User';
-import UserManagement from './admin/pages/User/UserManagement';
-import Vouchers from './admin/pages/Voucher/Vouchers';
-
-// Admin Components
-import AdminLayout from './admin/components/Layout';
-import AdminDashboardV1 from './admin/components/DashboardV1';
+// Admin App - New Dashboard
+import AdminApp from './admin/AdminApp';
 
 function App() {
   return (
@@ -105,16 +97,9 @@ function App() {
               </>
             } />
 
-            {/* Admin Routes */}
-            <Route path="/dashboard" element={<AdminLayout />}>
-              <Route index element={<AdminDashboardV1 />} />
-              <Route path="categories" element={<AdminCategory />} />
-              <Route path="orders" element={<AdminOrder />} />
-              <Route path="products" element={<AdminProduct />} />
-              {/* <Route path="users" element={<AdminUser />} /> */}
-              <Route path="user-management" element={<UserManagement />} />
-              <Route path="vouchers" element={<Vouchers />} />
-            </Route>
+            {/* Admin Routes - New Dashboard */}
+            <Route path="/admin/*" element={<AdminApp />} />
+            <Route path="/dashboard/*" element={<AdminApp />} />
           </Routes>
         </div>
       </Router>

@@ -1,7 +1,7 @@
 .product-container {
     padding: 20px;
-    width: 80%;
-    margin: 20px 0 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -13,8 +13,7 @@
 
 .product-header h2 {
     color: #333;
-    font-size: 1.5rem;
-    margin: 0;
+    font-size: 24px;
 }
 
 .product-error {
@@ -246,4 +245,36 @@ body {
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
+}
+
+body.dark .product-container,
+body.dark .product-form,
+body.dark .product-list,
+body.dark .product-table,
+body.dark .variant-section,
+body.dark .variant-item {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #333 !important;
+}
+
+body.dark .product-header h2 {
+    color: #fff !important;
+}
+
+body.dark .form-group label {
+    color: #eee !important;
+}
+
+body.dark .form-group input,
+body.dark .form-group textarea,
+body.dark .form-group select {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #444 !important;
+}
+
+body.dark .product-table th {
+    background: #23272f !important;
+    color: #fff !important;
 }

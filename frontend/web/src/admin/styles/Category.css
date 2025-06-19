@@ -1,29 +1,43 @@
 .content-inner {
     width: 100%;
-    /* max-width: 95%; */
-    margin: 0;
-    padding: 0;
+    max-width: 95%;
+    /* Adjusted max-width for better responsiveness with sidebar */
+    margin: 0 auto;
+    /* Center the content */
+    padding: 20px;
+    /* Slightly reduced padding */
     box-sizing: border-box;
+    /* Include padding in element's total width and height */
 }
 
 .category-container {
     background: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 80%;
-    margin: 20px 0 20px 20px;
+    padding: 40px;
+    /* Increased padding */
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    /* More prominent shadow */
+    margin-top: 40px;
+    border: 1px solid #e0e0e0;
+    /* Subtle border */
 }
 
 .category-header {
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .category-header h2 {
-    font-size: 1.5rem;
-    color: #333;
-    margin: 0 0 15px 0;
-    font-weight: 600;
+    font-size: 32px;
+    /* Larger heading */
+    color: #2c3e50;
+    /* Darker, more professional color */
+    margin-bottom: 35px;
+    /* More space below heading */
+    text-align: center;
+    font-weight: 700;
+    /* Bolder font */
+    position: relative;
+    padding-bottom: 15px;
 }
 
 .category-header h2::after {
@@ -251,9 +265,9 @@
     }
 
     .category-container {
-        width: 90%;
-        margin: 15px;
-        padding: 15px;
+        padding: 25px;
+        margin-left: 10px;
+        margin-right: 10px;
     }
 
     .category-header h2 {
@@ -283,4 +297,39 @@
         padding: 8px 12px;
         font-size: 13px;
     }
+}
+
+body.dark .category-container,
+body.dark .category-list,
+body.dark .category-form,
+body.dark .category-list table {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #333 !important;
+}
+
+body.dark .category-header h2,
+body.dark .category-list h3 {
+    color: #fff !important;
+}
+
+body.dark .category-form input,
+body.dark .category-form textarea {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #444 !important;
+}
+
+body.dark .category-form label {
+    color: #eee !important;
+}
+
+body.dark .category-form .btn-primary {
+    background: #007bff !important;
+    color: #fff !important;
+}
+
+body.dark .category-list th {
+    background: #23272f !important;
+    color: #fff !important;
 }

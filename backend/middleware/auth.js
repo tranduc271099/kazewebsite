@@ -23,6 +23,7 @@ const auth = async (req, res, next) => {
             return res.status(403).json({ message: 'Tài khoản của bạn đã bị khóa' });
         }
 
+        // Add user from payload
         req.user = decoded.user;
         next();
     } catch (error) {

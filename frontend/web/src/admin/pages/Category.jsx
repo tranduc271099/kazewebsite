@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/Category.css';
+import styles from '../CategoryLayout.module.css';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
-        name: '',
-        description: ''
+        name: ''
     });
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
@@ -36,7 +35,6 @@ const Category = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
         try {
             const token = localStorage.getItem('token');
             if (editingId) {
@@ -48,7 +46,7 @@ const Category = () => {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
-            setFormData({ name: '', description: '' });
+            setFormData({ name: '' });
             setEditingId(null);
             fetchCategories();
         } catch (err) {
@@ -60,8 +58,7 @@ const Category = () => {
 
     const handleEdit = (category) => {
         setFormData({
-            name: category.name,
-            description: category.description
+            name: category.name
         });
         setEditingId(category._id);
     };
@@ -81,78 +78,54 @@ const Category = () => {
     };
 
     return (
-        <div className="content-inner">
-            <div className="category-container">
-                <div className="category-header">
-                    <h2>Quản lý danh mục</h2>
-                </div>
-
-                {error && <div className="category-error">{error}</div>}
-
-                <form onSubmit={handleSubmit} className="category-form">
-                    <div className="form-group">
-                        <label htmlFor="name">Tên danh mục</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            required
-                            placeholder="Nhập tên danh mục"
-                        />
+        <div>
+            <div className={styles.card}>
+                <div className={styles.header}>Thêm danh mục mới</div>
+                <form onSubmit={handleSubmit}>
+                    <div className={styles.formGrid}>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label} htmlFor="name">Tên danh mục</label>
+                            <input
+                                className={styles.input}
+                                type="text"
+                                id="name"
+                                name="name"
+                                value={formData.name}
+                                onChange={handleChange}
+                                required
+                                placeholder="Nhập tên danh mục"
+                            />
+                        </div>
                     </div>
-
-                    <div className="form-group">
-                        <label htmlFor="description">Mô tả</label>
-                        <textarea
-                            id="description"
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            placeholder="Nhập mô tả danh mục"
-                        />
+                    <div className={styles.btnRow}>
+                        <button type="submit" className={styles.btnPrimary} disabled={loading}>
+                            {loading ? 'Đang xử lý...' : editingId ? 'Cập nhật' : 'Thêm mới'}
+                        </button>
                     </div>
-
-                    <button type="submit" className="btn-primary" disabled={loading}>
-                        {loading ? 'Đang xử lý...' : editingId ? 'Cập nhật' : 'Thêm mới'}
-                    </button>
                 </form>
-
-                <div className="category-list">
-                    <h3>Danh sách danh mục</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tên danh mục</th>
-                                <th>Mô tả</th>
-                                <th>Thao tác</th>
+            </div>
+            <div className={styles.card}>
+                <div className={styles.header}>Danh sách danh mục</div>
+                {error && <div className={styles.error}>{error}</div>}
+                <table className={styles.table}>
+                    <thead>
+                        <tr>
+                            <th>Tên danh mục</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {categories.map((category) => (
+                            <tr key={category._id}>
+                                <td>{category.name}</td>
+                                <td>
+                                    <button className={styles.btnEdit} onClick={() => handleEdit(category)}>Sửa</button>
+                                    <button className={styles.btnDelete} onClick={() => handleDelete(category._id)}>Xóa</button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {categories.map((category) => (
-                                <tr key={category._id}>
-                                    <td>{category.name}</td>
-                                    <td>{category.description}</td>
-                                    <td>
-                                        <button
-                                            className="btn-edit"
-                                            onClick={() => handleEdit(category)}
-                                        >
-                                            Sửa
-                                        </button>
-                                        <button
-                                            className="btn-delete"
-                                            onClick={() => handleDelete(category._id)}
-                                        >
-                                            Xóa
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

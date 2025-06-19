@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/Header.css';
-import { toast } from 'react-toastify';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,20 +14,7 @@ const Header = () => {
         if (userData) {
             setUser(JSON.parse(userData));
         }
-
-        // Lắng nghe lỗi khóa tài khoản từ các API khác
-        const handleApiError = (event) => {
-            if (event.detail === 'Tài khoản của bạn đã bị khóa') {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                setUser(null);
-                toast.error('Tài khoản của bạn đã bị khóa');
-                navigate('/login');
-            }
-        };
-        window.addEventListener('user-locked', handleApiError);
-        return () => window.removeEventListener('user-locked', handleApiError);
-    }, [navigate]);
+    }, []);
 
     const handleLogout = () => {
         localStorage.removeItem('token');

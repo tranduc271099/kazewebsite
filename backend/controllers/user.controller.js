@@ -19,6 +19,8 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
+      image: "",
+      role: "user"
     });
 
     // Mã hóa password
@@ -32,7 +34,8 @@ exports.register = async (req, res) => {
     const payload = {
       user: {
         id: user.id,
-      },
+        role: user.role
+      }
     };
 
     jwt.sign(
@@ -61,6 +64,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Email không tồn tại" });
     }
 
+    // Kiểm tra tài khoản bị khóa
+    if (user.isLocked) {
+      return res.status(403).json({ message: "Tài khoản đã bị khóa" });
+    }
+
     // Kiểm tra password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -69,16 +77,15 @@ exports.login = async (req, res) => {
 
     // Kiểm tra role admin nếu đăng nhập từ admin panel
     if (req.headers["x-app-type"] === "admin" && user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Bạn không có quyền truy cập admin panel" });
+      return res.status(403).json({ message: "Bạn không có quyền truy cập admin panel" });
     }
 
     // Tạo token
     const payload = {
       user: {
         id: user.id,
-      },
+        role: user.role
+      }
     };
 
     jwt.sign(
@@ -94,7 +101,8 @@ exports.login = async (req, res) => {
             name: user.name,
             email: user.email,
             role: user.role,
-          },
+            image: user.image || null
+          }
         });
       }
     );
@@ -119,20 +127,25 @@ exports.getProfile = async (req, res) => {
 // Cập nhật thông tin cá nhân
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone, address } = req.body;
+    const { name, phone, address, email } = req.body;
     const user = await User.findById(req.user.id);
     if (!user)
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    // Nếu đổi email, kiểm tra trùng
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) return res.status(400).json({ message: "Email đã tồn tại" });
+      user.email = email;
+    }
     user.name = name || user.name;
     user.phone = phone || user.phone;
     user.address = address || user.address;
+    // Nếu có file upload thì cập nhật image
+    if (req.file) {
+      user.image = req.file.path.replace('uploads/', '/api/uploads/');
+    }
     await user.save();
-    res.json({
-      message: "Cập nhật thành công",
-      name: user.name,
-      phone: user.phone,
-      address: user.address,
-    });
+    res.json({ message: "Cập nhật thành công", ...user.toObject() });
   } catch (err) {
     res.status(500).json({ message: "Cập nhật thất bại" });
   }
@@ -162,9 +175,13 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: "Đổi mật khẩu thất bại" });
   }
 };
-// Lấy danh sách người dùng
+
+// Lấy danh sách người dùng (admin)
 exports.getUsers = async (req, res) => {
   try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
+    }
     const users = await User.find().select("-password");
     res.json(users);
   } catch (error) {
@@ -172,7 +189,7 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// Tạo người dùng mới
+// Tạo người dùng mới (admin)
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -192,22 +209,11 @@ exports.createUser = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "user", // Mặc định là user nếu không chỉ định
+      role: role || "user",
+      image: ""
     });
 
     await newUser.save();
-
-    // Lưu lịch sử tạo người dùng
-    const historyEntry = new UserHistory({
-      userId: newUser._id,
-      updatedBy: req.user.id,
-      changes: {
-        name,
-        email,
-        role: role || "user",
-      },
-    });
-    await historyEntry.save();
 
     // Trả về thông tin người dùng (không bao gồm mật khẩu)
     const userResponse = newUser.toObject();
@@ -218,7 +224,7 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// Cập nhật thông tin người dùng
+// Cập nhật thông tin người dùng (admin)
 exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -233,9 +239,7 @@ exports.updateUser = async (req, res) => {
       targetUser.role === "admin" &&
       currentUser._id.toString() !== targetUser._id.toString()
     ) {
-      return res
-        .status(403)
-        .json({ message: "Không thể chỉnh sửa tài khoản admin khác" });
+      return res.status(403).json({ message: "Không thể chỉnh sửa tài khoản admin khác" });
     }
 
     const updateFields = { name, email, role };
@@ -247,26 +251,13 @@ exports.updateUser = async (req, res) => {
       { new: true }
     ).select("-password");
 
-    // Lưu lịch sử chỉnh sửa
-    const historyEntry = new UserHistory({
-      userId: id,
-      updatedBy: req.user.id,
-      changes: {
-        name,
-        email,
-        role,
-        isLocked,
-      },
-    });
-    await historyEntry.save();
-
     res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi cập nhật thông tin người dùng" });
   }
 };
 
-// Xóa người dùng
+// Xóa người dùng (admin)
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -276,15 +267,32 @@ exports.deleteUser = async (req, res) => {
     const targetUser = await User.findById(id);
 
     if (currentUser.role === "admin" && targetUser.role === "admin") {
-      return res
-        .status(403)
-        .json({ message: "Không thể xóa tài khoản admin khác" });
+      return res.status(403).json({ message: "Không thể xóa tài khoản admin khác" });
     }
 
     await User.findByIdAndDelete(id);
     res.json({ message: "Xóa người dùng thành công" });
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi xóa người dùng" });
+  }
+};
+
+// Khóa/mở khóa user (chỉ admin, không cho phép khóa admin)
+exports.lockUser = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'Không tìm thấy user' });
+    if (user.role === 'admin') {
+      return res.status(403).json({ message: 'Không thể khóa admin khác!' });
+    }
+    user.isLocked = !user.isLocked;
+    await user.save();
+    res.json({ message: user.isLocked ? 'Đã khóa user' : 'Đã mở khóa user', isLocked: user.isLocked });
+  } catch (err) {
+    res.status(500).json({ message: 'Thao tác thất bại' });
   }
 };
 
@@ -308,11 +316,11 @@ exports.saveUserHistory = async (req, res) => {
 exports.getUserHistory = async (req, res) => {
   try {
     const { userId } = req.params;
-    
+
     const history = await UserHistory.find({ userId })
       .populate('updatedBy', 'name email')
       .sort({ updatedAt: -1 });
-    
+
     res.json(history);
   } catch (error) {
     res.status(500).json({ message: "Lỗi khi lấy lịch sử chỉnh sửa" });
