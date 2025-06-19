@@ -17,7 +17,8 @@ exports.register = async (req, res) => {
         user = new User({
             name,
             email,
-            password
+            password,
+            image: "" // hoặc null nếu bạn muốn là null
         });
 
         // Mã hóa password
