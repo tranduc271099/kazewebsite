@@ -133,10 +133,10 @@ const Profile = () => {
                                 <i className="bi bi-person"></i>
                             )}
                         </div>
-                        <div style={{ fontWeight: 600 }}>{formData.name || 'Tên người dùng'}</div>
-                        <div style={{ fontSize: 13, color: '#888' }}>Sửa Hồ Sơ</div>
+                        <div style={{ fontWeight: 600, textAlign: 'center' }}>{formData.name || 'Tên người dùng'}</div>
+                        <div style={{ fontSize: 13, color: '#888', textAlign: 'center' }}>Sửa Hồ Sơ</div>
                     </div>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16 }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16, textAlign: 'left' }}>
                         <li style={{ margin: '16px 0' }}>
                             <Link to="/profile" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Hồ Sơ</Link>
                         </li>
@@ -157,7 +157,7 @@ const Profile = () => {
                     <form style={{ maxWidth: 600 }} onSubmit={handleSubmit}>
                         {/* Avatar upload */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Ảnh đại diện</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Ảnh đại diện</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#eee', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     {formData.image ? (
@@ -183,44 +183,44 @@ const Profile = () => {
                         </div>
                         {/* Name */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Tên</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Tên</label>
                             <input type="text" value={formData.name} onChange={handleChange} name="name"
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} required />
                         </div>
                         {/* Email */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Email</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Email</label>
                             <input type="email" value={formData.email} disabled
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
                         </div>
                         {/* Phone */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Số điện thoại</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Số điện thoại</label>
                             <input type="tel" value={formData.phone} onChange={handleChange} name="phone"
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
                         </div>
                         {/* Address */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Địa chỉ</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Địa chỉ</label>
                             <input type="text" value={formData.address} onChange={handleChange} name="address"
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
                         </div>
                         {/* Role (readonly) */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Vai trò</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Vai trò</label>
                             <input type="text" value={formData.role || ''} disabled
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
                         </div>
                         {/* isLocked (readonly) */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 120, color: '#555' }}>Trạng thái</label>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Trạng thái</label>
                             <input type="text" value={formData.isLocked ? 'Bị khóa' : 'Hoạt động'} disabled
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
                         </div>
                         {/* Nút lưu */}
                         <div style={{ marginLeft: 120 }}>
                             <button type="submit" style={{
-                                background: '#ee4d2d', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 32px', fontWeight: 600, fontSize: 16
+                                background: '#2563eb', color: '#fff', border: 'none', borderRadius: 4, padding: '10px 32px', fontWeight: 600, fontSize: 16
                             }}>{loading ? 'Đang lưu...' : 'Lưu'}</button>
                         </div>
                     </form>
