@@ -69,10 +69,11 @@ const ChangePassword = () => {
     if (profile.image) {
         if (profile.image.startsWith('http')) {
             avatar = profile.image;
-        } else if (profile.image.startsWith('/api/uploads/')) {
-            avatar = `http://localhost:5000${profile.image.replace('/api', '')}`;
-        } else if (profile.image.startsWith('/uploads/')) {
-            avatar = `http://localhost:5000${profile.image}`;
+        } else {
+            // fallback: luôn thêm domain nếu không phải http
+            let imgPath = profile.image.replace('/api', '');
+            if (!imgPath.startsWith('/')) imgPath = '/' + imgPath;
+            avatar = `http://localhost:5000${imgPath}`;
         }
     }
     const userName = profile.name || 'Tên người dùng';
@@ -94,10 +95,10 @@ const ChangePassword = () => {
                                 <i className="bi bi-person"></i>
                             )}
                         </div>
-                        <div style={{ fontWeight: 600 }}>{userName}</div>
-                        <div style={{ fontSize: 13, color: '#888' }}>Sửa Hồ Sơ</div>
+                        <div style={{ fontWeight: 600, textAlign: 'center' }}>{userName}</div>
+                        <div style={{ fontSize: 13, color: '#888', textAlign: 'center' }}>Sửa Hồ Sơ</div>
                     </div>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16 }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16, textAlign: 'left' }}>
                         <li style={{ margin: '16px 0' }}>
                             <Link to="/profile" style={{ color: '#333', textDecoration: 'none' }}>Hồ Sơ</Link>
                         </li>
@@ -115,10 +116,10 @@ const ChangePassword = () => {
                         <h2 style={{ textAlign: 'center', fontWeight: 700, marginBottom: 28 }}>Đổi Mật Khẩu</h2>
                         {error && <div className="error-message">{error}</div>}
                         {success && <div className="success-message">{success}</div>}
-                        <form onSubmit={handleSubmit} style={{ maxWidth: 600 }}>
+                        <form onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
                             {/* Current password */}
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                                <label htmlFor="currentPassword" style={{ width: 120, color: '#555' }}>Mật khẩu hiện tại</label>
+                                <label htmlFor="currentPassword" style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Mật khẩu hiện tại</label>
                                 <input
                                     type="password"
                                     id="currentPassword"
@@ -132,7 +133,7 @@ const ChangePassword = () => {
                             </div>
                             {/* New password */}
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                                <label htmlFor="newPassword" style={{ width: 120, color: '#555' }}>Mật khẩu mới</label>
+                                <label htmlFor="newPassword" style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Mật khẩu mới</label>
                                 <input
                                     type="password"
                                     id="newPassword"
@@ -146,7 +147,7 @@ const ChangePassword = () => {
                             </div>
                             {/* Confirm password */}
                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                                <label htmlFor="confirmPassword" style={{ width: 120, color: '#555' }}>Xác nhận mật khẩu mới</label>
+                                <label htmlFor="confirmPassword" style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Xác nhận mật khẩu mới</label>
                                 <input
                                     type="password"
                                     id="confirmPassword"
