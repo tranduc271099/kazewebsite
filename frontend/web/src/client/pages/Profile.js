@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Profile.css';
+import { useUser } from '../context/UserContext';
 
 const Profile = () => {
     const navigate = useNavigate();
+    const { user, setUser } = useUser();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -71,6 +73,18 @@ const Profile = () => {
         }
     };
 
+    let avatar = '';
+    if (formData.image && formData.image.startsWith('blob:')) {
+        avatar = formData.image;
+    } else if (user?.image) {
+        if (user.image.startsWith('http')) avatar = user.image;
+        else if (user.image.startsWith('/uploads/')) avatar = `http://localhost:5000${user.image}`;
+        else if (user.image.startsWith('/api/uploads/')) avatar = `http://localhost:5000${user.image.replace('/api', '')}`;
+        else avatar = `http://localhost:5000/${user.image}`;
+    } else {
+        avatar = '/default-avatar.png';
+    }
+
     const handleSubmit = async e => {
         e.preventDefault();
         setLoading(true);
@@ -92,8 +106,13 @@ const Profile = () => {
                 }
             });
             setSuccess('Cập nhật thông tin thành công!');
+            window.location.reload();
             localStorage.setItem('userName', formData.name);
-            fetchProfile();
+            const res = await axios.get('http://localhost:5000/api/users/me', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(res.data);
+            setFormData(f => ({ ...f, image: res.data.image || '' }));
         } catch (err) {
             setError('Cập nhật thất bại!');
             if (err.response?.status === 401) {
@@ -115,23 +134,11 @@ const Profile = () => {
                         <div style={{
                             width: 72, height: 72, borderRadius: '50%', background: '#eee', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, color: '#bbb', overflow: 'hidden'
                         }}>
-                            {formData.image ? (
-                                <img
-                                    src={formData.image.startsWith('blob:')
-                                        ? formData.image
-                                        : formData.image.startsWith('http')
-                                            ? formData.image
-                                            : formData.image.startsWith('/api/uploads/')
-                                                ? `http://localhost:5000${formData.image.replace('/api', '')}`
-                                                : formData.image
-                                    }
-                                    alt="avatar"
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
-                                />
-                            ) : (
-                                <i className="bi bi-person"></i>
-                            )}
+                            <img
+                                src={avatar}
+                                alt="avatar"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
                         <div style={{ fontWeight: 600, textAlign: 'center' }}>{formData.name || 'Tên người dùng'}</div>
                         <div style={{ fontSize: 13, color: '#888', textAlign: 'center' }}>Sửa Hồ Sơ</div>
@@ -160,23 +167,11 @@ const Profile = () => {
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Ảnh đại diện</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#eee', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    {formData.image ? (
-                                        <img
-                                            src={formData.image.startsWith('blob:')
-                                                ? formData.image
-                                                : formData.image.startsWith('http')
-                                                    ? formData.image
-                                                    : formData.image.startsWith('/api/uploads/')
-                                                        ? `http://localhost:5000${formData.image.replace('/api', '')}`
-                                                        : formData.image
-                                            }
-                                            alt="avatar"
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            onError={e => { e.target.onerror = null; e.target.src = '/default-avatar.png'; }}
-                                        />
-                                    ) : (
-                                        <i className="bi bi-person" style={{ fontSize: 28, color: '#bbb' }}></i>
-                                    )}
+                                    <img
+                                        src={avatar}
+                                        alt="avatar"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
                                 </div>
                                 <input type="file" accept="image/*" onChange={handleImageChange} style={{ fontSize: 14 }} />
                             </div>

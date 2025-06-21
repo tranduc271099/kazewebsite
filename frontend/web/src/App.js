@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CartProvider } from './client/context/CartContext';
+import { UserProvider } from './client/context/UserContext';
 import './admin/index.css'; // Import admin CSS
 // import Navbar from './components/Navbar'; // Đã xóa Navbar
 
@@ -29,88 +30,90 @@ import AdminApp from './admin/AdminApp';
 function App() {
   return (
     <CartProvider>
-      <Router>
-        <ToastContainer position="top-right" autoClose={3000} />
-        <div className="App">
-          {/* <Navbar />  Đã xóa Navbar */}
-          <Routes>
-            {/* Auth Routes */}
-            <Route element={<AuthLayout />}>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </Route>
+      <UserProvider>
+        <Router>
+          <ToastContainer position="top-right" autoClose={3000} />
+          <div className="App">
+            {/* <Navbar />  Đã xóa Navbar */}
+            <Routes>
+              {/* Auth Routes */}
+              <Route element={<AuthLayout />}>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+              </Route>
 
-            {/* Main Routes */}
-            <Route path="/" element={
-              <>
-                <Header />
-                <Home />
-                <Footer />
-              </>
-            } />
-            <Route path="/products" element={
-              <>
-                <Header />
-                <Products />
-                <Footer />
-              </>
-            } />
-            <Route path="/products/:id" element={
-              <>
-                <Header />
-                <ProductDetail />
-                <Footer />
-              </>
-            } />
-            <Route path="/product-details/:productId" element={
-              <>
-                <Header />
-                <ProductDetail />
-                <Footer />
-              </>
-            } />
-            <Route path="/cart" element={
-              <>
-                <Header />
-                <Cart />
-                <Footer />
-              </>
-            } />
-            <Route path="/about" element={
-              <>
-                <Header />
-                <About />
-                <Footer />
-              </>
-            } />
-            <Route path="/category" element={
-              <>
-                <Header />
-                <ClientCategory />
-                <Footer />
-              </>
-            } />
-            <Route path="/profile" element={
-              <>
-                <Header />
-                <Profile />
-                <Footer />
-              </>
-            } />
-            <Route path="/change-password" element={
-              <>
-                <Header />
-                <ChangePassword />
-                <Footer />
-              </>
-            } />
+              {/* Main Routes */}
+              <Route path="/" element={
+                <>
+                  <Header />
+                  <Home />
+                  <Footer />
+                </>
+              } />
+              <Route path="/products" element={
+                <>
+                  <Header />
+                  <Products />
+                  <Footer />
+                </>
+              } />
+              <Route path="/products/:id" element={
+                <>
+                  <Header />
+                  <ProductDetail />
+                  <Footer />
+                </>
+              } />
+              <Route path="/product-details/:productId" element={
+                <>
+                  <Header />
+                  <ProductDetail />
+                  <Footer />
+                </>
+              } />
+              <Route path="/cart" element={
+                <>
+                  <Header />
+                  <Cart />
+                  <Footer />
+                </>
+              } />
+              <Route path="/about" element={
+                <>
+                  <Header />
+                  <About />
+                  <Footer />
+                </>
+              } />
+              <Route path="/category" element={
+                <>
+                  <Header />
+                  <ClientCategory />
+                  <Footer />
+                </>
+              } />
+              <Route path="/profile" element={
+                <>
+                  <Header />
+                  <Profile />
+                  <Footer />
+                </>
+              } />
+              <Route path="/change-password" element={
+                <>
+                  <Header />
+                  <ChangePassword />
+                  <Footer />
+                </>
+              } />
 
-            {/* Admin Routes - New Dashboard */}
-            <Route path="/admin/*" element={<AdminApp />} />
-            <Route path="/dashboard/*" element={<AdminApp />} />
-          </Routes>
-        </div>
-      </Router>
+              {/* Admin Routes - New Dashboard */}
+              <Route path="/admin/*" element={<AdminApp />} />
+              <Route path="/dashboard/*" element={<AdminApp />} />
+            </Routes>
+          </div>
+        </Router>
+      </UserProvider>
     </CartProvider>
   );
 }

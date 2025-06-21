@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const slugify = require('slugify');
+const cloudinary = require('../config/cloudinary');
 
 // Get all products
 exports.getProducts = async (req, res) => {
@@ -68,7 +69,23 @@ exports.createProduct = async (req, res) => {
         // Xử lý ảnh
         let imagePaths = [];
         if (req.files && req.files.length > 0) {
-            imagePaths = req.files.map(file => '/uploads/' + file.filename);
+            // Upload từng ảnh lên Cloudinary
+            const uploadPromises = req.files.map(file =>
+                cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                    if (error) throw error;
+                    return result.secure_url;
+                })
+            );
+            // Sử dụng Promise.all để đợi tất cả upload xong
+            imagePaths = await Promise.all(req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            }));
         } else if (req.body.images) {
             imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
         }
@@ -148,7 +165,15 @@ exports.updateProduct = async (req, res) => {
         // Xử lý ảnh
         let imagePaths = [];
         if (req.files && req.files.length > 0) {
-            imagePaths = req.files.map(file => '/uploads/' + file.filename);
+            imagePaths = await Promise.all(req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            }));
         } else if (req.body.images) {
             imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
         }

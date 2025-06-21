@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('../config/cloudinary');
 
 // Đăng ký
 exports.register = async (req, res) => {
@@ -135,14 +136,36 @@ exports.updateProfile = async (req, res) => {
         user.name = name || user.name;
         user.phone = phone || user.phone;
         user.address = address || user.address;
-        // Nếu có file upload thì cập nhật image
+        // Nếu có file upload thì upload lên cloudinary và cập nhật image
         if (req.file) {
-            user.image = req.file.path.replace('uploads/', '/api/uploads/'); // Đường dẫn public
+            // Bọc upload_stream vào Promise
+            const uploadToCloudinary = (fileBuffer) => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        { folder: 'avatars', resource_type: 'image' },
+                        (error, result) => {
+                            if (error) return reject(error);
+                            resolve(result);
+                        }
+                    );
+                    stream.end(fileBuffer);
+                });
+            };
+
+            try {
+                const result = await uploadToCloudinary(req.file.buffer);
+                user.image = result.secure_url;
+                await user.save();
+                return res.json({ message: 'Cập nhật thành công', ...user.toObject() });
+            } catch (error) {
+                console.error('Lỗi upload ảnh:', error);
+                return res.status(500).json({ message: 'Lỗi upload ảnh', error: error.message });
+            }
         }
         await user.save();
         res.json({ message: 'Cập nhật thành công', ...user.toObject() });
     } catch (err) {
-        res.status(500).json({ message: 'Cập nhật thất bại' });
+        res.status(500).json({ message: 'Cập nhật thất bại', error: err.message });
     }
 };
 

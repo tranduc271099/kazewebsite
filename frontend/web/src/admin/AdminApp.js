@@ -19,6 +19,7 @@ import React from "react";
 import User from "./pages/User";
 import Category from "./pages/Category";
 import Product from "./pages/Product";
+import { UserProvider } from "./UserContext";
 
 function AdminApp() {
     const [theme, colorMode] = useMode();
@@ -44,29 +45,31 @@ function AdminApp() {
     return (
         <ColorModeContext.Provider value={colorMode}>
             <ThemeProvider theme={theme}>
-                <CssBaseline />
-                <div className="app">
-                    <Sidebar isSidebar={isSidebar} />
-                    <main className="content">
-                        <Topbar setIsSidebar={setIsSidebar} />
-                        <Routes>
-                            <Route path="/dashboard" element={<Dashboard />} />
-                            <Route path="/user" element={<User />} />
-                            <Route path="/category" element={<Category />} />
-                            <Route path="/product" element={<Product />} />
-                            <Route path="/team" element={<Team />} />
-                            <Route path="/contacts" element={<Contacts />} />
-                            <Route path="/invoices" element={<Invoices />} />
-                            <Route path="/form" element={<Form />} />
-                            <Route path="/bar" element={<Bar />} />
-                            <Route path="/pie" element={<Pie />} />
-                            <Route path="/line" element={<Line />} />
-                            <Route path="/faq" element={<FAQ />} />
-                            <Route path="/calendar" element={<Calendar />} />
-                            <Route path="/geography" element={<Geography />} />
-                        </Routes>
-                    </main>
-                </div>
+                <UserProvider>
+                    <CssBaseline />
+                    <div className="app">
+                        <Sidebar isSidebar={isSidebar} />
+                        <main className="content">
+                            <Topbar setIsSidebar={setIsSidebar} />
+                            <Routes>
+                                <Route path="/dashboard" element={<Dashboard />} />
+                                <Route path="/user" element={<User />} />
+                                <Route path="/category" element={<Category />} />
+                                <Route path="/product" element={<Product />} />
+                                <Route path="/team" element={<Team />} />
+                                <Route path="/contacts" element={<Contacts />} />
+                                <Route path="/invoices" element={<Invoices />} />
+                                <Route path="/form" element={<Form />} />
+                                <Route path="/bar" element={<Bar />} />
+                                <Route path="/pie" element={<Pie />} />
+                                <Route path="/line" element={<Line />} />
+                                <Route path="/faq" element={<FAQ />} />
+                                <Route path="/calendar" element={<Calendar />} />
+                                <Route path="/geography" element={<Geography />} />
+                            </Routes>
+                        </main>
+                    </div>
+                </UserProvider>
             </ThemeProvider>
         </ColorModeContext.Provider>
     );

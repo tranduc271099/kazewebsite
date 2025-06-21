@@ -1,3 +1,15 @@
+:global(body.dark) {
+    --page-bg: #111827;
+    --card-bg: #232a36;
+    --card-border: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --input-bg: #374151;
+    --input-border: #4b5563;
+    --input-border-hover: #6b7280;
+    --hover-bg: #4b5563;
+}
+
 .card,
 .tableCard {
     background: var(--card-bg, #fff);
@@ -10,6 +22,7 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
+    color: var(--text-primary, #222);
 }
 
 .card {
@@ -18,18 +31,13 @@
     align-items: center;
 }
 
-body.dark .card,
-body.dark .tableCard {
-    --card-bg: #23272f;
-    --card-border: #333;
-}
-
 .header {
     font-size: 2rem;
     font-weight: 800;
     margin-bottom: 32px;
     text-align: center;
     letter-spacing: -1px;
+    color: var(--text-primary, #222);
 }
 
 .tabBar {
@@ -72,28 +80,18 @@ body.dark .tableCard {
 .label {
     font-size: 1.08rem;
     font-weight: 600;
-    color: #444;
+    color: var(--text-secondary, #444);
     margin-bottom: 4px;
 }
 
-body.dark .label {
-    color: #eee;
-}
-
 .input {
-    border: 1.5px solid #e0e0e0;
+    border: 1.5px solid var(--input-border, #e0e0e0);
     border-radius: 8px;
     padding: 12px 16px;
     font-size: 1.08rem;
     background: var(--input-bg, #fafbfc);
-    color: var(--input-color, #222);
+    color: var(--text-primary, #222);
     transition: border 0.2s;
-}
-
-body.dark .input {
-    --input-bg: #23272f;
-    --input-color: #fff;
-    border-color: #444;
 }
 
 .input:focus {
@@ -154,21 +152,22 @@ body.dark .input {
 .table td {
     padding: 16px 18px;
     text-align: left;
+    color: var(--text-primary, #222);
 }
 
 .table th {
-    background: #f3f4f6;
-    color: #222;
+    background: var(--card-bg, #f3f4f6);
+    color: var(--text-primary, #222);
     font-weight: 700;
-    border-bottom: 2.5px solid #d1d5db;
+    border-bottom: 2.5px solid var(--card-border, #d1d5db);
     font-size: 1.08rem;
     letter-spacing: 0.5px;
 }
 
 body.dark .table th {
-    background: #23272f;
-    color: #fff;
-    border-bottom: 2.5px solid #444;
+    background: var(--card-bg, #23272f);
+    color: var(--text-primary, #fff);
+    border-bottom: 2.5px solid var(--card-border, #444);
 }
 
 .table tr {
@@ -176,7 +175,7 @@ body.dark .table th {
 }
 
 .table tr:not(:last-child) td {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--card-border, #e5e7eb);
 }
 
 .actionBtn {
@@ -209,7 +208,7 @@ body.dark .table th {
 }
 
 body.dark .table td {
-    color: #fff;
+    color: var(--text-primary, #fff);
 }
 
 @media (max-width: 1000px) {
@@ -228,17 +227,19 @@ body.dark .table td {
     }
 }
 
-:global(body.dark) .card,
-:global(body.dark) .tableCard {
-    background: #23272f !important;
-    border-color: #333 !important;
-    color: #fff !important;
+body.dark .card,
+body.dark .tableCard {
+    color: var(--text-primary, #fff);
 }
 
-:global(body.dark) .input {
-    background: #23272f !important;
-    color: #fff !important;
-    border-color: #444 !important;
+body.dark .label {
+    color: var(--text-secondary, #eee);
+}
+
+body.dark .input {
+    background: var(--input-bg, #23272f);
+    color: var(--text-primary, #fff);
+    border-color: var(--input-border, #444);
 }
 
 :global(body.dark) .table th {
@@ -253,4 +254,20 @@ body.dark .table td {
 
 :global(body.dark) .label {
     color: #fff !important;
+}
+
+.cardDark {
+    background: #232a36;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    border: 1px solid #232a36;
+    color: #fff;
+}
+
+.tableCardDark {
+    background: #232a36;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+    border: 1px solid #232a36;
+    color: #fff;
 }

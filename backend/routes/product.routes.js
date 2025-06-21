@@ -20,9 +20,22 @@ router.put('/:id', auth, upload.array('images'), productController.updateProduct
 router.delete('/:id', auth, productController.deleteProduct);
 
 // Upload variant images
-router.post('/upload', auth, upload.array('images'), (req, res) => {
-    const urls = req.files.map(file => '/uploads/' + file.filename);
-    res.json({ urls });
+router.post('/upload', auth, upload.array('images'), async (req, res) => {
+    try {
+        const cloudinary = require('../config/cloudinary');
+        const urls = await Promise.all(req.files.map(file => {
+            return new Promise((resolve, reject) => {
+                const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result.secure_url);
+                });
+                stream.end(file.buffer);
+            });
+        }));
+        res.json({ urls });
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi upload ảnh lên Cloudinary' });
+    }
 });
 
 module.exports = router; 
