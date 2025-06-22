@@ -15,4 +15,9 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter });
 
-module.exports = upload; 
+const uploadMultiple = upload.fields([
+    { name: 'images', maxCount: 10 },
+    { name: 'variantImages', maxCount: 50 }
+]);
+
+module.exports = { upload, uploadMultiple }; 

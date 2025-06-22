@@ -285,9 +285,11 @@ const Product = () => {
 
         const formDataToSend = new FormData();
 
-        // Append all simple key-values
-        Object.keys(formData).forEach(key => {
-            if (!['images', 'variants', 'attributes', '_id', '__v'].includes(key)) {
+        // Whitelist fields to append. This is safer than blacklisting.
+        const simpleFields = ['name', 'description', 'brand', 'category', 'price', 'stock', 'isActive'];
+        simpleFields.forEach(key => {
+            // Ensure the key exists and is not null/undefined before appending
+            if (formData[key] !== undefined && formData[key] !== null) {
                 formDataToSend.append(key, formData[key]);
             }
         });
@@ -678,13 +680,13 @@ const Product = () => {
                                 <label htmlFor="isActive" style={{ marginLeft: '8px' }}>Công khai sản phẩm</label>
                             </div>
                         </div>
-                        <div className={styles.btnGroup}>
-                            <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={resetForm}>Hủy</button>
-                            <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={loading}>
-                                {loading ? 'Đang lưu...' : (editingId ? 'Cập nhật' : 'Lưu sản phẩm')}
-                            </button>
-                        </div>
                     </div>
+                </div>
+                <div className={styles.btnGroup} style={{ gridColumn: '1 / -1', marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                    <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={resetForm}>Hủy</button>
+                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={loading}>
+                        {loading ? 'Đang lưu...' : (editingId ? 'Cập nhật' : 'Lưu sản phẩm')}
+                    </button>
                 </div>
             </form>
 
