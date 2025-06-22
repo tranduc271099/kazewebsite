@@ -1,0 +1,107 @@
+[{
+  "_id": {
+    "$oid": "6856d863726f24dce4d07324"
+  },
+  "name": "Bùi Đức Đạt",
+  "slug": "bui-djuc-djat",
+  "description": "ádasdasdasd",
+  "brand": "Apple",
+  "category": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "attributes": {
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Trắng",
+      "Đỏ",
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "S",
+        "color": "Trắng"
+      },
+      "stock": 11,
+      "price": 66666,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1750521997/jxh6m0i02ohoux57akn8.png"
+      ],
+      "_id": {
+        "$oid": "6856d863726f24dce4d07325"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1750524362/gisadw2ofbavhfyp3bs8.png"
+  ],
+  "price": 100000,
+  "stock": 100,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T16:05:55.584Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T16:46:02.714Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6857022628f8a3f4b273e3b7"
+  },
+  "name": "Nguyễn Phương Nam",
+  "slug": "nguyen-phuong-nam",
+  "description": "nguyenphuongnam",
+  "brand": "",
+  "category": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "attributes": {
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Trắng",
+      "Đỏ",
+      "Đen",
+      "Xanh"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "S",
+        "color": "Trắng"
+      },
+      "stock": 10,
+      "price": 6,
+      "images": [],
+      "_id": {
+        "$oid": "685704aaf80d444db2a441ac"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1750533317/rpibhesw1ydi4148qqbc.png"
+  ],
+  "price": 100000,
+  "stock": 100,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-21T19:04:06.079Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T19:15:18.053Z"
+  },
+  "__v": 0
+}]

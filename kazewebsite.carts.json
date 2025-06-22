@@ -1,0 +1,26 @@
+[{
+  "_id": {
+    "$oid": "6856d10f7abeaed5390cc9b7"
+  },
+  "userId": {
+    "$oid": "684c908e864f12fa45ad250b"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6856d863726f24dce4d07324"
+      },
+      "quantity": 1,
+      "color": "Trắng",
+      "size": "S",
+      "priceAtTimeOfAddition": 66666
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-06-21T15:34:39.417Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-21T18:52:28.387Z"
+  },
+  "__v": 1
+}]

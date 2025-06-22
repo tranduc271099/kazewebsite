@@ -1,0 +1,40 @@
+[{
+  "_id": {
+    "$oid": "68498f65a294011e87effddd"
+  },
+  "code": "SALE10",
+  "type": "percent",
+  "value": 10,
+  "minOrder": 200000,
+  "maxUsage": 100,
+  "usedCount": 5,
+  "validFrom": {
+    "$date": "2024-06-01T00:00:00.000Z"
+  },
+  "validTo": {
+    "$date": "2024-06-30T23:59:59.000Z"
+  },
+  "createdAt": {
+    "$date": "2024-06-01T00:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68498f65a294011e87effdde"
+  },
+  "code": "FREESHIP50K",
+  "type": "fixed",
+  "value": 50000,
+  "minOrder": 300000,
+  "maxUsage": 50,
+  "usedCount": 10,
+  "validFrom": {
+    "$date": "2024-06-05T00:00:00.000Z"
+  },
+  "validTo": {
+    "$date": "2024-07-05T23:59:59.000Z"
+  },
+  "createdAt": {
+    "$date": "2024-06-05T00:00:00.000Z"
+  }
+}]

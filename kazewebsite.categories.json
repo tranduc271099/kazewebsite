@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdc7"
+  },
+  "name": "Thời trang nam",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2024-06-11T10:00:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdc8"
+  },
+  "name": "Thời trang nữ",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2024-06-11T10:05:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "name": "Áo thun nam",
+  "parentId": {
+    "$oid": "665f1a2b3c4d5e6f7a8b9c10"
+  },
+  "createdAt": {
+    "$date": "2024-06-11T10:10:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "name": "Quần jeans nữ",
+  "parentId": {
+    "$oid": "665f1a2b3c4d5e6f7a8b9c11"
+  },
+  "createdAt": {
+    "$date": "2024-06-11T10:15:00.000Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "name": "buiducdat",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2025-06-15T01:40:32.131Z"
+  },
+  "__v": 0
+}]
