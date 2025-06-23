@@ -19,6 +19,7 @@ import React from "react";
 import User from "./pages/User";
 import Category from "./pages/Category";
 import Product from "./pages/Product";
+import ListOrder from "./pages/payment/ListOrder.tsx";
 
 function AdminApp() {
     const [theme, colorMode] = useMode();
@@ -64,6 +65,7 @@ function AdminApp() {
                             <Route path="/faq" element={<FAQ />} />
                             <Route path="/calendar" element={<Calendar />} />
                             <Route path="/geography" element={<Geography />} />
+                            <Route path="/bill" element={<ListOrder/>}/>
                         </Routes>
                     </main>
                 </div>
