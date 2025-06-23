@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styles from '../ProductLayout.module.css';
+import styles from '../styles/ProductLayout.module.css';
 import toast from 'react-hot-toast';
 
 const Product = () => {
@@ -113,14 +113,13 @@ const Product = () => {
         if (name === 'stock') {
             const newVariantStock = Number(value);
             const otherVariantsStock = formData.variants
-                .filter((_, i) => i !== editingVariantIdx) // Exclude the variant being edited
+                .filter((_, i) => i !== editingVariantIdx)
                 .reduce((acc, v) => acc + Number(v.stock || 0), 0);
 
             const totalStock = Number(formData.stock || 0);
 
             if (newVariantStock + otherVariantsStock > totalStock) {
                 toast.error('Tổng tồn kho các biến thể không được vượt quá tồn kho sản phẩm gốc.');
-                // Optionally, cap the value instead of just returning
                 const availableStock = totalStock - otherVariantsStock;
                 setCurrentVariant(prev => ({
                     ...prev,
@@ -336,7 +335,7 @@ const Product = () => {
             fetchProducts();
             resetForm();
         } catch (error) {
-            setError(error.response?.data?.message || 'Lỗi khi lưu sản phẩm');
+            alert(error.response?.data?.message || 'Lỗi khi lưu sản phẩm');
         } finally {
             setLoading(false);
         }
@@ -376,59 +375,6 @@ const Product = () => {
                 setError('Lỗi khi xóa sản phẩm');
             }
         }
-    };
-
-    const handleVariantImageChange = (e) => {
-        const files = Array.from(e.target.files);
-
-        // Validate file types and sizes
-        const validFiles = files.filter(file => {
-            const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
-            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-
-            if (!isValidType) {
-                setError('Chỉ hỗ trợ file ảnh: JPG, PNG, GIF, WEBP');
-                return false;
-            }
-
-            if (!isValidSize) {
-                setError('Kích thước file không được vượt quá 5MB');
-                return false;
-            }
-
-            return true;
-        });
-
-        if (validFiles.length === 0) return;
-
-        const newImageObjects = validFiles.map(file => ({
-            url: URL.createObjectURL(file),
-            file: file,
-            id: Date.now() + Math.random()
-        }));
-
-        setCurrentVariant(prev => ({
-            ...prev,
-            images: [...prev.images, ...newImageObjects]
-        }));
-
-        setError(''); // Clear any previous errors
-    };
-
-    const removeVariantImage = (index) => {
-        const updatedImages = [...currentVariant.images];
-        updatedImages.splice(index, 1);
-        setCurrentVariant(prev => ({ ...prev, images: updatedImages }));
-    };
-
-    const handleVariantDrop = (e) => {
-        e.preventDefault();
-        const files = Array.from(e.dataTransfer.files);
-        handleVariantImageChange({ target: { files } });
-    };
-
-    const handleVariantDragOver = (e) => {
-        e.preventDefault();
     };
 
     return (
@@ -537,7 +483,7 @@ const Product = () => {
                         {/* Variant Image Upload with Preview */}
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Ảnh biến thể</label>
-                            <div className={styles.dropZone} onDrop={handleVariantDrop} onDragOver={handleVariantDragOver} onClick={() => document.getElementById('variant-image-input').click()}>
+                            <div className={styles.dropZone} onClick={() => document.getElementById('variant-image-input').click()}>
                                 <div className={styles.dropZoneContent}>
                                     <i className="bi bi-cloud-upload" style={{ fontSize: '2rem', color: '#666' }}></i>
                                     <p>Kéo thả ảnh vào đây hoặc click để chọn</p>
@@ -547,7 +493,7 @@ const Product = () => {
                                     type="file"
                                     multiple
                                     accept="image/*"
-                                    onChange={handleVariantImageChange}
+                                    onChange={handleImageChange}
                                     className={styles.hiddenInput}
                                     id="variant-image-input"
                                 />
@@ -578,7 +524,7 @@ const Product = () => {
                                         }}
                                     >
                                         <img src={img.url} alt={`Variant ${idx + 1}`} className={styles.imagePreview} />
-                                        <button type="button" onClick={() => removeVariantImage(idx)} className={styles.removeImageBtn}>&times;</button>
+                                        <button type="button" onClick={() => handleRemoveImage(idx)} className={styles.removeImageBtn}>&times;</button>
                                         <div className={styles.imageOrder}>{idx + 1}</div>
                                     </div>
                                 ))}
@@ -693,8 +639,7 @@ const Product = () => {
             {/* Product List */}
             <div className={styles.card} style={{ marginTop: '24px' }}>
                 <h2 className={styles.cardTitle}>Danh sách sản phẩm</h2>
-                <table className={styles.productTable}>
-                    {/* Table headers */}
+                <table className={styles.productTable + ' customProductTable'}>
                     <thead>
                         <tr>
                             <th>Ảnh</th>
@@ -706,23 +651,22 @@ const Product = () => {
                             <th>Thao tác</th>
                         </tr>
                     </thead>
-                    {/* Table body */}
                     <tbody>
-                        {products.map(product => (
+                        {products.map((product) => (
                             <tr key={product._id}>
-                                <td><img src={getImageUrl(product.images?.[0])} alt={product.name} className={styles.productImage} /></td>
+                                <td>
+                                    {product.images && product.images.length > 0 && (
+                                        <img src={product.images[0]} alt="Ảnh" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />
+                                    )}
+                                </td>
                                 <td>{product.name}</td>
-                                <td>{product.category?.name || 'N/A'}</td>
+                                <td>{product.category?.name || categories.find(c => c._id === (product.category?._id || product.category))?.name || ''}</td>
                                 <td>{product.price}</td>
                                 <td>{product.stock}</td>
+                                <td>{product.isActive ? 'Công khai' : 'Ẩn'}</td>
                                 <td>
-                                    <span className={`${styles.status} ${product.isActive ? styles.statusActive : styles.statusInactive}`}>
-                                        {product.isActive ? 'Công khai' : 'Ẩn'}
-                                    </span>
-                                </td>
-                                <td>
-                                    <button onClick={() => handleEdit(product)} className={styles.actionBtn}>Edit</button>
-                                    <button onClick={() => handleDelete(product._id)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>Delete</button>
+                                    <button className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleEdit(product)}>Sửa</button>
+                                    <button className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => handleDelete(product._id)}>Xóa</button>
                                 </td>
                             </tr>
                         ))}

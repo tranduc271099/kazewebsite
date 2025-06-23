@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
+=======
+import React from 'react';
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
@@ -148,10 +152,13 @@ const Navbar = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
   const { items } = useSelector(state => state.cart);
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
+<<<<<<< HEAD
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleUserMenuToggle = () => setUserMenuOpen(open => !open);
   const handleUserMenuClose = () => setUserMenuOpen(false);
+=======
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
 
   return (
     <Header>
@@ -185,6 +192,7 @@ const Navbar = () => {
             </div>
           </SearchForm>
           <HeaderActions>
+<<<<<<< HEAD
             <div style={{ position: 'relative' }}>
               <button
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#333', fontSize: '1.2rem' }}
@@ -220,6 +228,11 @@ const Navbar = () => {
                 </div>
               )}
             </div>
+=======
+            <ActionButton to="/account">
+              <i className="bi bi-person"></i>
+            </ActionButton>
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
             <ActionButton to="/wishlist">
               <i className="bi bi-heart"></i>
               <span className="badge">0</span>
@@ -241,7 +254,10 @@ const Navbar = () => {
             <li><Link to="/about">About</Link></li>
             <li><Link to="/products">Products</Link></li>
             <li><Link to="/contact">Contact</Link></li>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
           </NavList>
         </NavContainer>
       </Nav>

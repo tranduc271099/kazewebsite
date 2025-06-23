@@ -6,6 +6,9 @@ const path = require('path');
 
 const app = express();
 
+// Thêm middleware để parse JSON body
+app.use(express.json());
+
 // Cấu hình static cho thư mục uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -15,8 +18,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: '20mb' })); // hoặc lớn hơn nếu cần
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('✅ MongoDB connected'))

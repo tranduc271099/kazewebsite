@@ -346,3 +346,31 @@
     display: flex;
     align-items: center;
 }
+
+.customProductTable {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+    background: var(--card-bg, #fff);
+}
+
+.customProductTable th,
+.customProductTable td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 1.05rem;
+}
+
+.customProductTable th {
+    background: var(--input-bg, #f3f4f6);
+    font-weight: 700;
+    color: var(--text-primary, #222);
+}
+
+.customProductTable tr:last-child td {
+    border-bottom: none;
+}
+
+.customProductTable tr:hover {
+    background: #f3f4f6;
+}

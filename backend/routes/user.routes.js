@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, lockUser, register, login, getProfile, updateProfile, changePassword, updateUser, getUserHistory } = require('../controllers/user.controller');
+const { getAllUsers, lockUser, register, login, getProfile, updateProfile, changePassword } = require('../controllers/user.controller');
 const auth = require('../middleware/auth');
 const { upload } = require('../middleware/upload');
 
@@ -18,9 +18,5 @@ router.put('/change-password', auth, changePassword);
 // Lấy danh sách user và khóa/mở khóa user
 router.get('/', auth, getAllUsers);
 router.put('/:id/lock', auth, lockUser);
-
-// Admin routes
-router.put('/admin/users/:userId', auth, updateUser);
-router.get('/admin/users/:userId/history', auth, getUserHistory);
 
 module.exports = router;

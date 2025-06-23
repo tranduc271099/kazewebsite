@@ -123,6 +123,7 @@
 
 .btn-checkout:hover {
     background-color: #218838;
+<<<<<<< HEAD
 }
 
 .cart-page-container {
@@ -141,4 +142,6 @@
     color: #222 !important;
     opacity: 1 !important;
     display: block !important;
+=======
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
 }

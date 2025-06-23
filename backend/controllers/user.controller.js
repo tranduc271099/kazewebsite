@@ -21,6 +21,7 @@ exports.register = async (req, res) => {
             password,
             image: ""
         });
+
         // Mã hóa password
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
@@ -206,142 +207,21 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// Khóa/mở khóa tài khoản
+// Khóa/mở khóa user (chỉ admin, không cho phép khóa admin)
 exports.lockUser = async (req, res) => {
     try {
-        // Kiểm tra quyền admin
         if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Không có quyền thực hiện!' });
+            return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
         }
-
-        const { id } = req.params;
-        const userToLock = await User.findById(id);
-
-        if (!userToLock) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'Không tìm thấy user' });
+        if (user.role === 'admin') {
+            return res.status(403).json({ message: 'Không thể khóa admin khác!' });
         }
-
-        // Kiểm tra nếu user cần khóa là admin
-        if (userToLock.role === 'admin') {
-            return res.status(403).json({ message: 'Không thể khóa tài khoản admin' });
-        }
-
-        // Lưu trạng thái cũ trước khi thay đổi
-        const oldLockStatus = userToLock.isLocked;
-
-        // Đảo ngược trạng thái khóa
-        userToLock.isLocked = !userToLock.isLocked;
-        await userToLock.save();
-
-        // Lưu lịch sử thay đổi
-        const UserHistory = require('../models/userHistory');
-        const history = new UserHistory({
-            userId: userToLock._id,
-            updatedBy: req.user.id,
-            changes: {
-                isLocked: userToLock.isLocked
-            }
-        });
-        await history.save();
-
-        res.json({
-            message: `Tài khoản đã được ${userToLock.isLocked ? 'khóa' : 'mở khóa'} thành công`,
-            user: userToLock
-        });
+        user.isLocked = !user.isLocked;
+        await user.save();
+        res.json({ message: user.isLocked ? 'Đã khóa user' : 'Đã mở khóa user', isLocked: user.isLocked });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Lỗi server', error: err.message });
-    }
-};
-
-// Update user (chỉ admin)
-exports.updateUser = async (req, res) => {
-    try {
-        const { userId } = req.params;
-        const { name, email, role, isLocked } = req.body;
-
-        // Kiểm tra quyền admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Không có quyền thực hiện!' });
-        }
-
-        // Tìm user cần update
-        const userToUpdate = await User.findById(userId);
-        if (!userToUpdate) {
-            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-        }
-
-        // Kiểm tra nếu user cần update là admin
-        if (userToUpdate.role === 'admin') {
-            return res.status(403).json({ message: 'Không thể chỉnh sửa tài khoản admin khác' });
-        }
-
-        // Lưu thông tin cũ trước khi update
-        const oldData = {
-            name: userToUpdate.name,
-            email: userToUpdate.email,
-            role: userToUpdate.role,
-            isLocked: userToUpdate.isLocked
-        };
-
-        // Kiểm tra email trùng nếu có thay đổi email
-        if (email && email !== userToUpdate.email) {
-            const emailExists = await User.findOne({ email });
-            if (emailExists) {
-                return res.status(400).json({ message: 'Email đã tồn tại' });
-            }
-            userToUpdate.email = email;
-        }
-
-        // Cập nhật thông tin
-        userToUpdate.name = name || userToUpdate.name;
-        userToUpdate.role = role || userToUpdate.role;
-        userToUpdate.isLocked = isLocked !== undefined ? isLocked : userToUpdate.isLocked;
-
-        await userToUpdate.save();
-
-        // Lưu lịch sử chỉnh sửa
-        const UserHistory = require('../models/userHistory');
-        const history = new UserHistory({
-            userId: userToUpdate._id,
-            updatedBy: req.user.id,
-            changes: {
-                name: name !== oldData.name ? name : undefined,
-                email: email !== oldData.email ? email : undefined,
-                role: role !== oldData.role ? role : undefined,
-                isLocked: isLocked !== oldData.isLocked ? isLocked : undefined
-            }
-        });
-        await history.save();
-
-        res.json({
-            message: 'Cập nhật thành công',
-            user: userToUpdate
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Lỗi server', error: err.message });
-    }
-};
-
-// Lấy lịch sử chỉnh sửa của user
-exports.getUserHistory = async (req, res) => {
-    try {
-        const { userId } = req.params;
-
-        // Kiểm tra quyền admin
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Không có quyền truy cập!' });
-        }
-
-        const UserHistory = require('../models/userHistory');
-        const history = await UserHistory.find({ userId })
-            .populate('updatedBy', 'name email')
-            .sort({ updatedAt: -1 });
-
-        res.json(history);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Lỗi server', error: err.message });
+        res.status(500).json({ message: 'Thao tác thất bại' });
     }
 };

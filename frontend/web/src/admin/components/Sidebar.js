@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+<<<<<<< HEAD
 import { useUser } from '../UserContext';
 
 const Sidebar = () => {
@@ -17,19 +18,47 @@ const Sidebar = () => {
         }
     }
     const userName = user?.name || user?.email || 'Tên người dùng';
+=======
+
+const Sidebar = () => {
+    const [dashboardOpen, setDashboardOpen] = useState(true);
+    const [userName, setUserName] = useState('');
+    useEffect(() => {
+        // Lấy tên admin từ localStorage user (ưu tiên user.name)
+        let name = 'Tên người dùng';
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+            try {
+                const userObj = JSON.parse(userStr);
+                name = userObj.name || userObj.email || name;
+            } catch { }
+        } else {
+            name = localStorage.getItem('userName') || name;
+        }
+        setUserName(name);
+    }, []);
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
     return (
         <aside className="main-sidebar sidebar-dark-primary elevation-4" style={{ height: '100vh', position: 'fixed', top: 0, left: 0, overflowY: 'auto', width: 250, zIndex: 1030 }}>
             {/* Brand Logo */}
             <NavLink to="/" className="brand-link">
+<<<<<<< HEAD
+=======
+
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
                 <span className="brand-text font-weight-light">AdminLTE 3</span>
             </NavLink>
             {/* Sidebar */}
             <div className="sidebar">
                 {/* Sidebar user panel (optional) */}
                 <div className="user-panel mt-3 pb-3 mb-3 d-flex">
+<<<<<<< HEAD
                     <div className="image">
                         <img src={avatar} className="img-circle elevation-2" alt="User Avatar" style={{ width: 40, height: 40 }} />
                     </div>
+=======
+
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
                     <div className="info">
                         <a href="#" className="d-block">Xin chào, {userName}</a>
                     </div>

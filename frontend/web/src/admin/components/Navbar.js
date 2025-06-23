@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
 import { useUser } from '../UserContext';
 
 const Navbar = () => {
@@ -10,6 +11,11 @@ const Navbar = () => {
         else if (user.image.startsWith('/')) avatar = `http://localhost:5000${user.image}`;
         else avatar = `http://localhost:5000/${user.image}`;
     }
+=======
+
+const Navbar = () => {
+    const [showUserDropdown, setShowUserDropdown] = useState(false);
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -67,7 +73,11 @@ const Navbar = () => {
                         <a href="#" className="dropdown-item">
                             {/* Message Start */}
                             <div className="media">
+<<<<<<< HEAD
                                 <img src={avatar} alt="User Avatar" className="img-size-50 mr-3 img-circle" />
+=======
+                                <img src="/assets/img/no-avatar.png" alt="User Avatar" className="img-size-50 mr-3 img-circle" />
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
                                 <div className="media-body">
                                     <h3 className="dropdown-item-title">
                                         Brad Diesel
@@ -82,7 +92,11 @@ const Navbar = () => {
                         <div className="dropdown-divider"></div>
                         <a href="#" className="dropdown-item">
                             <div className="media">
+<<<<<<< HEAD
                                 <img src={avatar} alt="User Avatar" className="img-size-50 img-circle mr-3" />
+=======
+                                <img src="/assets/img/no-avatar.png" alt="User Avatar" className="img-size-50 img-circle mr-3" />
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
                                 <div className="media-body">
                                     <h3 className="dropdown-item-title">
                                         John Pierce
@@ -96,7 +110,11 @@ const Navbar = () => {
                         <div className="dropdown-divider"></div>
                         <a href="#" className="dropdown-item">
                             <div className="media">
+<<<<<<< HEAD
                                 <img src={avatar} alt="User Avatar" className="img-size-50 img-circle mr-3" />
+=======
+                                <img src="/assets/img/no-avatar.png" alt="User Avatar" className="img-size-50 img-circle mr-3" />
+>>>>>>> 313c79ce51788a47d4d84ff060914c438e00c8ab
                                 <div className="media-body">
                                     <h3 className="dropdown-item-title">
                                         Nora Silvester

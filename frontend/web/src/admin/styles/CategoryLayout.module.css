@@ -84,6 +84,10 @@
     margin-bottom: 4px;
 }
 
+body.dark .label {
+    color: #eee;
+}
+
 .input {
     border: 1.5px solid var(--input-border, #e0e0e0);
     border-radius: 8px;
@@ -92,6 +96,12 @@
     background: var(--input-bg, #fafbfc);
     color: var(--text-primary, #222);
     transition: border 0.2s;
+}
+
+body.dark .input {
+    --input-bg: #23272f;
+    --input-color: #fff;
+    border-color: #444;
 }
 
 .input:focus {
@@ -270,4 +280,90 @@ body.dark .input {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
     border: 1px solid #232a36;
     color: #fff;
+}
+
+.detailModalBackdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.detailModalBox {
+    background: var(--card-bg, #fff);
+    color: var(--text-primary, #222);
+    border-radius: 16px;
+    padding: 32px 32px 24px 32px;
+    min-width: 340px;
+    max-width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    font-size: 1.08rem;
+}
+
+.detailModalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.detailModalTitle {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    text-align: center;
+    flex: 1;
+}
+
+.detailModalClose {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-primary, #222);
+    margin-left: 12px;
+}
+
+.detailModalTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    background: transparent;
+}
+
+.detailModalTable th,
+.detailModalTable td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.detailModalTable th {
+    background: var(--input-bg, #f3f4f6);
+    font-weight: 700;
+    color: var(--text-primary, #222);
+}
+
+.detailModalTable tr:last-child td {
+    border-bottom: none;
+}
+
+.detailModalTable tr:hover {
+    background: #f3f4f6;
+}
+
+@media (max-width: 600px) {
+    .detailModalBox {
+        min-width: 90vw;
+        max-width: 98vw;
+        padding: 16px 4vw 12px 4vw;
+    }
 }

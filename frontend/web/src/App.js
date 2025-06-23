@@ -25,7 +25,7 @@ import Header from './client/components/Header';
 import AuthLayout from './client/components/AuthLayout';
 
 // Admin App - New Dashboard
-import AdminApp from './admin/AdminApp';
+import AdminApp from './admin/App';
 
 function App() {
   return (

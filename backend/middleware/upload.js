@@ -20,4 +20,4 @@ const uploadMultiple = upload.fields([
     { name: 'variantImages', maxCount: 50 }
 ]);
 
-module.exports = { upload, uploadMultiple }; 
+module.exports = { upload, uploadMultiple };

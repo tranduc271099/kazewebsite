@@ -48,6 +48,11 @@ exports.createProduct = async (req, res) => {
             isActive
         } = req.body;
 
+        // Validate dữ liệu đầu vào
+        if (!name || !price || !stock || !category) {
+            return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin bắt buộc: tên, giá, tồn kho, danh mục.' });
+        }
+
         // Parse các trường phức tạp nếu là string (do FormData gửi lên)
         let attributes = req.body.attributes;
         let variants = req.body.variants;
@@ -274,4 +279,13 @@ exports.deleteProduct = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi xóa sản phẩm' });
     }
-}; 
+};
+exports.getProductsByCategory = async (req, res) => {
+    try {
+        const { categoryId } = req.params;
+        const products = await Product.find({ category: categoryId });
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy sản phẩm theo danh mục' });
+    }
+};

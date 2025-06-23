@@ -145,6 +145,19 @@ function ProductDetail() {
 
     return (
         <main className="main">
+            {/* Breadcrumb */}
+            <div className="page-title light-background">
+                <div className="container d-lg-flex justify-content-between align-items-center">
+                    <h1 className="mb-2 mb-lg-0">Chi tiết sản phẩm</h1>
+                    <nav className="breadcrumbs">
+                        <ol>
+                            <li><a href="/">Trang chủ</a></li>
+                            <li className="current">Chi tiết sản phẩm</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+
             {/* Product Details Section */}
             <section id="product-details" className="product-details section">
                 <div className="container" data-aos="fade-up" data-aos-delay="100">

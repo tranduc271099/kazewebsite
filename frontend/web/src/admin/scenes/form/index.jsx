@@ -162,32 +162,14 @@ const Form = () => {
                 >
                   <img
                     src={avatar}
-                    alt="avatar"
+                    alt="Avatar"
                     style={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: '50%',
-                      border: '3px solid var(--card-border, #ececec)',
+                      width: '100%',
+                      height: '100%',
                       objectFit: 'cover',
-                      boxShadow: theme.shadows[2],
-                      transition: 'box-shadow 0.2s',
-                      cursor: 'pointer',
-                      background: 'var(--page-bg, #f4f6f9)'
+                      borderRadius: '50%'
                     }}
-                    onMouseOver={e => (e.currentTarget.style.boxShadow = theme.shadows[6])}
-                    onMouseOut={e => (e.currentTarget.style.boxShadow = theme.shadows[2])}
-                    onClick={() => document.getElementById('avatar-input').click()}
                   />
-                  <input
-                    id="avatar-input"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={e => handleImageChange(e, setFieldValue)}
-                  />
-                  <Typography variant="caption" sx={{ color: 'var(--text-secondary, #888)', position: 'absolute', bottom: -22, left: '50%', transform: 'translateX(-50%)' }}>
-                    Nhấn vào ảnh để thay đổi
-                  </Typography>
                 </Box>
               </Box>
               <TextField

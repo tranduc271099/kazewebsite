@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import styles from '../CategoryLayout.module.css';
+import styles from '../styles/CategoryLayout.module.css';
 import { useTheme } from '@mui/material/styles';
 
 const Category = () => {
@@ -11,6 +11,13 @@ const Category = () => {
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // State cho modal chi tiết danh mục
+    const [detailOpen, setDetailOpen] = useState(false);
+    const [detailCategory, setDetailCategory] = useState(null);
+    const [categoryProducts, setCategoryProducts] = useState([]);
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [errorProducts, setErrorProducts] = useState('');
 
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
@@ -76,9 +83,34 @@ const Category = () => {
                 });
                 fetchCategories();
             } catch (err) {
-                setError('Không thể xóa danh mục');
+                setError(err.response?.data?.message || 'Không thể xóa danh mục');
+                alert(err.response?.data?.message || 'Không thể xóa danh mục');
             }
         }
+    };
+
+    // Hàm mở modal chi tiết và lấy sản phẩm theo danh mục
+    const handleShowDetail = async (category) => {
+        setDetailCategory(category);
+        setDetailOpen(true);
+        setLoadingProducts(true);
+        setErrorProducts('');
+        try {
+            const response = await axios.get(`http://localhost:5000/api/products/category/${category._id}`);
+            setCategoryProducts(response.data);
+        } catch (err) {
+            setErrorProducts('Không thể tải sản phẩm');
+        } finally {
+            setLoadingProducts(false);
+        }
+    };
+
+    // Hàm đóng modal
+    const handleCloseDetail = () => {
+        setDetailOpen(false);
+        setDetailCategory(null);
+        setCategoryProducts([]);
+        setErrorProducts('');
     };
 
     return (
@@ -135,12 +167,55 @@ const Category = () => {
                                     >
                                         Xóa
                                     </button>
+                                    <button
+                                        className={styles.actionBtn}
+                                        style={{ background: '#0ea5e9', color: '#fff', marginLeft: 8 }}
+                                        onClick={() => handleShowDetail(category)}
+                                    >
+                                        Xem chi tiết
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+            {/* Modal chi tiết danh mục */}
+            {detailOpen && (
+                <div className={styles.detailModalBackdrop}>
+                    <div className={styles.detailModalBox}>
+                        <div className={styles.detailModalHeader}>
+                            <h2 className={styles.detailModalTitle}>Sản phẩm thuộc danh mục: {detailCategory?.name}</h2>
+                            <button onClick={handleCloseDetail} className={styles.detailModalClose}>×</button>
+                        </div>
+                        {loadingProducts ? (
+                            <div>Đang tải sản phẩm...</div>
+                        ) : errorProducts ? (
+                            <div style={{ color: 'red' }}>{errorProducts}</div>
+                        ) : categoryProducts.length === 0 ? (
+                            <div>Không có sản phẩm nào trong danh mục này.</div>
+                        ) : (
+                            <table className={styles.detailModalTable}>
+                                <thead>
+                                    <tr>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {categoryProducts.map(product => (
+                                        <tr key={product._id}>
+                                            <td>{product.name}</td>
+                                            <td>{product.price?.toLocaleString('vi-VN')} đ</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
