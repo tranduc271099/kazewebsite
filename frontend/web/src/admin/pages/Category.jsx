@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from '../CategoryLayout.module.css';
+import { useTheme } from '@mui/material/styles';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -10,6 +11,9 @@ const Category = () => {
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
 
     useEffect(() => {
         fetchCategories();
@@ -79,7 +83,7 @@ const Category = () => {
 
     return (
         <div>
-            <div className={styles.card}>
+            <div className={`${styles.card} ${isDark ? styles.cardDark : ''}`}>
                 <div className={styles.header}>Thêm danh mục mới</div>
                 <form onSubmit={handleSubmit}>
                     <div className={styles.formGrid}>
@@ -105,7 +109,7 @@ const Category = () => {
                 </form>
             </div>
 
-            <div className={styles.tableCard}>
+            <div className={`${styles.tableCard} ${isDark ? styles.tableCardDark : ''}`}>
                 <div className={styles.tableTitle}>Danh sách danh mục</div>
                 <table className={styles.table}>
                     <thead>

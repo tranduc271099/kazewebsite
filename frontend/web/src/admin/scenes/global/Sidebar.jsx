@@ -115,7 +115,7 @@ const Sidebar = () => {
                   width="100px"
                   height="100px"
                   src={avatar}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                  style={{ cursor: "pointer", borderRadius: "50%", objectFit: "cover" }}
                 />
               </Box>
               <Box textAlign="center">
