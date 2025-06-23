@@ -262,7 +262,7 @@ const BillUserClient = () => {
                                 <div className="bill-empty-state-title">Chưa có đơn hàng nào</div>
                                 <div className="bill-empty-state-description">Bắt đầu mua sắm để tạo đơn hàng đầu tiên</div>
                                 <Link to="/" className="bill-btn-primary">
-                                    Mua sắm ngay
+                                    Mua sắm ngay!
                                 </Link>
                             </div>
                         ) : (
