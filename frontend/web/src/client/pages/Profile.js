@@ -151,7 +151,7 @@ const Profile = () => {
                             <Link to="/change-password" style={{ color: '#333', textDecoration: 'none' }}>Đổi Mật Khẩu</Link>
                         </li>
                         <li style={{ margin: '16px 0' }}>
-                            <Link to="/orders" style={{ color: '#333', textDecoration: 'none' }}>Đơn Mua</Link>
+                            <Link to="/bill" style={{ color: '#333', textDecoration: 'none' }}>Đơn Mua</Link>
                         </li>
                     </ul>
                 </aside>

@@ -18,6 +18,7 @@ import About from './client/pages/About';
 import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
 import ChangePassword from './client/pages/ChangePassword';
+import BillUser from './client/pages/Bill/BillUserClient.tsx';
 
 // Components
 import Footer from './client/components/Footer';
@@ -26,6 +27,7 @@ import AuthLayout from './client/components/AuthLayout';
 
 // Admin App - New Dashboard
 import AdminApp from './admin/AdminApp';
+import Checkout from './client/pages/Checkout/checkout.tsx';
 
 function App() {
   return (
@@ -42,70 +44,19 @@ function App() {
                 <Route path="/register" element={<Register />} />
               </Route>
 
-              {/* Main Routes */}
-              <Route path="/" element={
-                <>
-                  <Header />
-                  <Home />
-                  <Footer />
-                </>
-              } />
-              <Route path="/products" element={
-                <>
-                  <Header />
-                  <Products />
-                  <Footer />
-                </>
-              } />
-              <Route path="/products/:id" element={
-                <>
-                  <Header />
-                  <ProductDetail />
-                  <Footer />
-                </>
-              } />
-              <Route path="/product-details/:productId" element={
-                <>
-                  <Header />
-                  <ProductDetail />
-                  <Footer />
-                </>
-              } />
-              <Route path="/cart" element={
-                <>
-                  <Header />
-                  <Cart />
-                  <Footer />
-                </>
-              } />
-              <Route path="/about" element={
-                <>
-                  <Header />
-                  <About />
-                  <Footer />
-                </>
-              } />
-              <Route path="/category" element={
-                <>
-                  <Header />
-                  <ClientCategory />
-                  <Footer />
-                </>
-              } />
-              <Route path="/profile" element={
-                <>
-                  <Header />
-                  <Profile />
-                  <Footer />
-                </>
-              } />
-              <Route path="/change-password" element={
-                <>
-                  <Header />
-                  <ChangePassword />
-                  <Footer />
-                </>
-              } />
+{/* Main Routes */}
+<Route path="/" element={<><Header /><Home /><Footer /></>} />
+<Route path="/products" element={<><Header /><Products /><Footer /></>} />
+<Route path="/products/:id" element={<><Header /><ProductDetail /><Footer /></>} />
+<Route path="/product-details/:productId" element={<><Header /><ProductDetail /><Footer /></>} />
+<Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
+<Route path="/about" element={<><Header /><About /><Footer /></>} />
+<Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
+<Route path="/profile" element={<><Header /><Profile /><Footer /></>} />
+<Route path="/change-password" element={<><Header /><ChangePassword /><Footer /></>} />
+<Route path="/bill" element={<><Header /><BillUser /><Footer /></>} />
+<Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
+
 
               {/* Admin Routes - New Dashboard */}
               <Route path="/admin/*" element={<AdminApp />} />
