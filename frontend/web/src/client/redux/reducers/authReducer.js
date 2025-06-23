@@ -2,8 +2,8 @@ import { LOGIN_SUCCESS, LOGIN_FAIL, LOGOUT, REGISTER_SUCCESS, REGISTER_FAIL } fr
 
 const initialState = {
     token: localStorage.getItem('token'),
-    isAuthenticated: false,
-    user: null,
+    isAuthenticated: !!localStorage.getItem('token'),
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
     error: null
 };
 

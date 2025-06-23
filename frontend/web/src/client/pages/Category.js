@@ -45,6 +45,7 @@ const Category = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedCategorySidebar, setSelectedCategorySidebar] = useState('*');
+    const [hoveredProductId, setHoveredProductId] = useState(null);
     const backendUrl = 'http://localhost:5000';
 
     const { addToCart } = useContext(CartContext);
@@ -71,21 +72,6 @@ const Category = () => {
     const filteredProducts = selectedCategorySidebar === '*'
         ? products
         : products.filter(product => product.category?.name?.toLowerCase() === selectedCategorySidebar.toLowerCase());
-
-    console.log('selectedCategory:', selectedCategorySidebar);
-    console.log('products:', products.map(p => ({ id: p._id, cat: p.category })));
-    console.log('filteredProducts:', filteredProducts);
-
-    // Thêm vào đầu file hoặc trong component
-    const productImgStyle = {
-        width: '220px',
-        height: '220px',
-        objectFit: 'cover',
-        borderRadius: '10px',
-        background: '#f5f5f5',
-        display: 'block',
-        margin: '0 auto'
-    };
 
     const handleAddToCart = (product) => {
         const itemToAdd = {
@@ -428,18 +414,18 @@ const Category = () => {
                         <section id="category-product-list" className="category-product-list section product-list">
                             <div className="container isotope-layout" data-aos="fade-up" data-aos-delay="100" data-default-filter="*" data-layout="masonry" data-sort="original-order">
                                 <div className="row product-container isotope-container g-4" data-aos="fade-up" data-aos-delay="200">
+                                    {/* Product Item */}
                                     {filteredProducts.map(product => {
                                         const image1 = product.images?.[0] ? (product.images[0].startsWith('/uploads/') ? backendUrl + product.images[0] : product.images[0]) : '/assets/img/no-image.png';
                                         const image2 = product.images?.[1] ? (product.images[1].startsWith('/uploads/') ? backendUrl + product.images[1] : product.images[1]) : image1;
 
                                         return (
-                                            <div key={product._id} className="col-md-6 col-lg-3 product-item isotope-item">
+                                            <div key={product._id} className="col-lg-4 col-md-6" onMouseEnter={() => setHoveredProductId(product._id)} onMouseLeave={() => setHoveredProductId(null)}>
                                                 <div className="product-card">
                                                     <div className="product-image position-relative overflow-hidden">
                                                         {product.isNew && <span className="badge">New</span>}
                                                         {product.isSale && <span className="badge">Sale</span>}
-                                                        <img src={image1} alt={product.name} className="img-fluid main-img" />
-                                                        <img src={image2} alt={`${product.name} Hover`} className="img-fluid hover-img position-absolute top-0 start-0 w-100 h-100 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                                                        <img src={hoveredProductId === product._id && product.images?.[1] ? image2 : image1} alt={product.name} className="img-fluid" />
                                                         <div className="product-overlay">
                                                             <button className="btn-cart" onClick={() => handleAddToCart(product)}>
                                                                 <i className="bi bi-cart-plus"></i> Thêm vào giỏ

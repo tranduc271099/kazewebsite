@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
@@ -148,6 +148,10 @@ const Navbar = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
   const { items } = useSelector(state => state.cart);
   const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const handleUserMenuToggle = () => setUserMenuOpen(open => !open);
+  const handleUserMenuClose = () => setUserMenuOpen(false);
 
   return (
     <Header>
@@ -181,9 +185,41 @@ const Navbar = () => {
             </div>
           </SearchForm>
           <HeaderActions>
-            <ActionButton to="/account">
-              <i className="bi bi-person"></i>
-            </ActionButton>
+            <div style={{ position: 'relative' }}>
+              <button
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#333', fontSize: '1.2rem' }}
+                onClick={handleUserMenuToggle}
+              >
+                <i className="bi bi-person"></i>
+              </button>
+              {userMenuOpen && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: '100%',
+                    background: '#fff',
+                    borderRadius: 8,
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                    minWidth: 180,
+                    zIndex: 1000,
+                  }}
+                  onMouseLeave={handleUserMenuClose}
+                >
+                  {isAuthenticated && user && user.role === 'admin' && (
+                    <Link to="/admin" style={{ display: 'block', padding: '12px 16px', color: '#333', textDecoration: 'none' }} onClick={handleUserMenuClose}>
+                      <i className="bi bi-speedometer2" style={{ marginRight: 8 }}></i> Admin
+                    </Link>
+                  )}
+                  <Link to="/account" style={{ display: 'block', padding: '12px 16px', color: '#333', textDecoration: 'none' }} onClick={handleUserMenuClose}>
+                    <i className="bi bi-person" style={{ marginRight: 8 }}></i> Thông tin cá nhân
+                  </Link>
+                  <button style={{ display: 'block', width: '100%', padding: '12px 16px', color: '#333', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }} onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login'; }}>
+                    <i className="bi bi-box-arrow-right" style={{ marginRight: 8 }}></i> Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
             <ActionButton to="/wishlist">
               <i className="bi bi-heart"></i>
               <span className="badge">0</span>
@@ -205,6 +241,7 @@ const Navbar = () => {
             <li><Link to="/about">About</Link></li>
             <li><Link to="/products">Products</Link></li>
             <li><Link to="/contact">Contact</Link></li>
+
           </NavList>
         </NavContainer>
       </Nav>
