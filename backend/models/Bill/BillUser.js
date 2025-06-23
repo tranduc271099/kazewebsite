@@ -52,5 +52,5 @@ const billSchema = new mongoose.Schema({
   ]
 });
 
-const Bill = mongoose.model('Bill', billSchema);
+const Bill = mongoose.model('order', billSchema);
 module.exports = Bill;

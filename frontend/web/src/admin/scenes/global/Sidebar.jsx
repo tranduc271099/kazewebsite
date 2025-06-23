@@ -115,7 +115,7 @@ const Sidebar = () => {
                   width="100px"
                   height="100px"
                   src={avatar}
-                  style={{ cursor: "pointer", borderRadius: "50%" }}
+                  style={{ cursor: "pointer", borderRadius: "50%", objectFit: "cover" }}
                 />
               </Box>
               <Box textAlign="center">
@@ -171,7 +171,13 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
+             <Item
+              title="Quản lý Đơn hàng"
+              to="/admin/bill"
+              icon={<Inventory2OutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Typography
               variant="h6"
               color={colors.grey[300]}

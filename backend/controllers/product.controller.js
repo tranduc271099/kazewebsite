@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const slugify = require('slugify');
+const cloudinary = require('../config/cloudinary');
 
 // Get all products
 exports.getProducts = async (req, res) => {
@@ -65,12 +66,43 @@ exports.createProduct = async (req, res) => {
             }));
         }
 
-        // Xử lý ảnh
-        let imagePaths = [];
-        if (req.files && req.files.length > 0) {
-            imagePaths = req.files.map(file => '/uploads/' + file.filename);
-        } else if (req.body.images) {
-            imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+        // Xử lý ảnh chính (main images)
+        const mainImageFiles = (req.files && req.files.images) || [];
+        const mainImageUrls = await Promise.all(
+            mainImageFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            })
+        );
+
+        // Xử lý ảnh biến thể (variant images)
+        const variantImageFiles = (req.files && req.files.variantImages) || [];
+        const variantImageUrls = await Promise.all(
+            variantImageFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            })
+        );
+
+        // Gán ảnh biến thể vào đúng biến thể
+        let currentVariantImageIndex = 0;
+        if (Array.isArray(variants)) {
+            variants.forEach(variant => {
+                const imageCount = variant.newImageCount || 0;
+                const newImagesForVariant = variantImageUrls.slice(currentVariantImageIndex, currentVariantImageIndex + imageCount);
+                variant.images = [...(variant.images || []), ...newImagesForVariant];
+                currentVariantImageIndex += imageCount;
+            });
         }
 
         // Check if category exists
@@ -96,7 +128,7 @@ exports.createProduct = async (req, res) => {
             category,
             attributes,
             variants,
-            images: imagePaths,
+            images: mainImageUrls,
             price,
             stock,
             isActive
@@ -133,24 +165,48 @@ exports.updateProduct = async (req, res) => {
         if (typeof attributes === 'string') attributes = JSON.parse(attributes);
         if (typeof variants === 'string') variants = JSON.parse(variants);
 
-        // Chuyển đổi variants sang EAV nếu chưa đúng định dạng
-        if (Array.isArray(variants) && variants.length > 0 && !variants[0].attributes) {
-            variants = variants.map(v => ({
-                attributes: {
-                    size: v.size,
-                    color: v.color
-                },
-                stock: v.stock,
-                price: v.price
-            }));
-        }
+        // Lấy URL ảnh hiện có từ body
+        const existingMainImages = req.body.existingImages ? (Array.isArray(req.body.existingImages) ? req.body.existingImages : [req.body.existingImages]) : [];
 
-        // Xử lý ảnh
-        let imagePaths = [];
-        if (req.files && req.files.length > 0) {
-            imagePaths = req.files.map(file => '/uploads/' + file.filename);
-        } else if (req.body.images) {
-            imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+        // Xử lý ảnh chính mới (main images)
+        const mainImageFiles = (req.files && req.files.images) || [];
+        const newMainImageUrls = await Promise.all(
+            mainImageFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            })
+        );
+        const allMainImages = [...existingMainImages, ...newMainImageUrls];
+
+        // Xử lý ảnh biến thể mới (variant images)
+        const variantImageFiles = (req.files && req.files.variantImages) || [];
+        const newVariantImageUrls = await Promise.all(
+            variantImageFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+                        if (error) return reject(error);
+                        resolve(result.secure_url);
+                    });
+                    stream.end(file.buffer);
+                });
+            })
+        );
+
+        // Gán ảnh biến thể vào đúng biến thể
+        let currentVariantImageIndex = 0;
+        if (Array.isArray(variants)) {
+            variants.forEach(variant => {
+                const imageCount = variant.newImageCount || 0;
+                const newImagesForVariant = newVariantImageUrls.slice(currentVariantImageIndex, currentVariantImageIndex + imageCount);
+                // Giữ lại ảnh cũ và thêm ảnh mới
+                variant.images = [...(variant.images || []), ...newImagesForVariant];
+                currentVariantImageIndex += imageCount;
+            });
         }
 
         // Check if product exists
@@ -188,7 +244,7 @@ exports.updateProduct = async (req, res) => {
                 category,
                 attributes,
                 variants,
-                images: imagePaths,
+                images: allMainImages,
                 price,
                 stock,
                 isActive

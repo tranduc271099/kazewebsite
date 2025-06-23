@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import '../styles/Auth.css';
+import { useDispatch } from 'react-redux';
+import { LOGIN_SUCCESS } from '../redux/types';
 
 const Login = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -51,6 +54,9 @@ const Login = () => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
+            // Lưu vào Redux
+            dispatch({ type: LOGIN_SUCCESS, payload: { token, user } });
+
             // Kiểm tra role và chuyển hướng
             if (user?.role === 'admin') {
                 navigate('/dashboard');
@@ -76,6 +82,9 @@ const Login = () => {
             // Lưu token và user vào localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+
+            // Lưu vào Redux
+            dispatch({ type: LOGIN_SUCCESS, payload: { token, user } });
 
             // Kiểm tra role và chuyển hướng
             if (user?.role === 'admin') {

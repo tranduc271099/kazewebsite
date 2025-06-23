@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getAllUsers, lockUser, register, login, getProfile, updateProfile, changePassword } = require('../controllers/user.controller');
 const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { upload } = require('../middleware/upload');
 
 // Đăng ký và đăng nhập
 router.post('/register', register);

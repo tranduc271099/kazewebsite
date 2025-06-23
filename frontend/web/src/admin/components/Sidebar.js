@@ -1,35 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useUser } from '../UserContext';
 
 const Sidebar = () => {
+    const { user } = useUser();
     const [dashboardOpen, setDashboardOpen] = useState(true);
-    const [userName, setUserName] = useState('');
-    useEffect(() => {
-        // Lấy tên admin từ localStorage user (ưu tiên user.name)
-        let name = 'Tên người dùng';
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const userObj = JSON.parse(userStr);
-                name = userObj.name || userObj.email || name;
-            } catch { }
+    // Lấy avatar và tên từ context
+    let avatar = "/assets/img/person/person-m-1.webp";
+    if (user?.image) {
+        if (user.image.startsWith("http")) {
+            avatar = user.image;
+        } else if (user.image.startsWith("/")) {
+            avatar = `http://localhost:5000${user.image}`;
         } else {
-            name = localStorage.getItem('userName') || name;
+            avatar = `http://localhost:5000/${user.image}`;
         }
-        setUserName(name);
-    }, []);
+    }
+    const userName = user?.name || user?.email || 'Tên người dùng';
     return (
         <aside className="main-sidebar sidebar-dark-primary elevation-4" style={{ height: '100vh', position: 'fixed', top: 0, left: 0, overflowY: 'auto', width: 250, zIndex: 1030 }}>
             {/* Brand Logo */}
             <NavLink to="/" className="brand-link">
-
                 <span className="brand-text font-weight-light">AdminLTE 3</span>
             </NavLink>
             {/* Sidebar */}
             <div className="sidebar">
                 {/* Sidebar user panel (optional) */}
                 <div className="user-panel mt-3 pb-3 mb-3 d-flex">
-
+                    <div className="image">
+                        <img src={avatar} className="img-circle elevation-2" alt="User Avatar" style={{ width: 40, height: 40 }} />
+                    </div>
                     <div className="info">
                         <a href="#" className="d-block">Xin chào, {userName}</a>
                     </div>
@@ -94,6 +94,12 @@ const Sidebar = () => {
                                     <NavLink to="/dashboard/products" className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}>
                                         <i className="nav-icon fas fa-box"></i>
                                         <p>Quản lý sản phẩm</p>
+                                    </NavLink>
+                                </li>
+                                <li className="nav-item">
+                                    <NavLink to="/admin/bill" className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}>
+                                        <i className="nav-icon fas fa-box"></i>
+                                        <p>Quản lý đơn hàng</p>
                                     </NavLink>
                                 </li>
                             </ul>

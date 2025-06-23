@@ -9,6 +9,7 @@ const ProductListSection = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('*');
+    const [hoveredProductId, setHoveredProductId] = useState(null);
     const backendUrl = 'http://localhost:5000';
 
     useEffect(() => {
@@ -118,13 +119,13 @@ const ProductListSection = () => {
                         const image2 = product.images?.[1] ? (product.images[1].startsWith('/uploads/') ? backendUrl + product.images[1] : product.images[1]) : image1;
 
                         return (
-                            <div key={product._id} className="col-md-6 col-lg-3 product-item isotope-item">
+                            <div key={product._id} className="col-md-6 col-lg-3 product-item isotope-item" onMouseEnter={() => setHoveredProductId(product._id)} onMouseLeave={() => setHoveredProductId(null)}>
                                 <div className="product-card">
                                     <div className="product-image position-relative overflow-hidden">
                                         {product.isNew && <span className="badge">New</span>}
                                         {product.isSale && <span className="badge">Sale</span>}
-                                        <img src={image1} alt={product.name} className="img-fluid main-img" />
-                                        <img src={image2} alt={`${product.name} Hover`} className="img-fluid hover-img position-absolute top-0 start-0 w-100 h-100 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                                        <img src={hoveredProductId === product._id && product.images?.[1] ? image2 : image1} alt={product.name} className="img-fluid" />
+
                                         <div className="product-overlay">
                                             <button className="btn-cart" onClick={() => handleAddToCart(product)}><i className="bi bi-cart-plus"></i> Thêm vào giỏ</button>
                                             <div className="product-actions">
