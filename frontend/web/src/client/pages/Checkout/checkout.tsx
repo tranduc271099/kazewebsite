@@ -122,7 +122,12 @@ const Checkout = () => {
     const [errors, setErrors] = useState({
         fullName: '',
         email: '',
-        address: ''
+        address: '',
+        phone: '',
+        city: '',
+        district: '',
+        ward: '',
+        note: ''
     });
 
     useEffect(() => {
@@ -199,7 +204,7 @@ const Checkout = () => {
 
     const validate = () => {
         let valid = true;
-        const newErrors = { fullName: '', email: '', address: '' };
+        const newErrors = { fullName: '', email: '', address: '', phone: '', city: '', district: '', ward: '', note: '' };
         // Họ tên: không số, dưới 20 ký tự
         if (!formData.fullName.trim()) {
             newErrors.fullName = 'Vui lòng nhập họ và tên';
@@ -219,9 +224,38 @@ const Checkout = () => {
             newErrors.email = 'Email không hợp lệ';
             valid = false;
         }
-        // Địa chỉ bắt buộc
+        // Số điện thoại: chỉ số, tối đa 10 số
+        if (!formData.phone.trim()) {
+            newErrors.phone = 'Vui lòng nhập số điện thoại';
+            valid = false;
+        } else if (!/^\d{1,10}$/.test(formData.phone)) {
+            newErrors.phone = 'Số điện thoại chỉ được phép là số và tối đa 10 số';
+            valid = false;
+        }
+        // Địa chỉ bắt buộc, không ký tự đặc biệt
         if (!formData.address.trim()) {
             newErrors.address = 'Vui lòng nhập địa chỉ';
+            valid = false;
+        } else if (!/^[\w\s,\-]+$/.test(formData.address)) {
+            newErrors.address = 'Địa chỉ không được chứa ký tự đặc biệt';
+            valid = false;
+        }
+        // Validate city
+        if (!formData.city) {
+            newErrors.city = 'Vui lòng chọn tỉnh/thành phố';
+            valid = false;
+        }
+        if (!formData.district) {
+            newErrors.district = 'Vui lòng chọn quận/huyện';
+            valid = false;
+        }
+        if (!formData.ward) {
+            newErrors.ward = 'Vui lòng chọn phường/xã';
+            valid = false;
+        }
+        // Validate ghi chú: tối đa 30 từ
+        if (formData.note && formData.note.trim().split(/\s+/).length > 30) {
+            newErrors.note = 'Ghi chú không được vượt quá 30 từ';
             valid = false;
         }
         setErrors(newErrors);
@@ -334,6 +368,7 @@ const Checkout = () => {
                                                                 onChange={handleInputChange}
                                                                 required
                                                             />
+                                                            {errors.phone && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.phone}</div>}
                                                         </div>
                                                     </div>
                                                     <div className="row">
@@ -383,6 +418,7 @@ const Checkout = () => {
                                                                     <option key={key} value={key}>{city.name}</option>
                                                                 ))}
                                                             </select>
+                                                            {errors.city && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.city}</div>}
                                                         </div>
                                                         <div className="col-md-4 mb-3">
                                                             <label className="form-label">Quận/Huyện *</label>
@@ -399,6 +435,7 @@ const Checkout = () => {
                                                                     <option key={key} value={key}>{district.name}</option>
                                                                 ))}
                                                             </select>
+                                                            {errors.district && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.district}</div>}
                                                         </div>
                                                         <div className="col-md-4 mb-3">
                                                             <label className="form-label">Phường/Xã *</label>
@@ -415,6 +452,7 @@ const Checkout = () => {
                                                                     <option key={key} value={ward}>{ward}</option>
                                                                 ))}
                                                             </select>
+                                                            {errors.ward && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.ward}</div>}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -632,6 +670,7 @@ const Checkout = () => {
                                                         rows={3}
                                                         placeholder="Ghi chú về đơn hàng, hướng dẫn giao hàng..."
                                                     ></textarea>
+                                                    {errors.note && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.note}</div>}
                                                 </div>
                                             </form>
                                         </div>

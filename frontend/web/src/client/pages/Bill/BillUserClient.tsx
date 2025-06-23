@@ -26,6 +26,10 @@ interface HoaDon {
     tong_tien: number;
     phuong_thuc_thanh_toan?: string;
     ghi_chu?: string;
+    nguoi_dung_id?: {
+        name: string;
+        phone?: string;
+    };
 }
 
 const BillUserClient = () => {
@@ -513,101 +517,58 @@ const BillUserClient = () => {
                             </button>
                         </div>
                         
-                        <div style={{ marginBottom: 16 }}>
-                            <strong>Ngày đặt:</strong> {formatDate(selectedBill.ngay_tao)}
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Khách hàng: {selectedBill.nguoi_dung_id?.name}
                         </div>
-                        
-                        <div style={{ marginBottom: 16 }}>
-                            <strong>Trạng thái:</strong> 
-                            <span style={{ 
-                                backgroundColor: getStatusColor(selectedBill.trang_thai),
-                                color: '#fff',
-                                padding: '4px 8px',
-                                borderRadius: 4,
-                                marginLeft: 8,
-                                fontSize: 12
-                            }}>
-                                {selectedBill.trang_thai}
-                            </span>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            SĐT: {selectedBill.nguoi_dung_id?.phone || '---'}
                         </div>
-
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Ngày đặt: {formatDate(selectedBill.ngay_tao)}
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Trạng thái: <span style={{ backgroundColor: getStatusColor(selectedBill.trang_thai), color: '#fff', padding: '4px 8px', borderRadius: 4, marginLeft: 8, fontSize: 12 }}>{selectedBill.trang_thai}</span>
+                        </div>
                         {selectedBill.phuong_thuc_thanh_toan && (
-                            <div style={{ marginBottom: 16 }}>
-                                <strong>Phương thức thanh toán:</strong> 
-                                <span style={{ 
-                                    backgroundColor: '#e3f2fd',
-                                    color: '#1976d2',
-                                    padding: '4px 8px',
-                                    borderRadius: 4,
-                                    marginLeft: 8,
-                                    fontSize: 12
-                                }}>
-                                    {selectedBill.phuong_thuc_thanh_toan}
-                                </span>
+                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                                Phương thức thanh toán: {selectedBill.phuong_thuc_thanh_toan}
                             </div>
                         )}
-                        
-                        <div style={{ marginBottom: 16 }}>
-                            <strong>Địa chỉ giao hàng:</strong>
-                            <div style={{ marginTop: 4, fontSize: 13 }}>{selectedBill.dia_chi_giao_hang}</div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Địa chỉ giao hàng: {selectedBill.dia_chi_giao_hang}
                         </div>
-                        
-                        <div style={{ marginBottom: 16 }}>
-                            <strong>Sản phẩm:</strong>
-                            {selectedBill.danh_sach_san_pham.map((item, index) => (
-                                <div key={index} style={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center',
-                                    padding: '12px 0',
-                                    borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none'
-                                }}>
-                                    <div style={{
-                                        width: 50,
-                                        height: 50,
-                                        borderRadius: 6,
-                                        overflow: 'hidden',
-                                        background: '#f9fafb',
-                                        border: '1px solid #eee',
-                                        marginRight: 12,
-                                        flexShrink: 0
-                                    }}>
-                                        <img
-                                            src={item.san_pham_id?.images && item.san_pham_id.images[0] && (item.san_pham_id.images[0].startsWith('http') 
-                                                ? item.san_pham_id.images[0] 
-                                                : `http://localhost:5000${item.san_pham_id.images[0]}`)
-                                            }
-                                            alt={item.san_pham_id?.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = 'https://via.placeholder.com/150'; // Fallback image
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontSize: 13, fontWeight: 500 }}>{item.san_pham_id?.name}</div>
-                                        <div style={{ fontSize: 11, color: '#666' }}>
-                                            SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
-                                        </div>
-                                    </div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, marginLeft: 12 }}>{formatPrice(item.gia * item.so_luong)}</div>
-                                </div>
-                            ))}
-                        </div>
-                        
                         {selectedBill.ghi_chu && (
                             <div style={{ marginBottom: 16 }}>
                                 <strong>Ghi chú:</strong> <span style={{ fontSize: 13 }}>{selectedBill.ghi_chu}</span>
                             </div>
                         )}
-                        
-                        <div style={{ 
-                            borderTop: '2px solid #eee', 
-                            paddingTop: 16, 
-                            textAlign: 'right',
-                            fontSize: 16,
-                            fontWeight: 700
-                        }}>
+                        <div style={{ marginBottom: 16, color: '#222' }}>Sản phẩm:</div>
+                        {selectedBill.danh_sach_san_pham.map((item, index) => (
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none' }}>
+                                <div style={{ width: 50, height: 50, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
+                                    <img
+                                        src={item.san_pham_id?.images && item.san_pham_id.images[0] && (item.san_pham_id.images[0].startsWith('http') 
+                                            ? item.san_pham_id.images[0] 
+                                            : `http://localhost:5000${item.san_pham_id.images[0]}`)
+                                        }
+                                        alt={item.san_pham_id?.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = 'https://via.placeholder.com/150';
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 13, color: '#222', fontWeight: 500 }}>{item.san_pham_id?.name}</div>
+                                    <div style={{ fontSize: 11, color: '#666' }}>
+                                        SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 13, fontWeight: 600, marginLeft: 12 }}>{formatPrice(item.gia * item.so_luong)}</div>
+                            </div>
+                        ))}
+                        <div style={{ borderTop: '2px solid #eee', paddingTop: 16, textAlign: 'right', fontSize: 16, fontWeight: 700 }}>
                             Tổng cộng: {formatPrice(selectedBill.tong_tien)}
                         </div>
                     </div>

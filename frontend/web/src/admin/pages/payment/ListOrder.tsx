@@ -77,7 +77,6 @@ const ListOrder = () => {
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line
   }, []);
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
@@ -105,7 +104,6 @@ const ListOrder = () => {
     }
   };
 
-  // Tìm kiếm
   const filteredOrders = orders.filter(order => {
     const searchText = search.toLowerCase();
     return (
@@ -115,7 +113,6 @@ const ListOrder = () => {
     );
   });
 
-  // Sắp xếp
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     if (sortType === 'newest') {
       return new Date(b.ngay_tao).getTime() - new Date(a.ngay_tao).getTime();
@@ -129,11 +126,9 @@ const ListOrder = () => {
     return 0;
   });
 
-  // Phân trang
   const totalPages = Math.ceil(sortedOrders.length / limit);
   const pagedOrders = sortedOrders.slice((page - 1) * limit, page * limit);
 
-  // Helper: parseAddress và getStatusColor
   function parseAddress(address: string) {
     if (!address) return { street: '', ward: '', district: '', city: '' };
     const parts = address.split(',').map(part => part.trim());
@@ -157,19 +152,16 @@ const ListOrder = () => {
       default: return '#6b7280';
     }
   }
-  // Màu pastel cho card
   const pastelColors = [
     '#fef6e4', '#e0f2fe', '#f0fdf4', '#f3e8ff', '#f1f5f9', '#fce7f3', '#f3f4f6', '#fef9c3',
   ];
 
-  // Helper: formatDateTime
   function formatDateTime(dateString: string) {
     const date = new Date(dateString);
     const pad = (n: number) => n.toString().padStart(2, '0');
     return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
   }
 
-  // Hiển thị danh sách đơn hàng dạng card
   return (
     <div style={{ padding: 32 }}>
       <h2 style={{ fontWeight: 700, marginBottom: 24 }}>Quản lý đơn hàng</h2>
@@ -224,7 +216,6 @@ const ListOrder = () => {
               </div>
             ))}
           </div>
-          {/* Pagination */}
           {totalPages > 1 && (
             <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'center' }}>
               <button onClick={() => setPage(page - 1)} disabled={page === 1} style={{ padding: '6px 16px' }}>&larr; Trước</button>
@@ -243,7 +234,6 @@ const ListOrder = () => {
         </>
       )}
 
-      {/* Modal chi tiết đơn hàng */}
       {showModal && selectedOrder && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -311,7 +301,6 @@ const ListOrder = () => {
                 Phương thức thanh toán: <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
               </div>
             )}
-            {/* Địa chỉ giao hàng tách dòng */}
             <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
               Địa chỉ giao hàng:
               <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
