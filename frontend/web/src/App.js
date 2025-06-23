@@ -17,6 +17,7 @@ import About from './client/pages/About';
 import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
 import ChangePassword from './client/pages/ChangePassword';
+import BillUser from './client/pages/Bill/BillUserClient.tsx';
 
 // Components
 import Footer from './client/components/Footer';
@@ -25,6 +26,7 @@ import AuthLayout from './client/components/AuthLayout';
 
 // Admin App - New Dashboard
 import AdminApp from './admin/AdminApp';
+import Checkout from './client/pages/Checkout/checkout.tsx';
 
 function App() {
   return (
@@ -101,6 +103,20 @@ function App() {
               <>
                 <Header />
                 <ChangePassword />
+                <Footer />
+              </>
+            } />
+            <Route path="/bill" element={
+              <>
+                <Header />
+                <BillUser />
+                <Footer />
+              </>
+            } />
+            <Route path="/checkout" element={
+              <>
+                <Header />
+                <Checkout />
                 <Footer />
               </>
             } />

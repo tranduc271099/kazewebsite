@@ -110,9 +110,14 @@ function Cart() {
                     <i className="bi bi-cart-x" style={{ fontSize: '4rem', color: '#ccc' }}></i>
                     <h3 className="mt-3">Giỏ hàng trống</h3>
                     <p className="text-muted">Thêm sản phẩm vào giỏ hàng để xem ở đây</p>
-                    <Link to="/category" className="btn btn-primary mt-3">
-                        Tiếp tục mua sắm
-                    </Link>
+                    <div className="mt-3">
+                        <Link to="/category" className="btn btn-primary me-2">
+                            Tiếp tục mua sắm
+                        </Link>
+                        <Link to="/orders" className="btn btn-outline-primary">
+                            Xem đơn hàng của tôi
+                        </Link>
+                    </div>
                 </div>
             ) : (
                 <div className="cart-page-container py-5" style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', background: '#fff', marginTop: 0 }}>
@@ -298,7 +303,7 @@ function Cart() {
                                             <span style={{ fontWeight: 600, fontSize: 18 }}>Tổng cộng</span>
                                             <span style={{ fontWeight: 700, fontSize: 22 }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                         </div>
-                                        <button className="btn btn-primary w-100 mb-2" style={{ fontWeight: 600, fontSize: 16 }}>Thanh toán &rarr;</button>
+                                        <Link to="/checkout" className="btn btn-primary w-100 mb-2" style={{ fontWeight: 600, fontSize: 16 }}>Thanh toán &rarr;</Link>
                                         <Link to="/category" className="btn btn-link w-100">&larr; Tiếp tục mua sắm</Link>
                                         <div className="mt-4">
                                             <span className="text-muted">Chấp nhận thanh toán</span>
