@@ -25,8 +25,35 @@ const billSchema = new mongoose.Schema({
   },
   trang_thai: {
     type: String,
-    enum: ['chờ xác nhận', 'đã xác nhận', 'đang giao', 'đã giao', 'đã hủy'],
+    enum: [
+      'chờ xác nhận',
+      'đã xác nhận',
+      'đang giao hàng',
+      'đã giao hàng',
+      'đã nhận hàng',
+      'hoàn thành',
+      'đã hủy'
+    ],
     default: 'chờ xác nhận'
+  },
+  thanh_toan: {
+    type: String,
+    enum: ['đã thanh toán', 'chưa thanh toán'],
+    default: 'chưa thanh toán'
+  },
+  ly_do_huy: {
+    type: String,
+    default: ''
+  },
+  nguoi_huy: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    loai: {
+      type: String,
+      enum: ['User', 'Admin']
+    }
   },
   ngay_tao: {
     type: Date,

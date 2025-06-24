@@ -19,25 +19,36 @@ interface SanPhamTrongHoaDon {
 
 interface HoaDon {
     _id: string;
-    ngay_tao: string;
-    trang_thai: 'chờ xác nhận' | 'đã xác nhận' | 'đang giao' | 'đã giao' | 'đã hủy';
-    danh_sach_san_pham: SanPhamTrongHoaDon[];
-    dia_chi_giao_hang: string;
-    tong_tien: number;
-    phuong_thuc_thanh_toan?: string;
-    ghi_chu?: string;
-    nguoi_dung_id?: {
+    nguoi_dung_id: {
+        _id: string;
         name: string;
+        email: string;
         phone?: string;
     };
-    trang_thai_lich_su: {
-        trang_thai: string;
-        thoi_gian: Date;
-    }[];
-    statusHistory: {
-        status: string;
-        time: Date;
-    }[];
+    dia_chi_giao_hang: string;
+    tong_tien: number;
+    phuong_thuc_thanh_toan: string;
+    ghi_chu: string;
+    trang_thai: string;
+    ngay_tao: string;
+    danh_sach_san_pham: Array<{
+        _id: string;
+        san_pham_id: {
+            _id: string;
+            name: string;
+            images: string[];
+        };
+        so_luong: number;
+        gia: number;
+        mau_sac: string;
+        kich_thuoc: string;
+    }>;
+    thanh_toan?: string;
+    ly_do_huy?: string;
+    nguoi_huy?: {
+        id: string;
+        loai: string;
+    };
 }
 
 const BillUserClient = () => {
@@ -49,7 +60,10 @@ const BillUserClient = () => {
     const [selectedBill, setSelectedBill] = useState<HoaDon | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5); 
+    const [itemsPerPage] = useState(5);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState('');
+    const [cancelingBillId, setCancelingBillId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchBills = async () => {
@@ -82,42 +96,51 @@ const BillUserClient = () => {
         fetchBills();
     }, [navigate]);
 
-    const handleCancelOrder = async (billId: string) => {
-        if (!window.confirm('Bạn có chắc chắn muốn hủy đơn hàng này?')) {
+    const handleCancelOrder = (billId: string) => {
+        setCancelingBillId(billId);
+        setShowCancelModal(true);
+    };
+
+    const confirmCancelOrder = async () => {
+        if (!cancelingBillId) return;
+        if (!cancelReason.trim()) {
+            toast.error('Vui lòng nhập lý do huỷ đơn!');
             return;
         }
-
         try {
             const token = localStorage.getItem('token');
-            
-            const response = await axios.put(`http://localhost:5000/api/bill/${billId}/cancel`, {}, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
+            const response = await axios.put(
+                `http://localhost:5000/api/bill/${cancelingBillId}/cancel`,
+                { ly_do_huy: cancelReason },
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
             if (response.status === 200) {
                 toast.success('Hủy đơn hàng thành công!');
-                const updatedBills = bills.map(bill => 
-                    bill._id === billId 
-                        ? { ...bill, trang_thai: 'đã hủy' as const }
-                        : bill
-                );
-                setBills(updatedBills);
+                setBills(bills.map(bill => bill._id === cancelingBillId ? { ...bill, trang_thai: 'đã hủy', ly_do_huy: cancelReason } : bill));
             }
-        } catch (error) {
-            console.error('Lỗi khi hủy đơn hàng:', error);
-            
-            if (error.response?.status === 400) {
-                toast.error(error.response.data.message || 'Không thể hủy đơn hàng này');
-            } else if (error.response?.status === 404) {
-                toast.error('Không tìm thấy đơn hàng');
-            } else if (error.response?.status === 401) {
-                toast.error('Phiên đăng nhập đã hết hạn');
-                navigate('/login');
-            } else {
-                toast.error('Không thể hủy đơn hàng. Vui lòng thử lại sau.');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Không thể hủy đơn hàng. Vui lòng thử lại sau.');
+        } finally {
+            setShowCancelModal(false);
+            setCancelingBillId(null);
+            setCancelReason('');
+        }
+    };
+
+    const handleConfirmReceived = async (billId: string) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:5000/api/bill/${billId}/confirm-received`,
+                {},
+                { headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            if (response.status === 200) {
+                toast.success('Đã xác nhận nhận hàng!');
+                setBills(bills.map(bill => bill._id === billId ? { ...bill, trang_thai: 'hoàn thành' } : bill));
             }
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Có lỗi khi xác nhận nhận hàng.');
         }
     };
 
@@ -215,7 +238,7 @@ const BillUserClient = () => {
                                 <Link to="/change-password" style={{ color: '#333', textDecoration: 'none' }}>Đổi Mật Khẩu</Link>
                             </li>
                             <li style={{ margin: '16px 0' }}>
-                                <Link to="/orders" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Đơn Mua</Link>
+                                <Link to="/bill" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Đơn Mua</Link>
                             </li>
                         </ul>
                     </aside>
@@ -433,9 +456,9 @@ const BillUserClient = () => {
                                                                 Hủy đơn
                                                             </button>
                                                         )}
-                                                        {bill.trang_thai === 'đã giao' && (
-                                                            <button className="btn btn-outline-success btn-sm" style={{ fontSize: 11, padding: '4px 8px' }}>
-                                                                Mua lại
+                                                        {bill.trang_thai === 'đã giao hàng' && (
+                                                            <button className="btn btn-outline-success btn-sm" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => handleConfirmReceived(bill._id)}>
+                                                                Đã nhận hàng
                                                             </button>
                                                         )}
                                                     </div>
@@ -510,123 +533,106 @@ const BillUserClient = () => {
                         background: '#fff',
                         borderRadius: 12,
                         padding: 24,
-                        maxWidth: 800,
+                        maxWidth: 600,
                         width: '95%',
                         maxHeight: '80vh',
-                        overflow: 'auto',
-                        display: 'flex',
-                        gap: 32
+                        overflow: 'auto'
                     }}>
-                        {/* Bên trái: Thông tin đơn hàng */}
-                        <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                                <h3 style={{ margin: 0, fontSize: 18 }}>Chi tiết đơn hàng #{selectedBill._id.slice(-8).toUpperCase()}</h3>
-                                <button
-                                    onClick={() => setShowDetailModal(false)}
-                                    style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}
-                                >
-                                    ×
-                                </button>
-                            </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <h3 style={{ margin: 0, fontSize: 18 }}>Chi tiết đơn hàng #{selectedBill._id.slice(-8).toUpperCase()}</h3>
+                            <button
+                                onClick={() => setShowDetailModal(false)}
+                                style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Khách hàng: {selectedBill.nguoi_dung_id?.name}
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            SĐT: {selectedBill.nguoi_dung_id?.phone || '---'}
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Ngày đặt: {formatDate(selectedBill.ngay_tao)}
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            Trạng thái: <span style={{ backgroundColor: getStatusColor(selectedBill.trang_thai), color: '#fff', padding: '4px 8px', borderRadius: 4, marginLeft: 8, fontSize: 12 }}>{selectedBill.trang_thai}</span>
+                        </div>
+                        {selectedBill.phuong_thuc_thanh_toan && (
                             <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                Khách hàng: {selectedBill.nguoi_dung_id?.name}
+                                Phương thức thanh toán: {selectedBill.phuong_thuc_thanh_toan}
                             </div>
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                SĐT: {selectedBill.nguoi_dung_id?.phone || '---'}
-                            </div>
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                Ngày đặt: {formatDate(selectedBill.ngay_tao)}
-                            </div>
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                Trạng thái: <span style={{ backgroundColor: getStatusColor(selectedBill.trang_thai), color: '#fff', padding: '4px 8px', borderRadius: 4, marginLeft: 8, fontSize: 12 }}>{selectedBill.trang_thai}</span>
-                            </div>
-                            {selectedBill.phuong_thuc_thanh_toan && (
-                                <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                    Phương thức thanh toán: {selectedBill.phuong_thuc_thanh_toan}
-                                </div>
-                            )}
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                Địa chỉ giao hàng: {selectedBill.dia_chi_giao_hang}
-                            </div>
-                            {selectedBill.ghi_chu && (
-                                <div style={{ marginBottom: 16 }}>
-                                    <strong>Ghi chú:</strong> <span style={{ fontSize: 13 }}>{selectedBill.ghi_chu}</span>
-                                </div>
-                            )}
-                            <div style={{ marginBottom: 16, color: '#222' }}>Sản phẩm:</div>
-                            {selectedBill.danh_sach_san_pham.map((item, index) => (
-                                <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none' }}>
-                                    <div style={{ width: 50, height: 50, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
-                                        <img
-                                            src={item.san_pham_id?.images && item.san_pham_id.images[0] && (item.san_pham_id.images[0].startsWith('http')
-                                                ? item.san_pham_id.images[0]
-                                                : `http://localhost:5000${item.san_pham_id.images[0]}`)
-                                            }
-                                            alt={item.san_pham_id?.name}
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.src = 'https://via.placeholder.com/150';
-                                            }}
-                                        />
-                                    </div>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontSize: 13, color: '#222', fontWeight: 500 }}>{item.san_pham_id?.name}</div>
-                                        <div style={{ fontSize: 11, color: '#666' }}>
-                                            SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
-                                        </div>
-                                    </div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, marginLeft: 12 }}>{formatPrice(item.gia * item.so_luong)}</div>
-                                </div>
-                            ))}
-                            <div style={{ borderTop: '2px solid #eee', paddingTop: 16, textAlign: 'right', fontSize: 16, fontWeight: 700 }}>
-                                Tổng cộng: {formatPrice(selectedBill.tong_tien)}
+                        )}
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            <strong>Địa chỉ giao hàng:</strong>
+                            <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
+                                {selectedBill.dia_chi_giao_hang ? (
+                                    <>
+                                        <div><strong>Địa chỉ:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).street}</div>
+                                        {parseAddress(selectedBill.dia_chi_giao_hang).ward && <div><strong>Xã/Phường:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).ward}</div>}
+                                        {parseAddress(selectedBill.dia_chi_giao_hang).district && <div><strong>Quận/Huyện:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).district}</div>}
+                                        {parseAddress(selectedBill.dia_chi_giao_hang).city && <div><strong>Tỉnh/Thành phố:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).city}</div>}
+                                    </>
+                                ) : (
+                                    'Không có địa chỉ'
+                                )}
                             </div>
                         </div>
-                        {/* Bên phải: Timeline trạng thái */}
-                        <div style={{ width: 180, minWidth: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', borderLeft: '1px solid #eee', paddingLeft: 24 }}>
-                            {(() => {
-                                const statusSteps = [
-                                    { key: 'chờ xác nhận', label: 'Chờ xác nhận', icon: '⏳' },
-                                    { key: 'đã xác nhận', label: 'Đã xác nhận', icon: '✔️' },
-                                    { key: 'đang giao', label: 'Đang giao', icon: '🚚' },
-                                    { key: 'đã giao', label: 'Đã giao', icon: '✅' },
-                                    { key: 'đã hủy', label: 'Đã hủy', icon: '❌' }
-                                ];
-                                return statusSteps.map((step, idx) => {
-                                    const history = selectedBill.trang_thai_lich_su?.find(s => s.trang_thai === step.key);
-                                    const isActive = !!history;
-                                    const isCurrent = selectedBill.trang_thai === step.key;
-                                    return (
-                                        <div key={step.key} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
-                                            <div style={{
-                                                width: isCurrent ? 28 : 18,
-                                                height: isCurrent ? 28 : 18,
-                                                borderRadius: '50%',
-                                                background: isCurrent ? '#2563eb' : (isActive ? '#a5b4fc' : '#e5e7eb'),
-                                                color: '#fff',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                fontSize: isCurrent ? 18 : 14,
-                                                fontWeight: 700,
-                                                marginBottom: 4
-                                            }}>
-                                                {step.icon}
-                                            </div>
-                                            <div style={{ fontSize: 13, color: isCurrent ? '#2563eb' : (isActive ? '#222' : '#aaa'), fontWeight: isCurrent ? 700 : 500 }}>
-                                                {step.label}
-                                            </div>
-                                            <div style={{ fontSize: 11, color: '#666', minHeight: 16 }}>
-                                                {history ? new Date(history.thoi_gian).toLocaleString('vi-VN') : ''}
-                                            </div>
-                                            {idx < statusSteps.length - 1 && (
-                                                <div style={{ width: 2, height: 24, background: isActive ? '#2563eb' : '#e5e7eb', margin: '2px 0' }} />
-                                            )}
-                                        </div>
-                                    );
-                                });
-                            })()}
+                        {selectedBill.ghi_chu && (
+                            <div style={{ marginBottom: 16 }}>
+                                <strong>Ghi chú:</strong> <span style={{ fontSize: 13 }}>{selectedBill.ghi_chu}</span>
+                            </div>
+                        )}
+                        <div style={{ marginBottom: 16, color: '#222' }}>Sản phẩm:</div>
+                        {selectedBill.danh_sach_san_pham.map((item, index) => (
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none' }}>
+                                <div style={{ width: 50, height: 50, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
+                                    <img
+                                        src={item.san_pham_id?.images && item.san_pham_id.images[0] && (item.san_pham_id.images[0].startsWith('http')
+                                            ? item.san_pham_id.images[0]
+                                            : `http://localhost:5000${item.san_pham_id.images[0]}`)
+                                        }
+                                        alt={item.san_pham_id?.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            target.src = 'https://via.placeholder.com/150';
+                                        }}
+                                    />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 13, color: '#222', fontWeight: 500 }}>{item.san_pham_id?.name}</div>
+                                    <div style={{ fontSize: 11, color: '#666' }}>
+                                        SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: 13, fontWeight: 600, marginLeft: 12 }}>{formatPrice(item.gia * item.so_luong)}</div>
+                            </div>
+                        ))}
+                        <div style={{ borderTop: '2px solid #eee', paddingTop: 16, textAlign: 'right', fontSize: 16, fontWeight: 700 }}>
+                            Tổng cộng: {formatPrice(selectedBill.tong_tien)}
+                        </div>
+                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                            <strong>Trạng thái thanh toán:</strong> {selectedBill.thanh_toan || '---'}
+                        </div>
+                        {selectedBill.ly_do_huy && (
+                            <div style={{ marginBottom: 16, color: 'red', textAlign: 'left' }}>
+                                <strong>Lý do huỷ:</strong> {selectedBill.ly_do_huy}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {showCancelModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+                    <div style={{ background: '#fff', borderRadius: 8, padding: 24, minWidth: 320 }}>
+                        <h4>Nhập lý do huỷ đơn</h4>
+                        <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} rows={3} style={{ width: '100%', marginBottom: 16 }} />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                            <button className="btn btn-secondary" onClick={() => { setShowCancelModal(false); setCancelingBillId(null); setCancelReason(''); }}>Huỷ</button>
+                            <button className="btn btn-danger" onClick={confirmCancelOrder}>Xác nhận huỷ</button>
                         </div>
                     </div>
                 </div>

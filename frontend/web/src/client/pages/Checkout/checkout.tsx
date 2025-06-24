@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { CartContext } from '../../context/CartContext';
 import axios from 'axios';
-
+import vietnamAddress from './vietnamAddress.json'
 interface AuthState {
     isAuthenticated: boolean;
     user: {
@@ -29,72 +29,6 @@ interface UserData {
     address?: string;
 }
 
-// Dữ liệu địa chỉ Việt Nam
-const vietnamAddressData = {
-    'hanoi': {
-        name: 'Hà Nội',
-        districts: {
-            'ba-dinh': { name: 'Ba Đình', wards: ['phuc-xa', 'trung-tu', 'ngoc-khanh', 'kim-ma'] },
-            'hoan-kiem': { name: 'Hoàn Kiếm', wards: ['hang-bac', 'hang-bai', 'hang-buom', 'hang-dao'] },
-            'tay-ho': { name: 'Tây Hồ', wards: ['buoi', 'thuy-khue', 'yen-phu', 'quang-an'] },
-            'long-bien': { name: 'Long Biên', wards: ['bo-de', 'duc-giang', 'gia-thuy', 'ngoc-lam'] },
-            'cau-giay': { name: 'Cầu Giấy', wards: ['dich-vong', 'dich-vong-hau', 'mai-dich', 'nghia-do'] },
-            'dong-da': { name: 'Đống Đa', wards: ['cat-linh', 'van-mieu', 'quoc-tu-giam', 'lang-ha'] },
-            'hai-ba-trung': { name: 'Hai Bà Trưng', wards: ['nguyen-du', 'bach-khoa', 'bach-mai', 'dong-nhan'] },
-            'hoang-mai': { name: 'Hoàng Mai', wards: ['giang-bien', 'linh-nam', 'mai-dong', 'tan-mai'] },
-            'thanh-xuan': { name: 'Thanh Xuân', wards: ['kim-giang', 'nguyen-trai', 'phuong-liet', 'thanh-xuan-bac'] }
-        }
-    },
-    'hcm': {
-        name: 'TP. Hồ Chí Minh',
-        districts: {
-            'district-1': { name: 'Quận 1', wards: ['ben-nghe', 'ben-thanh', 'cau-kho', 'cau-ong-lanh'] },
-            'district-2': { name: 'Quận 2', wards: ['an-khanh', 'an-loi-dong', 'an-phu', 'binh-an'] },
-            'district-3': { name: 'Quận 3', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-4': { name: 'Quận 4', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-5': { name: 'Quận 5', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-6': { name: 'Quận 6', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-7': { name: 'Quận 7', wards: ['binh-thuan', 'phu-my', 'phu-thuan', 'tan-phu'] },
-            'district-8': { name: 'Quận 8', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-9': { name: 'Quận 9', wards: ['long-binh', 'long-phuoc', 'long-thanh-my', 'long-truong'] },
-            'district-10': { name: 'Quận 10', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-11': { name: 'Quận 11', wards: ['phuong-1', 'phuong-2', 'phuong-3', 'phuong-4'] },
-            'district-12': { name: 'Quận 12', wards: ['an-phu-dong', 'dong-hung-thuan', 'hiep-thanh', 'tan-chanh-hiep'] }
-        }
-    },
-    'danang': {
-        name: 'Đà Nẵng',
-        districts: {
-            'hai-chau': { name: 'Hải Châu', wards: ['hai-chau-1', 'hai-chau-2', 'nam-duong', 'phuoc-ninh'] },
-            'thanh-khe': { name: 'Thanh Khê', wards: ['an-khe', 'chinh-gian', 'hoa-khe', 'tan-chinh'] },
-            'son-tra': { name: 'Sơn Trà', wards: ['an-hai-bac', 'an-hai-dong', 'man-thai', 'nai-hien-dong'] },
-            'ngu-hanh-son': { name: 'Ngũ Hành Sơn', wards: ['hoa-hai', 'hoa-quy', 'khue-my', 'my-an'] },
-            'lien-chieu': { name: 'Liên Chiểu', wards: ['hoa-hiep-bac', 'hoa-hiep-nam', 'hoa-khanh-bac', 'hoa-khanh-nam'] },
-            'cam-le': { name: 'Cẩm Lệ', wards: ['hoa-an', 'hoa-phat', 'hoa-tho-dong', 'hoa-tho-tay'] }
-        }
-    },
-    'haiphong': {
-        name: 'Hải Phòng',
-        districts: {
-            'hong-bang': { name: 'Hồng Bàng', wards: ['hoang-van-thu', 'minh-khai', 'pham-hong-thai', 'quan-toan'] },
-            'ngo-quyen': { name: 'Ngô Quyền', wards: ['cau-dat', 'cau-tre', 'dong-khe', 'le-loi'] },
-            'le-chan': { name: 'Lê Chân', wards: ['an-bien', 'cat-dai', 'cat-lam', 'du-hang'] },
-            'hai-an': { name: 'Hải An', wards: ['cat-bi', 'dang-hai', 'hai-an', 'trang-cat'] },
-            'kien-an': { name: 'Kiến An', wards: ['bai-chay', 'cao-nhan', 'doan-xa', 'duong-quan'] },
-            'do-son': { name: 'Đồ Sơn', wards: ['bang-la', 'do-son', 'hop-duc', 'minh-duc'] }
-        }
-    },
-    'can-tho': {
-        name: 'Cần Thơ',
-        districts: {
-            'ninh-kieu': { name: 'Ninh Kiều', wards: ['an-binh', 'an-cu', 'an-hoi', 'an-khanh'] },
-            'binh-thuy': { name: 'Bình Thủy', wards: ['an-thoi', 'binh-thuy', 'bui-huu-nghia', 'long-hoa'] },
-            'cai-rang': { name: 'Cái Răng', wards: ['le-binh', 'phu-an', 'phu-thu', 'tan-an'] },
-            'o-mon': { name: 'Ô Môn', wards: ['chanh-an', 'le-binh', 'long-hoa', 'thoi-lai'] },
-            'thot-not': { name: 'Thốt Nốt', wards: ['thot-not', 'thoi-lai', 'vinh-thanh', 'vinh-trinh'] }
-        }
-    }
-};
 
 const Checkout = () => {
     const { cartItems, clearCart } = useContext(CartContext);
@@ -169,10 +103,12 @@ const Checkout = () => {
         setTotal(subtotal + shipping + taxValue - discount);
     }, [cartItems, shipping, tax, discount]);
 
-    // Cập nhật quận/huyện khi chọn tỉnh/thành phố
     useEffect(() => {
-        if (formData.city && vietnamAddressData[formData.city]) {
-            setAvailableDistricts(vietnamAddressData[formData.city].districts);
+        if (formData.city && vietnamAddress[formData.city]) {
+            const districtsArray = vietnamAddress[formData.city].Districts || [];
+            const districtsObj = {};
+            districtsArray.forEach(d => { districtsObj[d.Id] = d; });
+            setAvailableDistricts(districtsObj);
             setFormData(prev => ({ ...prev, district: '', ward: '' }));
         } else {
             setAvailableDistricts({});
@@ -180,10 +116,12 @@ const Checkout = () => {
         }
     }, [formData.city]);
 
-    // Cập nhật phường/xã khi chọn quận/huyện
     useEffect(() => {
         if (formData.district && availableDistricts[formData.district]) {
-            setAvailableWards(availableDistricts[formData.district].wards);
+            const wardsArray = availableDistricts[formData.district].Wards || [];
+            const wardsObj = {};
+            wardsArray.forEach(w => { wardsObj[w.Id] = w; });
+            setAvailableWards(wardsObj);
             setFormData(prev => ({ ...prev, ward: '' }));
         } else {
             setAvailableWards({});
@@ -191,7 +129,6 @@ const Checkout = () => {
     }, [formData.district, availableDistricts]);
 
     useEffect(() => {
-        // Xóa toast, không hiện thông báo popup nữa
     }, [cartItems]);
 
     const handleInputChange = (e) => {
@@ -205,7 +142,6 @@ const Checkout = () => {
     const validate = () => {
         let valid = true;
         const newErrors = { fullName: '', email: '', address: '', phone: '', city: '', district: '', ward: '', note: '' };
-        // Họ tên: không số, dưới 20 ký tự
         if (!formData.fullName.trim()) {
             newErrors.fullName = 'Vui lòng nhập họ và tên';
             valid = false;
@@ -216,7 +152,6 @@ const Checkout = () => {
             newErrors.fullName = 'Họ tên không được quá 20 ký tự';
             valid = false;
         }
-        // Email phải có @
         if (!formData.email.trim()) {
             newErrors.email = 'Vui lòng nhập email';
             valid = false;
@@ -224,7 +159,6 @@ const Checkout = () => {
             newErrors.email = 'Email không hợp lệ';
             valid = false;
         }
-        // Số điện thoại: chỉ số, tối đa 10 số
         if (!formData.phone.trim()) {
             newErrors.phone = 'Vui lòng nhập số điện thoại';
             valid = false;
@@ -232,7 +166,6 @@ const Checkout = () => {
             newErrors.phone = 'Số điện thoại chỉ được phép là số và tối đa 10 số';
             valid = false;
         }
-        // Địa chỉ bắt buộc, không ký tự đặc biệt
         if (!formData.address.trim()) {
             newErrors.address = 'Vui lòng nhập địa chỉ';
             valid = false;
@@ -240,7 +173,6 @@ const Checkout = () => {
             newErrors.address = 'Địa chỉ không được chứa ký tự đặc biệt';
             valid = false;
         }
-        // Validate city
         if (!formData.city) {
             newErrors.city = 'Vui lòng chọn tỉnh/thành phố';
             valid = false;
@@ -253,7 +185,6 @@ const Checkout = () => {
             newErrors.ward = 'Vui lòng chọn phường/xã';
             valid = false;
         }
-        // Validate ghi chú: tối đa 30 từ
         if (formData.note && formData.note.trim().split(/\s+/).length > 30) {
             newErrors.note = 'Ghi chú không được vượt quá 30 từ';
             valid = false;
@@ -414,8 +345,8 @@ const Checkout = () => {
                                                                 required
                                                             >
                                                                 <option value="">Chọn tỉnh/thành phố</option>
-                                                                {Object.entries(vietnamAddressData).map(([key, city]) => (
-                                                                    <option key={key} value={key}>{city.name}</option>
+                                                                {Object.entries(vietnamAddress || {}).map(([key, city]) => (
+                                                                    <option key={key} value={key}>{city.Name}</option>
                                                                 ))}
                                                             </select>
                                                             {errors.city && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.city}</div>}
@@ -431,8 +362,8 @@ const Checkout = () => {
                                                                 disabled={!formData.city}
                                                             >
                                                                 <option value="">Chọn quận/huyện</option>
-                                                                {Object.entries(availableDistricts).map(([key, district]) => (
-                                                                    <option key={key} value={key}>{district.name}</option>
+                                                                {Object.entries(availableDistricts || {}).map(([key, district]) => (
+                                                                    <option key={key} value={key}>{district.Name}</option>
                                                                 ))}
                                                             </select>
                                                             {errors.district && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.district}</div>}
@@ -448,8 +379,8 @@ const Checkout = () => {
                                                                 disabled={!formData.district}
                                                             >
                                                                 <option value="">Chọn phường/xã</option>
-                                                                {Object.entries(availableWards).map(([key, ward]) => (
-                                                                    <option key={key} value={ward}>{ward}</option>
+                                                                {Object.entries(availableWards || {}).map(([key, ward]) => (
+                                                                    <option key={key} value={key}>{ward.Name}</option>
                                                                 ))}
                                                             </select>
                                                             {errors.ward && <div style={{ color: 'red', fontSize: 13, marginTop: 2 }}>{errors.ward}</div>}
@@ -457,7 +388,6 @@ const Checkout = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Phương thức vận chuyển */}
                                                 <div className="mb-4">
                                                     <h5 className="mb-3" style={{ fontWeight: 600, color: '#333' }}>Phương thức vận chuyển</h5>
                                                     <div className="row">
@@ -544,7 +474,6 @@ const Checkout = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Phương thức thanh toán */}
                                                 <div className="mb-4">
                                                     <h5 className="mb-3" style={{ fontWeight: 600, color: '#333' }}>Phương thức thanh toán</h5>
                                                     <div className="row">
@@ -659,7 +588,6 @@ const Checkout = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Ghi chú */}
                                                 <div className="mb-4">
                                                     <label className="form-label">Ghi chú đơn hàng</label>
                                                     <textarea
@@ -677,13 +605,11 @@ const Checkout = () => {
                                     </div>
                                 </div>
 
-                                {/* Thông tin đơn hàng bên phải */}
                                 <div className="col-lg-4">
                                     <div className="card shadow-sm border-0">
                                         <div className="card-body p-4" style={{ textAlign: 'left' }}>
                                             <h5 className="mb-4" style={{ fontWeight: 600 }}>THÔNG TIN ĐƠN HÀNG</h5>
                                             
-                                            {/* Danh sách sản phẩm */}
                                             <div className="mb-4">
                                                 {cartItems.map((item) => (
                                                     <div key={`${item.id}-${item.color}-${item.size}`} className="d-flex align-items-center mb-3 p-2 rounded" style={{ background: '#f8f9fa' }}>
@@ -708,7 +634,6 @@ const Checkout = () => {
                                                 ))}
                                             </div>
 
-                                            {/* Tổng tiền */}
                                             <div className="border-top pt-3">
                                                 <div className="d-flex justify-content-between mb-2">
                                                     <span>Tạm tính</span>
@@ -728,7 +653,6 @@ const Checkout = () => {
                                                     <span style={{ fontWeight: 700, fontSize: '22px', color: '#e53935' }}>{total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                                 </div>
                                                 
-                                                {/* Nút đặt hàng */}
                                                 <button 
                                                     className="btn btn-primary w-100 mb-2" 
                                                     style={{ fontWeight: 600, fontSize: '16px', padding: '12px' }}
@@ -740,7 +664,6 @@ const Checkout = () => {
                                                 
                                                 <Link to="/cart" className="btn btn-link w-100">&larr; Quay lại giỏ hàng</Link>
                                                 
-                                                {/* Phương thức thanh toán được chấp nhận */}
                                                 <div className="mt-4">
                                                     <span className="text-muted" style={{ fontSize: '12px' }}>Chấp nhận thanh toán</span>
                                                     <div className="d-flex gap-2 mt-2">
