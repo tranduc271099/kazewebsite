@@ -76,7 +76,11 @@ const billSchema = new mongoose.Schema({
       mau_sac: String,
       kich_thuoc: String,
     }
-  ]
+  ],
+  shippingFee: {
+    type: Number,
+    default: 0
+  }
 });
 
 const Bill = mongoose.model('order', billSchema);

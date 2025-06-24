@@ -57,6 +57,7 @@ class BillController {
         phuong_thuc_thanh_toan,
         ghi_chu,
         danh_sach_san_pham,
+        shippingFee
       });
       await newBill.save();
       await Cart.findByIdAndDelete(cart._id);

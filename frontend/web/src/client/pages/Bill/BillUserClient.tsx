@@ -50,6 +50,7 @@ interface HoaDon {
         id: string;
         loai: string;
     };
+    shippingFee?: number;
 }
 
 const BillUserClient = () => {
@@ -581,24 +582,14 @@ const BillUserClient = () => {
                                 Phương thức thanh toán: {selectedBill.phuong_thuc_thanh_toan}
                             </div>
                         )}
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                            <strong>Địa chỉ giao hàng:</strong>
-                            <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
-                                {selectedBill.dia_chi_giao_hang ? (
-                                    <>
-                                        <div><strong>Địa chỉ:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).street}</div>
-                                        {parseAddress(selectedBill.dia_chi_giao_hang).ward && <div><strong>Xã/Phường:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).ward}</div>}
-                                        {parseAddress(selectedBill.dia_chi_giao_hang).district && <div><strong>Quận/Huyện:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).district}</div>}
-                                        {parseAddress(selectedBill.dia_chi_giao_hang).city && <div><strong>Tỉnh/Thành phố:</strong> {parseAddress(selectedBill.dia_chi_giao_hang).city}</div>}
-                                    </>
-                                ) : (
-                                    'Không có địa chỉ'
+                        {selectedBill.shippingFee !== undefined && (
+                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left', fontWeight: 500 }}>
+                                <strong>Phương thức vận chuyển:</strong> {selectedBill.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedBill.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedBill.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedBill.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+                                {selectedBill.shippingFee > 0 && (
+                                    <span style={{ marginLeft: 8, color: '#e53935', fontWeight: 600 }}>
+                                        ({selectedBill.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })})
+                                    </span>
                                 )}
-                            </div>
-                        </div>
-                        {selectedBill.ghi_chu && (
-                            <div style={{ marginBottom: 16 }}>
-                                <strong>Ghi chú:</strong> <span style={{ fontSize: 13 }}>{selectedBill.ghi_chu}</span>
                             </div>
                         )}
                         <div style={{ marginBottom: 16, color: '#222' }}>Sản phẩm:</div>

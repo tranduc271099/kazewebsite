@@ -7,8 +7,6 @@ function Cart() {
     const { cartItems, removeFromCart, updateQuantity, clearCart, updateCartItemAttributes } = useContext(CartContext);
 
     const [total, setTotal] = useState(0);
-    const [shipping, setShipping] = useState(4990);
-    const [tax, setTax] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [selectedItems, setSelectedItems] = useState({});
 
@@ -44,16 +42,8 @@ function Cart() {
             }
             return acc;
         }, 0);
-        const taxValue = Math.round(subtotal * 0.1);
-        setTax(taxValue);
-        setTotal(subtotal + shipping + taxValue - discount);
-
-        // Ensure free shipping is only selected if subtotal is over 300,000
-        if (shipping === 0 && subtotal < 300000) {
-            setShipping(4990); // Default back to standard shipping
-        }
-
-    }, [cartItems, shipping, tax, discount, selectedItems]);
+        setTotal(subtotal - discount);
+    }, [cartItems, discount, selectedItems]);
 
     const handleItemSelection = (itemId, isSelected) => {
         setSelectedItems(prevSelected => ({
@@ -73,10 +63,6 @@ function Cart() {
             delete newSelected[`${itemId}-${color}-${size}`];
             return newSelected;
         });
-    };
-
-    const handleShippingChange = (value) => {
-        setShipping(value);
     };
 
     const handleAttributeChange = async (productId, oldColor, oldSize, attributeType, newValue) => {
@@ -274,25 +260,6 @@ function Cart() {
                                         <div className="d-flex justify-content-between mb-2">
                                             <span>Tạm tính</span>
                                             <span>{cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
-                                        </div>
-                                        <div className="mb-2">
-                                            <span>Vận chuyển</span>
-                                            <div className="form-check mt-2">
-                                                <input className="form-check-input" type="radio" name="shipping" id="standard" checked={shipping === 4990} onChange={() => setShipping(4990)} />
-                                                <label className="form-check-label" htmlFor="standard">Giao hàng tiêu chuẩn - {(4990).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</label>
-                                            </div>
-                                            <div className="form-check">
-                                                <input className="form-check-input" type="radio" name="shipping" id="express" checked={shipping === 12990} onChange={() => setShipping(12990)} />
-                                                <label className="form-check-label" htmlFor="express">Giao hàng nhanh - {(12990).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</label>
-                                            </div>
-                                            <div className="form-check">
-                                                <input className="form-check-input" type="radio" name="shipping" id="free" checked={shipping === 0} onChange={() => setShipping(0)} disabled={total < 300000} />
-                                                <label className="form-check-label" htmlFor="free">Miễn phí vận chuyển (Đơn trên {(300000).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })})</label>
-                                            </div>
-                                        </div>
-                                        <div className="d-flex justify-content-between mb-2">
-                                            <span>Thuế</span>
-                                            <span>{tax.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                         </div>
                                         <div className="d-flex justify-content-between mb-2">
                                             <span>Giảm giá</span>

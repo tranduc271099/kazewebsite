@@ -37,6 +37,7 @@ interface Order {
   thanh_toan?: 'đã thanh toán' | 'chưa thanh toán';
   ly_do_huy?: string;
   nguoi_huy?: { id: string; loai: string };
+  shippingFee?: number;
 }
 
 const statusOptions = [
@@ -64,6 +65,12 @@ const ListOrder = () => {
   const [sortType, setSortType] = useState('newest');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('');
+  const [shipping, setShipping] = useState(() => {
+    const saved = localStorage.getItem('selectedShipping');
+    return saved !== null ? Number(saved) : 4990;
+  });
 
   const fetchOrders = async (pageNum = 1) => {
     setLoading(true);
@@ -153,13 +160,29 @@ const ListOrder = () => {
 
   const filteredOrders = orders.filter(order => {
     const searchText = search.toLowerCase();
-    return (
+    const matchSearch =
       (order.nguoi_dung_id?.name || '').toLowerCase().includes(searchText) ||
       (order._id || '').toLowerCase().includes(searchText) ||
-      (order.nguoi_dung_id?.phone || '').toLowerCase().includes(searchText)
-    );
+      (order.nguoi_dung_id?.phone || '').toLowerCase().includes(searchText);
+    const matchStatus = statusFilter === 'all' || order.trang_thai === statusFilter;
+    let matchDate = true;
+    if (dateFilter) {
+      const orderDate = new Date(order.ngay_tao);
+      const filterDate = new Date(dateFilter);
+      matchDate = orderDate.toISOString().slice(0, 10) === filterDate.toISOString().slice(0, 10);
+    }
+    return matchSearch && matchStatus && matchDate;
   });
 
+  const statusOrder = [
+    'chờ xác nhận',
+    'đã xác nhận',
+    'đang giao hàng',
+    'đã giao hàng',
+    'đã nhận hàng',
+    'hoàn thành',
+    'đã hủy',
+  ];
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     if (sortType === 'newest') {
       return new Date(b.ngay_tao || 0).getTime() - new Date(a.ngay_tao || 0).getTime();
@@ -169,12 +192,20 @@ const ListOrder = () => {
       return (a.tong_tien || 0) - (b.tong_tien || 0);
     } else if (sortType === 'price_desc') {
       return (b.tong_tien || 0) - (a.tong_tien || 0);
+    } else if (sortType === 'status') {
+      return statusOrder.indexOf(a.trang_thai) - statusOrder.indexOf(b.trang_thai);
     }
     return 0;
   });
 
   const totalPages = Math.ceil(sortedOrders.length / limit);
   const pagedOrders = sortedOrders.slice((page - 1) * limit, page * limit);
+
+  const trulyNewestOrder = orders.length > 0
+    ? orders.reduce((latest, order) =>
+        new Date(order.ngay_tao) > new Date(latest.ngay_tao) ? order : latest, orders[0])
+    : null;
+  const trulyNewestOrderId = trulyNewestOrder?._id;
 
   function parseAddress(address: string) {
     if (!address) return { street: '', ward: '', district: '', city: '' };
@@ -228,6 +259,14 @@ const ListOrder = () => {
     }
   };
 
+  // Tính tổng số sản phẩm của các đơn hàng đang hiển thị
+  const totalProducts = filteredOrders.reduce((sum, order) => sum + (order.danh_sach_san_pham?.length || 0), 0);
+
+  const handleShippingSelect = (value) => {
+    setShipping(value);
+    localStorage.setItem('selectedShipping', value);
+  };
+
   return (
     <div style={{ padding: 32 }}>
       <h2 style={{ fontWeight: 700, marginBottom: 24 }}>Quản lý đơn hàng</h2>
@@ -240,16 +279,32 @@ const ListOrder = () => {
           style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
         />
         <select
+          value={statusFilter}
+          onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+        >
+          <option value="all">Tất cả trạng thái</option>
+          {statusOptions.map(st => (
+            <option key={st} value={st}>{st}</option>
+          ))}
+        </select>
+        <input
+          type="date"
+          value={dateFilter}
+          onChange={e => { setDateFilter(e.target.value); setPage(1); }}
+          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+        />
+        <select
           value={sortType}
           onChange={e => { setSortType(e.target.value); setPage(1); }}
           style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
         >
           <option value="newest">Mới nhất</option>
           <option value="oldest">Cũ nhất</option>
-          <option value="price_asc">Giá tăng dần</option>
-          <option value="price_desc">Giá giảm dần</option>
+          <option value="price_asc">Tổng tiền tăng dần</option>
+          <option value="price_desc">Tổng tiền giảm dần</option>
         </select>
-        <span style={{ color: '#888', fontSize: 13 }}>Tổng: {sortedOrders.length} đơn hàng</span>
+        <span style={{ color: '#888', fontSize: 13 }}>Tổng sản phẩm: {totalProducts}</span>
       </div>
       {loading ? (
         <div>Đang tải...</div>
@@ -258,29 +313,59 @@ const ListOrder = () => {
       ) : (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
-            {pagedOrders.map((order, idx) => (
-              <div key={order._id || idx} style={{ background: pastelColors[idx % pastelColors.length], borderRadius: 10, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 20, display: 'flex', flexDirection: 'column', gap: 10, border: '1px solid #eee' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: 15, color: '#222' }}>#{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}</div>
-                  <span style={{ background: getStatusColor(order.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, fontWeight: 600, fontSize: 13, minWidth: 90, textAlign: 'center' }}>{order.trang_thai || 'chờ xác nhận'}</span>
-                </div>
-                <div style={{ fontSize: 14, color: '#222', marginBottom: 2 }}>Khách hàng: {order.nguoi_dung_id?.name || 'Ẩn danh'}</div>
-                <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>SĐT: {order.nguoi_dung_id?.phone || '---'}</div>
-                <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>Ngày đặt: {order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}</div>
-                <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>Phương thức: <span style={{ color: '#1976d2', fontWeight: 500 }}>{order.phuong_thuc_thanh_toan || '---'}</span></div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#2563eb', marginBottom: 2 }}>Tổng: {(order.tong_tien || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
-                <button
-                  style={{ marginTop: 8, padding: '6px 0', borderRadius: 4, border: '1px solid #2563eb', background: '#fff', color: '#2563eb', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}
-                  onClick={() => {
-                    setSelectedOrder(order);
-                    setShowModal(true);
-                    setNewStatus(order.trang_thai || 'chờ xác nhận');
+            {pagedOrders.map((order, idx) => {
+              const isNewest = trulyNewestOrderId === order._id;
+              const boxShadow = isNewest ? '0 0 24px 6px #ff9800, 0 0 8px 2px #ff5722' : '0 2px 8px rgba(0,0,0,0.06)';
+              return (
+                <div
+                  key={order._id || idx}
+                  style={{
+                    background: pastelColors[idx % pastelColors.length],
+                    borderRadius: 10,
+                    boxShadow,
+                    padding: 20,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 10,
+                    border: isNewest ? '3px solid #ff9800' : '1px solid #eee',
+                    position: 'relative',
                   }}
                 >
-                  Chi tiết
-                </button>
-              </div>
-            ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ fontSize: 15, color: '#222' }}>#{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}</div>
+                    <span style={{ background: getStatusColor(order.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, fontWeight: 600, fontSize: 13, minWidth: 90, textAlign: 'center' }}>{order.trang_thai || 'chờ xác nhận'}</span>
+                  </div>
+                  <div style={{ fontSize: 14, color: '#222', marginBottom: 2 }}>Khách hàng: {order.nguoi_dung_id?.name || 'Ẩn danh'}</div>
+                  <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>SĐT: {order.nguoi_dung_id?.phone || '---'}</div>
+                  <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>Ngày đặt: {order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}</div>
+                  <div style={{ fontSize: 13, color: '#666', marginBottom: 2 }}>Phương thức: <span style={{ color: '#1976d2', fontWeight: 500 }}>{order.phuong_thuc_thanh_toan || '---'}</span></div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#2563eb', marginBottom: 2 }}>Tổng: {(order.tong_tien || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
+                  {order.shippingFee !== undefined && (
+                    <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                      Phí vận chuyển: <span style={{ fontWeight: 500 }}>
+                        {order.shippingFee === 0
+                          ? 'Miễn phí (Đơn trên 300k)'
+                          : order.shippingFee === 4990
+                            ? 'Tiêu chuẩn (3-5 ngày)'
+                            : order.shippingFee === 12990
+                              ? 'Nhanh (1-2 ngày)'
+                              : order.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    style={{ marginTop: 8, padding: '6px 0', borderRadius: 4, border: '1px solid #2563eb', background: '#fff', color: '#2563eb', cursor: 'pointer', fontWeight: 600, fontSize: 13 }}
+                    onClick={() => {
+                      setSelectedOrder(order);
+                      setShowModal(true);
+                      setNewStatus(order.trang_thai || 'chờ xác nhận');
+                    }}
+                  >
+                    Chi tiết
+                  </button>
+                </div>
+              );
+            })}
           </div>
           {totalPages > 1 && (
             <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'center' }}>
@@ -341,6 +426,11 @@ const ListOrder = () => {
                 Phương thức thanh toán: <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
               </div>
             )}
+            {selectedOrder.shippingFee !== undefined && (
+              <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+                <strong>Phương thức vận chuyển:</strong> {selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+              </div>
+            )}
             <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
               Địa chỉ giao hàng:
               <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
@@ -376,7 +466,7 @@ const ListOrder = () => {
               </div>
             ))}
             <div style={{ borderTop: '2px solid #eee', paddingTop: 16, textAlign: 'right', fontSize: 18, fontWeight: 700, marginTop: 8, color: '#222' }}>
-              Tổng cộng: <span style={{ color: '#2563eb', fontWeight: 700 }}>{(selectedOrder.tong_tien || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+              Tổng cộng: <span style={{ fontWeight: 600, color: '#2563eb', fontSize: 14 }}>{(selectedOrder.tong_tien || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
             </div>
             {selectedOrder.thanh_toan && (
               <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
@@ -403,36 +493,21 @@ const ListOrder = () => {
                       alert('Dữ liệu đơn hàng không hợp lệ');
                       return;
                     }
-                    
                     setUpdatingStatus(true);
                     try {
-                      console.log('Updating status to:', status);
-                      console.log('Order ID:', selectedOrder._id);
-                      console.log('Current order status:', selectedOrder.trang_thai);
-                      
-                      if (!selectedOrder._id) {
-                        throw new Error('Order ID is missing');
-                      }
-                      
                       const token = localStorage.getItem('token');
-                      if (!token) {
-                        throw new Error('Token is missing');
+                      if (!token) throw new Error('Token is missing');
+                      const requestData: any = { trang_thai: status };
+                      if (status === 'đã giao hàng') {
+                        requestData.thanh_toan = 'đã thanh toán';
                       }
-                      
-                      const requestData = { trang_thai: status };
-                      console.log('Request data:', requestData);
-                      
                       const response = await axios.put(`http://localhost:5000/api/bill/${selectedOrder._id}/status`, requestData, {
                         headers: { Authorization: `Bearer ${token}` },
                       });
-                      console.log('Update response:', response.data);
                       await fetchOrders(page);
                       setShowModal(false);
                       toast.success('Trạng thái đơn hàng đã được cập nhật thành công!');
                     } catch (err: any) {
-                      console.error('Error updating status:', err);
-                      console.error('Error response:', err.response?.data);
-                      console.error('Error status:', err.response?.status);
                       alert(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
                     } finally {
                       setUpdatingStatus(false);

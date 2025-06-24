@@ -49,7 +49,6 @@ const Checkout = () => {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [shipping, setShipping] = useState(4990);
     const [total, setTotal] = useState(0);
-    const [tax, setTax] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [availableDistricts, setAvailableDistricts] = useState<{[key: string]: any}>({});
     const [availableWards, setAvailableWards] = useState<{[key: string]: any}>({});
@@ -98,10 +97,8 @@ const Checkout = () => {
 
     useEffect(() => {
         const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        const taxValue = Math.round(subtotal * 0.1);
-        setTax(taxValue);
-        setTotal(subtotal + shipping + taxValue - discount);
-    }, [cartItems, shipping, tax, discount]);
+        setTotal(subtotal + shipping - discount);
+    }, [cartItems, shipping, discount]);
 
     useEffect(() => {
         if (formData.city && vietnamAddress[formData.city]) {
