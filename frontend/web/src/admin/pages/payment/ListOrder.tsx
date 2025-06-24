@@ -218,9 +218,9 @@ const ListOrder = () => {
       case 'đã xác nhận':
         return ['đang giao hàng', 'đã hủy'];
       case 'đang giao hàng':
-        return ['đã giao hàng', 'đã hủy'];
+        return ['đã giao hàng'];
       case 'đã giao hàng':
-        return ['hoàn thành', 'đã hủy'];
+        return ['hoàn thành'];
       case 'đã nhận hàng':
         return ['hoàn thành'];
       default:

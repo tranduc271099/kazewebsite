@@ -8,7 +8,7 @@ class BillController {
     try {
       const userId = req.user.id;
       const bills = await Bill.find({ nguoi_dung_id: userId })
-        .populate('nguoi_dung_id', 'name email')
+        .populate('nguoi_dung_id', 'name email phone')
         .populate({
             path: 'danh_sach_san_pham.san_pham_id',
             select: 'name images'
@@ -113,7 +113,7 @@ class BillController {
     try {
       const { id } = req.params;
       const bill = await Bill.findById(id)
-        .populate('nguoi_dung_id', 'name email')
+        .populate('nguoi_dung_id', 'name email phone')
         .populate({
           path: 'danh_sach_san_pham.san_pham_id',
           select: 'name images'

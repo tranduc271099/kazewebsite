@@ -169,8 +169,8 @@ const Checkout = () => {
         if (!formData.address.trim()) {
             newErrors.address = 'Vui lòng nhập địa chỉ';
             valid = false;
-        } else if (!/^[\w\s,\-]+$/.test(formData.address)) {
-            newErrors.address = 'Địa chỉ không được chứa ký tự đặc biệt';
+        } else if (!/^[\w\s,\-àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ()]+$/.test(formData.address)) {
+            newErrors.address = 'Địa chỉ chỉ được chứa chữ cái, số, dấu cách, dấu phẩy, dấu gạch ngang và dấu ngoặc';
             valid = false;
         }
         if (!formData.city) {
@@ -203,17 +203,27 @@ const Checkout = () => {
             return;
         }
 
-        const fullAddress = `${formData.address}, ${formData.ward}, ${formData.district}, ${formData.city}`;
-
-        const billData = {
-            dia_chi_giao_hang: fullAddress,
-            phuong_thuc_thanh_toan: paymentMethod.toUpperCase(),
-            ghi_chu: formData.note,
-            shippingFee: shipping
-        };
-
         try {
             const token = localStorage.getItem('token');
+            
+            // Cập nhật thông tin người dùng trước khi đặt hàng
+            await axios.put('http://localhost:5000/api/users/me', {
+                name: formData.fullName,
+                phone: formData.phone,
+                email: formData.email
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const fullAddress = `${formData.address}, ${availableWards[formData.ward]?.Name || formData.ward}, ${availableDistricts[formData.district]?.Name || formData.district}, ${vietnamAddress[formData.city]?.Name || formData.city}`;
+
+            const billData = {
+                dia_chi_giao_hang: fullAddress,
+                phuong_thuc_thanh_toan: paymentMethod.toUpperCase(),
+                ghi_chu: formData.note,
+                shippingFee: shipping
+            };
+
             const response = await fetch('http://localhost:5000/api/bill', {
                 method: 'POST',
                 headers: {
