@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useUser } from '../../context/UserContext';
 import '../../styles/BillHistory.css';
 
 interface SanPhamTrongHoaDon {
@@ -53,6 +54,7 @@ interface HoaDon {
 
 const BillUserClient = () => {
     const navigate = useNavigate();
+    const { user } = useUser();
     const [bills, setBills] = useState<HoaDon[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -64,6 +66,17 @@ const BillUserClient = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
     const [cancelingBillId, setCancelingBillId] = useState<string | null>(null);
+
+    // Avatar handling
+    let avatar = '';
+    if (user?.image) {
+        if (user.image.startsWith('http')) avatar = user.image;
+        else if (user.image.startsWith('/uploads/')) avatar = `http://localhost:5000${user.image}`;
+        else if (user.image.startsWith('/api/uploads/')) avatar = `http://localhost:5000${user.image.replace('/api', '')}`;
+        else avatar = `http://localhost:5000/${user.image}`;
+    } else {
+        avatar = '/default-avatar.png';
+    }
 
     useEffect(() => {
         const fetchBills = async () => {
@@ -225,9 +238,13 @@ const BillUserClient = () => {
                             <div style={{
                                 width: 72, height: 72, borderRadius: '50%', background: '#eee', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, color: '#bbb', overflow: 'hidden'
                             }}>
-                                <i className="bi bi-person"></i>
+                                <img
+                                    src={avatar}
+                                    alt="Avatar"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                />
                             </div>
-                            <div style={{ fontWeight: 600, textAlign: 'center' }}>Tài khoản</div>
+                            <div style={{ fontWeight: 600, textAlign: 'center' }}>{user?.name}</div>
                             <div style={{ fontSize: 13, color: '#888', textAlign: 'center' }}>Quản lý đơn hàng</div>
                         </div>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16, textAlign: 'left' }}>
