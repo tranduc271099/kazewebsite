@@ -176,6 +176,12 @@ const BillUserClient = () => {
         }
     };
 
+    const getStatusDisplay = (status: string) => {
+        if (status === 'chờ xác nhận') return 'chờ xác nhận từ phía shop';
+        if (status === 'đã xác nhận') return 'đã xác nhận từ phía shop';
+        return status;
+    };
+
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('vi-VN', {
@@ -362,65 +368,49 @@ const BillUserClient = () => {
                                             <div key={bill._id} className="bill-card" style={{
                                                 border: isNewest ? '2px solid #ff5722' : (isNewOrder(bill.ngay_tao) ? '2px solid #10b981' : '1px solid #e5e7eb'),
                                                 borderRadius: 8,
-                                                padding: 16,
+                                                padding: 24,
                                                 background: isNewest ? '#fffde7' : (isNewOrder(bill.ngay_tao) ? '#f0fdf4' : '#fff'),
                                                 position: 'relative',
-                                                boxShadow: isNewest ? '0 0 12px 2px #ff9800a0' : undefined
+                                                boxShadow: isNewest ? '0 0 12px 2px #ff9800a0' : undefined,
+                                                fontSize: 20,
+                                                lineHeight: 1.7
                                             }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                        <div style={{ fontWeight: 600, fontSize: 14 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                        <div style={{ fontWeight: 700, fontSize: 24 }}>
                                                             Đơn hàng #{bill._id.slice(-8).toUpperCase()}
                                                         </div>
-                                                        <div style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>
+                                                        <div style={{ fontSize: 18, color: '#888', marginLeft: 12 }}>
                                                             Ngày: {formatDate(bill.ngay_tao)}
                                                         </div>
-                                                        {isNewest && (
-                                                            <span style={{
-                                                                background: '#ff5722',
-                                                                color: '#fff',
-                                                                padding: '2px 8px',
-                                                                borderRadius: 4,
-                                                                fontSize: 12,
-                                                                fontWeight: 700,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                gap: 4
-                                                            }}>
-                                                                <span role="img" aria-label="fire">🔥</span> MỚI NHẤT
-                                                            </span>
-                                                        )}
                                                     </div>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                        <div style={{ fontSize: 12, color: '#666' }}>
-                                                            {formatDate(bill.ngay_tao)}
-                                                        </div>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                                         <div className="bill-status-badge" style={{ 
                                                             backgroundColor: getStatusColor(bill.trang_thai),
                                                             color: '#fff',
-                                                            padding: '4px 8px',
-                                                            borderRadius: 4,
-                                                            fontSize: 11,
-                                                            fontWeight: 600
+                                                            padding: '6px 16px',
+                                                            borderRadius: 6,
+                                                            fontSize: 18,
+                                                            fontWeight: 700
                                                         }}>
-                                                            {bill.trang_thai}
+                                                            {getStatusDisplay(bill.trang_thai)}
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div style={{ marginBottom: 12 }}>
+                                                <div style={{ marginBottom: 18 }}>
                                                     {bill.danh_sach_san_pham && bill.danh_sach_san_pham.slice(0, 2).map((item, index) => (
                                                         <div key={item._id || index} style={{
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            gap: 10,
-                                                            padding: '6px 0',
+                                                            gap: 16,
+                                                            padding: '10px 0',
                                                             borderBottom: index < bill.danh_sach_san_pham.length - 1 ? '1px solid #f3f4f6' : 'none'
                                                         }}>
                                                             <div style={{
-                                                                width: 40,
-                                                                height: 40,
-                                                                borderRadius: 4,
+                                                                width: 60,
+                                                                height: 60,
+                                                                borderRadius: 6,
                                                                 overflow: 'hidden',
                                                                 background: '#f9fafb',
                                                                 border: '1px solid #eee',
@@ -441,29 +431,29 @@ const BillUserClient = () => {
                                                             </div>
                                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                                 <div style={{ 
-                                                                    fontSize: 13, 
-                                                                    fontWeight: 500,
+                                                                    fontSize: 20, 
+                                                                    fontWeight: 600,
                                                                     whiteSpace: 'nowrap',
                                                                     overflow: 'hidden',
                                                                     textOverflow: 'ellipsis'
                                                                 }}>
                                                                     {item.san_pham_id?.name || 'Sản phẩm không xác định'}
                                                                 </div>
-                                                                <div style={{ fontSize: 11, color: '#666' }}>
+                                                                <div style={{ fontSize: 16, color: '#666' }}>
                                                                     SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
                                                                 </div>
                                                             </div>
-                                                            <div style={{ fontSize: 13, fontWeight: 600, color: '#2563eb' }}>
+                                                            <div style={{ fontSize: 20, fontWeight: 700, color: '#2563eb' }}>
                                                                 {formatPrice(item.gia)}
                                                             </div>
                                                         </div>
                                                     ))}
                                                     {bill.danh_sach_san_pham && bill.danh_sach_san_pham.length > 2 && (
                                                         <div style={{ 
-                                                            fontSize: 11, 
+                                                            fontSize: 16, 
                                                             color: '#666', 
                                                             textAlign: 'center', 
-                                                            padding: '4px 0',
+                                                            padding: '6px 0',
                                                             borderTop: '1px solid #f3f4f6'
                                                         }}>
                                                             +{bill.danh_sach_san_pham.length - 2} sản phẩm khác
@@ -472,11 +462,11 @@ const BillUserClient = () => {
                                                 </div>
 
                                                 {/* Address Info */}
-                                                <div style={{ marginBottom: 12, fontSize: 12, color: '#666' }}>
-                                                    <div style={{ marginBottom: 4 }}>
+                                                <div style={{ marginBottom: 18, fontSize: 16, color: '#666' }}>
+                                                    <div style={{ marginBottom: 6 }}>
                                                         <strong>Địa chỉ:</strong> {addressInfo.street}
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                                                    <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
                                                         {addressInfo.ward && <span><strong>Xã/Phường:</strong> {addressInfo.ward}</span>}
                                                         {addressInfo.district && <span><strong>Quận/Huyện:</strong> {addressInfo.district}</span>}
                                                         {addressInfo.city && <span><strong>Tỉnh/TP:</strong> {addressInfo.city}</span>}
@@ -488,31 +478,31 @@ const BillUserClient = () => {
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     alignItems: 'center',
-                                                    paddingTop: 12,
+                                                    paddingTop: 16,
                                                     borderTop: '1px solid #e5e7eb'
                                                 }}>
-                                                    <div style={{ fontSize: 12, color: '#666' }}>
-                                                        Tổng cộng: <span style={{ fontWeight: 600, color: '#2563eb', fontSize: 14 }}>{formatPrice(bill.tong_tien)}</span>
+                                                    <div style={{ fontSize: 18, color: '#666' }}>
+                                                        Tổng cộng: <span style={{ fontWeight: 700, color: '#2563eb', fontSize: 22 }}>{formatPrice(bill.tong_tien)}</span>
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: 8 }}>
+                                                    <div style={{ display: 'flex', gap: 16 }}>
                                                         <button 
-                                                            className="btn btn-outline-primary btn-sm"
+                                                            className="btn btn-outline-primary btn-lg"
                                                             onClick={() => showBillDetail(bill)}
-                                                            style={{ fontSize: 11, padding: '4px 8px' }}
+                                                            style={{ fontSize: 18, padding: '8px 18px' }}
                                                         >
                                                             Chi tiết
                                                         </button>
                                                         {bill.trang_thai === 'chờ xác nhận' && (
                                                             <button 
-                                                                className="btn btn-outline-danger btn-sm"
+                                                                className="btn btn-outline-danger btn-lg"
                                                                 onClick={() => handleCancelOrder(bill._id)}
-                                                                style={{ fontSize: 11, padding: '4px 8px' }}
+                                                                style={{ fontSize: 18, padding: '8px 18px' }}
                                                             >
                                                                 Hủy đơn
                                                             </button>
                                                         )}
                                                         {bill.trang_thai === 'đã giao hàng' && (
-                                                            <button className="btn btn-outline-success btn-sm" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => handleConfirmReceived(bill._id)}>
+                                                            <button className="btn btn-outline-success btn-lg" style={{ fontSize: 18, padding: '8px 18px' }} onClick={() => handleConfirmReceived(bill._id)}>
                                                                 Đã nhận hàng
                                                             </button>
                                                         )}
@@ -586,53 +576,55 @@ const BillUserClient = () => {
                 }}>
                     <div style={{
                         background: '#fff',
-                        borderRadius: 12,
-                        padding: 24,
-                        maxWidth: 600,
-                        width: '95%',
-                        maxHeight: '80vh',
-                        overflow: 'auto'
+                        borderRadius: 16,
+                        padding: 40,
+                        maxWidth: 700,
+                        width: '98%',
+                        maxHeight: '85vh',
+                        overflow: 'auto',
+                        fontSize: 22,
+                        lineHeight: 1.8
                     }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                            <h3 style={{ margin: 0, fontSize: 18 }}>Chi tiết đơn hàng #{selectedBill._id.slice(-8).toUpperCase()}</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+                            <h3 style={{ margin: 0, fontSize: 30, fontWeight: 800 }}>Chi tiết đơn hàng #{selectedBill._id.slice(-8).toUpperCase()}</h3>
                             <button
                                 onClick={() => setShowDetailModal(false)}
-                                style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }}
+                                style={{ background: 'none', border: 'none', fontSize: 36, cursor: 'pointer', fontWeight: 700 }}
                             >
                                 ×
                             </button>
                         </div>
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                            Khách hàng: {selectedBill.nguoi_dung_id?.name}
+                        <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
+                            <strong>Khách hàng:</strong> {selectedBill.nguoi_dung_id?.name}
                         </div>
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                            SĐT: {selectedBill.nguoi_dung_id?.phone || '---'}
+                        <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
+                            <strong>SĐT:</strong> {selectedBill.nguoi_dung_id?.phone || '---'}
                         </div>
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                            Ngày đặt: {formatDate(selectedBill.ngay_tao)}
+                        <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
+                            <strong>Ngày đặt:</strong> {formatDate(selectedBill.ngay_tao)}
                         </div>
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                            Trạng thái: <span style={{ backgroundColor: getStatusColor(selectedBill.trang_thai), color: '#fff', padding: '4px 8px', borderRadius: 4, marginLeft: 8, fontSize: 12 }}>{selectedBill.trang_thai}</span>
+                        <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
+                            <strong>Trạng thái:</strong> <span style={{ backgroundColor: getStatusColor(selectedBill.trang_thai), color: '#fff', padding: '6px 18px', borderRadius: 8, marginLeft: 12, fontSize: 22, fontWeight: 700 }}>{getStatusDisplay(selectedBill.trang_thai)}</span>
                         </div>
                         {selectedBill.phuong_thuc_thanh_toan && (
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
-                                Phương thức thanh toán: {selectedBill.phuong_thuc_thanh_toan}
+                            <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
+                                <strong>Phương thức thanh toán:</strong> {selectedBill.phuong_thuc_thanh_toan}
                             </div>
                         )}
                         {selectedBill.shippingFee !== undefined && (
-                            <div style={{ marginBottom: 16, color: '#222', textAlign: 'left', fontWeight: 500 }}>
+                            <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontWeight: 600, fontSize: 22 }}>
                                 <strong>Phương thức vận chuyển:</strong> {selectedBill.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedBill.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedBill.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedBill.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
                                 {selectedBill.shippingFee > 0 && (
-                                    <span style={{ marginLeft: 8, color: '#e53935', fontWeight: 600 }}>
+                                    <span style={{ marginLeft: 12, color: '#e53935', fontWeight: 700, fontSize: 22 }}>
                                         ({selectedBill.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })})
                                     </span>
                                 )}
                             </div>
                         )}
-                        <div style={{ marginBottom: 16, color: '#222' }}>Sản phẩm:</div>
+                        <div style={{ marginBottom: 22, color: '#222', fontSize: 22 }}><strong>Sản phẩm:</strong></div>
                         {selectedBill.danh_sach_san_pham.map((item, index) => (
-                            <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none' }}>
-                                <div style={{ width: 50, height: 50, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
+                            <div key={index} style={{ display: 'flex', alignItems: 'center', padding: '18px 0', borderBottom: index < selectedBill.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none' }}>
+                                <div style={{ width: 80, height: 80, borderRadius: 10, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 22, flexShrink: 0 }}>
                                     <img
                                         src={item.san_pham_id?.images && item.san_pham_id.images[0] && (item.san_pham_id.images[0].startsWith('http')
                                             ? item.san_pham_id.images[0]
@@ -647,22 +639,22 @@ const BillUserClient = () => {
                                     />
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: 13, color: '#222', fontWeight: 500 }}>{item.san_pham_id?.name}</div>
-                                    <div style={{ fontSize: 11, color: '#666' }}>
+                                    <div style={{ fontSize: 22, color: '#222', fontWeight: 700 }}>{item.san_pham_id?.name}</div>
+                                    <div style={{ fontSize: 18, color: '#666' }}>
                                         SL: {item.so_luong} | {item.mau_sac} | {item.kich_thuoc}
                                     </div>
                                 </div>
-                                <div style={{ fontSize: 13, fontWeight: 600, marginLeft: 12 }}>{formatPrice(item.gia * item.so_luong)}</div>
+                                <div style={{ fontSize: 22, fontWeight: 800, marginLeft: 22 }}>{formatPrice(item.gia * item.so_luong)}</div>
                             </div>
                         ))}
-                        <div style={{ borderTop: '2px solid #eee', paddingTop: 16, textAlign: 'right', fontSize: 16, fontWeight: 700 }}>
+                        <div style={{ borderTop: '2px solid #eee', paddingTop: 22, textAlign: 'right', fontSize: 28, fontWeight: 900 }}>
                             Tổng cộng: {formatPrice(selectedBill.tong_tien)}
                         </div>
-                        <div style={{ marginBottom: 16, color: '#222', textAlign: 'left' }}>
+                        <div style={{ marginBottom: 22, color: '#222', textAlign: 'left', fontSize: 22 }}>
                             <strong>Trạng thái thanh toán:</strong> {selectedBill.thanh_toan || '---'}
                         </div>
                         {selectedBill.ly_do_huy && (
-                            <div style={{ marginBottom: 16, color: 'red', textAlign: 'left' }}>
+                            <div style={{ marginBottom: 22, color: 'red', textAlign: 'left', fontSize: 22 }}>
                                 <strong>Lý do huỷ:</strong> {selectedBill.ly_do_huy}
                             </div>
                         )}
