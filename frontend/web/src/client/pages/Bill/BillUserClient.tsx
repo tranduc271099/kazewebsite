@@ -67,6 +67,8 @@ const BillUserClient = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
     const [cancelingBillId, setCancelingBillId] = useState<string | null>(null);
+    const [sortType, setSortType] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest');
+    const [dateFilter, setDateFilter] = useState('');
 
     // Avatar handling
     let avatar = '';
@@ -207,14 +209,38 @@ const BillUserClient = () => {
         return { street: address, ward: '', district: '', city: '' };
     };
 
-    const filteredBills = selectedStatus === 'all' 
-        ? bills 
-        : bills.filter(bill => bill.trang_thai === selectedStatus);
+    const filteredBills = bills.filter(bill => {
+        const matchStatus = selectedStatus === 'all' || bill.trang_thai === selectedStatus;
+        let matchDate = true;
+        if (dateFilter) {
+            const billDate = new Date(bill.ngay_tao);
+            const filterDate = new Date(dateFilter);
+            matchDate = billDate.toISOString().slice(0, 10) === filterDate.toISOString().slice(0, 10);
+        }
+        return matchStatus && matchDate;
+    });
+
+    const sortedBills = [...filteredBills].sort((a, b) => {
+        if (sortType === 'newest') {
+            return new Date(b.ngay_tao).getTime() - new Date(a.ngay_tao).getTime();
+        } else if (sortType === 'oldest') {
+            return new Date(a.ngay_tao).getTime() - new Date(b.ngay_tao).getTime();
+        } else if (sortType === 'highest') {
+            return (b.tong_tien || 0) - (a.tong_tien || 0);
+        } else if (sortType === 'lowest') {
+            return (a.tong_tien || 0) - (b.tong_tien || 0);
+        }
+        return 0;
+    });
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentBills = filteredBills.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredBills.length / itemsPerPage);
+    const currentBills = sortedBills.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(sortedBills.length / itemsPerPage);
+
+    // Xác định đơn hàng mới nhất thực sự (theo ngày tạo lớn nhất trong toàn bộ bills)
+    const trulyNewestBill = bills.length > 0 ? bills.reduce((latest, bill) => new Date(bill.ngay_tao) > new Date(latest.ngay_tao) ? bill : latest, bills[0]) : null;
+    const trulyNewestBillId = trulyNewestBill?._id;
 
     const isNewOrder = (dateString: string) => {
         const orderDate = new Date(dateString);
@@ -267,24 +293,44 @@ const BillUserClient = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                             <div>
                                 <h2 style={{ fontWeight: 700, fontSize: 22, marginBottom: 8 }}>Lịch Sử Đơn Hàng</h2>
-                                <div style={{ color: '#888' }}>Tổng cộng {filteredBills.length} đơn hàng</div>
+                                <div style={{ color: '#888', cursor: 'pointer' }} onClick={() => { setSelectedStatus('all'); setCurrentPage(1); }}>
+                                    Tổng cộng <span style={{ fontWeight: 600, color: '#2563eb' }}>{bills.length}</span> đơn hàng
+                                </div>
                             </div>
-                            <select 
-                                className="bill-status-select"
-                                value={selectedStatus} 
-                                onChange={(e) => {
-                                    setSelectedStatus(e.target.value);
-                                    setCurrentPage(1);
-                                }}
-                                style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ddd', fontSize: 13 }}
-                            >
-                                <option value="all">Tất cả đơn hàng</option>
-                                <option value="chờ xác nhận">Chờ xác nhận</option>
-                                <option value="đã xác nhận">Đã xác nhận</option>
-                                <option value="đang giao">Đang giao</option>
-                                <option value="đã giao">Đã giao</option>
-                                <option value="đã hủy">Đã hủy</option>
-                            </select>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                <select 
+                                    className="bill-status-select"
+                                    value={selectedStatus} 
+                                    onChange={(e) => {
+                                        setSelectedStatus(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ddd', fontSize: 13 }}
+                                >
+                                    <option value="all">Tất cả đơn hàng</option>
+                                    <option value="chờ xác nhận">Chờ xác nhận</option>
+                                    <option value="đã xác nhận">Đã xác nhận</option>
+                                    <option value="đang giao">Đang giao</option>
+                                    <option value="đã giao">Đã giao</option>
+                                    <option value="đã hủy">Đã hủy</option>
+                                </select>
+                                <input
+                                    type="date"
+                                    value={dateFilter}
+                                    onChange={e => { setDateFilter(e.target.value); setCurrentPage(1); }}
+                                    style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ddd', fontSize: 13 }}
+                                />
+                                <select
+                                    value={sortType}
+                                    onChange={e => { setSortType(e.target.value as any); setCurrentPage(1); }}
+                                    style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ddd', fontSize: 13 }}
+                                >
+                                    <option value="newest">Ngày mới nhất</option>
+                                    <option value="oldest">Ngày cũ nhất</option>
+                                    <option value="highest">Tổng tiền cao nhất</option>
+                                    <option value="lowest">Tổng tiền thấp nhất</option>
+                                </select>
+                            </div>
                         </div>
 
                         {loading ? (
@@ -311,7 +357,7 @@ const BillUserClient = () => {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                                     {currentBills.map((bill, index) => {
                                         const addressInfo = parseAddress(bill.dia_chi_giao_hang);
-                                        const isNewest = index === 0 && currentPage === 1;
+                                        const isNewest = bill._id === trulyNewestBillId;
                                         return (
                                             <div key={bill._id} className="bill-card" style={{
                                                 border: isNewest ? '2px solid #ff5722' : (isNewOrder(bill.ngay_tao) ? '2px solid #10b981' : '1px solid #e5e7eb'),
@@ -326,6 +372,9 @@ const BillUserClient = () => {
                                                         <div style={{ fontWeight: 600, fontSize: 14 }}>
                                                             Đơn hàng #{bill._id.slice(-8).toUpperCase()}
                                                         </div>
+                                                        <div style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>
+                                                            Ngày: {formatDate(bill.ngay_tao)}
+                                                        </div>
                                                         {isNewest && (
                                                             <span style={{
                                                                 background: '#ff5722',
@@ -339,18 +388,6 @@ const BillUserClient = () => {
                                                                 gap: 4
                                                             }}>
                                                                 <span role="img" aria-label="fire">🔥</span> MỚI NHẤT
-                                                            </span>
-                                                        )}
-                                                        {!isNewest && isNewOrder(bill.ngay_tao) && (
-                                                            <span style={{
-                                                                background: '#10b981',
-                                                                color: '#fff',
-                                                                padding: '2px 6px',
-                                                                borderRadius: 4,
-                                                                fontSize: 10,
-                                                                fontWeight: 600
-                                                            }}>
-                                                                MỚI
                                                             </span>
                                                         )}
                                                     </div>
