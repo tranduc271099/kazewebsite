@@ -125,6 +125,12 @@ const Sidebar = () => {
                                         <p>Quản lý sản phẩm</p>
                                     </NavLink>
                                 </li>
+                                <li className="nav-item">
+                                    <NavLink to="/admin/bill" className={({ isActive }) => "nav-link" + (isActive ? " active" : "")}>
+                                        <i className="nav-icon fas fa-box"></i>
+                                        <p>Quản lý đơn hàng</p>
+                                    </NavLink>
+                                </li>
                             </ul>
                         </li>
                         <li className="nav-item">
