@@ -1,0 +1,223 @@
+/* Product Card Styles based on eStore Template */
+
+.product-card {
+    position: relative;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.product-card:hover .product-image .main-img {
+    opacity: 0;
+}
+
+.product-card:hover .product-image .hover-img {
+    opacity: 1;
+}
+
+.product-card:hover .product-image .product-overlay {
+    opacity: 1;
+}
+
+.product-image {
+    position: relative;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.product-image img {
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.product-image .main-img {
+    opacity: 1;
+}
+
+.product-image .hover-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.product-image .badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #e63946;
+}
+
+.product-image .product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 20px;
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 2;
+}
+
+.product-image .product-overlay .btn-cart {
+    width: 100%;
+    background-color: #fff;
+    color: #2d465e;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    transform: translateY(15px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    transition-delay: 0.1s;
+}
+
+.product-card:hover .product-image .product-overlay .btn-cart {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.product-image .product-overlay .btn-cart:hover {
+    background-color: #0a4db8;
+    color: #fff;
+}
+
+.product-image .product-overlay .product-actions {
+    display: flex;
+    gap: 10px;
+    transform: translateY(15px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    transition-delay: 0.2s;
+}
+
+.product-card:hover .product-image .product-overlay .product-actions {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.product-image .product-overlay .product-actions .action-btn {
+    background-color: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #2d465e;
+    transition: all 0.3s;
+}
+
+.product-image .product-overlay .product-actions .action-btn:hover {
+    background-color: #0a4db8;
+    color: #fff;
+}
+
+.product-info {
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+.product-info .product-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.product-info .product-title a {
+    color: #2d465e;
+    text-decoration: none;
+}
+
+.product-info .product-title a:hover {
+    color: #0a4db8;
+}
+
+.product-info .product-price {
+    margin-bottom: 0.5rem;
+}
+
+.product-info .product-price .current-price {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0a4db8;
+}
+
+.product-info .product-price .old-price {
+    font-size: 0.9rem;
+    text-decoration: line-through;
+    color: #888;
+    margin-left: 8px;
+}
+
+.product-info .product-rating {
+    font-size: 0.8rem;
+    color: #ffc107;
+}
+
+.product-info .product-rating span {
+    color: #999;
+    margin-left: 5px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    border-right: 1px solid #dee2e6;
+    padding-right: 15px;
+}
+
+.widget-item {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.widget-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.category-tree .category-item {
+    padding: 8px 0;
+}
+
+.category-tree .category-link {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.category-tree .category-item.active .category-link,
+.category-tree .category-link:hover {
+    color: #0a4db8;
+    font-weight: 500;
+}

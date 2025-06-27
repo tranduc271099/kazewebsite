@@ -1,0 +1,277 @@
+.product-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.product-header {
+    margin-bottom: 20px;
+}
+
+.product-header h2 {
+    color: #333;
+    font-size: 24px;
+}
+
+.product-error {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.product-form {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.variant-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.variant-list {
+    margin-top: 10px;
+}
+
+.variant-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.variant-item button {
+    padding: 4px 8px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.variant-item button:hover {
+    background: #c82333;
+}
+
+.product-list {
+    margin-top: 30px;
+}
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-table th,
+.product-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.product-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-button,
+.delete-button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.edit-button:hover {
+    background-color: #0056b3;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.submit-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.submit-button:hover {
+    background-color: #218838;
+}
+
+.submit-button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.dashboard-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #f4f6f9;
+}
+
+.content-wrapper {
+    margin-left: 250px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    float: none !important;
+    display: block !important;
+    background: #f4f6f9;
+    box-sizing: border-box;
+    padding: 0 24px;
+}
+
+body .content-wrapper,
+body .content-wrapper .container-fluid,
+body .content-wrapper .content,
+body .content-wrapper .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.main-footer {
+    position: relative;
+    left: 0;
+    bottom: 0;
+    margin-left: 250px;
+    width: calc(100% - 250px);
+    background: #fff;
+    padding: 10px 24px;
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.03);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    font-size: 15px;
+    margin-bottom: 0;
+}
+
+body {
+    padding-bottom: 0;
+}
+
+.content-inner {
+    width: 100%;
+    max-width: 95%;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+body.dark .product-container,
+body.dark .product-form,
+body.dark .product-list,
+body.dark .product-table,
+body.dark .variant-section,
+body.dark .variant-item {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #333 !important;
+}
+
+body.dark .product-header h2 {
+    color: #fff !important;
+}
+
+body.dark .form-group label {
+    color: #eee !important;
+}
+
+body.dark .form-group input,
+body.dark .form-group textarea,
+body.dark .form-group select {
+    background: #23272f !important;
+    color: #fff !important;
+    border-color: #444 !important;
+}
+
+body.dark .product-table th {
+    background: #23272f !important;
+    color: #fff !important;
+}

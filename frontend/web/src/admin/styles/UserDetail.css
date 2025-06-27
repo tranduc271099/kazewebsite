@@ -1,0 +1,139 @@
+.user-detail {
+    padding: 20px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+}
+
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 16px;
+}
+
+.detail-item {
+    padding: 16px;
+    background: var(--input-bg);
+    border-radius: 6px;
+    border: 1px solid var(--input-border);
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.detail-value {
+    color: var(--text-primary);
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.user-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--text-primary);
+    border: 2px solid var(--input-border);
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin: 0 0 4px 0;
+}
+
+.user-role {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-section {
+    margin-top: 24px;
+}
+
+.section-title {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.voucher-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.voucher-item {
+    padding: 8px 12px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-badge.locked {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.created-at {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    margin-top: 4px;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-primary);
+}
+
+.contact-item i {
+    color: var(--text-secondary);
+    width: 16px;
+}
