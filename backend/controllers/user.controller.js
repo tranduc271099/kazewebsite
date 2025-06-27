@@ -2,6 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('../config/cloudinary');
+const mongoose = require('mongoose');
+const UserHistory = require('../models/UserHistory');
 
 // Đăng ký
 exports.register = async (req, res) => {
@@ -157,6 +159,18 @@ exports.updateProfile = async (req, res) => {
                 const result = await uploadToCloudinary(req.file.buffer);
                 user.image = result.secure_url;
                 await user.save();
+                // Lưu lịch sử chỉnh sửa
+                await UserHistory.create({
+                    userId: user._id,
+                    updatedBy: req.user.id,
+                    changes: {
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        isLocked: user.isLocked
+                    },
+                    updatedAt: new Date()
+                });
                 return res.json({ message: 'Cập nhật thành công', ...user.toObject() });
             } catch (error) {
                 console.error('Lỗi upload ảnh:', error);
@@ -164,6 +178,18 @@ exports.updateProfile = async (req, res) => {
             }
         }
         await user.save();
+        // Lưu lịch sử chỉnh sửa
+        await UserHistory.create({
+            userId: user._id,
+            updatedBy: req.user.id,
+            changes: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isLocked: user.isLocked
+            },
+            updatedAt: new Date()
+        });
         res.json({ message: 'Cập nhật thành công', ...user.toObject() });
     } catch (err) {
         res.status(500).json({ message: 'Cập nhật thất bại', error: err.message });
@@ -220,8 +246,44 @@ exports.lockUser = async (req, res) => {
         }
         user.isLocked = !user.isLocked;
         await user.save();
+        // Lưu lịch sử chỉnh sửa
+        await UserHistory.create({
+            userId: user._id,
+            updatedBy: req.user.id,
+            changes: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                isLocked: user.isLocked
+            },
+            updatedAt: new Date()
+        });
         res.json({ message: user.isLocked ? 'Đã khóa user' : 'Đã mở khóa user', isLocked: user.isLocked });
     } catch (err) {
         res.status(500).json({ message: 'Thao tác thất bại' });
+    }
+};
+
+// Lấy lịch sử chỉnh sửa user (chỉ admin)
+exports.getUserHistory = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log('API getUserHistory called with userId:', userId);
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            console.log('userId không hợp lệ:', userId);
+            return res.status(400).json({ message: 'userId không hợp lệ' });
+        }
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const history = await UserHistory.find({ userId: objectId })
+            .populate('updatedBy', 'name email')
+            .sort({ updatedAt: -1 }); // Sắp xếp mới nhất lên đầu
+        console.log('History found:', history.length);
+        if (!history || history.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy lịch sử chỉnh sửa cho user này' });
+        }
+        res.json(history);
+    } catch (err) {
+        console.error('Lỗi getUserHistory:', err);
+        res.status(500).json({ message: 'Không thể lấy lịch sử chỉnh sửa', error: err.message });
     }
 };

@@ -15,55 +15,30 @@ exports.getCategories = async (req, res) => {
 exports.createCategory = async (req, res) => {
     try {
         const { name } = req.body;
-
-        // Check if category name already exists
-        const existingCategory = await Category.findOne({ name });
-        if (existingCategory) {
-            return res.status(400).json({ message: 'Tên danh mục đã tồn tại' });
+        let image = '';
+        if (req.file && req.file.filename) {
+            image = '/uploads/' + req.file.filename;
         }
-
-        const category = new Category({
-            name
-        });
-
-        const savedCategory = await category.save();
-        res.status(201).json(savedCategory);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Lỗi khi tạo danh mục mới' });
+        const category = new Category({ name, image });
+        await category.save();
+        res.json(category);
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi tạo danh mục', error: err.message });
     }
 };
 
 // Update a category
 exports.updateCategory = async (req, res) => {
     try {
-        const { id } = req.params;
         const { name } = req.body;
-
-        // Check if category exists
-        const category = await Category.findById(id);
-        if (!category) {
-            return res.status(404).json({ message: 'Không tìm thấy danh mục' });
+        let updateData = { name };
+        if (req.file && req.file.filename) {
+            updateData.image = '/uploads/' + req.file.filename;
         }
-
-        // Check if new name already exists (excluding current category)
-        if (name !== category.name) {
-            const existingCategory = await Category.findOne({ name });
-            if (existingCategory) {
-                return res.status(400).json({ message: 'Tên danh mục đã tồn tại' });
-            }
-        }
-
-        const updatedCategory = await Category.findByIdAndUpdate(
-            id,
-            { name, updatedAt: Date.now() },
-            { new: true }
-        );
-
-        res.json(updatedCategory);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Lỗi khi cập nhật danh mục' });
+        const category = await Category.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json(category);
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi cập nhật danh mục', error: err.message });
     }
 };
 

@@ -52,7 +52,7 @@ exports.applyVoucher = async (req, res) => {
   try {
     const { code, cartTotal } = req.body;
     const voucher = await Voucher.findOne({ code, isActive: true });
-    
+
     if (!voucher) {
       return res.status(404).json({ message: 'Mã giảm giá không tồn tại hoặc đã bị vô hiệu hóa' });
     }
@@ -61,13 +61,13 @@ exports.applyVoucher = async (req, res) => {
     if (now < voucher.startDate) {
       return res.status(400).json({ message: 'Mã giảm giá chưa có hiệu lực' });
     }
-    
+
     if (now > voucher.endDate) {
       return res.status(400).json({ message: 'Mã giảm giá đã hết hạn' });
     }
 
     if (cartTotal < voucher.minOrder) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: `Đơn hàng tối thiểu ${voucher.minOrder.toLocaleString('vi-VN')}đ để sử dụng mã này`
       });
     }
@@ -79,8 +79,8 @@ exports.applyVoucher = async (req, res) => {
       discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
     }
 
-    res.json({ 
-      discountAmount, 
+    res.json({
+      discountAmount,
       voucher,
       message: `Áp dụng mã giảm giá thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`
     });

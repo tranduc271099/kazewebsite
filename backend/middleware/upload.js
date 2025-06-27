@@ -1,6 +1,7 @@
 const multer = require('multer');
+// const path = require('path');
 
-// Use memory storage for multer so we can upload buffer to Cloudinary
+// Đổi sang memoryStorage để có file.buffer
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {

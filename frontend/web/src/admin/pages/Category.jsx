@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from '../styles/CategoryLayout.module.css';
 import { useTheme } from '@mui/material/styles';
@@ -19,8 +19,12 @@ const Category = () => {
     const [loadingProducts, setLoadingProducts] = useState(false);
     const [errorProducts, setErrorProducts] = useState('');
 
+    const [image, setImage] = useState(null);
+
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
+
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchCategories();
@@ -42,23 +46,32 @@ const Category = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        setImage(e.target.files[0]);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
             const token = localStorage.getItem('token');
+            const form = new FormData();
+            form.append('name', formData.name);
+            if (image) form.append('image', image);
             if (editingId) {
-                await axios.put(`http://localhost:5000/api/categories/${editingId}`, formData, {
-                    headers: { Authorization: `Bearer ${token}` }
+                await axios.put(`http://localhost:5000/api/categories/${editingId}`, form, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await axios.post('http://localhost:5000/api/categories', formData, {
-                    headers: { Authorization: `Bearer ${token}` }
+                await axios.post('http://localhost:5000/api/categories', form, {
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
                 });
             }
             setFormData({ name: '' });
+            setImage(null);
             setEditingId(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
             fetchCategories();
         } catch (err) {
             setError(err.response?.data?.message || 'Có lỗi xảy ra');
@@ -132,6 +145,18 @@ const Category = () => {
                                 placeholder="Nhập tên danh mục"
                             />
                         </div>
+                        <div className={styles.formGroup}>
+                            <label className={styles.label} htmlFor="image">Ảnh danh mục</label>
+                            <input
+                                className={styles.input}
+                                type="file"
+                                id="image"
+                                name="image"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                ref={fileInputRef}
+                            />
+                        </div>
                     </div>
                     <div className={styles.btnRow}>
                         <button type="submit" className={styles.btnPrimary} disabled={loading}>
@@ -147,6 +172,7 @@ const Category = () => {
                     <thead>
                         <tr>
                             <th>Tên danh mục</th>
+                            <th>Ảnh</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -154,6 +180,9 @@ const Category = () => {
                         {categories.map((category) => (
                             <tr key={category._id}>
                                 <td>{category.name}</td>
+                                <td>
+                                    {category.image && <img src={`http://localhost:5000${category.image}`} alt={category.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />}
+                                </td>
                                 <td>
                                     <button
                                         className={`${styles.actionBtn} ${styles.editBtn}`}

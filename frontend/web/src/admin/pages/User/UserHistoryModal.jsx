@@ -3,6 +3,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import '../../styles/UserHistoryModal.css';
+import UserHistory from './UserHistory';
 
 const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
     const [history, setHistory] = useState([]);
@@ -55,8 +56,8 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
     return (
         <>
             <div className="modal-backdrop" onClick={onClose}></div>
-            <button 
-                className="modal-close-button" 
+            <button
+                className="modal-close-button"
                 onClick={onClose}
                 title="Đóng"
             >
@@ -102,82 +103,7 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
                                             Tổng cộng {history.length} lần chỉnh sửa
                                         </small>
                                     </div>
-                                    <div className="table-responsive">
-                                        <table className="table table-striped history-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Thời gian</th>
-                                                    <th>Chỉnh sửa bởi</th>
-                                                    <th>Tên</th>
-                                                    <th>Email</th>
-                                                    <th>Vai trò</th>
-                                                    <th>Trạng thái</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {history.map((entry, index) => (
-                                                    <tr key={index}>
-                                                        <td>
-                                                            <i className="fas fa-clock me-1"></i>
-                                                            {formatDate(entry.updatedAt)}
-                                                        </td>
-                                                        <td>
-                                                            {entry.updatedBy ? (
-                                                                <span>
-                                                                    <i className="fas fa-user me-1"></i>
-                                                                    {entry.updatedBy.name} 
-                                                                    <small className="text-muted d-block">
-                                                                        ({entry.updatedBy.email})
-                                                                    </small>
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-muted">
-                                                                    <i className="fas fa-user-slash me-1"></i>
-                                                                    Không xác định
-                                                                </span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            {entry.changes.name ? (
-                                                                <span className="badge bg-info">
-                                                                    {entry.changes.name}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-muted">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            {entry.changes.email ? (
-                                                                <span className="badge bg-info">
-                                                                    {entry.changes.email}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-muted">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            {entry.changes.role ? (
-                                                                <span className="badge bg-info">
-                                                                    {entry.changes.role}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-muted">-</span>
-                                                            )}
-                                                        </td>
-                                                        <td>
-                                                            {entry.changes.isLocked !== undefined ? (
-                                                                <span className={`badge ${entry.changes.isLocked ? 'bg-danger' : 'bg-success'}`}>
-                                                                    {entry.changes.isLocked ? 'Đã khóa' : 'Đã mở khóa'}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="text-muted">-</span>
-                                                            )}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    <UserHistory history={history} />
                                 </>
                             )}
                         </div>

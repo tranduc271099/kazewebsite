@@ -146,6 +146,47 @@ const Product = () => {
         }
     };
 
+    const handleVariantImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        const newImageObjects = files.map(file => ({
+            url: URL.createObjectURL(file),
+            file: file,
+            id: Date.now() + Math.random()
+        }));
+
+        // Thêm ảnh vào biến thể hiện tại
+        setCurrentVariant(prev => ({
+            ...prev,
+            images: [...(prev.images || []), ...newImageObjects]
+        }));
+
+        // Thêm ảnh vào main images nếu chưa có, chỉ thêm file thực sự hoặc url thực tế, không thêm blob
+        setFormData(prev => {
+            const newMainImages = newImageObjects.filter(newImg =>
+                (newImg.file && newImg.file instanceof File)
+            ).filter(newImg =>
+                !prev.images.some(img =>
+                    (img.file && newImg.file && img.file === newImg.file)
+                )
+            );
+            // Gộp và loại trùng lặp
+            const allImages = [...newMainImages, ...prev.images];
+            const uniqueImages = [];
+            for (const img of allImages) {
+                if (!uniqueImages.some(uImg =>
+                    (uImg.file && img.file && uImg.file === img.file) ||
+                    (uImg.url && img.url && uImg.url === img.url)
+                )) {
+                    uniqueImages.push(img);
+                }
+            }
+            return {
+                ...prev,
+                images: uniqueImages
+            };
+        });
+    };
+
     const addVariant = () => {
         if (!currentVariant.attributes.size || !currentVariant.attributes.color || !currentVariant.stock) {
             toast.error('Vui lòng điền đủ thông tin size, màu và tồn kho cho biến thể.');
@@ -176,13 +217,27 @@ const Product = () => {
             return;
         }
 
+        // Nếu biến thể có ảnh, thêm ảnh đầu tiên vào main images nếu chưa có, chỉ thêm file thực sự hoặc url thực tế
+        let updatedImages = [...formData.images];
+        if (currentVariant.images && currentVariant.images.length > 0) {
+            const firstVariantImg = currentVariant.images[0];
+            const isValidImg = (firstVariantImg.file && firstVariantImg.file instanceof File) || (typeof firstVariantImg.url === 'string' && !firstVariantImg.url.startsWith('blob:'));
+            if (isValidImg) {
+                const exists = updatedImages.some(img => (img.file && firstVariantImg.file && img.file === firstVariantImg.file) || (img.url && firstVariantImg.url && img.url === firstVariantImg.url));
+                if (!exists) {
+                    updatedImages = [firstVariantImg, ...updatedImages]; // Thêm lên đầu
+                }
+            }
+        }
+
         if (editingVariantIdx !== null) {
             // Update existing variant
             const updatedVariants = [...formData.variants];
             updatedVariants[editingVariantIdx] = { ...currentVariant };
             setFormData(prev => ({
                 ...prev,
-                variants: updatedVariants
+                variants: updatedVariants,
+                images: updatedImages
             }));
         } else {
             // Add new variant
@@ -194,7 +249,8 @@ const Product = () => {
             };
             setFormData(prev => ({
                 ...prev,
-                variants: [...prev.variants, newVariant]
+                variants: [...prev.variants, newVariant],
+                images: updatedImages
             }));
         }
 
@@ -250,8 +306,12 @@ const Product = () => {
     };
 
     const handleRemoveImage = (index) => {
-        const updatedImages = [...formData.images];
+        let updatedImages = [...formData.images];
         updatedImages.splice(index, 1);
+        // Sau khi xóa, chỉ giữ lại object có file thực sự hoặc url thực tế (không blob)
+        updatedImages = updatedImages.filter(img =>
+            (img.file && img.file instanceof File) || (typeof img.url === 'string' && !img.url.startsWith('blob:'))
+        );
         setFormData(prev => ({ ...prev, images: updatedImages }));
     };
 
@@ -282,33 +342,40 @@ const Product = () => {
         setLoading(true);
         setError('');
 
-        const formDataToSend = new FormData();
+        // Lọc lại images trước khi submit
+        const validImages = formData.images.filter(img =>
+            (img.file && img.file instanceof File) || (typeof img.url === 'string' && !img.url.startsWith('blob:'))
+        );
 
-        // Whitelist fields to append. This is safer than blacklisting.
+        const formDataToSend = new FormData();
         const simpleFields = ['name', 'description', 'brand', 'category', 'price', 'stock', 'isActive'];
         simpleFields.forEach(key => {
-            // Ensure the key exists and is not null/undefined before appending
             if (formData[key] !== undefined && formData[key] !== null) {
                 formDataToSend.append(key, formData[key]);
             }
         });
 
         // 1. Handle Main Images
-        const existingMainImageUrls = formData.images.filter(img => !img.file).map(img => img.url);
-        const newMainImageFiles = formData.images.filter(img => !!img.file).map(img => img.file);
+        const existingMainImageUrls = validImages.filter(img => !img.file && typeof img.url === 'string' && !img.url.startsWith('blob:')).map(img => img.url);
+        const newMainImageFiles = validImages.filter(img => !!img.file && img.file instanceof File).map(img => img.file);
 
-        existingMainImageUrls.forEach(url => formDataToSend.append('existingImages', url));
-        newMainImageFiles.forEach(file => formDataToSend.append('images', file));
-
+        if (existingMainImageUrls.length > 0) {
+            existingMainImageUrls.forEach(url => formDataToSend.append('existingImages', url));
+        }
+        if (newMainImageFiles.length > 0) {
+            newMainImageFiles.forEach(file => formDataToSend.append('images', file));
+        }
 
         // 2. Handle Variants and their images
         const variantsForUpload = formData.variants.map(variant => {
-            const existingVariantImages = variant.images.filter(img => !img.file).map(img => img.url);
-            const newVariantImageFiles = variant.images.filter(img => !!img.file).map(img => img.file);
+            const existingVariantImages = (variant.images || []).filter(img => !img.file && typeof img.url === 'string' && !img.url.startsWith('blob:')).map(img => img.url);
+            const newVariantImageFiles = (variant.images || []).filter(img => !!img.file && img.file instanceof File).map(img => img.file);
 
-            newVariantImageFiles.forEach(file => {
-                formDataToSend.append('variantImages', file);
-            });
+            if (newVariantImageFiles.length > 0) {
+                newVariantImageFiles.forEach(file => {
+                    formDataToSend.append('variantImages', file);
+                });
+            }
 
             return {
                 ...variant,
@@ -375,6 +442,18 @@ const Product = () => {
                 setError('Lỗi khi xóa sản phẩm');
             }
         }
+    };
+
+    // Thêm hàm xoá ảnh biến thể
+    const handleRemoveVariantImage = (idx) => {
+        setCurrentVariant(prev => {
+            const newImages = [...(prev.images || [])];
+            newImages.splice(idx, 1);
+            return {
+                ...prev,
+                images: newImages
+            };
+        });
     };
 
     return (
@@ -493,7 +572,7 @@ const Product = () => {
                                     type="file"
                                     multiple
                                     accept="image/*"
-                                    onChange={handleImageChange}
+                                    onChange={handleVariantImageChange}
                                     className={styles.hiddenInput}
                                     id="variant-image-input"
                                 />
@@ -524,7 +603,7 @@ const Product = () => {
                                         }}
                                     >
                                         <img src={img.url} alt={`Variant ${idx + 1}`} className={styles.imagePreview} />
-                                        <button type="button" onClick={() => handleRemoveImage(idx)} className={styles.removeImageBtn}>&times;</button>
+                                        <button type="button" onClick={() => handleRemoveVariantImage(idx)} className={styles.removeImageBtn}>&times;</button>
                                         <div className={styles.imageOrder}>{idx + 1}</div>
                                     </div>
                                 ))}
@@ -557,33 +636,16 @@ const Product = () => {
                                             <td>{v.price}</td>
                                             <td>
                                                 {v.images && v.images.length > 0 ? (
-                                                    <div className={styles.variantImages}>
-                                                        {v.images.slice(0, 2).map((img, imgIdx) => (
-                                                            <img
-                                                                key={imgIdx}
-                                                                src={getImageUrl(img)}
-                                                                alt={`Variant ${idx + 1}`}
-                                                                className={styles.variantThumbnail}
-                                                                onClick={() => {
-                                                                    setSelectedImage(getImageUrl(img));
-                                                                    setShowImageModal(true);
-                                                                }}
-                                                                style={{ cursor: 'pointer' }}
-                                                            />
-                                                        ))}
-                                                        {v.images.length > 2 && (
-                                                            <div
-                                                                className={styles.moreImages}
-                                                                onClick={() => {
-                                                                    setSelectedImage(getImageUrl(v.images[0]));
-                                                                    setShowImageModal(true);
-                                                                }}
-                                                                style={{ cursor: 'pointer' }}
-                                                            >
-                                                                +{v.images.length - 2}
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    <img
+                                                        src={getImageUrl(v.images[0])}
+                                                        alt={`Variant ${idx + 1}`}
+                                                        className={styles.variantThumbnail}
+                                                        style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
+                                                        onClick={() => {
+                                                            setSelectedImage(getImageUrl(v.images[0]));
+                                                            setShowImageModal(true);
+                                                        }}
+                                                    />
                                                 ) : (
                                                     <span className={styles.noImage}>Không có ảnh</span>
                                                 )}
@@ -593,7 +655,7 @@ const Product = () => {
                                                     Sửa
                                                 </button>
                                                 <button type="button" onClick={() => removeVariant(idx)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>
-                                                    Xoá
+                                                    Xóa
                                                 </button>
                                             </td>
                                         </tr>

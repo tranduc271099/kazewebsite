@@ -136,7 +136,7 @@ const Sidebar = () => {
 
           <Box paddingLeft={isCollapsed ? undefined : "10%"}>
             <Item
-              title="Dashboard"
+              title="Bảng điều khiển"
               to="/admin/dashboard"
               icon={<HomeOutlinedIcon />}
               selected={selected}
@@ -171,7 +171,13 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
+            <Item
+              title="Quản lý Đơn hàng"
+              to="/admin/bill"
+              icon={<Inventory2OutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Typography
               variant="h6"
               color={colors.grey[300]}
@@ -180,21 +186,21 @@ const Sidebar = () => {
               Pages
             </Typography>
             <Item
-              title="Profile Form"
+              title="Hồ sơ"
               to="/admin/form"
               icon={<PersonOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Calendar"
+              title="Lịch"
               to="/admin/calendar"
               icon={<CalendarTodayOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="FAQ Page"
+              title="Câu hỏi thường gặp"
               to="/admin/faq"
               icon={<HelpOutlineOutlinedIcon />}
               selected={selected}
@@ -209,28 +215,28 @@ const Sidebar = () => {
               Charts
             </Typography>
             <Item
-              title="Bar Chart"
+              title="Biểu đồ cột"
               to="/admin/bar"
               icon={<BarChartOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Pie Chart"
+              title="Biểu đồ tròn"
               to="/admin/pie"
               icon={<PieChartOutlineOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Line Chart"
+              title="Biểu đồ đường"
               to="/admin/line"
               icon={<TimelineOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
             <Item
-              title="Geography Chart"
+              title="Biểu đồ địa lý"
               to="/admin/geography"
               icon={<MapOutlinedIcon />}
               selected={selected}
