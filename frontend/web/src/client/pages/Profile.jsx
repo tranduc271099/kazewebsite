@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Profile.css';
 import { useUser } from '../context/UserContext';
+import ProfileSidebar from '../components/ProfileSidebar';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -126,35 +127,7 @@ const Profile = () => {
     return (
         <div className="profile-page" style={{ background: '#f5f5f7', minHeight: '100vh', padding: '40px 0', marginTop: 80 }}>
             <div className="container" style={{ display: 'flex', gap: 32, maxWidth: 1100, margin: '0 auto' }}>
-                {/* Sidebar */}
-                <aside className="profile-sidebar" style={{
-                    width: 220, background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: 24, minHeight: 400
-                }}>
-                    <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                        <div style={{
-                            width: 72, height: 72, borderRadius: '50%', background: '#eee', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, color: '#bbb', overflow: 'hidden'
-                        }}>
-                            <img
-                                src={avatar}
-                                alt="avatar"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                        </div>
-                        <div style={{ fontWeight: 600, textAlign: 'center' }}>{formData.name || 'Tên người dùng'}</div>
-                        <div style={{ fontSize: 13, color: '#888', textAlign: 'center' }}>Sửa Hồ Sơ</div>
-                    </div>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 16, textAlign: 'left' }}>
-                        <li style={{ margin: '16px 0' }}>
-                            <Link to="/profile" style={{ color: '#2563eb', fontWeight: 600, textDecoration: 'none' }}>Hồ Sơ</Link>
-                        </li>
-                        <li style={{ margin: '16px 0' }}>
-                            <Link to="/change-password" style={{ color: '#333', textDecoration: 'none' }}>Đổi Mật Khẩu</Link>
-                        </li>
-                        <li style={{ margin: '16px 0' }}>
-                            <Link to="/bill" style={{ color: '#333', textDecoration: 'none' }}>Đơn Mua</Link>
-                        </li>
-                    </ul>
-                </aside>
+                <ProfileSidebar activePage="profile" />
                 {/* Main content */}
                 <main className="profile-main" style={{
                     flex: 1, background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', padding: 36, minWidth: 0

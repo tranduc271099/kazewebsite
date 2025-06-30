@@ -181,7 +181,7 @@ const Category = () => {
                             <tr key={category._id}>
                                 <td>{category.name}</td>
                                 <td>
-                                    {category.image && <img src={`http://localhost:5000${category.image}`} alt={category.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />}
+                                    {category.image && <img src={category.image} alt={category.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 8 }} />}
                                 </td>
                                 <td>
                                     <button

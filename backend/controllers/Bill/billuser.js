@@ -9,6 +9,7 @@ class BillController {
       const userId = req.user.id;
       const bills = await Bill.find({ nguoi_dung_id: userId })
         .populate('nguoi_dung_id', 'name email phone')
+        .populate('nguoi_huy.id', 'name')
         .populate({
           path: 'danh_sach_san_pham.san_pham_id',
           select: 'name images'

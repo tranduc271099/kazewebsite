@@ -18,7 +18,7 @@ import About from './client/pages/About';
 import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
 import ChangePassword from './client/pages/ChangePassword';
-import BillUser from './client/pages/Bill/BillUserClient.tsx';
+import BillUser from './client/pages/Bill/BillUserClient.jsx';
 
 // Components
 import Footer from './client/components/Footer';
@@ -27,7 +27,7 @@ import AuthLayout from './client/components/AuthLayout';
 
 // Admin App - New Dashboard
 import AdminApp from './admin/App';
-import Checkout from './client/pages/Checkout/checkout.tsx';
+import Checkout from './client/pages/Checkout/checkout.jsx';
 
 function App() {
   return (

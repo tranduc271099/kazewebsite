@@ -34,6 +34,7 @@ const Product = () => {
     const [editingVariant, setEditingVariant] = useState(null);
     const [selectedImage, setSelectedImage] = useState('');
     const [showImageModal, setShowImageModal] = useState(false);
+    const [draggedIndex, setDraggedIndex] = useState(null);
 
     const getImageUrl = (imgData) => {
         if (!imgData) return '/assets/img/no-image.png';
@@ -146,47 +147,6 @@ const Product = () => {
         }
     };
 
-    const handleVariantImageChange = (e) => {
-        const files = Array.from(e.target.files);
-        const newImageObjects = files.map(file => ({
-            url: URL.createObjectURL(file),
-            file: file,
-            id: Date.now() + Math.random()
-        }));
-
-        // Thêm ảnh vào biến thể hiện tại
-        setCurrentVariant(prev => ({
-            ...prev,
-            images: [...(prev.images || []), ...newImageObjects]
-        }));
-
-        // Thêm ảnh vào main images nếu chưa có, chỉ thêm file thực sự hoặc url thực tế, không thêm blob
-        setFormData(prev => {
-            const newMainImages = newImageObjects.filter(newImg =>
-                (newImg.file && newImg.file instanceof File)
-            ).filter(newImg =>
-                !prev.images.some(img =>
-                    (img.file && newImg.file && img.file === newImg.file)
-                )
-            );
-            // Gộp và loại trùng lặp
-            const allImages = [...newMainImages, ...prev.images];
-            const uniqueImages = [];
-            for (const img of allImages) {
-                if (!uniqueImages.some(uImg =>
-                    (uImg.file && img.file && uImg.file === img.file) ||
-                    (uImg.url && img.url && uImg.url === img.url)
-                )) {
-                    uniqueImages.push(img);
-                }
-            }
-            return {
-                ...prev,
-                images: uniqueImages
-            };
-        });
-    };
-
     const addVariant = () => {
         if (!currentVariant.attributes.size || !currentVariant.attributes.color || !currentVariant.stock) {
             toast.error('Vui lòng điền đủ thông tin size, màu và tồn kho cho biến thể.');
@@ -217,27 +177,13 @@ const Product = () => {
             return;
         }
 
-        // Nếu biến thể có ảnh, thêm ảnh đầu tiên vào main images nếu chưa có, chỉ thêm file thực sự hoặc url thực tế
-        let updatedImages = [...formData.images];
-        if (currentVariant.images && currentVariant.images.length > 0) {
-            const firstVariantImg = currentVariant.images[0];
-            const isValidImg = (firstVariantImg.file && firstVariantImg.file instanceof File) || (typeof firstVariantImg.url === 'string' && !firstVariantImg.url.startsWith('blob:'));
-            if (isValidImg) {
-                const exists = updatedImages.some(img => (img.file && firstVariantImg.file && img.file === firstVariantImg.file) || (img.url && firstVariantImg.url && img.url === firstVariantImg.url));
-                if (!exists) {
-                    updatedImages = [firstVariantImg, ...updatedImages]; // Thêm lên đầu
-                }
-            }
-        }
-
         if (editingVariantIdx !== null) {
             // Update existing variant
             const updatedVariants = [...formData.variants];
             updatedVariants[editingVariantIdx] = { ...currentVariant };
             setFormData(prev => ({
                 ...prev,
-                variants: updatedVariants,
-                images: updatedImages
+                variants: updatedVariants
             }));
         } else {
             // Add new variant
@@ -249,8 +195,7 @@ const Product = () => {
             };
             setFormData(prev => ({
                 ...prev,
-                variants: [...prev.variants, newVariant],
-                images: updatedImages
+                variants: [...prev.variants, newVariant]
             }));
         }
 
@@ -306,12 +251,8 @@ const Product = () => {
     };
 
     const handleRemoveImage = (index) => {
-        let updatedImages = [...formData.images];
+        const updatedImages = [...formData.images];
         updatedImages.splice(index, 1);
-        // Sau khi xóa, chỉ giữ lại object có file thực sự hoặc url thực tế (không blob)
-        updatedImages = updatedImages.filter(img =>
-            (img.file && img.file instanceof File) || (typeof img.url === 'string' && !img.url.startsWith('blob:'))
-        );
         setFormData(prev => ({ ...prev, images: updatedImages }));
     };
 
@@ -342,40 +283,33 @@ const Product = () => {
         setLoading(true);
         setError('');
 
-        // Lọc lại images trước khi submit
-        const validImages = formData.images.filter(img =>
-            (img.file && img.file instanceof File) || (typeof img.url === 'string' && !img.url.startsWith('blob:'))
-        );
-
         const formDataToSend = new FormData();
+
+        // Whitelist fields to append. This is safer than blacklisting.
         const simpleFields = ['name', 'description', 'brand', 'category', 'price', 'stock', 'isActive'];
         simpleFields.forEach(key => {
+            // Ensure the key exists and is not null/undefined before appending
             if (formData[key] !== undefined && formData[key] !== null) {
                 formDataToSend.append(key, formData[key]);
             }
         });
 
         // 1. Handle Main Images
-        const existingMainImageUrls = validImages.filter(img => !img.file && typeof img.url === 'string' && !img.url.startsWith('blob:')).map(img => img.url);
-        const newMainImageFiles = validImages.filter(img => !!img.file && img.file instanceof File).map(img => img.file);
+        const existingMainImageUrls = formData.images.filter(img => !img.file).map(img => img.url);
+        const newMainImageFiles = formData.images.filter(img => !!img.file).map(img => img.file);
 
-        if (existingMainImageUrls.length > 0) {
-            existingMainImageUrls.forEach(url => formDataToSend.append('existingImages', url));
-        }
-        if (newMainImageFiles.length > 0) {
-            newMainImageFiles.forEach(file => formDataToSend.append('images', file));
-        }
+        existingMainImageUrls.forEach(url => formDataToSend.append('existingImages', url));
+        newMainImageFiles.forEach(file => formDataToSend.append('images', file));
+
 
         // 2. Handle Variants and their images
         const variantsForUpload = formData.variants.map(variant => {
-            const existingVariantImages = (variant.images || []).filter(img => !img.file && typeof img.url === 'string' && !img.url.startsWith('blob:')).map(img => img.url);
-            const newVariantImageFiles = (variant.images || []).filter(img => !!img.file && img.file instanceof File).map(img => img.file);
+            const existingVariantImages = variant.images.filter(img => !img.file).map(img => img.url);
+            const newVariantImageFiles = variant.images.filter(img => !!img.file).map(img => img.file);
 
-            if (newVariantImageFiles.length > 0) {
-                newVariantImageFiles.forEach(file => {
-                    formDataToSend.append('variantImages', file);
-                });
-            }
+            newVariantImageFiles.forEach(file => {
+                formDataToSend.append('variantImages', file);
+            });
 
             return {
                 ...variant,
@@ -402,7 +336,7 @@ const Product = () => {
             fetchProducts();
             resetForm();
         } catch (error) {
-            alert(error.response?.data?.message || 'Lỗi khi lưu sản phẩm');
+            setError(error.response?.data?.message || 'Lỗi khi lưu sản phẩm');
         } finally {
             setLoading(false);
         }
@@ -444,16 +378,57 @@ const Product = () => {
         }
     };
 
-    // Thêm hàm xoá ảnh biến thể
-    const handleRemoveVariantImage = (idx) => {
-        setCurrentVariant(prev => {
-            const newImages = [...(prev.images || [])];
-            newImages.splice(idx, 1);
-            return {
-                ...prev,
-                images: newImages
-            };
+    const handleVariantImageChange = (e) => {
+        const files = Array.from(e.target.files);
+
+        // Validate file types and sizes
+        const validFiles = files.filter(file => {
+            const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
+            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
+
+            if (!isValidType) {
+                setError('Chỉ hỗ trợ file ảnh: JPG, PNG, GIF, WEBP');
+                return false;
+            }
+
+            if (!isValidSize) {
+                setError('Kích thước file không được vượt quá 5MB');
+                return false;
+            }
+
+            return true;
         });
+
+        if (validFiles.length === 0) return;
+
+        const newImageObjects = validFiles.map(file => ({
+            url: URL.createObjectURL(file),
+            file: file,
+            id: Date.now() + Math.random()
+        }));
+
+        setCurrentVariant(prev => ({
+            ...prev,
+            images: [...prev.images, ...newImageObjects]
+        }));
+
+        setError(''); // Clear any previous errors
+    };
+
+    const removeVariantImage = (index) => {
+        const updatedImages = [...currentVariant.images];
+        updatedImages.splice(index, 1);
+        setCurrentVariant(prev => ({ ...prev, images: updatedImages }));
+    };
+
+    const handleVariantDrop = (e) => {
+        e.preventDefault();
+        const files = Array.from(e.dataTransfer.files);
+        handleVariantImageChange({ target: { files } });
+    };
+
+    const handleVariantDragOver = (e) => {
+        e.preventDefault();
     };
 
     return (
@@ -493,7 +468,27 @@ const Product = () => {
                         <input type="file" multiple onChange={handleImageChange} className={styles.input} />
                         <div className={styles.imagePreviewContainer} style={{ marginTop: '20px' }}>
                             {formData.images.map((img, index) => (
-                                <div key={img.id || index} className={styles.imagePreviewWrapper}>
+                                <div key={img.id || index}
+                                    className={`${styles.imagePreviewWrapper} ${draggedIndex === index ? styles.dragging : ''}`}
+                                    draggable
+                                    onDragStart={(e) => {
+                                        setDraggedIndex(index);
+                                        e.dataTransfer.effectAllowed = 'move';
+                                    }}
+                                    onDragOver={(e) => e.preventDefault()}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        if (draggedIndex === null) return;
+
+                                        const newImages = [...formData.images];
+                                        const [draggedItem] = newImages.splice(draggedIndex, 1);
+                                        newImages.splice(index, 0, draggedItem);
+
+                                        setFormData(prev => ({ ...prev, images: newImages }));
+                                        setDraggedIndex(null);
+                                    }}
+                                    onDragEnd={() => setDraggedIndex(null)}
+                                >
                                     <img src={img.url} alt="Preview" className={styles.imagePreview} />
                                     <button type="button" className={styles.removeImageBtn} onClick={() => handleRemoveImage(index)}>&times;</button>
                                 </div>
@@ -562,7 +557,7 @@ const Product = () => {
                         {/* Variant Image Upload with Preview */}
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Ảnh biến thể</label>
-                            <div className={styles.dropZone} onClick={() => document.getElementById('variant-image-input').click()}>
+                            <div className={styles.dropZone} onDrop={handleVariantDrop} onDragOver={handleVariantDragOver} onClick={() => document.getElementById('variant-image-input').click()}>
                                 <div className={styles.dropZoneContent}>
                                     <i className="bi bi-cloud-upload" style={{ fontSize: '2rem', color: '#666' }}></i>
                                     <p>Kéo thả ảnh vào đây hoặc click để chọn</p>
@@ -588,6 +583,7 @@ const Product = () => {
                                         draggable
                                         onDragStart={(e) => {
                                             e.dataTransfer.setData('variantImageIndex', idx);
+                                            e.dataTransfer.effectAllowed = 'move';
                                         }}
                                         onDragOver={(e) => e.preventDefault()}
                                         onDrop={(e) => {
@@ -603,7 +599,7 @@ const Product = () => {
                                         }}
                                     >
                                         <img src={img.url} alt={`Variant ${idx + 1}`} className={styles.imagePreview} />
-                                        <button type="button" onClick={() => handleRemoveVariantImage(idx)} className={styles.removeImageBtn}>&times;</button>
+                                        <button type="button" onClick={() => removeVariantImage(idx)} className={styles.removeImageBtn}>&times;</button>
                                         <div className={styles.imageOrder}>{idx + 1}</div>
                                     </div>
                                 ))}
@@ -636,16 +632,33 @@ const Product = () => {
                                             <td>{v.price}</td>
                                             <td>
                                                 {v.images && v.images.length > 0 ? (
-                                                    <img
-                                                        src={getImageUrl(v.images[0])}
-                                                        alt={`Variant ${idx + 1}`}
-                                                        className={styles.variantThumbnail}
-                                                        style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }}
-                                                        onClick={() => {
-                                                            setSelectedImage(getImageUrl(v.images[0]));
-                                                            setShowImageModal(true);
-                                                        }}
-                                                    />
+                                                    <div className={styles.variantImages}>
+                                                        {v.images.slice(0, 2).map((img, imgIdx) => (
+                                                            <img
+                                                                key={imgIdx}
+                                                                src={getImageUrl(img)}
+                                                                alt={`Variant ${idx + 1}`}
+                                                                className={styles.variantThumbnail}
+                                                                onClick={() => {
+                                                                    setSelectedImage(getImageUrl(img));
+                                                                    setShowImageModal(true);
+                                                                }}
+                                                                style={{ cursor: 'pointer' }}
+                                                            />
+                                                        ))}
+                                                        {v.images.length > 2 && (
+                                                            <div
+                                                                className={styles.moreImages}
+                                                                onClick={() => {
+                                                                    setSelectedImage(getImageUrl(v.images[0]));
+                                                                    setShowImageModal(true);
+                                                                }}
+                                                                style={{ cursor: 'pointer' }}
+                                                            >
+                                                                +{v.images.length - 2}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <span className={styles.noImage}>Không có ảnh</span>
                                                 )}
@@ -655,7 +668,7 @@ const Product = () => {
                                                     Sửa
                                                 </button>
                                                 <button type="button" onClick={() => removeVariant(idx)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>
-                                                    Xóa
+                                                    Xoá
                                                 </button>
                                             </td>
                                         </tr>
@@ -701,7 +714,8 @@ const Product = () => {
             {/* Product List */}
             <div className={styles.card} style={{ marginTop: '24px' }}>
                 <h2 className={styles.cardTitle}>Danh sách sản phẩm</h2>
-                <table className={styles.productTable + ' customProductTable'}>
+                <table className={styles.productTable}>
+                    {/* Table headers */}
                     <thead>
                         <tr>
                             <th>Ảnh</th>
@@ -713,22 +727,23 @@ const Product = () => {
                             <th>Thao tác</th>
                         </tr>
                     </thead>
+                    {/* Table body */}
                     <tbody>
-                        {products.map((product) => (
+                        {products.map(product => (
                             <tr key={product._id}>
-                                <td>
-                                    {product.images && product.images.length > 0 && (
-                                        <img src={product.images[0]} alt="Ảnh" style={{ width: 40, height: 40, objectFit: 'cover', borderRadius: 6 }} />
-                                    )}
-                                </td>
+                                <td><img src={getImageUrl(product.images?.[0])} alt={product.name} className={styles.productImage} /></td>
                                 <td>{product.name}</td>
-                                <td>{product.category?.name || categories.find(c => c._id === (product.category?._id || product.category))?.name || ''}</td>
+                                <td>{product.category?.name || 'N/A'}</td>
                                 <td>{product.price}</td>
                                 <td>{product.stock}</td>
-                                <td>{product.isActive ? 'Công khai' : 'Ẩn'}</td>
                                 <td>
-                                    <button className={styles.actionBtn + ' ' + styles.editBtn} onClick={() => handleEdit(product)}>Sửa</button>
-                                    <button className={styles.actionBtn + ' ' + styles.deleteBtn} onClick={() => handleDelete(product._id)}>Xóa</button>
+                                    <span className={`${styles.status} ${product.isActive ? styles.statusActive : styles.statusInactive}`}>
+                                        {product.isActive ? 'Công khai' : 'Ẩn'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button onClick={() => handleEdit(product)} className={styles.actionBtn}>Edit</button>
+                                    <button onClick={() => handleDelete(product._id)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>Delete</button>
                                 </td>
                             </tr>
                         ))}

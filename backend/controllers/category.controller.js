@@ -1,5 +1,7 @@
 const Category = require('../models/Category');
 const Product = require('../models/Product');
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
 
 // Get all categories
 exports.getCategories = async (req, res) => {
@@ -19,31 +21,57 @@ exports.getCategories = async (req, res) => {
 
 // Create a new category
 exports.createCategory = async (req, res) => {
+    console.log('Request body:', req.body); // Log req.body
+    console.log('Request file:', req.file);   // Log req.file
     try {
         const { name } = req.body;
         let image = '';
-        if (req.file && req.file.filename) {
-            image = '/uploads/' + req.file.filename;
+        if (req.file) {
+            console.log('Received file for upload:', req.file); // Log để kiểm tra file
+            try {
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'categories'
+                });
+                image = result.secure_url;
+                fs.unlinkSync(req.file.path); // Xóa file tạm
+            } catch (uploadError) {
+                console.error('Cloudinary Upload Error:', uploadError); // Log lỗi từ Cloudinary
+                return res.status(500).json({ message: 'Lỗi khi tải ảnh lên Cloudinary', error: uploadError.message });
+            }
         }
         const category = new Category({ name, image });
         await category.save();
         res.json(category);
     } catch (err) {
+        console.error('Create Category Error:', err);
         res.status(500).json({ message: 'Lỗi tạo danh mục', error: err.message });
     }
 };
 
 // Update a category
 exports.updateCategory = async (req, res) => {
+    console.log('Update request body:', req.body); // Log req.body
+    console.log('Update request file:', req.file);   // Log req.file
     try {
         const { name } = req.body;
         let updateData = { name };
-        if (req.file && req.file.filename) {
-            updateData.image = '/uploads/' + req.file.filename;
+        if (req.file) {
+            console.log('Received file for update:', req.file); // Log để kiểm tra file
+            try {
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'categories'
+                });
+                updateData.image = result.secure_url;
+                fs.unlinkSync(req.file.path); // Xóa file tạm
+            } catch (uploadError) {
+                console.error('Cloudinary Upload Error on Update:', uploadError); // Log lỗi từ Cloudinary
+                return res.status(500).json({ message: 'Lỗi khi tải ảnh lên Cloudinary', error: uploadError.message });
+            }
         }
         const category = await Category.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(category);
     } catch (err) {
+        console.error('Update Category Error:', err);
         res.status(500).json({ message: 'Lỗi cập nhật danh mục', error: err.message });
     }
 };

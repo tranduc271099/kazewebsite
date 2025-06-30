@@ -18,15 +18,17 @@ exports.getRevenueStats = async (req, res) => {
             };
         }
 
+        const revenueStatusFilter = { trang_thai: { $in: ['đã giao hàng', 'đã nhận hàng', 'hoàn thành'] } };
+
         // Tổng doanh thu
         const totalRevenue = await Bill.aggregate([
-            { $match: { ...dateFilter, trang_thai: { $in: ['đã giao hàng', 'đã nhận hàng', 'hoàn thành'] } } },
+            { $match: { ...dateFilter, ...revenueStatusFilter } },
             { $group: { _id: null, total: { $sum: '$tong_tien' } } }
         ]);
 
         // Doanh thu theo ngày
         const revenueByDay = await Bill.aggregate([
-            { $match: { ...dateFilter, trang_thai: { $in: ['đã giao hàng', 'đã nhận hàng', 'hoàn thành'] } } },
+            { $match: { ...dateFilter, ...revenueStatusFilter } },
             {
                 $group: {
                     _id: { $dateToString: { format: "%Y-%m-%d", date: "$ngay_tao" } },
@@ -244,7 +246,15 @@ exports.getDashboardStats = async (req, res) => {
                 $group: {
                     _id: null,
                     totalOrders: { $sum: 1 },
-                    totalRevenue: { $sum: '$tong_tien' },
+                    totalRevenue: {
+                        $sum: {
+                            $cond: [
+                                { $in: ['$trang_thai', ['đã giao hàng', 'đã nhận hàng', 'hoàn thành']] },
+                                '$tong_tien',
+                                0
+                            ]
+                        }
+                    },
                     completedOrders: {
                         $sum: {
                             $cond: [

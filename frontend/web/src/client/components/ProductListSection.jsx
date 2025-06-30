@@ -119,6 +119,13 @@ const ProductListSection = () => {
             .popover-attribute-box button[aria-label='Đóng']:hover {
                 color: #1976d2;
             }
+            .hover-img {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .product-image:hover .hover-img {
+                opacity: 1;
+            }
         `;
         document.head.appendChild(style);
         return () => document.head.removeChild(style);
@@ -190,7 +197,7 @@ const ProductListSection = () => {
             product.category?.name?.toLowerCase() === selectedCategory.toLowerCase()
         );
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <div>Đang tải...</div>;
     if (error) return <div>{error}</div>;
 
     return (
@@ -231,10 +238,10 @@ const ProductListSection = () => {
                             <div key={product._id} className="col-md-6 col-lg-3 product-item isotope-item" style={{ position: 'relative' }}>
                                 <div className="product-card">
                                     <div className="product-image position-relative overflow-hidden">
-                                        {product.isNew && <span className="badge">New</span>}
-                                        {product.isSale && <span className="badge">Sale</span>}
+                                        {product.isNew && <span className="badge">Mới</span>}
+                                        {product.isSale && <span className="badge">Giảm giá</span>}
                                         <img src={image1} alt={product.name} className="img-fluid main-img" />
-                                        <img src={image2} alt={`${product.name} Hover`} className="img-fluid hover-img position-absolute top-0 start-0 w-100 h-100 opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                                        <img src={image2} alt={`${product.name} Hover`} className="img-fluid hover-img position-absolute top-0 start-0 w-100 h-100" />
                                         <div className="product-overlay">
                                             <button className="btn-cart" onClick={() => openPopover(product)}><i className="bi bi-cart-plus"></i> Thêm vào giỏ</button>
                                             <div className="product-actions">
@@ -291,7 +298,7 @@ const ProductListSection = () => {
                                             >&times;</button>
                                             <h5 className="mb-2" style={{ fontWeight: 600 }}>Chọn thuộc tính</h5>
                                             <div className="mb-2">
-                                                <label className="form-label" style={{ fontWeight: 500 }}>Size:</label>
+                                                <label className="form-label" style={{ fontWeight: 500 }}>Kích thước:</label>
                                                 <select className="form-select" value={selectedSize} onChange={e => setSelectedSize(e.target.value)}>
                                                     {selectedProduct.attributes?.sizes?.map(size => (
                                                         <option key={size} value={size}>{size}</option>
@@ -299,7 +306,7 @@ const ProductListSection = () => {
                                                 </select>
                                             </div>
                                             <div className="mb-2">
-                                                <label className="form-label" style={{ fontWeight: 500 }}>Màu:</label>
+                                                <label className="form-label" style={{ fontWeight: 500 }}>Màu sắc:</label>
                                                 <select className="form-select" value={selectedColor} onChange={e => setSelectedColor(e.target.value)}>
                                                     {selectedProduct.attributes?.colors?.map(color => (
                                                         <option key={color} value={color}>{color}</option>
@@ -316,7 +323,7 @@ const ProductListSection = () => {
                                                     value={selectedQuantity}
                                                     onChange={e => setSelectedQuantity(Math.max(1, Math.min(selectedProduct.stock, Number(e.target.value))))}
                                                 />
-                                                <small className="text-muted">Tồn kho: {selectedProduct.stock}</small>
+                                                <small className="text-muted">Còn lại: {selectedProduct.stock}</small>
                                             </div>
                                             <div className="d-flex justify-content-end gap-2 mt-2">
                                                 <button className="btn btn-secondary btn-sm" onClick={closePopover}>Hủy</button>

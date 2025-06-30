@@ -125,8 +125,8 @@ function ProductDetail() {
     if (selectedVariant && selectedVariant.images && selectedVariant.images.length > 0) {
         // Lấy ảnh biến thể + ảnh sản phẩm (loại trùng lặp)
         const variantImgs = selectedVariant.images.map(normalizeImageUrl);
-        const productImgs = (product?.images || []).map(normalizeImageUrl).filter(img => !variantImgs.includes(img));
-        thumbnails = [...variantImgs, ...productImgs];
+        // const productImgs = (product?.images || []).map(normalizeImageUrl).filter(img => !variantImgs.includes(img));
+        thumbnails = [...variantImgs];
     } else if (product?.images && product.images.length > 0) {
         thumbnails = product.images.map(normalizeImageUrl);
     } else {
@@ -147,7 +147,7 @@ function ProductDetail() {
     }, [selectedVariant, mainImage]);
 
     if (fetchError) return <div>Không tìm thấy sản phẩm hoặc có lỗi xảy ra.</div>;
-    if (!product) return <div>Loading...</div>;
+    if (!product) return <div>Đang tải...</div>;
 
     console.log('Render ảnh:', mainImage, normalizeImageUrl(mainImage));
 
@@ -188,7 +188,7 @@ function ProductDetail() {
                                     >
                                         <img
                                             src={normalizeImageUrl(mainImage)}
-                                            alt="Product"
+                                            alt="Sản phẩm"
                                             className="img-fluid main-image"
                                             style={{
                                                 maxWidth: '100%',
@@ -216,7 +216,7 @@ function ProductDetail() {
                                         >
                                             <img
                                                 src={normalizeImageUrl(thumb || '/assets/img/no-image.png')}
-                                                alt="Product Thumbnail"
+                                                alt="Ảnh thu nhỏ sản phẩm"
                                                 className="img-fluid"
                                                 style={{
                                                     width: 70,
@@ -235,14 +235,14 @@ function ProductDetail() {
                         <div className="col-lg-6" data-aos="fade-left" data-aos-delay="200">
                             <div className="product-info">
                                 <div className="product-meta mb-2">
-                                    <span className="product-category">{product.category?.name || 'Danh mục'}</span>
+                                    <span className="product-category">{product.category?.name || 'Chưa phân loại'}</span>
                                     <div className="product-rating">
                                         <i className="bi bi-star-fill"></i>
                                         <i className="bi bi-star-fill"></i>
                                         <i className="bi bi-star-fill"></i>
                                         <i className="bi bi-star-fill"></i>
                                         <i className="bi bi-star-half"></i>
-                                        <span className="rating-count">({product.reviews?.length || 0})</span>
+                                        <span className="rating-count">({product.reviews?.length || 0} đánh giá)</span>
                                     </div>
                                 </div>
                                 <h1 className="product-title">{product.name}</h1>
@@ -254,12 +254,12 @@ function ProductDetail() {
                                     {product.oldPrice && <span className="discount-badge">-{Math.round(100 - ((selectedVariant?.price || product.price) / product.oldPrice) * 100)}%</span>}
                                 </div>
                                 <div className="product-short-description mb-4">
-                                    <p>{product.description}</p>
+                                    <p style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
                                 </div>
                                 <div className="product-availability mb-4">
                                     <i className={`bi bi-${selectedVariant?.stock > 0 ? 'check' : 'x'}-circle-fill text-${selectedVariant?.stock > 0 ? 'success' : 'danger'}`}></i>
-                                    <span>{selectedVariant?.stock > 0 ? 'Còn hàng' : 'Hết hàng'}</span>
-                                    <span className="stock-count">({selectedVariant?.stock || 0} sản phẩm)</span>
+                                    <span>{selectedVariant?.stock > 0 ? (selectedVariant.stock > 10 ? 'Còn hàng' : 'Sắp hết hàng') : 'Hết hàng'}</span>
+                                    {selectedVariant?.stock > 0 && <span className="stock-count">({selectedVariant?.stock} sản phẩm có sẵn)</span>}
                                 </div>
 
                                 {/* Product Attributes */}
@@ -348,7 +348,7 @@ function ProductDetail() {
                                         <i className="bi bi-lightning-fill"></i> Mua ngay
                                     </button>
                                     <button className="btn btn-outline-secondary wishlist-btn">
-                                        <i className="bi bi-heart"></i>
+                                        <i className="bi bi-heart"></i> Thêm vào yêu thích
                                     </button>
                                 </div>
 
@@ -356,7 +356,7 @@ function ProductDetail() {
                                 <div className="additional-info mt-4">
                                     <div className="info-item"><i className="bi bi-truck"></i> <span>Miễn phí vận chuyển cho đơn hàng trên 500.000đ</span></div>
                                     <div className="info-item"><i className="bi bi-arrow-repeat"></i> <span>Chính sách đổi trả trong 30 ngày</span></div>
-                                    <div className="info-item"><i className="bi bi-shield-check"></i> <span>Bảo hành 2 năm</span></div>
+                                    <div className="info-item"><i className="bi bi-shield-check"></i> <span>Bảo hành chính hãng 2 năm</span></div>
                                 </div>
                             </div>
                         </div>
@@ -382,7 +382,7 @@ function ProductDetail() {
                                     <div className="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
                                         <div className="product-description">
                                             <h4>Tổng quan sản phẩm</h4>
-                                            <p>{product.description}</p>
+                                            <p style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
                                         </div>
                                     </div>
                                     {/* Specifications Tab */}
@@ -391,12 +391,16 @@ function ProductDetail() {
                                             <div className="specs-group">
                                                 <h4>Thông số kỹ thuật</h4>
                                                 <div className="specs-table">
-                                                    {Object.entries(product.specifications || {}).map(([key, value]) => (
-                                                        <div key={key} className="specs-row">
-                                                            <div className="specs-label">{key}</div>
-                                                            <div className="specs-value">{value}</div>
-                                                        </div>
-                                                    ))}
+                                                    {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                                                        Object.entries(product.specifications).map(([key, value]) => (
+                                                            <div key={key} className="specs-row">
+                                                                <div className="specs-label">{key.charAt(0).toUpperCase() + key.slice(1)}</div>
+                                                                <div className="specs-value">{value}</div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p>Không có thông số kỹ thuật cho sản phẩm này.</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -406,15 +410,16 @@ function ProductDetail() {
                                         <div className="product-reviews">
                                             <div className="reviews-summary">
                                                 <div className="overall-rating">
-                                                    <div className="rating-number">{product.rating || 0}</div>
+                                                    <div className="rating-number">{product.rating ? product.rating.toFixed(1) : '0.0'}</div>
                                                     <div className="rating-stars">
                                                         {[...Array(5)].map((_, i) => (
-                                                            <i key={i} className={`bi bi-star${i < Math.floor(product.rating) ? '-fill' : i < Math.ceil(product.rating) ? '-half' : ''}`}></i>
+                                                            <i key={i} className={`bi bi-star${i < Math.floor(product.rating || 0) ? '-fill' : i < Math.ceil(product.rating || 0) ? '-half' : ''}`}></i>
                                                         ))}
                                                     </div>
                                                 </div>
-                                                <div className="reviews-count">{product.reviews?.length || 0} đánh giá</div>
+                                                <div className="reviews-count">{product.reviews?.length || 0} lượt đánh giá</div>
                                             </div>
+                                            {/* Thêm phần review chi tiết và form review ở đây */}
                                         </div>
                                     </div>
                                 </div>
