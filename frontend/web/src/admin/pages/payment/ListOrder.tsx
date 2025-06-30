@@ -52,6 +52,8 @@ const statusOptions = [
   'đã hủy',
 ];
 
+console.log('ListOrder component mounted');
+
 const ListOrder = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
@@ -84,15 +86,9 @@ const ListOrder = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Orders response:', res.data);
-
-      if (res.data && res.data.bills) {
-        setOrders(res.data.bills);
-        setTotal(res.data.bills.length);
-      } else {
-        console.error('Invalid response format:', res.data);
-        setError('Dữ liệu không đúng định dạng');
-      }
-      setPage(1);
+      setOrders(res.data.bills);
+      console.log('Set orders:', res.data.bills);
+      setTotal(res.data.bills.length);
     } catch (err: any) {
       console.error('Error fetching orders:', err);
       console.error('Error response:', err.response?.data);
@@ -161,14 +157,14 @@ const ListOrder = () => {
   };
 
   const filteredOrders = orders.filter(order => {
-    // Loại bỏ đơn hàng ảo: tổng tiền = 0 hoặc không có khách hàng hoặc không có địa chỉ
-    const isFakeOrder =
-      !order.nguoi_dung_id?.name ||
-      order.tong_tien === 0 ||
-      !order.dia_chi_giao_hang ||
-      order.nguoi_dung_id.name === 'Ẩn danh' ||
-      order.nguoi_dung_id.name === 'Không có thông tin';
-    if (isFakeOrder) return false;
+    // Tạm thời bỏ filter loại bỏ đơn hàng ảo để hiển thị tất cả đơn hàng
+    // const isFakeOrder =
+    //   !order.nguoi_dung_id?.name ||
+    //   order.tong_tien === 0 ||
+    //   !order.dia_chi_giao_hang ||
+    //   order.nguoi_dung_id.name === 'Ẩn danh' ||
+    //   order.nguoi_dung_id.name === 'Không có thông tin';
+    // if (isFakeOrder) return false;
     const searchText = search.toLowerCase();
     const matchSearch =
       (order.nguoi_dung_id?.name || '').toLowerCase().includes(searchText) ||

@@ -1,0 +1,23 @@
+.section-spacing,
+.category-cards.section,
+.info-cards.section,
+.best-sellers.section {
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+
+    .section-spacing,
+    .category-cards.section,
+    .info-cards.section,
+    .best-sellers.section {
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+}
+
+.main .container>.row,
+.main .container>.row.gy-4 {
+    margin-top: 0 !important;
+}

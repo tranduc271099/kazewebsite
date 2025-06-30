@@ -242,15 +242,20 @@ const Checkout = () => {
             const result = await response.json();
 
             if (response.ok) {
-                toast.success('Đặt hàng thành công!');
-                await removeItemsFromCart(itemsToCheckout);
-                navigate('/bill');
+                toast.success('Đặt hàng thành công!', {
+                    onClose: () => navigate('/bill'),
+                    autoClose: 2000
+                });
+                removeItemsFromCart(itemsToCheckout).catch((e) => {
+                    console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng:', e);
+                });
+                return;
             } else {
                 toast.error(result.message || 'Có lỗi xảy ra, vui lòng thử lại.');
             }
         } catch (error) {
             console.error('Lỗi khi đặt hàng:', error);
-            toast.error('Không thể kết nối đến server.');
+            toast.error('Có lỗi xảy ra, vui lòng thử lại.');
         }
     };
 

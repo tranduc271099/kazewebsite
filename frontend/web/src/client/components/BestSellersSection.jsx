@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 const BestSellersSection = () => (
     <section id="best-sellers" className="best-sellers section">
-        <div className="container section-title" data-aos="fade-up">
-            <h2>Bán chạy nhất</h2>
-            <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+        <div className="container section-title" data-aos="fade-up" style={{ padding: '28px 40px 28px' }}>
+            <h2>Best Sellers</h2>
+            {/* <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p> */}
         </div>
         <div className="container" data-aos="fade-up" data-aos-delay="100">
             <div className="row gy-4">

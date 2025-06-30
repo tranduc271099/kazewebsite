@@ -31,8 +31,7 @@ app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/products', require('./routes/product.routes'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cart', require('./routes/cart.routes'));
-
-
+app.use('/api/dashboard', require('./routes/dashboard'));
 
 app.use('/api/bill', require('./routes/Bill/billroutes'))
 

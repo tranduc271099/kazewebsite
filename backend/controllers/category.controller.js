@@ -4,8 +4,14 @@ const Product = require('../models/Product');
 // Get all categories
 exports.getCategories = async (req, res) => {
     try {
+        // Lấy tất cả danh mục
         const categories = await Category.find().sort({ createdAt: -1 });
-        res.json(categories);
+        // Đếm số lượng sản phẩm cho từng danh mục
+        const categoriesWithCount = await Promise.all(categories.map(async (cat) => {
+            const productCount = await Product.countDocuments({ category: cat._id });
+            return { ...cat.toObject(), productCount };
+        }));
+        res.json(categoriesWithCount);
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi lấy danh sách danh mục' });
     }
