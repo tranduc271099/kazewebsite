@@ -28,7 +28,7 @@ const Register = () => {
             const response = await axios.post('http://localhost:5000/api/users/register', formData);
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data?.message || 'Đăng ký không thành công');
+            setError(err.response?.data?.message || 'Đăng ký không thành công. Vui lòng thử lại.');
         } finally {
             setLoading(false);
         }

@@ -14,7 +14,7 @@ import User from "./pages/User";
 import Category from "./pages/Category";
 import Product from "./pages/Product";
 import { UserProvider } from "./UserContext";
-import ListOrder from "./pages/payment/ListOrder.tsx";
+import ListOrder from "./pages/payment/ListOrder.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();

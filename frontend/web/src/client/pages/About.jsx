@@ -5,11 +5,11 @@ const About = () => (
         {/* Page Title */}
         <div className="page-title light-background">
             <div className="container d-lg-flex justify-content-between align-items-center">
-                <h1 className="mb-2 mb-lg-0">About</h1>
+                <h1 className="mb-2 mb-lg-0">Giới thiệu</h1>
                 <nav className="breadcrumbs">
                     <ol>
-                        <li><a href="/">Home</a></li>
-                        <li className="current">About</li>
+                        <li><a href="/">Trang chủ</a></li>
+                        <li className="current">Giới thiệu</li>
                     </ol>
                 </nav>
             </div>
@@ -17,37 +17,37 @@ const About = () => (
         {/* About 2 Section */}
         <section id="about-2" className="about-2 section">
             <div className="container" data-aos="fade-up" data-aos-delay="100">
-                <span className="section-badge"><i className="bi bi-info-circle"></i> About Us</span>
+                <span className="section-badge"><i className="bi bi-info-circle"></i> Về chúng tôi</span>
                 <div className="row">
                     <div className="col-lg-6">
-                        <h2 className="about-title">Nemo enim ipsam voluptatem quia voluptas aspernatur</h2>
-                        <p className="about-description">Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae.</p>
+                        <h2 className="about-title">Hành trình tạo nên phong cách của bạn</h2>
+                        <p className="about-description">Tại KazeStore, chúng tôi tin rằng thời trang không chỉ là quần áo, mà còn là cách bạn thể hiện bản thân. Chúng tôi luôn nỗ lực để mang đến những sản phẩm chất lượng với thiết kế độc đáo.</p>
                     </div>
                     <div className="col-lg-6">
-                        <p className="about-text">Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
-                        <p className="about-text">Amet eos ut. Officiis soluta ab id dolor non sint. Corporis omnis consequatur quisquam ex consequuntur quo omnis. Quo eligendi cum. Amet mollitia qui quidem dolores praesentium quasi ut et.</p>
+                        <p className="about-text">Mỗi sản phẩm đều được chúng tôi lựa chọn cẩn thận từ chất liệu đến kiểu dáng, đảm bảo sự thoải mái và tự tin cho người mặc. Sứ mệnh của chúng tôi là đồng hành cùng bạn trên con đường định hình phong cách cá nhân.</p>
+                        <p className="about-text">Chúng tôi tự hào về đội ngũ nhân viên nhiệt huyết, luôn sẵn sàng tư vấn và hỗ trợ khách hàng. Hãy đến với KazeStore để trải nghiệm không gian mua sắm tuyệt vời và tìm thấy những món đồ ưng ý nhất.</p>
                     </div>
                 </div>
                 <div className="row features-boxes gy-4 mt-3">
                     <div className="col-lg-4" data-aos="fade-up" data-aos-delay="200">
                         <div className="feature-box">
                             <div className="icon-box"><i className="bi bi-bullseye"></i></div>
-                            <h3><a href="#" className="stretched-link">At vero eos</a></h3>
-                            <p>Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat.</p>
+                            <h3><a href="#" className="stretched-link">Sản phẩm chất lượng</a></h3>
+                            <p>Chúng tôi cam kết mang đến những sản phẩm được làm từ chất liệu cao cấp, bền đẹp theo thời gian.</p>
                         </div>
                     </div>
                     <div className="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                         <div className="feature-box">
                             <div className="icon-box"><i className="bi bi-person-check"></i></div>
-                            <h3><a href="#" className="stretched-link">Sed ut perspiciatis</a></h3>
-                            <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque.</p>
+                            <h3><a href="#" className="stretched-link">Dịch vụ tận tâm</a></h3>
+                            <p>Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn với thái độ chuyên nghiệp và thân thiện nhất.</p>
                         </div>
                     </div>
                     <div className="col-lg-4" data-aos="fade-up" data-aos-delay="400">
                         <div className="feature-box">
                             <div className="icon-box"><i className="bi bi-clipboard-data"></i></div>
-                            <h3><a href="#" className="stretched-link">Nemo enim ipsam</a></h3>
-                            <p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam.</p>
+                            <h3><a href="#" className="stretched-link">Giá cả hợp lý</a></h3>
+                            <p>Chúng tôi tin rằng thời trang chất lượng cao không nhất thiết phải đi kèm với mức giá đắt đỏ.</p>
                         </div>
                     </div>
                 </div>
@@ -77,15 +77,15 @@ const About = () => (
                         <div className="row counters">
                             <div className="col-md-4" data-aos="fade-up" data-aos-delay="300">
                                 <h2><span data-purecounter-start="0" data-purecounter-end="185" data-purecounter-duration="1" className="purecounter"></span>+</h2>
-                                <p>Nemo enim ipsam</p>
+                                <p>Mẫu thiết kế độc quyền</p>
                             </div>
                             <div className="col-md-4" data-aos="fade-up" data-aos-delay="400">
                                 <h2><span data-purecounter-start="0" data-purecounter-end="32" data-purecounter-duration="1" className="purecounter"></span>K</h2>
-                                <p>Voluptatem sequi</p>
+                                <p>Khách hàng hài lòng</p>
                             </div>
                             <div className="col-md-4" data-aos="fade-up" data-aos-delay="500">
                                 <h2><span data-purecounter-start="0" data-purecounter-end="128" data-purecounter-duration="1" className="purecounter"></span>+</h2>
-                                <p>Dolor sit consectetur</p>
+                                <p>Đối tác thương hiệu</p>
                             </div>
                         </div>
                     </div>
@@ -99,60 +99,60 @@ const About = () => (
                     <div className="testimonial-item" data-aos="fade-up">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Implementing innovative strategies has revolutionized our approach to market challenges and competitive positioning.</p>
+                            <p>Việc áp dụng các chiến lược đổi mới đã cách mạng hóa cách tiếp cận của chúng tôi đối với các thách thức thị trường.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-f-7.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Rachel Bennett</h3><span className="position">Strategy Director</span></div>
+                                <div className="client-details"><h3>An Nhiên</h3><span className="position">Giám đốc chiến lược</span></div>
                             </div>
                         </div>
                     </div>
                     <div className="testimonial-item highlight" data-aos="fade-up" data-aos-delay="100">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Exceptional service delivery and innovative solutions have transformed our business operations, leading to remarkable growth and enhanced customer satisfaction across all touchpoints.</p>
+                            <p>Dịch vụ vượt trội và các giải pháp sáng tạo đã làm thay đổi hoạt động kinh doanh của chúng tôi, mang lại sự tăng trưởng đáng kể.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-m-7.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Daniel Morgan</h3><span className="position">Chief Innovation Officer</span></div>
+                                <div className="client-details"><h3>Đức Minh</h3><span className="position">Giám đốc đổi mới</span></div>
                             </div>
                         </div>
                     </div>
                     <div className="testimonial-item" data-aos="fade-up" data-aos-delay="200">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Strategic partnership has enabled seamless digital transformation and operational excellence.</p>
+                            <p>Quan hệ đối tác chiến lược đã cho phép chuyển đổi số liền mạch và hoạt động xuất sắc.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-f-8.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Emma Thompson</h3><span className="position">Digital Lead</span></div>
+                                <div className="client-details"><h3>Thu Trang</h3><span className="position">Trưởng phòng kỹ thuật số</span></div>
                             </div>
                         </div>
                     </div>
                     <div className="testimonial-item" data-aos="fade-up" data-aos-delay="300">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Professional expertise and dedication have significantly improved our project delivery timelines and quality metrics.</p>
+                            <p>Chuyên môn và sự tận tâm đã cải thiện đáng kể tiến độ và chất lượng các dự án của chúng tôi.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-m-8.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Christopher Lee</h3><span className="position">Technical Director</span></div>
+                                <div className="client-details"><h3>Quốc Hùng</h3><span className="position">Giám đốc kỹ thuật</span></div>
                             </div>
                         </div>
                     </div>
                     <div className="testimonial-item highlight" data-aos="fade-up" data-aos-delay="400">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Collaborative approach and industry expertise have revolutionized our product development cycle, resulting in faster time-to-market and increased customer engagement levels.</p>
+                            <p>Cách tiếp cận hợp tác và chuyên môn trong ngành đã cách mạng hóa chu trình phát triển sản phẩm của chúng tôi.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-f-9.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Olivia Carter</h3><span className="position">Product Manager</span></div>
+                                <div className="client-details"><h3>Mai Phương</h3><span className="position">Quản lý sản phẩm</span></div>
                             </div>
                         </div>
                     </div>
                     <div className="testimonial-item" data-aos="fade-up" data-aos-delay="500">
                         <div className="testimonial-content">
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Innovative approach to user experience design has significantly enhanced our platform's engagement metrics and customer retention rates.</p>
+                            <p>Cách tiếp cận sáng tạo trong thiết kế trải nghiệm người dùng đã nâng cao đáng kể các chỉ số tương tác trên nền tảng của chúng tôi.</p>
                             <div className="client-info">
                                 <div className="client-image"><img src="/assets/img/person/person-m-13.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Nathan Brooks</h3><span className="position">UX Director</span></div>
+                                <div className="client-details"><h3>Gia Bảo</h3><span className="position">Giám đốc UX</span></div>
                             </div>
                         </div>
                     </div>

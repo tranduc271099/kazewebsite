@@ -49,10 +49,10 @@ const CategorySliderSection = () => {
                                 data-aos-delay={100 + idx * 100}
                             >
                                 <div className="category-image mb-2">
-                                    <img style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }} src={`http://localhost:5000${cat.image || "/assets/img/product/product-1.webp"}`} alt={cat.name} className="img-fluid" />
+                                    <img style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }} src={cat.image || "/assets/img/product/product-1.webp"} alt={cat.name} className="img-fluid" />
                                 </div>
                                 <h3 className="category-title mb-1" style={{ fontSize: '1rem' }}>{cat.name}</h3>
-                                <p className="category-count mb-0" style={{ fontSize: '0.9rem', color: '#888' }}>{cat.productCount || 0} Products</p>
+                                <p className="category-count mb-0" style={{ fontSize: '0.9rem', color: '#888' }}>{cat.productCount || 0} Sản phẩm</p>
                             </div>
                         </SwiperSlide>
                     ))}

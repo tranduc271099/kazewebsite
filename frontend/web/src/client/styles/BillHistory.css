@@ -1,442 +1,314 @@
-/* Bill History Page Styles - Scoped with bill- prefix */
+/* General Page Layout */
 .bill-history-page {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    padding-top: 100px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .bill-history-page .bill-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
+    display: flex;
+    gap: 20px;
 }
 
-/* Sidebar Styles */
+/* Sidebar */
 .bill-history-page .bill-profile-sidebar {
-    transition: all 0.3s ease;
+    width: 200px;
+    flex-shrink: 0;
 }
 
-.bill-history-page .bill-profile-sidebar:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+.bill-history-page .bill-profile-sidebar .avatar-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    overflow: hidden;
 }
 
-.bill-history-page .bill-profile-sidebar ul li {
-    transition: all 0.2s ease;
+.bill-history-page .bill-profile-sidebar .avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.bill-history-page .bill-profile-sidebar ul li:hover {
-    transform: translateX(4px);
+.bill-history-page .bill-profile-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
 }
 
 .bill-history-page .bill-profile-sidebar ul li a {
-    transition: color 0.2s ease;
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
 .bill-history-page .bill-profile-sidebar ul li a:hover {
-    color: #2563eb !important;
+    background-color: #f0f0f0;
 }
 
-/* Main Content Styles */
+.bill-history-page .bill-profile-sidebar ul li a.active {
+    color: #2563eb;
+    font-weight: 600;
+}
+
+/* Main Content */
 .bill-history-page .bill-main {
-    transition: all 0.3s ease;
+    flex-grow: 1;
 }
 
-.bill-history-page .bill-main:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-}
-
-/* Bill Card Styles */
-.bill-history-page .bill-card {
-    transition: all 0.3s ease;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    background: #fafafa;
-    margin-bottom: 16px;
-}
-
-.bill-history-page .bill-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-color: #d1d5db;
-}
-
-/* Status Badge Styles */
-.bill-history-page .bill-status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Vietnamese status styles */
-.bill-history-page .bill-status-chờ-xác-nhận {
-    background: linear-gradient(135deg, #f59e0b, #f97316);
-}
-
-.bill-history-page .bill-status-đã-xác-nhận {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-}
-
-.bill-history-page .bill-status-đang-giao {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-
-.bill-history-page .bill-status-đã-giao {
-    background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.bill-history-page .bill-status-đã-hủy {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-/* English status styles (for backward compatibility) */
-.bill-history-page .bill-status-pending {
-    background: linear-gradient(135deg, #f59e0b, #f97316);
-}
-
-.bill-history-page .bill-status-confirmed {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-}
-
-.bill-history-page .bill-status-shipping {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-
-.bill-history-page .bill-status-delivered {
-    background: linear-gradient(135deg, #10b981, #059669);
-}
-
-.bill-history-page .bill-status-cancelled {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-/* Product Item Styles */
-.bill-history-page .bill-product-item {
+/* Status Tabs */
+.bill-history-page .status-tabs-container {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s ease;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
 }
 
-.bill-history-page .bill-product-item:last-child {
-    border-bottom: none;
+.bill-history-page .status-tab {
+    flex-grow: 1;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    color: #555;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
 }
 
-.bill-history-page .bill-product-item:hover {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 12px;
-    margin: 0 -12px;
+.bill-history-page .status-tab:hover {
+    color: #2563eb;
 }
 
-.bill-history-page .bill-product-image {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    background: #f0f0f0;
-    overflow: hidden;
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
-}
-
-.bill-history-page .bill-product-image:hover {
-    transform: scale(1.05);
-}
-
-.bill-history-page .bill-product-info {
-    flex: 1;
-}
-
-.bill-history-page .bill-product-name {
-    font-weight: 500;
-    margin-bottom: 4px;
-    color: #1f2937;
-}
-
-.bill-history-page .bill-product-quantity {
-    font-size: 14px;
-    color: #6b7280;
-}
-
-.bill-history-page .bill-product-price {
+.bill-history-page .status-tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
     font-weight: 600;
-    color: #2563eb;
-    font-size: 16px;
 }
 
-/* Button Styles */
-.bill-history-page .bill-btn-primary {
-    padding: 8px 16px;
-    border: 1px solid #2563eb;
-    background: #2563eb;
-    color: #fff;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-block;
+/* Shopee-like Order Card */
+.bill-history-page .shopee-order-card {
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
 }
 
-.bill-history-page .bill-btn-primary:hover {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.bill-history-page .bill-btn-outline {
-    padding: 8px 16px;
-    border: 1px solid #2563eb;
-    background: #fff;
-    color: #2563eb;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.bill-history-page .bill-btn-outline:hover {
-    background: #2563eb;
-    color: #fff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-/* Select Styles */
-.bill-history-page .bill-status-select {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background: #fff;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.bill-history-page .bill-status-select:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-/* Empty State Styles */
-.bill-history-page .bill-empty-state {
-    text-align: center;
-    padding: 60px 0;
-}
-
-.bill-history-page .bill-empty-state-icon {
-    font-size: 48px;
-    color: #ddd;
-    margin-bottom: 16px;
-}
-
-.bill-history-page .bill-empty-state-title {
-    font-size: 18px;
-    color: #666;
-    margin-bottom: 8px;
-    font-weight: 500;
-}
-
-.bill-history-page .bill-empty-state-description {
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 24px;
-}
-
-/* Loading and Error States */
-.bill-history-page .bill-loading-state,
-.bill-history-page .bill-error-state {
-    text-align: center;
-    padding: 40px 0;
-}
-
-.bill-history-page .bill-loading-state {
-    color: #888;
-}
-
-.bill-history-page .bill-error-state {
-    color: #ef4444;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .bill-history-page .bill-container {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .bill-history-page .bill-profile-sidebar {
-        width: 100% !important;
-        order: 2;
-    }
-
-    .bill-history-page .bill-main {
-        order: 1;
-    }
-
-    .bill-history-page .bill-card {
-        padding: 16px;
-    }
-
-    .bill-history-page .bill-product-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-    .bill-history-page .bill-product-image {
-        width: 50px;
-        height: 50px;
-    }
-}
-
-/* Animation for card entrance */
-@keyframes billSlideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.bill-history-page .bill-card {
-    animation: billSlideInUp 0.3s ease-out;
-}
-
-/* Hover effects for interactive elements */
-.bill-history-page .bill-card .bill-btn-primary,
-.bill-history-page .bill-card .bill-btn-outline {
-    position: relative;
-    overflow: hidden;
-}
-
-.bill-history-page .bill-card .bill-btn-primary::before,
-.bill-history-page .bill-card .bill-btn-outline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.bill-history-page .bill-card .bill-btn-primary:hover::before,
-.bill-history-page .bill-card .bill-btn-outline:hover::before {
-    left: 100%;
-}
-
-/* Modern Order History Styles */
-.order-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.order-card {
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    background: #fff;
-    padding: 20px 24px;
-    transition: box-shadow 0.2s;
-    border: 1px solid #e5e7eb;
-}
-
-.order-card:hover {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
-}
-
-.order-header {
+.bill-history-page .order-header {
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.order-id {
-    font-weight: bold;
+.bill-history-page .order-header span {
+    font-size: 0.9rem;
+}
+
+.bill-history-page .order-status {
     color: #2563eb;
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
-.order-status {
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 0.95em;
-    font-weight: 500;
-}
-
-.status-cho-xac-nhan {
-    background: #ffe5b4;
-    color: #d97706;
-}
-
-.status-dang-giao {
-    background: #e0f2fe;
-    color: #2563eb;
-}
-
-.status-da-giao {
-    background: #dcfce7;
-    color: #16a34a;
-}
-
-.order-body {
+/* Product Item in Card */
+.bill-history-page .product-item {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    padding: 20px;
+    gap: 15px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.order-product-img {
-    width: 64px;
-    height: 64px;
+.bill-history-page .product-item:last-child {
+    border-bottom: none;
+}
+
+.bill-history-page .product-image {
+    width: 80px;
+    height: 80px;
     object-fit: cover;
-    border-radius: 8px;
     border: 1px solid #eee;
+    flex-shrink: 0;
 }
 
-.order-info {
-    flex: 1;
+.bill-history-page .product-details {
+    flex-grow: 1;
 }
 
-.order-product-name {
+.bill-history-page .product-name {
     font-weight: 500;
-    margin-bottom: 4px;
+    margin: 0 0 5px;
 }
 
-.order-attributes {
-    color: #6b7280;
-    font-size: 0.95em;
-    margin-bottom: 4px;
+.bill-history-page .product-variation,
+.bill-history-page .product-quantity {
+    font-size: 0.9rem;
+    color: #757575;
+    margin: 0;
 }
 
-.order-address {
-    color: #6b7280;
-    font-size: 0.95em;
+.bill-history-page .product-price {
+    font-size: 0.9rem;
+    color: #555;
 }
 
-.order-total {
+
+/* Order Footer */
+.bill-history-page .order-footer {
+    padding: 15px 20px;
     text-align: right;
-    font-weight: bold;
-    color: #d97706;
-    min-width: 120px;
+    background-color: #fff;
 }
 
-.order-actions {
+.bill-history-page .total-amount {
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.bill-history-page .total-amount .amount {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin-left: 10px;
+}
+
+.bill-history-page .order-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 12px;
     justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Shopee-like Buttons */
+.bill-history-page .shopee-btn {
+    padding: 8px 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    min-width: 120px;
+    transition: background-color 0.2s;
+}
+
+.bill-history-page .shopee-btn:hover {
+    background-color: #f8f8f8;
+}
+
+.bill-history-page .shopee-btn-primary {
+    background-color: #2563eb;
+    color: #fff;
+    border-color: #2563eb;
+}
+
+.bill-history-page .shopee-btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+
+/* Empty State */
+.bill-history-page .bill-empty-state {
+    text-align: center;
+    padding: 80px 0;
+    background: #fff;
+    border-radius: 4px;
+}
+
+.bill-history-page .bill-empty-state-icon i {
+    font-size: 60px;
+    color: #e0e0e0;
+}
+
+.bill-history-page .bill-empty-state-title {
+    margin-top: 15px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+/* Modal Styles */
+.bill-history-page .bill-detail-modal,
+.bill-history-page .cancel-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.bill-history-page .modal-content,
+.bill-history-page .cancel-modal-content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    width: 90%;
+    max-width: 600px;
+}
+
+.bill-history-page .cancel-modal-content {
+    max-width: 400px;
+}
+
+.bill-history-page .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.bill-history-page .close-btn {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.bill-history-page .order-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.bill-history-page .info-item label {
+    display: block;
+    color: #757575;
+    margin-bottom: 5px;
+}
+
+.bill-history-page .address-info p {
+    margin: 5px 0 0;
+}
+
+.bill-history-page .product-list-modal .product-item {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.bill-history-page .cancel-modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.bill-history-page .cancel-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }

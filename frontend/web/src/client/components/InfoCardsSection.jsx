@@ -10,7 +10,7 @@ const InfoCardsSection = () => (
                             <i className="bi bi-truck"></i>
                         </div>
                         <h3>Miễn phí vận chuyển</h3>
-                        <p>Nulla sit morbi vestibulum eros duis amet, consectetur vitae lacus. Ut quis tempor felis sed nunc viverra.</p>
+                        <p>Chúng tôi miễn phí vận chuyển cho tất cả các đơn hàng có giá trị từ 500.000đ trở lên trên toàn quốc.</p>
                     </div>
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
@@ -19,7 +19,7 @@ const InfoCardsSection = () => (
                             <i className="bi bi-piggy-bank"></i>
                         </div>
                         <h3>Đảm bảo hoàn tiền</h3>
-                        <p>Nullam gravida felis ac nunc tincidunt, sed malesuada justo pulvinar. Vestibulum nec diam vitae eros.</p>
+                        <p>Nếu bạn không hài lòng với sản phẩm, chúng tôi cam kết hoàn tiền 100% trong vòng 30 ngày.</p>
                     </div>
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
@@ -28,7 +28,7 @@ const InfoCardsSection = () => (
                             <i className="bi bi-percent"></i>
                         </div>
                         <h3>Ưu đãi giảm giá</h3>
-                        <p>Nulla ipsum nisi vel adipiscing amet, dignissim consectetur ornare. Vestibulum quis posuere elit auctor.</p>
+                        <p>Đăng ký thành viên để nhận ngay các mã giảm giá độc quyền và cập nhật những ưu đãi mới nhất.</p>
                     </div>
                 </div>
                 <div className="col-12 col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="500">
@@ -37,7 +37,7 @@ const InfoCardsSection = () => (
                             <i className="bi bi-headset"></i>
                         </div>
                         <h3>Hỗ trợ 24/7</h3>
-                        <p>Ipsum dolor amet sit consectetur adipiscing, nullam vitae euismod tempor nunc felis vestibulum ornare.</p>
+                        <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giải đáp mọi thắc mắc của bạn mọi lúc, mọi nơi.</p>
                     </div>
                 </div>
             </div>

@@ -31,7 +31,7 @@ const Login = () => {
                     navigate('/');
                 }
             } catch (error) {
-                console.error('Error parsing user data:', error);
+                console.error('Lỗi phân tích dữ liệu người dùng:', error);
             }
         }
     }, [navigate]);
@@ -64,7 +64,7 @@ const Login = () => {
                 navigate('/');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Đăng nhập không thành công');
+            setError(err.response?.data?.message || 'Đăng nhập không thành công. Vui lòng kiểm tra lại email và mật khẩu.');
         } finally {
             setLoading(false);
         }
