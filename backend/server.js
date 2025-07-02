@@ -34,6 +34,7 @@ app.use('/api/users', require('./routes/user.routes'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cart', require('./routes/cart.routes'));
 app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/api/comments', require('./routes/Comment/CommentRoutes'));
 
 app.use('/api/bill', require('./routes/Bill/billroutes'))
 
