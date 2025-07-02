@@ -397,7 +397,7 @@ const ListOrder = () => {
             </div>
             <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
               <strong>Trạng thái:</strong> <span style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 16 }}>
-                {getStatusDisplay(selectedOrder.trang_thai || 'chờ xác nhận')}
+                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplay(selectedOrder.trang_thai || 'chờ xác nhận')}
               </span>
               {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
                 <div style={{ marginTop: 8, color: '#d32f2f', fontSize: 16 }}><strong>Lý do huỷ:</strong> {selectedOrder.ly_do_huy}</div>
