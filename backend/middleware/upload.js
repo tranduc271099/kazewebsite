@@ -6,19 +6,12 @@ const uploadDir = 'uploads/';
 // Đảm bảo thư mục uploads tồn tại
 fs.mkdirSync(uploadDir, { recursive: true });
 
-// Cấu hình diskStorage để lưu file tạm
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
+// Cấu hình memoryStorage để xử lý file trong bộ nhớ
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
-    const extname = allowedTypes.test(file.originalname.toLowerCase());
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
     if (extname && mimetype) {
         return cb(null, true);
@@ -26,7 +19,11 @@ const fileFilter = (req, file, cb) => {
     cb(new Error('Chỉ chấp nhận file ảnh!'));
 };
 
-const upload = multer({ storage });
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: { fileSize: 1024 * 1024 * 10 } // Giới hạn 10MB
+});
 
 const uploadMultiple = upload.fields([
     { name: 'images', maxCount: 10 },

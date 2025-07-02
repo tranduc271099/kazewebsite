@@ -347,9 +347,6 @@ function ProductDetail() {
                                     >
                                         <i className="bi bi-lightning-fill"></i> Mua ngay
                                     </button>
-                                    <button className="btn btn-outline-secondary wishlist-btn">
-                                        <i className="bi bi-heart"></i> Thêm vào yêu thích
-                                    </button>
                                 </div>
 
                                 {/* Additional Info */}

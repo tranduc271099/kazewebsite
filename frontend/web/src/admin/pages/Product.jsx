@@ -22,7 +22,8 @@ const Product = () => {
             colors: []
         },
         variants: [],
-        images: []
+        images: [],
+        specifications: []
     });
     const [currentVariant, setCurrentVariant] = useState({
         attributes: { size: '', color: '' },
@@ -268,7 +269,8 @@ const Product = () => {
             isActive: true,
             attributes: { sizes: [], colors: [] },
             variants: [],
-            images: []
+            images: [],
+            specifications: []
         });
         setCurrentVariant({
             attributes: { size: '', color: '' },
@@ -469,7 +471,7 @@ const Product = () => {
                         <div className={styles.imagePreviewContainer} style={{ marginTop: '20px' }}>
                             {formData.images.map((img, index) => (
                                 <div key={img.id || index}
-                                    className={`${styles.imagePreviewWrapper} ${draggedIndex === index ? styles.dragging : ''}`}
+                                    className={`${styles.imagePreviewItem} ${draggedIndex === index ? styles.dragging : ''}`}
                                     draggable
                                     onDragStart={(e) => {
                                         setDraggedIndex(index);
@@ -579,7 +581,7 @@ const Product = () => {
                                 {currentVariant.images.map((img, idx) => (
                                     <div
                                         key={img.id || idx}
-                                        className={styles.imagePreviewWrapper}
+                                        className={styles.imagePreviewItem}
                                         draggable
                                         onDragStart={(e) => {
                                             e.dataTransfer.setData('variantImageIndex', idx);

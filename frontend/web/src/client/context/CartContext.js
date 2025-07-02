@@ -221,6 +221,67 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    const removeItemsFromCart = async (itemsToRemove) => {
+        const token = getToken();
+        if (!token) {
+            toast.error('Vui lòng đăng nhập để thực hiện hành động này.');
+            return;
+        }
+
+        const deletePromises = itemsToRemove.map(item =>
+            axios.delete(`${API_URL}/cart`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                data: { productId: item.id, color: item.color, size: item.size },
+            })
+        );
+
+        const results = await Promise.allSettled(deletePromises);
+
+        results.forEach(result => {
+            if (result.status === 'rejected') {
+                const error = result.reason;
+                // Silently log errors that are not 404 for debugging purposes
+                if (error.response?.status !== 404) {
+                    console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng (bỏ qua):', error.response?.data?.message || error.message);
+                }
+            }
+        });
+
+        // Always fetch the updated cart from the backend to ensure UI consistency
+        try {
+            const response = await axios.get(`${API_URL}/cart`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const formattedItems = response.data.items.map(cartItem => {
+                const variantInProduct = cartItem.productId.variants.find(
+                    v => v.attributes.color === cartItem.color && v.attributes.size === cartItem.size
+                );
+                return {
+                    id: cartItem.productId._id,
+                    name: cartItem.productId.name,
+                    price: cartItem.productId.price,
+                    image: cartItem.productId.images?.[0] || '',
+                    color: cartItem.color,
+                    size: cartItem.size,
+                    quantity: cartItem.quantity,
+                    stock: variantInProduct ? variantInProduct.stock : cartItem.productId.stock,
+                    availableColors: cartItem.productId.attributes?.colors || [],
+                    availableSizes: cartItem.productId.attributes?.sizes || [],
+                    variants: cartItem.productId.variants || [],
+                };
+            });
+            setCartItems(formattedItems);
+        } catch (fetchError) {
+            console.error('Lỗi khi tải lại giỏ hàng sau khi xóa lỗi:', fetchError);
+            // Do not show an error toast to the user as requested
+        }
+    };
+
     const getCartTotal = () => {
         return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
     };
@@ -286,6 +347,7 @@ export const CartProvider = ({ children }) => {
                 getCartTotal,
                 getCartItemsCount,
                 updateCartItemAttributes,
+                removeItemsFromCart
             }}
         >
             {children}
