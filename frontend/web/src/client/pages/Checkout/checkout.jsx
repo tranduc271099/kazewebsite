@@ -391,13 +391,12 @@ const Checkout = () => {
                                                     <div className="row">
                                                         <div className="col-md-4 mb-3">
                                                             <div
-                                                                className={`card h-100 border-2 ${shipping === 4990 ? 'border-primary' : 'border-light'}`}
-                                                                style={{ cursor: 'pointer', transition: 'all 0.3s ease' }}
-                                                                onClick={() => setShipping(4990)}
+                                                                className={`card h-100 border-2 border-primary`}
+                                                                style={{ cursor: 'not-allowed', transition: 'all 0.3s ease', opacity: 1 }}
                                                             >
                                                                 <div className="card-body text-center p-3">
                                                                     <div className="mb-2">
-                                                                        <i className="bi bi-truck" style={{ fontSize: '24px', color: shipping === 4990 ? '#0d6efd' : '#6c757d' }}></i>
+                                                                        <i className="bi bi-truck" style={{ fontSize: '24px', color: '#0d6efd' }}></i>
                                                                     </div>
                                                                     <h6 className="card-title mb-1" style={{ fontSize: '14px', fontWeight: 600 }}>Tiêu chuẩn</h6>
                                                                     <p className="card-text mb-1" style={{ fontSize: '12px', color: '#666' }}>3-5 ngày</p>
@@ -407,63 +406,8 @@ const Checkout = () => {
                                                                     <input
                                                                         type="radio"
                                                                         name="shipping"
-                                                                        checked={shipping === 4990}
-                                                                        onChange={() => setShipping(4990)}
-                                                                        style={{ position: 'absolute', opacity: 0 }}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-md-4 mb-3">
-                                                            <div
-                                                                className={`card h-100 border-2 ${shipping === 12990 ? 'border-primary' : 'border-light'}`}
-                                                                style={{ cursor: 'pointer', transition: 'all 0.3s ease' }}
-                                                                onClick={() => setShipping(12990)}
-                                                            >
-                                                                <div className="card-body text-center p-3">
-                                                                    <div className="mb-2">
-                                                                        <i className="bi bi-lightning" style={{ fontSize: '24px', color: shipping === 12990 ? '#0d6efd' : '#6c757d' }}></i>
-                                                                    </div>
-                                                                    <h6 className="card-title mb-1" style={{ fontSize: '14px', fontWeight: 600 }}>Nhanh</h6>
-                                                                    <p className="card-text mb-1" style={{ fontSize: '12px', color: '#666' }}>1-2 ngày</p>
-                                                                    <p className="card-text" style={{ fontSize: '14px', fontWeight: 600, color: '#e53935' }}>
-                                                                        {(12990).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                                                    </p>
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="shipping"
-                                                                        checked={shipping === 12990}
-                                                                        onChange={() => setShipping(12990)}
-                                                                        style={{ position: 'absolute', opacity: 0 }}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-md-4 mb-3">
-                                                            <div
-                                                                className={`card h-100 border-2 ${shipping === 0 ? 'border-primary' : 'border-light'} ${itemsToCheckout.reduce((acc, item) => acc + (item.price * item.quantity), 0) < 300000 ? 'opacity-50' : ''}`}
-                                                                style={{ cursor: itemsToCheckout.reduce((acc, item) => acc + (item.price * item.quantity), 0) < 300000 ? 'not-allowed' : 'pointer', transition: 'all 0.3s ease' }}
-                                                                onClick={() => {
-                                                                    if (itemsToCheckout.reduce((acc, item) => acc + (item.price * item.quantity), 0) >= 300000) {
-                                                                        setShipping(0);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <div className="card-body text-center p-3">
-                                                                    <div className="mb-2">
-                                                                        <i className="bi bi-gift" style={{ fontSize: '24px', color: shipping === 0 ? '#0d6efd' : '#6c757d' }}></i>
-                                                                    </div>
-                                                                    <h6 className="card-title mb-1" style={{ fontSize: '14px', fontWeight: 600 }}>Miễn phí</h6>
-                                                                    <p className="card-text mb-1" style={{ fontSize: '12px', color: '#666' }}>Đơn trên 300k</p>
-                                                                    <p className="card-text" style={{ fontSize: '14px', fontWeight: 600, color: '#28a745' }}>
-                                                                        Miễn phí
-                                                                    </p>
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="shipping"
-                                                                        checked={shipping === 0}
-                                                                        onChange={() => setShipping(0)}
-                                                                        disabled={itemsToCheckout.reduce((acc, item) => acc + (item.price * item.quantity), 0) < 300000}
+                                                                        checked={true}
+                                                                        readOnly
                                                                         style={{ position: 'absolute', opacity: 0 }}
                                                                     />
                                                                 </div>

@@ -311,10 +311,12 @@ const BillUserClient = () => {
                         </div>
                         <div className="modal-body">
                             <div className="order-info-grid">
-                                <div className="info-item"><label>ID Đơn hàng</label><span>{selectedBill._id}</span></div>
+                                <div className="info-item"><label>Mã đơn hàng</label><span>{selectedBill._id.slice(-8).toUpperCase()}</span></div>
                                 <div className="info-item"><label>Ngày đặt</label><span>{formatDate(selectedBill.ngay_tao)}</span></div>
-                                <div className="info-item"><label>Tổng tiền</label><span>{formatPrice(selectedBill.tong_tien)}</span></div>
-                                <div className="info-item"><label>Trạng thái</label><span style={{ color: '#2563eb', fontWeight: 600 }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
+                                <div className="info-item"><label>Tên người đặt</label><span>{selectedBill.nguoi_dung_id?.name || '---'}</span></div>
+                                <div className="info-item"><label>SĐT</label><span>{selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
+                                <div className="info-item"><label>Trạng thái thanh toán</label><span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#ef4444', fontWeight: 600 }}>{selectedBill.thanh_toan?.toUpperCase() || '---'}</span></div>
+                                <div className="info-item"><label>Trạng thái đơn hàng</label><span style={{ color: '#2563eb', fontWeight: 600 }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 {selectedBill.trang_thai === 'đã hủy' && (
                                     <>
                                         <div className="info-item">
@@ -347,6 +349,13 @@ const BillUserClient = () => {
                                         <p className="product-price">{formatPrice(item.gia * item.so_luong)}</p>
                                     </div>
                                 ))}
+                            </div>
+                            {/* Tổng tiền breakdown */}
+                            <div className="bill-total-breakdown" style={{ marginTop: 24, background: '#f8fafc', borderRadius: 8, padding: 16 }}>
+                                <h5 style={{ marginBottom: 12 }}>Chi tiết thanh toán</h5>
+                                <div className="breakdown-row"><span>Tạm tính sản phẩm:</span><span>{formatPrice(selectedBill.danh_sach_san_pham.reduce((sum, item) => sum + (item.gia * item.so_luong), 0))}</span></div>
+                                <div className="breakdown-row"><span>Phí vận chuyển:</span><span>{formatPrice(selectedBill.shippingFee || 0)}</span></div>
+                                <div className="breakdown-row" style={{ fontWeight: 700, color: '#2563eb' }}><span>Tổng cộng:</span><span>{formatPrice(selectedBill.tong_tien)}</span></div>
                             </div>
                         </div>
                     </div>
