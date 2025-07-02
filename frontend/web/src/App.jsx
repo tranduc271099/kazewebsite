@@ -25,6 +25,7 @@ import Footer from './client/components/Footer';
 import Header from './client/components/Header';
 import AuthLayout from './client/components/AuthLayout';
 import ProtectedRoute from './client/components/ProtectedRoute'; // Import ProtectedRoute
+import AdminRoute from './admin/components/AdminRoute'; // Import AdminRoute
 
 // Admin App - New Dashboard
 import AdminApp from './admin/App';
@@ -51,8 +52,10 @@ function App() {
                 <Route path="/change-password" element={<><Header /><ChangePassword /><Footer /></>} />
                 <Route path="/bill" element={<><Header /><BillUser /><Footer /></>} />
                 <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
+              </Route>
 
-                {/* Admin Routes should also be protected */}
+              {/* Admin Routes - Protected by AdminRoute */}
+              <Route element={<AdminRoute />}>
                 <Route path="/admin/*" element={<AdminApp />} />
                 <Route path="/dashboard/*" element={<AdminApp />} />
               </Route>

@@ -38,6 +38,19 @@ const ListOrder = () => {
     return saved !== null ? Number(saved) : 4990;
   });
 
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'chờ xác nhận': return 'Chờ xác nhận';
+      case 'đã xác nhận': return 'Đã xác nhận';
+      case 'đang giao hàng': return 'Đang giao';
+      case 'đã giao hàng': return 'Đã giao';
+      case 'đã nhận hàng': return 'Đã nhận';
+      case 'hoàn thành': return 'Hoàn thành';
+      case 'đã hủy': return 'Đã hủy';
+      default: return status;
+    }
+  };
+
   const fetchOrders = async (pageNum = 1) => {
     setLoading(true);
     setError('');
@@ -71,8 +84,10 @@ const ListOrder = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchOrders(page);
+      setShowModal(false);
+      toast.success(`Đơn hàng đã được cập nhật thành "${getStatusDisplay(newStatus)}".`);
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+      toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     }
   };
 
@@ -229,19 +244,6 @@ const ListOrder = () => {
         return ['hoàn thành'];
       default:
         return [];
-    }
-  };
-
-  const getStatusDisplay = (status) => {
-    switch (status) {
-      case 'chờ xác nhận': return 'Chờ xác nhận';
-      case 'đã xác nhận': return 'Đã xác nhận';
-      case 'đang giao hàng': return 'Đang giao';
-      case 'đã giao hàng': return 'Đã giao';
-      case 'đã nhận hàng': return 'Đã nhận';
-      case 'hoàn thành': return 'Hoàn thành';
-      case 'đã hủy': return 'Đã hủy';
-      default: return status;
     }
   };
 
@@ -403,7 +405,7 @@ const ListOrder = () => {
             </div>
             {selectedOrder.phuong_thuc_thanh_toan && (
               <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                Phương thức thanh toán: <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
+                <strong>Phương thức thanh toán:</strong> <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
               </div>
             )}
             {selectedOrder.shippingFee !== undefined && (
@@ -445,6 +447,40 @@ const ListOrder = () => {
                 <div style={{ color: '#2563eb', marginLeft: 12, fontSize: 14 }}>{((item.gia || 0) * (item.so_luong || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
               </div>
             ))}
+            <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+              {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&
+                <>
+                  <strong style={{ marginRight: 'auto', fontSize: '16px' }}>Cập nhật trạng thái:</strong>
+                  {getNextStatusOptions(selectedOrder.trang_thai).map(status => (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        if (status === 'đã hủy') {
+                          handleAdminCancelOrder(selectedOrder);
+                        } else {
+                          handleStatusChange(selectedOrder._id, status);
+                        }
+                      }}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: 6,
+                        background: status === 'đã hủy' ? '#ef4444' : (status === 'đã xác nhận' ? '#3b82f6' : '#10b981'),
+                        color: '#fff',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                      }}
+                    >
+                      {getStatusDisplay(status)}
+                    </button>
+                  ))}
+                </>
+              }
+              <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', borderRadius: 6, background: '#6c757d', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 ? 'initial' : 'auto' }}>
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}
