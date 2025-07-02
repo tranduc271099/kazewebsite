@@ -3,6 +3,19 @@ const Category = require('../models/Category');
 const slugify = require('slugify');
 const cloudinary = require('../config/cloudinary');
 
+const getPublicIdFromUrl = (url) => {
+    try {
+        // Example URL: http://res.cloudinary.com/cloud_name/image/upload/v123456789/folder/public_id.jpg
+        const parts = url.split('/');
+        const publicIdWithExtension = parts.slice(parts.indexOf('upload') + 2).join('/');
+        const publicId = publicIdWithExtension.substring(0, publicIdWithExtension.lastIndexOf('.'));
+        return publicId;
+    } catch (e) {
+        console.error('Không thể trích xuất public ID từ URL:', url, e);
+        return null;
+    }
+};
+
 // Get all products
 exports.getProducts = async (req, res) => {
     try {
@@ -56,8 +69,20 @@ exports.createProduct = async (req, res) => {
         // Parse các trường phức tạp nếu là string (do FormData gửi lên)
         let attributes = req.body.attributes;
         let variants = req.body.variants;
-        if (typeof attributes === 'string') attributes = JSON.parse(attributes);
-        if (typeof variants === 'string') variants = JSON.parse(variants);
+        try {
+            if (typeof attributes === 'string') {
+                attributes = JSON.parse(attributes);
+            }
+        } catch (e) {
+            attributes = {}; // Fallback to empty object
+        }
+        try {
+            if (typeof variants === 'string') {
+                variants = JSON.parse(variants);
+            }
+        } catch (e) {
+            variants = []; // Fallback to empty array
+        }
 
         // Chuyển đổi variants sang EAV nếu chưa đúng định dạng
         if (Array.isArray(variants) && variants.length > 0 && !variants[0].attributes) {
@@ -116,8 +141,8 @@ exports.createProduct = async (req, res) => {
             return res.status(400).json({ message: 'Danh mục không tồn tại' });
         }
 
-        // Check if product name already exists
-        const existingProduct = await Product.findOne({ name });
+        // Check if product name already exists (case-insensitive)
+        const existingProduct = await Product.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
         if (existingProduct) {
             return res.status(400).json({ message: 'Tên sản phẩm đã tồn tại' });
         }
@@ -136,7 +161,7 @@ exports.createProduct = async (req, res) => {
             images: mainImageUrls,
             price,
             stock,
-            isActive
+            isActive,
         });
 
         const savedProduct = await product.save();
@@ -167,11 +192,58 @@ exports.updateProduct = async (req, res) => {
         // Parse các trường phức tạp nếu là string (do FormData gửi lên)
         let attributes = req.body.attributes;
         let variants = req.body.variants;
-        if (typeof attributes === 'string') attributes = JSON.parse(attributes);
-        if (typeof variants === 'string') variants = JSON.parse(variants);
+        try {
+            if (typeof attributes === 'string') attributes = JSON.parse(attributes);
+        } catch (e) {
+            attributes = {};
+        }
+        try {
+            if (typeof variants === 'string') variants = JSON.parse(variants);
+        } catch (e) {
+            variants = [];
+        }
+
+        // Check if product exists before proceeding
+        const productToUpdate = await Product.findById(id);
+        if (!productToUpdate) {
+            return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
+        }
 
         // Lấy URL ảnh hiện có từ body
         const existingMainImages = req.body.existingImages ? (Array.isArray(req.body.existingImages) ? req.body.existingImages : [req.body.existingImages]) : [];
+
+        // So sánh ảnh cũ và mới để tìm ảnh cần xóa
+        const oldMainImages = productToUpdate.images || [];
+        const imagesToDelete = oldMainImages.filter(url => !existingMainImages.includes(url));
+
+        // Lặp qua các biến thể để tìm ảnh cần xóa
+        const oldVariants = productToUpdate.variants || [];
+        const newVariants = Array.isArray(variants) ? variants : [];
+
+        oldVariants.forEach(oldVariant => {
+            const newVariantMatch = newVariants.find(nv =>
+                nv.attributes.color === oldVariant.attributes.color &&
+                nv.attributes.size === oldVariant.attributes.size
+            );
+
+            const oldVariantImages = oldVariant.images || [];
+            if (newVariantMatch) {
+                const newVariantExistingImages = newVariantMatch.images || [];
+                const deletedImagesInVariant = oldVariantImages.filter(url => !newVariantExistingImages.includes(url));
+                imagesToDelete.push(...deletedImagesInVariant);
+            } else {
+                // Nếu biến thể bị xóa, tất cả ảnh của nó cũng bị xóa
+                imagesToDelete.push(...oldVariantImages);
+            }
+        });
+
+        // Xóa ảnh khỏi Cloudinary
+        if (imagesToDelete.length > 0) {
+            const publicIdsToDelete = imagesToDelete.map(getPublicIdFromUrl).filter(id => id);
+            if (publicIdsToDelete.length > 0) {
+                await Promise.all(publicIdsToDelete.map(publicId => cloudinary.uploader.destroy(publicId)));
+            }
+        }
 
         // Xử lý ảnh chính mới (main images)
         const mainImageFiles = (req.files && req.files.images) || [];
@@ -214,12 +286,6 @@ exports.updateProduct = async (req, res) => {
             });
         }
 
-        // Check if product exists
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-        }
-
         // Check if category exists
         if (category) {
             const categoryExists = await Category.findById(category);
@@ -228,32 +294,41 @@ exports.updateProduct = async (req, res) => {
             }
         }
 
-        // Check if new name already exists (excluding current product)
-        if (name && name !== product.name) {
-            const existingProduct = await Product.findOne({ name });
+        // Check if new name already exists (excluding current product, case-insensitive)
+        if (name && name.toLowerCase() !== productToUpdate.name.toLowerCase()) {
+            const existingProduct = await Product.findOne({
+                name: { $regex: new RegExp(`^${name}$`, 'i') },
+                _id: { $ne: id }
+            });
             if (existingProduct) {
                 return res.status(400).json({ message: 'Tên sản phẩm đã tồn tại' });
             }
         }
 
         // Create new slug if name is changed
-        const slug = name ? slugify(name, { lower: true }) : product.slug;
+        const slug = name ? slugify(name, { lower: true }) : productToUpdate.slug;
+
+        const updateData = {
+            name,
+            slug,
+            description,
+            brand,
+            category,
+            attributes,
+            variants,
+            images: allMainImages,
+            price,
+            stock,
+            isActive
+        };
+
+        if (name === productToUpdate.name) {
+            delete updateData.slug;
+        }
 
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
-            {
-                name,
-                slug,
-                description,
-                brand,
-                category,
-                attributes,
-                variants,
-                images: allMainImages,
-                price,
-                stock,
-                isActive
-            },
+            updateData,
             { new: true }
         ).populate('category', 'name');
 
@@ -274,12 +349,26 @@ exports.deleteProduct = async (req, res) => {
             return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
         }
 
+        // Lấy danh sách tất cả ảnh cần xóa
+        const mainImages = product.images || [];
+        const variantImages = (product.variants || []).flatMap(v => v.images || []);
+        const allImagesToDelete = [...mainImages, ...variantImages];
+
+        // Xóa ảnh từ Cloudinary
+        if (allImagesToDelete.length > 0) {
+            const publicIdsToDelete = allImagesToDelete.map(getPublicIdFromUrl).filter(id => id);
+            if (publicIdsToDelete.length > 0) {
+                await Promise.all(publicIdsToDelete.map(publicId => cloudinary.uploader.destroy(publicId)));
+            }
+        }
+
         await Product.findByIdAndDelete(id);
         res.json({ message: 'Xóa sản phẩm thành công' });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi xóa sản phẩm' });
     }
 };
+
 exports.getProductsByCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;

@@ -24,6 +24,7 @@ import BillUser from './client/pages/Bill/BillUserClient.jsx';
 import Footer from './client/components/Footer';
 import Header from './client/components/Header';
 import AuthLayout from './client/components/AuthLayout';
+import ProtectedRoute from './client/components/ProtectedRoute'; // Import ProtectedRoute
 
 // Admin App - New Dashboard
 import AdminApp from './admin/App';
@@ -44,6 +45,18 @@ function App() {
                 <Route path="/register" element={<Register />} />
               </Route>
 
+              {/* Protected Routes */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/profile" element={<><Header /><Profile /><Footer /></>} />
+                <Route path="/change-password" element={<><Header /><ChangePassword /><Footer /></>} />
+                <Route path="/bill" element={<><Header /><BillUser /><Footer /></>} />
+                <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
+
+                {/* Admin Routes should also be protected */}
+                <Route path="/admin/*" element={<AdminApp />} />
+                <Route path="/dashboard/*" element={<AdminApp />} />
+              </Route>
+
               {/* Main Routes */}
               <Route path="/" element={<><Header /><Home /><Footer /></>} />
               <Route path="/products" element={<><Header /><Products /><Footer /></>} />
@@ -52,15 +65,6 @@ function App() {
               <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
               <Route path="/about" element={<><Header /><About /><Footer /></>} />
               <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
-              <Route path="/profile" element={<><Header /><Profile /><Footer /></>} />
-              <Route path="/change-password" element={<><Header /><ChangePassword /><Footer /></>} />
-              <Route path="/bill" element={<><Header /><BillUser /><Footer /></>} />
-              <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
-
-
-              {/* Admin Routes - New Dashboard */}
-              <Route path="/admin/*" element={<AdminApp />} />
-              <Route path="/dashboard/*" element={<AdminApp />} />
             </Routes>
           </div>
         </Router>
