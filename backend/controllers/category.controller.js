@@ -6,15 +6,24 @@ const fs = require('fs');
 // Get all categories
 exports.getCategories = async (req, res) => {
     try {
-        // Lấy tất cả danh mục
         const categories = await Category.find().sort({ createdAt: -1 });
-        // Đếm số lượng sản phẩm cho từng danh mục
-        const categoriesWithCount = await Promise.all(categories.map(async (cat) => {
-            const productCount = await Product.countDocuments({ category: cat._id });
-            return { ...cat.toObject(), productCount };
-        }));
+
+        const categoriesWithCount = await Promise.all(
+            categories.map(async (cat) => {
+                const productCount = await Product.countDocuments({ category: cat._id });
+                // Đảm bảo rằng trường image có một URL hợp lệ, nếu không thì cung cấp một ảnh mặc định
+                const imageUrl = cat.image || 'https://res.cloudinary.com/dkzwd3vvw/image/upload/v1717999238/products/default-image.jpg';
+                return {
+                    ...cat.toObject(),
+                    productCount,
+                    image: imageUrl
+                };
+            })
+        );
+
         res.json(categoriesWithCount);
     } catch (error) {
+        console.error('Error fetching categories:', error);
         res.status(500).json({ message: 'Lỗi khi lấy danh sách danh mục' });
     }
 };
@@ -29,11 +38,12 @@ exports.createCategory = async (req, res) => {
         if (req.file) {
             console.log('Received file for upload:', req.file); // Log để kiểm tra file
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
+                const b64 = Buffer.from(req.file.buffer).toString("base64");
+                let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+                const result = await cloudinary.uploader.upload(dataURI, {
                     folder: 'categories'
                 });
                 image = result.secure_url;
-                fs.unlinkSync(req.file.path); // Xóa file tạm
             } catch (uploadError) {
                 console.error('Cloudinary Upload Error:', uploadError); // Log lỗi từ Cloudinary
                 return res.status(500).json({ message: 'Lỗi khi tải ảnh lên Cloudinary', error: uploadError.message });
@@ -58,11 +68,12 @@ exports.updateCategory = async (req, res) => {
         if (req.file) {
             console.log('Received file for update:', req.file); // Log để kiểm tra file
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
+                const b64 = Buffer.from(req.file.buffer).toString("base64");
+                let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+                const result = await cloudinary.uploader.upload(dataURI, {
                     folder: 'categories'
                 });
                 updateData.image = result.secure_url;
-                fs.unlinkSync(req.file.path); // Xóa file tạm
             } catch (uploadError) {
                 console.error('Cloudinary Upload Error on Update:', uploadError); // Log lỗi từ Cloudinary
                 return res.status(500).json({ message: 'Lỗi khi tải ảnh lên Cloudinary', error: uploadError.message });

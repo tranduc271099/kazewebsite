@@ -86,6 +86,51 @@ class BillController {
         return res.status(400).json({ message: 'Không có sản phẩm hợp lệ để tạo đơn hàng.' });
       }
       const tong_tien = subtotal + (shippingFee || 0);
+
+      // --- BẮT ĐẦU: TRỪ KHO (Atomic) ---
+      for (const item of danh_sach_san_pham) {
+        const updateResult = await Product.updateOne(
+          {
+            _id: item.san_pham_id,
+            "variants": {
+              $elemMatch: {
+                "attributes.color": item.mau_sac,
+                "attributes.size": item.kich_thuoc,
+                "stock": { $gte: item.so_luong }
+              }
+            }
+          },
+          {
+            $inc: { "variants.$.stock": -item.so_luong }
+          }
+        );
+
+        // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc (không có biến thể)
+        if (updateResult.modifiedCount === 0) {
+          const fallbackUpdateResult = await Product.updateOne(
+            {
+              _id: item.san_pham_id,
+              $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }],
+              stock: { $gte: item.so_luong }
+            },
+            {
+              $inc: { stock: -item.so_luong }
+            }
+          );
+
+          // Nếu cả hai đều không thành công, sản phẩm không đủ hàng hoặc không tồn tại
+          if (fallbackUpdateResult.modifiedCount === 0) {
+            const product = await Product.findById(item.san_pham_id).lean();
+            const variant = product.variants.find(v => v.attributes.color === item.mau_sac && v.attributes.size === item.kich_thuoc);
+            if (!variant) {
+              return res.status(400).json({ message: `Sản phẩm ${product.name} với thuộc tính đã chọn không tồn tại.` });
+            }
+            return res.status(400).json({ message: `Sản phẩm ${product.name} (${item.mau_sac} - ${item.kich_thuoc}) không đủ hàng. Tồn kho: ${variant.stock}, Cần: ${item.so_luong}` });
+          }
+        }
+      }
+      // --- KẾT THÚC: TRỪ KHO ---
+
       const newBill = new Bill({
         nguoi_dung_id,
         dia_chi_giao_hang,
@@ -133,6 +178,34 @@ class BillController {
       bill.ly_do_huy = ly_do_huy || '';
       bill.nguoi_huy = { id: userId, loai: 'User' };
       await bill.save();
+
+      // --- BẮT ĐẦU: HOÀN KHO (Atomic) ---
+      for (const item of bill.danh_sach_san_pham) {
+        const updateResult = await Product.updateOne(
+          {
+            _id: item.san_pham_id,
+            "variants.attributes.color": item.mau_sac,
+            "variants.attributes.size": item.kich_thuoc
+          },
+          {
+            $inc: { "variants.$.stock": item.so_luong }
+          }
+        );
+
+        if (updateResult.modifiedCount === 0) {
+          await Product.updateOne(
+            {
+              _id: item.san_pham_id,
+              $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+            },
+            {
+              $inc: { stock: item.so_luong }
+            }
+          );
+        }
+      }
+      // --- KẾT THÚC: HOÀN KHO ---
+
       res.status(200).json({ message: 'Hủy đơn hàng thành công', bill });
     } catch (error) {
       res.status(500).json({ message: 'Lỗi server khi hủy đơn hàng', error: error.message });
@@ -196,13 +269,42 @@ class BillController {
 
       console.log('Found bill:', bill._id, 'Current status:', bill.trang_thai);
 
-      // Nếu huỷ đơn
-      if (trang_thai === 'đã hủy') {
+      const oldStatus = bill.trang_thai; // Lưu lại trạng thái cũ
+
+      // Nếu huỷ đơn và trước đó đơn hàng chưa bị huỷ
+      if (trang_thai === 'đã hủy' && oldStatus !== 'đã hủy') {
         bill.ly_do_huy = ly_do_huy || '';
         bill.nguoi_huy = {
           id: req.user.id,
           loai: req.user.role === 'admin' ? 'Admin' : 'User'
         };
+
+        // --- BẮT ĐẦU: HOÀN KHO KHI ADMIN HUỶ (Atomic) ---
+        for (const item of bill.danh_sach_san_pham) {
+          const updateResult = await Product.updateOne(
+            {
+              _id: item.san_pham_id,
+              "variants.attributes.color": item.mau_sac,
+              "variants.attributes.size": item.kich_thuoc
+            },
+            {
+              $inc: { "variants.$.stock": item.so_luong }
+            }
+          );
+
+          if (updateResult.modifiedCount === 0) {
+            await Product.updateOne(
+              {
+                _id: item.san_pham_id,
+                $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+              },
+              {
+                $inc: { stock: item.so_luong }
+              }
+            );
+          }
+        }
+        // --- KẾT THÚC: HOÀN KHO KHI ADMIN HUỶ ---
       }
 
       // Cập nhật trạng thái thanh toán nếu có
