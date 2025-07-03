@@ -14,6 +14,13 @@ function ProductDetail() {
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [selectedVariant, setSelectedVariant] = useState(null);
     const [fetchError, setFetchError] = useState(false);
+    const [comments, setComments] = useState([]);
+    const [canReviewOrders, setCanReviewOrders] = useState([]);
+    const [reviewContent, setReviewContent] = useState('');
+    const [reviewRating, setReviewRating] = useState(5);
+    const [selectedOrderId, setSelectedOrderId] = useState('');
+    const [loadingComments, setLoadingComments] = useState(false);
+    const [showAllComments, setShowAllComments] = useState(false);
 
     const { addToCart } = useContext(CartContext);
 
@@ -145,6 +152,69 @@ function ProductDetail() {
             console.log('selectedVariant.images:', selectedVariant.images);
         }
     }, [selectedVariant, mainImage]);
+
+    // Lấy danh sách bình luận
+    useEffect(() => {
+        const fetchComments = async () => {
+            setLoadingComments(true);
+            try {
+                const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
+                setComments(res.data);
+            } catch (err) {
+                setComments([]);
+            } finally {
+                setLoadingComments(false);
+            }
+        };
+        if (productId) fetchComments();
+    }, [productId]);
+
+    // Lấy danh sách orderId hợp lệ để đánh giá
+    useEffect(() => {
+        const fetchEligibleOrders = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const res = await axios.get(`http://localhost:5000/api/comments/eligible-orders/${productId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setCanReviewOrders(res.data);
+                if (res.data.length > 0) setSelectedOrderId(res.data[0].orderId);
+            } catch (err) {
+                setCanReviewOrders([]);
+            }
+        };
+        if (productId) fetchEligibleOrders();
+    }, [productId]);
+
+    // Gửi đánh giá
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (!reviewContent || !reviewRating || !selectedOrderId) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post('http://localhost:5000/api/comments', {
+                productId,
+                content: reviewContent,
+                rating: reviewRating,
+                orderId: selectedOrderId
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setReviewContent('');
+            setReviewRating(5);
+            // Reload bình luận và order hợp lệ
+            const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
+            setComments(res.data);
+            const eligibleRes = await axios.get(`http://localhost:5000/api/comments/eligible-orders/${productId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setCanReviewOrders(eligibleRes.data);
+            if (eligibleRes.data.length > 0) setSelectedOrderId(eligibleRes.data[0].orderId);
+        } catch (err) {
+            alert(err.response?.data?.message || 'Lỗi khi gửi đánh giá');
+        }
+    };
 
     if (fetchError) return <div>Không tìm thấy sản phẩm hoặc có lỗi xảy ra.</div>;
     if (!product) return <div>Đang tải...</div>;
@@ -371,7 +441,7 @@ function ProductDetail() {
                                         <button className="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab" aria-controls="specifications" aria-selected="false">Thông số kỹ thuật</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá ({product.reviews?.length || 0})</button>
+                                        <button className="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá ({comments.length})</button>
                                     </li>
                                 </ul>
                                 <div className="tab-content" id="productTabsContent">
@@ -405,18 +475,65 @@ function ProductDetail() {
                                     {/* Reviews Tab */}
                                     <div className="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
                                         <div className="product-reviews">
-                                            <div className="reviews-summary">
-                                                <div className="overall-rating">
-                                                    <div className="rating-number">{product.rating ? product.rating.toFixed(1) : '0.0'}</div>
-                                                    <div className="rating-stars">
-                                                        {[...Array(5)].map((_, i) => (
-                                                            <i key={i} className={`bi bi-star${i < Math.floor(product.rating || 0) ? '-fill' : i < Math.ceil(product.rating || 0) ? '-half' : ''}`}></i>
-                                                        ))}
+                                            {/* Form đánh giá nếu đủ điều kiện */}
+                                            {canReviewOrders.length > 0 && (
+                                                <form onSubmit={handleReviewSubmit} className="mb-4">
+                                                    <div className="mb-2">
+                                                        <label>Đánh giá:</label>
+                                                        <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))}>
+                                                            {[5,4,3,2,1].map(star => (
+                                                                <option key={star} value={star}>{star} sao</option>
+                                                            ))}
+                                                        </select>
                                                     </div>
-                                                </div>
-                                                <div className="reviews-count">{product.reviews?.length || 0} lượt đánh giá</div>
-                                            </div>
-                                            {/* Thêm phần review chi tiết và form review ở đây */}
+                                                    <div className="mb-2">
+                                                        <label>Nội dung:</label>
+                                                        <textarea value={reviewContent} onChange={e => setReviewContent(e.target.value)} rows={3} style={{width:'100%'}} required />
+                                                    </div>
+                                                    {canReviewOrders.length > 1 && (
+                                                        <div className="mb-2">
+                                                            <label>Chọn đơn hàng:</label>
+                                                            <select value={selectedOrderId} onChange={e => setSelectedOrderId(e.target.value)}>
+                                                                {canReviewOrders.map(o => (
+                                                                    <option key={o.orderId} value={o.orderId}>
+                                                                        Đơn #{o.orderId.slice(-5)} - {new Date(o.ngay_tao).toLocaleDateString('vi-VN')}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    )}
+                                                    <button type="submit" className="btn btn-primary">Gửi đánh giá</button>
+                                                </form>
+                                            )}
+                                            {canReviewOrders.length === 0 && (
+                                                <div className="alert alert-info mb-4">Chỉ khách đã mua và hoàn thành đơn hàng mới được đánh giá sản phẩm này.</div>
+                                            )}
+                                            {/* Danh sách bình luận */}
+                                            <h5>Đánh giá sản phẩm</h5>
+                                            {loadingComments ? <div>Đang tải đánh giá...</div> : (
+                                                comments.length === 0 ? <div>Chưa có đánh giá nào.</div> : (
+                                                    <>
+                                                        {(showAllComments ? comments : comments.slice(0, 5)).map((c, idx) => (
+                                                            <div key={c._id || idx} className="border rounded p-2 mb-2">
+                                                                <div className="fw-bold">Tên: {c.userId?.name || 'Ẩn danh'}</div>
+                                                                <div>Bình luận: {c.content}</div>
+                                                                <div>Ngày bình luận: <span className="text-muted" style={{fontSize:'0.9em'}}>{new Date(c.createdAt).toLocaleString('vi-VN')}</span></div>
+                                                                <div className="text-warning">{Array(c.rating).fill('★').join('')}{Array(5-c.rating).fill('☆').join('')}</div>
+                                                            </div>
+                                                        ))}
+                                                        {comments.length > 5 && !showAllComments && (
+                                                            <button className="btn btn-link" onClick={() => setShowAllComments(true)}>
+                                                                Hiển thị thêm
+                                                            </button>
+                                                        )}
+                                                        {comments.length > 5 && showAllComments && (
+                                                            <button className="btn btn-link" onClick={() => setShowAllComments(false)}>
+                                                                Ẩn bớt
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )
+                                            )}
                                         </div>
                                     </div>
                                 </div>
