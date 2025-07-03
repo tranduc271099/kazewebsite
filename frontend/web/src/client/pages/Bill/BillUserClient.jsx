@@ -304,58 +304,69 @@ const BillUserClient = () => {
 
             {showDetailModal && selectedBill && (
                 <div className="bill-detail-modal" onClick={() => setShowDetailModal(false)}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <h4 style={{ margin: 0, fontWeight: 600 }}>Chi tiết đơn hàng</h4>
+                    <div className="modal-content order-detail-modern" onClick={e => e.stopPropagation()} style={{ maxWidth: 1050, minWidth: 800 }}>
+                        {/* Header */}
+                        <div className="order-detail-header">
+                            <span>Chi tiết đơn hàng <b>#{selectedBill._id.slice(-8).toUpperCase()}</b></span>
+                            <span style={{ fontSize: '1rem', color: '#888', fontWeight: 400, marginLeft: 'auto', marginRight: 24 }}>
+                                Ngày đặt hàng: {formatDate(selectedBill.ngay_tao)}
+                            </span>
                             <button className="close-btn" onClick={() => setShowDetailModal(false)}>&times;</button>
                         </div>
-                        <div className="modal-body">
-                            <div className="order-info-grid">
-                                <div className="info-item"><label>Mã đơn hàng</label><span>{selectedBill._id.slice(-8).toUpperCase()}</span></div>
-                                <div className="info-item"><label>Ngày đặt</label><span>{formatDate(selectedBill.ngay_tao)}</span></div>
-                                <div className="info-item"><label>Tên người đặt</label><span>{selectedBill.nguoi_dung_id?.name || '---'}</span></div>
-                                <div className="info-item"><label>SĐT</label><span>{selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
-                                <div className="info-item"><label>Trạng thái thanh toán</label><span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#ef4444', fontWeight: 600 }}>{selectedBill.thanh_toan?.toUpperCase() || '---'}</span></div>
-                                <div className="info-item"><label>Trạng thái đơn hàng</label><span style={{ color: '#2563eb', fontWeight: 600 }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
-                                {selectedBill.trang_thai === 'đã hủy' && (
-                                    <>
-                                        <div className="info-item">
-                                            <label>Lý do hủy</label>
-                                            <span>{selectedBill.ly_do_huy || 'Không có lý do'}</span>
+                        <div className="order-detail-body">
+                            {/* Bên trái: Sản phẩm và tổng */}
+                            <div className="order-detail-left order-detail-left-border">
+                                {/* Danh sách sản phẩm */}
+                                {selectedBill.danh_sach_san_pham.map((item, idx) => (
+                                    <div className="order-detail-product-row order-detail-product-row-large" key={item.san_pham_id._id + idx}>
+                                        <img className="order-detail-product-img" src={item.san_pham_id.images?.[0] || 'https://via.placeholder.com/80'} alt={item.san_pham_id.name} />
+                                        <div className="order-detail-product-info">
+                                            <div className="order-detail-product-name">{item.san_pham_id.name}</div>
+                                            <div className="order-detail-product-variant">
+                                                Phân loại: {item.kich_thuoc} - {item.mau_sac} &nbsp;|&nbsp; SL: {item.so_luong}
+                                            </div>
                                         </div>
-                                        <div className="info-item">
-                                            <label>Hủy bởi</label>
-                                            <span>
-                                                {selectedBill.nguoi_huy?.id?.name || 'Không rõ'}
-                                                {selectedBill.nguoi_huy?.loai ? ` (${selectedBill.nguoi_huy.loai})` : ''}
-                                            </span>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                            <hr />
-                            <div className="address-info"><label>Địa chỉ giao hàng</label><p>{selectedBill.dia_chi_giao_hang}</p></div>
-                            <hr />
-                            <div className="product-list-modal">
-                                <h5>Sản phẩm trong đơn</h5>
-                                {selectedBill.danh_sach_san_pham.map((item, index) => (
-                                    <div key={item.san_pham_id._id + index} className="product-item">
-                                        <img src={item.san_pham_id.images?.[0] || 'https://via.placeholder.com/150'} alt={item.san_pham_id.name} className="product-image" />
-                                        <div className="product-details">
-                                            <p className="product-name">{item.san_pham_id.name}</p>
-                                            <p className="product-variant">{item.kich_thuoc} - {item.mau_sac}</p>
-                                            <p className="product-quantity">SL: {item.so_luong}</p>
-                                        </div>
-                                        <p className="product-price">{formatPrice(item.gia * item.so_luong)}</p>
+                                        <div className="order-detail-product-price">{formatPrice(item.gia)}</div>
                                     </div>
                                 ))}
+                                <hr className="order-detail-hr order-detail-hr-bold" />
+                                {/* Bảng tạm tính, phí ship, tổng cộng */}
+                                <div className="order-detail-summary-row" style={{ marginTop: 24 }}>
+                                    <span>Tạm tính</span>
+                                    <span>{formatPrice(selectedBill.danh_sach_san_pham.reduce((sum, item) => sum + (item.gia * item.so_luong), 0))}</span>
+                                </div>
+                                <div className="order-detail-summary-row">
+                                    <span>Phí vận chuyển</span>
+                                    <span>{formatPrice(selectedBill.shippingFee || 0)}</span>
+                                </div>
+                                <div className="order-detail-summary-row order-detail-summary-total">
+                                    <span>Tổng cộng</span>
+                                    <span>{formatPrice(selectedBill.tong_tien)}</span>
+                                </div>
                             </div>
-                            {/* Tổng tiền breakdown */}
-                            <div className="bill-total-breakdown" style={{ marginTop: 24, background: '#f8fafc', borderRadius: 8, padding: 16 }}>
-                                <h5 style={{ marginBottom: 12 }}>Chi tiết thanh toán</h5>
-                                <div className="breakdown-row"><span>Tạm tính sản phẩm:</span><span>{formatPrice(selectedBill.danh_sach_san_pham.reduce((sum, item) => sum + (item.gia * item.so_luong), 0))}</span></div>
-                                <div className="breakdown-row"><span>Phí vận chuyển:</span><span>{formatPrice(selectedBill.shippingFee || 0)}</span></div>
-                                <div className="breakdown-row" style={{ fontWeight: 700, color: '#2563eb' }}><span>Tổng cộng:</span><span>{formatPrice(selectedBill.tong_tien)}</span></div>
+                            {/* Bên phải: Box thông tin trạng thái, giao hàng, thanh toán */}
+                            <div className="order-detail-right-box">
+                                <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
+                                <div className="order-detail-section">
+                                    <div className="order-detail-section-title">THÔNG TIN GIAO HÀNG</div>
+                                    <div>{selectedBill.nguoi_dung_id?.name || '---'}</div>
+                                    <div>{selectedBill.nguoi_dung_id?.phone || '---'}</div>
+                                    <div>{selectedBill.dia_chi_giao_hang || '---'}</div>
+                                    {selectedBill.ghi_chu && (
+                                        <div style={{ marginTop: 6 }}><b>Ghi chú:</b> {selectedBill.ghi_chu}</div>
+                                    )}
+                                    {selectedBill.trang_thai === 'đã hủy' && (
+                                        <>
+                                            <div style={{ marginTop: 6 }}><b>Lý do hủy:</b> {selectedBill.ly_do_huy || 'Không có lý do'}</div>
+                                            <div><b>Người hủy:</b> {selectedBill.nguoi_huy?.id?.name || 'Không rõ'}{selectedBill.nguoi_huy?.loai ? ` (${selectedBill.nguoi_huy.loai})` : ''}</div>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="order-detail-section">
+                                    <div className="order-detail-section-title">THANH TOÁN</div>
+                                    <div>Phương thức: {selectedBill.phuong_thuc_thanh_toan || '---'}</div>
+                                    <div>Trạng thái: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{selectedBill.thanh_toan ? getStatusDisplay(selectedBill.thanh_toan) : '---'}</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
