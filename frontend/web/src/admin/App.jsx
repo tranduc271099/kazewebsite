@@ -21,6 +21,7 @@ import Category from "./pages/Category";
 import Product from "./pages/Product";
 import { UserProvider } from "./UserContext";
 import ListOrder from "./pages/payment/ListOrder.jsx";
+import Vouchers from "./pages/Voucher/Vouchers";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -68,6 +69,7 @@ function App() {
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/geography" element={<Geography />} />
+                <Route path="/voucher" element={<Vouchers />} />
               </Routes>
             </main>
           </div>

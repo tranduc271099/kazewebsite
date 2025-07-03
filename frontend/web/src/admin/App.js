@@ -15,6 +15,7 @@ import Category from "./pages/Category";
 import Product from "./pages/Product";
 import { UserProvider } from "./UserContext";
 import ListOrder from "./pages/payment/ListOrder.jsx";
+import Vouchers from "./pages/Vouchers.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -56,6 +57,7 @@ function App() {
                 <Route path="/invoices" element={<Invoices />} />
                 <Route path="/form" element={<Form />} />
                 <Route path="/bill" element={<ListOrder />} />
+                <Route path="/voucher" element={<Vouchers />} />
               </Routes>
             </main>
           </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
+import ApplyVoucher from '../pages/ApplyVoucher';
 
 function Cart() {
     const { cartItems, removeFromCart, updateQuantity, clearCart, updateCartItemAttributes } = useContext(CartContext);
@@ -10,6 +11,7 @@ function Cart() {
     const [total, setTotal] = useState(0);
     const [discount, setDiscount] = useState(0);
     const [selectedItems, setSelectedItems] = useState({});
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
 
     // Helper to find matching variant (similar to ProductDetail)
     const findMatchingVariant = useCallback((productId, newColor, newSize) => {
@@ -36,14 +38,10 @@ function Cart() {
 
     useEffect(() => {
         // Calculate total based on selected items
-        const subtotal = cartItems.reduce((acc, item) => {
-            const itemId = `${item.id}-${item.color}-${item.size}`;
-            if (selectedItems[itemId]) {
-                return acc + (item.price * item.quantity);
-            }
-            return acc;
-        }, 0);
-        setTotal(subtotal - discount);
+        const subtotal = cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`])
+            .reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        const totalAfterDiscount = Math.max(subtotal - discount, 0);
+        setTotal(totalAfterDiscount);
     }, [cartItems, discount, selectedItems]);
 
     const handleItemSelection = (itemId, isSelected) => {
@@ -85,7 +83,7 @@ function Cart() {
             toast.warning('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!');
             return;
         }
-        navigate('/checkout', { state: { selectedCartItems } });
+        navigate('/checkout', { state: { selectedCartItems, discount, voucher: selectedVoucher } });
     };
 
     return (
@@ -250,10 +248,14 @@ function Cart() {
                                         })}
                                         {/* Coupon and actions */}
                                         <div className="d-flex justify-content-between align-items-center mt-4">
-                                            <div className="input-group" style={{ maxWidth: 300 }}>
-                                                <input type="text" className="form-control" placeholder="Mã giảm giá" />
-                                                <button className="btn btn-primary" type="button">Áp dụng</button>
-                                            </div>
+                                            <ApplyVoucher
+                                                cartTotal={cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`])
+                                                    .reduce((acc, item) => acc + (item.price * item.quantity), 0)}
+                                                onDiscountApplied={(discountAmount, voucher) => {
+                                                    setDiscount(discountAmount);
+                                                    setSelectedVoucher(voucher);
+                                                }}
+                                            />
                                             <div>
                                                 <button className="btn btn-outline-primary me-2" type="button">Cập nhật</button>
                                                 <button className="btn btn-outline-danger" type="button" onClick={clearCart}>Xóa hết</button>
@@ -278,7 +280,9 @@ function Cart() {
                                         <hr />
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <span style={{ fontWeight: 600, fontSize: 18 }}>Tổng cộng</span>
-                                            <span style={{ fontWeight: 700, fontSize: 22 }}>{cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]).reduce((acc, item) => acc + (item.price * item.quantity), 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                                            <span style={{ fontWeight: 700, fontSize: 22 }}>
+                                                {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                            </span>
                                         </div>
                                         <button className="btn btn-primary w-100 mb-2" style={{ fontWeight: 600, fontSize: 16 }} onClick={handleCheckout}>
                                             Thanh toán &rarr;

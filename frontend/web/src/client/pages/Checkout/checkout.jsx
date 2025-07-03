@@ -14,6 +14,8 @@ const Checkout = () => {
     const location = useLocation();
     const selectedCartItems = location.state?.selectedCartItems;
     const itemsToCheckout = selectedCartItems && selectedCartItems.length > 0 ? selectedCartItems : cartItems;
+    const discountFromState = location.state?.discount || 0;
+    const voucherFromState = location.state?.voucher || null;
 
     const [userData, setUserData] = useState(null);
     const [formData, setFormData] = useState({
@@ -29,7 +31,7 @@ const Checkout = () => {
     const [paymentMethod, setPaymentMethod] = useState('cod');
     const [shipping, setShipping] = useState(4990);
     const [total, setTotal] = useState(0);
-    const [discount, setDiscount] = useState(0);
+    const [discount, setDiscount] = useState(discountFromState);
     const [availableDistricts, setAvailableDistricts] = useState({});
     const [availableWards, setAvailableWards] = useState({});
     const [errors, setErrors] = useState({
@@ -204,7 +206,9 @@ const Checkout = () => {
                     color: item.color,
                     size: item.size,
                     quantity: item.quantity
-                }))
+                })),
+                discount,
+                voucher: voucherFromState
             };
 
             const response = await fetch('http://localhost:5000/api/bill', {
@@ -585,6 +589,31 @@ const Checkout = () => {
                                                     <span>Phí vận chuyển</span>
                                                     <span>{shipping.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                                 </div>
+                                                {voucherFromState && (
+                                                    <div style={{
+                                                        marginTop: 8,
+                                                        background: '#fffbe6',
+                                                        border: '1px solid #ffe58f',
+                                                        borderRadius: 6,
+                                                        padding: '8px 12px',
+                                                        color: '#b26a00',
+                                                        fontSize: 15,
+                                                        fontWeight: 500,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 8
+                                                    }}>
+                                                        <span style={{ color: '#e53935', fontSize: 18 }}>
+                                                            <i className="fas fa-ticket-alt"></i>
+                                                        </span>
+                                                        <span>
+                                                            Đã áp dụng voucher: <b>{voucherFromState.name}</b>
+                                                            &nbsp;{voucherFromState.discountType === 'amount'
+                                                                ? `Giảm ${voucherFromState.discountValue.toLocaleString('vi-VN')}đ`
+                                                                : `Giảm ${voucherFromState.discountValue}%`}
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 <div className="d-flex justify-content-between mb-2">
                                                     <span>Giảm giá</span>
                                                     <span className="text-success">-{discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>

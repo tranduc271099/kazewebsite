@@ -28,7 +28,9 @@ class BillController {
         phuong_thuc_thanh_toan,
         ghi_chu,
         shippingFee,
-        danh_sach_san_pham: selectedItems
+        danh_sach_san_pham: selectedItems,
+        discount = 0,
+        voucher = null
       } = req.body;
       const nguoi_dung_id = req.user.id;
       // Log thông tin tạo đơn hàng
@@ -138,7 +140,9 @@ class BillController {
         phuong_thuc_thanh_toan,
         ghi_chu,
         danh_sach_san_pham,
-        shippingFee
+        shippingFee,
+        discount,
+        voucher
       });
       await newBill.save();
       // Xóa các sản phẩm đã đặt khỏi giỏ hàng, giữ lại sản phẩm chưa đặt

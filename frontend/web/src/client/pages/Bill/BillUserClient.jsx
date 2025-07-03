@@ -282,7 +282,7 @@ const BillUserClient = () => {
                                             <div className="order-footer">
                                                 <div className="total-amount">
                                                     <span>Thành tiền:</span>
-                                                    <span className="amount">{formatPrice(bill.tong_tien)}</span>
+                                                    <span className="amount">{formatPrice((bill.tong_tien || 0) - (bill.discount || 0))}</span>
                                                 </div>
                                                 <div className="order-actions">
                                                     <button className="shopee-btn shopee-btn-secondary" onClick={() => showBillDetail(bill)}>Xem Chi Tiết</button>
@@ -339,9 +339,13 @@ const BillUserClient = () => {
                                     <span>Phí vận chuyển</span>
                                     <span>{formatPrice(selectedBill.shippingFee || 0)}</span>
                                 </div>
+                                <div className="order-detail-summary-row">
+                                    <span>Giảm giá</span>
+                                    <span style={{ color: '#10b981' }}>-{formatPrice(selectedBill.discount || 0)}</span>
+                                </div>
                                 <div className="order-detail-summary-row order-detail-summary-total">
                                     <span>Tổng cộng</span>
-                                    <span>{formatPrice(selectedBill.tong_tien)}</span>
+                                    <span>{formatPrice((selectedBill.tong_tien || 0) - (selectedBill.discount || 0))}</span>
                                 </div>
                             </div>
                             {/* Bên phải: Box thông tin trạng thái, giao hàng, thanh toán */}

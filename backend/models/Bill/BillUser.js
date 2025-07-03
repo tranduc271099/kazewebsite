@@ -80,6 +80,15 @@ const billSchema = new mongoose.Schema({
   shippingFee: {
     type: Number,
     default: 0
+  },
+  discount: {
+    type: Number,
+    default: 0
+  },
+  voucher: {
+    name: { type: String },
+    discountType: { type: String },
+    discountValue: { type: Number }
   }
 });
 

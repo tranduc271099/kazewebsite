@@ -320,7 +320,9 @@ const ListOrder = () => {
                           {getStatusDisplay(order.trang_thai || 'chờ xác nhận')}
                         </span>
                       </td>
-                      <td style={{ color: '#2563eb', fontWeight: 600, textAlign: 'right' }}>{(order.tong_tien || 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
+                      <td style={{ color: '#2563eb', fontWeight: 600, textAlign: 'right' }}>
+                        {((order.tong_tien || 0) - (order.discount || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                      </td>
                       <td style={{ textAlign: 'center' }}>{order.phuong_thuc_thanh_toan || '---'}</td>
                       <td style={{ textAlign: 'center' }}>
                         <button

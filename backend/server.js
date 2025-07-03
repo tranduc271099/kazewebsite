@@ -38,6 +38,8 @@ app.use('/api/comments', require('./routes/Comment/CommentRoutes'));
 
 app.use('/api/bill', require('./routes/Bill/billroutes'))
 
+app.use('/api/vouchers', require('./routes/voucher.routes'));
+
 app.listen(process.env.PORT, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
 });
