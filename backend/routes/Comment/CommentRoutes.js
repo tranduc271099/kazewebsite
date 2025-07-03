@@ -9,5 +9,7 @@ router.get('/:productId', CommentController.getByProduct);
 router.post('/', auth, CommentController.create);
 // Xóa bình luận (cần đăng nhập)
 router.delete('/:id', auth, CommentController.remove);
+// Lấy danh sách orderId hợp lệ để bình luận cho sản phẩm này
+router.get('/eligible-orders/:productId', auth, CommentController.getEligibleOrdersForComment);
 
 module.exports = router;
