@@ -89,6 +89,8 @@ class BillController {
 
       // --- BẮT ĐẦU: TRỪ KHO (Atomic) ---
       for (const item of danh_sach_san_pham) {
+        console.log(`[ADD BILL] Reducing stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+        
         const updateResult = await Product.updateOne(
           {
             _id: item.san_pham_id,
@@ -107,6 +109,7 @@ class BillController {
 
         // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc (không có biến thể)
         if (updateResult.modifiedCount === 0) {
+          console.log(`[ADD BILL] Variant not found, trying to update main product stock`);
           const fallbackUpdateResult = await Product.updateOne(
             {
               _id: item.san_pham_id,
@@ -126,7 +129,11 @@ class BillController {
               return res.status(400).json({ message: `Sản phẩm ${product.name} với thuộc tính đã chọn không tồn tại.` });
             }
             return res.status(400).json({ message: `Sản phẩm ${product.name} (${item.mau_sac} - ${item.kich_thuoc}) không đủ hàng. Tồn kho: ${variant.stock}, Cần: ${item.so_luong}` });
+          } else {
+            console.log(`[ADD BILL] Successfully reduced main product stock for ${item.san_pham_id}`);
           }
+        } else {
+          console.log(`[ADD BILL] Successfully reduced variant stock for product ${item.san_pham_id}`);
         }
       }
       // --- KẾT THÚC: TRỪ KHO ---
@@ -181,19 +188,28 @@ class BillController {
 
       // --- BẮT ĐẦU: HOÀN KHO (Atomic) ---
       for (const item of bill.danh_sach_san_pham) {
+        console.log(`[CANCEL BILL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+        
+        // Thử cập nhật biến thể trước
         const updateResult = await Product.updateOne(
           {
             _id: item.san_pham_id,
-            "variants.attributes.color": item.mau_sac,
-            "variants.attributes.size": item.kich_thuoc
+            "variants": {
+              $elemMatch: {
+                "attributes.color": item.mau_sac,
+                "attributes.size": item.kich_thuoc
+              }
+            }
           },
           {
             $inc: { "variants.$.stock": item.so_luong }
           }
         );
 
+        // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
         if (updateResult.modifiedCount === 0) {
-          await Product.updateOne(
+          console.log(`[CANCEL BILL] Variant not found, trying to update main product stock`);
+          const fallbackUpdateResult = await Product.updateOne(
             {
               _id: item.san_pham_id,
               $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
@@ -202,6 +218,14 @@ class BillController {
               $inc: { stock: item.so_luong }
             }
           );
+          
+          if (fallbackUpdateResult.modifiedCount === 0) {
+            console.log(`[CANCEL BILL] Failed to restore stock for product ${item.san_pham_id}`);
+          } else {
+            console.log(`[CANCEL BILL] Successfully restored main product stock for ${item.san_pham_id}`);
+          }
+        } else {
+          console.log(`[CANCEL BILL] Successfully restored variant stock for product ${item.san_pham_id}`);
         }
       }
       // --- KẾT THÚC: HOÀN KHO ---
@@ -281,19 +305,28 @@ class BillController {
 
         // --- BẮT ĐẦU: HOÀN KHO KHI ADMIN HUỶ (Atomic) ---
         for (const item of bill.danh_sach_san_pham) {
+          console.log(`[ADMIN CANCEL BILL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+          
+          // Thử cập nhật biến thể trước
           const updateResult = await Product.updateOne(
             {
               _id: item.san_pham_id,
-              "variants.attributes.color": item.mau_sac,
-              "variants.attributes.size": item.kich_thuoc
+              "variants": {
+                $elemMatch: {
+                  "attributes.color": item.mau_sac,
+                  "attributes.size": item.kich_thuoc
+                }
+              }
             },
             {
               $inc: { "variants.$.stock": item.so_luong }
             }
           );
 
+          // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
           if (updateResult.modifiedCount === 0) {
-            await Product.updateOne(
+            console.log(`[ADMIN CANCEL BILL] Variant not found, trying to update main product stock`);
+            const fallbackUpdateResult = await Product.updateOne(
               {
                 _id: item.san_pham_id,
                 $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
@@ -302,6 +335,14 @@ class BillController {
                 $inc: { stock: item.so_luong }
               }
             );
+            
+            if (fallbackUpdateResult.modifiedCount === 0) {
+              console.log(`[ADMIN CANCEL BILL] Failed to restore stock for product ${item.san_pham_id}`);
+            } else {
+              console.log(`[ADMIN CANCEL BILL] Successfully restored main product stock for ${item.san_pham_id}`);
+            }
+          } else {
+            console.log(`[ADMIN CANCEL BILL] Successfully restored variant stock for product ${item.san_pham_id}`);
           }
         }
         // --- KẾT THÚC: HOÀN KHO KHI ADMIN HUỶ ---
