@@ -343,29 +343,68 @@ exports.getDashboardStats = async (req, res) => {
             { $limit: 3 }
         ]);
 
-        // Top 3 order mới nhất
-        const latestOrders = await Bill.aggregate([
-            { $match: dateFilter },
-            { $sort: { ngay_tao: -1 } },
-            { $limit: 3 },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'nguoi_dung_id',
-                    foreignField: '_id',
-                    as: 'userInfo'
+        // Debug: đếm tổng số đơn hàng
+        const totalBills = await Bill.countDocuments(dateFilter);
+        console.log('Total bills in database:', totalBills);
+        
+        // Top 5 order mới nhất - phiên bản đơn giản để test
+        let latestOrders = [];
+        try {
+            latestOrders = await Bill.aggregate([
+                { $match: dateFilter },
+                { $sort: { ngay_tao: -1 } },
+                { $limit: 5 },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: 'nguoi_dung_id',
+                        foreignField: '_id',
+                        as: 'userInfo'
+                    }
+                },
+                { $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true } },
+                {
+                    $project: {
+                        orderId: '$_id',
+                        userName: { $ifNull: ['$userInfo.name', 'Ẩn danh'] },
+                        userPhone: { $ifNull: ['$userInfo.phone', '---'] },
+                        totalAmount: '$tong_tien',
+                        status: '$trang_thai',
+                        createdAt: '$ngay_tao',
+                        paymentMethod: '$phuong_thuc_thanh_toan',
+                        shippingFee: '$phi_van_chuyen',
+                        dia_chi_giao_hang: '$dia_chi_giao_hang',
+                        ghi_chu: '$ghi_chu',
+                        danh_sach_san_pham: '$danh_sach_san_pham',
+                        ly_do_huy: '$ly_do_huy'
+                    }
                 }
-            },
-            { $unwind: '$userInfo' },
-            {
-                $project: {
-                    userName: '$userInfo.name',
-                    totalAmount: '$tong_tien',
-                    status: '$trang_thai',
-                    createdAt: '$ngay_tao'
-                }
-            }
-        ]);
+            ]);
+        } catch (error) {
+            console.error('Error in latestOrders aggregation:', error);
+            // Fallback: lấy đơn giản không có lookup
+            latestOrders = await Bill.find(dateFilter)
+                .sort({ ngay_tao: -1 })
+                .limit(5)
+                .lean()
+                .then(bills => bills.map(bill => ({
+                    orderId: bill._id,
+                    userName: 'Ẩn danh',
+                    userPhone: '---',
+                    totalAmount: bill.tong_tien,
+                    status: bill.trang_thai,
+                    createdAt: bill.ngay_tao,
+                    paymentMethod: bill.phuong_thuc_thanh_toan,
+                    shippingFee: bill.phi_van_chuyen,
+                    dia_chi_giao_hang: bill.dia_chi_giao_hang,
+                    ghi_chu: bill.ghi_chu,
+                    danh_sach_san_pham: bill.danh_sach_san_pham,
+                    ly_do_huy: bill.ly_do_huy
+                })));
+        }
+        
+        console.log('Latest orders found:', latestOrders.length);
+        console.log('Latest orders data:', latestOrders);
 
         res.json({
             overview: overviewStats[0] || {

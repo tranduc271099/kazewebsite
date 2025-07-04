@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { toast } from 'react-toastify';
 import '../styles/Dashboard.css';
 
 const Dashboard = () => {
@@ -18,17 +19,27 @@ const Dashboard = () => {
         topProducts: [],
         latestOrders: []
     });
+    const [latestOrders, setLatestOrders] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [dateRange, setDateRange] = useState({
         startDate: '',
         endDate: ''
     });
+    // Order management states
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+    const [updatingStatus, setUpdatingStatus] = useState(false);
+    const [newStatus, setNewStatus] = useState('');
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelReason, setCancelReason] = useState('');
+    
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
 
     useEffect(() => {
         fetchDashboardData();
+        fetchLatestOrders();
     }, [dateRange]);
 
     const fetchDashboardData = async () => {
@@ -44,6 +55,7 @@ const Dashboard = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
+            console.log('Dashboard data:', response.data);
             setDashboardData(response.data);
         } catch (err) {
             setError('Không thể tải dữ liệu dashboard');
@@ -51,6 +63,152 @@ const Dashboard = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchLatestOrders = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:5000/api/bill/all`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            console.log('Latest orders response:', res.data);
+            // Lấy 5 đơn hàng mới nhất
+            const latest5Orders = res.data.bills.slice(0, 5);
+            setLatestOrders(latest5Orders);
+        } catch (err) {
+            console.error('Error fetching latest orders:', err);
+            setLatestOrders([]);
+        }
+    };
+
+    // Order management functions
+    const handleStatusChange = async (orderId, newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/bill/${orderId}/status`, { trang_thai: newStatus }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchDashboardData();
+            fetchLatestOrders();
+            setShowModal(false);
+            toast.success(`Đơn hàng đã được cập nhật thành "${getStatusDisplay(newStatus)}".`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+        }
+    };
+
+    const handleShowDetail = async (orderId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:5000/api/bill/${orderId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setSelectedOrder(res.data);
+            setShowModal(true);
+        } catch (err) {
+            console.error('Error fetching order details:', err);
+            // Fallback: sử dụng dữ liệu từ latestOrders nếu API lỗi
+            const orderFromLatest = latestOrders.find(order => order._id === orderId);
+            if (orderFromLatest) {
+                setSelectedOrder(orderFromLatest);
+                setShowModal(true);
+            } else {
+                alert(err.response?.data?.message || 'Lỗi khi lấy chi tiết đơn hàng');
+            }
+        }
+    };
+
+    const handleAdminCancelOrder = (order) => {
+        setSelectedOrder(order);
+        setShowModal(true);
+        setNewStatus('đã hủy');
+        setShowCancelModal(true);
+    };
+
+    const confirmAdminCancelOrder = async () => {
+        if (!selectedOrder) return;
+        if (!cancelReason.trim()) {
+            alert('Vui lòng nhập lý do huỷ đơn!');
+            return;
+        }
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(`http://localhost:5000/api/bill/${selectedOrder._id}/status`, { trang_thai: 'đã hủy', ly_do_huy: cancelReason }, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            fetchDashboardData();
+            fetchLatestOrders();
+            setShowModal(false);
+            toast.success('Đơn hàng đã được hủy thành công!');
+        } catch (err) {
+            alert('Lỗi khi huỷ đơn hàng');
+        } finally {
+            setShowCancelModal(false);
+            setCancelReason('');
+        }
+    };
+
+    const getStatusDisplay = (status) => {
+        switch (status) {
+            case 'chờ xác nhận': return 'Chờ xác nhận';
+            case 'đã xác nhận': return 'Đã xác nhận';
+            case 'đang giao hàng': return 'Đang giao';
+            case 'đã giao hàng': return 'Đã giao';
+            case 'đã nhận hàng': return 'Đã nhận';
+            case 'hoàn thành': return 'Hoàn thành';
+            case 'đã hủy': return 'Đã hủy';
+            default: return status;
+        }
+    };
+
+    const getNextStatusOptions = (currentStatus) => {
+        switch (currentStatus) {
+            case 'chờ xác nhận':
+                return ['đã xác nhận', 'đã hủy'];
+            case 'đã xác nhận':
+                return ['đang giao hàng', 'đã hủy'];
+            case 'đang giao hàng':
+                return ['đã giao hàng'];
+            case 'đã giao hàng':
+                return ['hoàn thành'];
+            case 'đã nhận hàng':
+                return ['hoàn thành'];
+            default:
+                return [];
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'chờ xác nhận': return '#f59e0b';
+            case 'đã xác nhận': return '#3b82f6';
+            case 'đang giao hàng': return '#8b5cf6';
+            case 'đã giao hàng': return '#10b981';
+            case 'đã nhận hàng': return '#3b82f6';
+            case 'hoàn thành': return '#10b981';
+            case 'đã hủy': return '#ef4444';
+            default: return '#6b7280';
+        }
+    };
+
+    const parseAddress = (address) => {
+        if (!address) return { street: '', ward: '', district: '', city: '' };
+        const parts = address.split(',').map(part => part.trim());
+        if (parts.length >= 4) {
+            return {
+                street: parts[0],
+                ward: parts[1],
+                district: parts[2],
+                city: parts[3]
+            };
+        }
+        return { street: address, ward: '', district: '', city: '' };
+    };
+
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+        const pad = (n) => n.toString().padStart(2, '0');
+        return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())} ${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
     };
 
     const formatCurrency = (amount) => {
@@ -142,15 +300,19 @@ const Dashboard = () => {
     const thStyle = {
         background: isDark ? theme.palette.background.default : '#f8f9fa',
         color: theme.palette.text.primary,
-        padding: 12,
+        padding: '12px 8px',
         textAlign: 'left',
         fontWeight: 600,
         borderBottom: `2px solid ${theme.palette.divider}`,
+        fontSize: '14px',
+        verticalAlign: 'middle'
     };
     const tdStyle = {
-        padding: 12,
+        padding: '12px 8px',
         borderBottom: `1px solid ${theme.palette.divider}`,
         color: theme.palette.text.primary,
+        fontSize: '14px',
+        verticalAlign: 'middle'
     };
     const badgeBase = {
         padding: '4px 8px',
@@ -355,38 +517,340 @@ const Dashboard = () => {
             <Paper elevation={2} style={cardStyle}>
                 <h3 style={sectionTitleStyle}>Đơn hàng mới nhất</h3>
                 <div style={{ overflowX: 'auto' }}>
-                    <table style={tableStyle}>
+                    <table style={{
+                        ...tableStyle,
+                        borderCollapse: 'collapse',
+                        borderSpacing: 0,
+                        width: '100%',
+                        minWidth: '800px',
+                        tableLayout: 'fixed'
+                    }}>
                         <thead>
                             <tr>
-                                <th style={thStyle}>Khách hàng</th>
-                                <th style={thStyle}>Tổng tiền</th>
-                                <th style={thStyle}>Trạng thái</th>
-                                <th style={thStyle}>Ngày đặt</th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '12%', 
+                                    minWidth: '100px',
+                                    textAlign: 'center',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Mã đơn
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '18%', 
+                                    minWidth: '120px',
+                                    textAlign: 'left',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Khách hàng
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '12%', 
+                                    minWidth: '100px',
+                                    textAlign: 'center',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    SĐT
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '18%', 
+                                    minWidth: '140px',
+                                    textAlign: 'center',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Ngày đặt
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '15%', 
+                                    minWidth: '120px',
+                                    textAlign: 'center',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Trạng thái
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '15%', 
+                                    minWidth: '120px',
+                                    textAlign: 'right',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Tổng tiền
+                                </th>
+                                <th style={{ 
+                                    ...thStyle, 
+                                    width: '10%', 
+                                    minWidth: '100px',
+                                    textAlign: 'center',
+                                    padding: '12px 8px',
+                                    fontSize: '14px',
+                                    fontWeight: 600
+                                }}>
+                                    Thao tác
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {dashboardData.latestOrders.length > 0 ? (
-                                dashboardData.latestOrders.map(order => (
-                                    <tr key={order.orderId}>
-                                        <td style={tdStyle}>{order.userName}</td>
-                                        <td style={tdStyle}>{formatCurrency(order.totalAmount)}</td>
-                                        <td style={tdStyle}>
-                                            <span style={badgeStyles[getStatusBadgeClass(order.status)]}>
-                                                {order.status}
+                            {console.log('Latest orders:', latestOrders)}
+                            {latestOrders && latestOrders.length > 0 ? (
+                                latestOrders.map(order => (
+                                    <tr key={order._id} style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            textAlign: 'center', 
+                                            fontWeight: 500
+                                        }}>
+                                            #{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}
+                                        </td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            maxWidth: '120px',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            textAlign: 'left'
+                                        }}>
+                                            {order.nguoi_dung_id?.name || 'Ẩn danh'}
+                                        </td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            textAlign: 'center'
+                                        }}>
+                                            {order.nguoi_dung_id?.phone || '---'}
+                                        </td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            textAlign: 'center'
+                                        }}>
+                                            {order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}
+                                        </td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            textAlign: 'center'
+                                        }}>
+                                            <span style={{
+                                                padding: '6px 12px',
+                                                borderRadius: 6,
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                display: 'inline-block',
+                                                background: getStatusColor(order.trang_thai),
+                                                color: '#fff',
+                                                minWidth: '80px',
+                                                textAlign: 'center'
+                                            }}>
+                                                {getStatusDisplay(order.trang_thai)}
                                             </span>
                                         </td>
-                                        <td style={tdStyle}>{formatDate(order.createdAt)}</td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            color: '#2563eb', 
+                                            fontWeight: 600, 
+                                            textAlign: 'right'
+                                        }}>
+                                            {formatCurrency(order.tong_tien)}
+                                        </td>
+                                        <td style={{ 
+                                            ...tdStyle, 
+                                            textAlign: 'center'
+                                        }}>
+                                            <button
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    borderRadius: 6,
+                                                    border: '1px solid #2563eb',
+                                                    background: '#fff',
+                                                    color: '#2563eb',
+                                                    fontWeight: 600,
+                                                    fontSize: '12px',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease',
+                                                    minWidth: '70px'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = '#2563eb';
+                                                    e.target.style.color = '#fff';
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = '#fff';
+                                                    e.target.style.color = '#2563eb';
+                                                }}
+                                                onClick={() => handleShowDetail(order._id)}
+                                            >
+                                                Chi tiết
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4" style={{ ...tdStyle, color: theme.palette.text.secondary }}>Không có đơn hàng nào</td>
+                                    <td colSpan="7" style={{ 
+                                        ...tdStyle, 
+                                        color: theme.palette.text.secondary, 
+                                        textAlign: 'center',
+                                        padding: '40px 20px',
+                                        fontSize: '16px'
+                                    }}>
+                                        Không có đơn hàng nào
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
             </Paper>
+
+            {/* Order Detail Modal */}
+            {showModal && selectedOrder && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+                }}>
+                    <div style={{
+                        background: '#fff',
+                        borderRadius: 12,
+                        padding: 32,
+                        maxWidth: 700,
+                        width: '95%',
+                        maxHeight: '85vh',
+                        overflow: 'auto',
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                        fontSize: '18px'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
+                            <div style={{ fontSize: 24, color: '#222', fontWeight: 700 }}>
+                                Mã hóa đơn #{selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A'}
+                            </div>
+                            <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 32, cursor: 'pointer', color: '#888', lineHeight: 1 }}>×</button>
+                        </div>
+                        <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
+                            <strong>Khách hàng:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
+                        </div>
+                        <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
+                            <strong>SĐT:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+                        </div>
+                        <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
+                            <strong>Ngày đặt:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
+                        </div>
+                        <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
+                            <strong>Trạng thái:</strong> <span style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 16 }}>
+                                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplay(selectedOrder.trang_thai || 'chờ xác nhận')}
+                            </span>
+                            {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
+                                <div style={{ marginTop: 8, color: '#d32f2f', fontSize: 16 }}><strong>Lý do huỷ:</strong> {selectedOrder.ly_do_huy}</div>
+                            )}
+                        </div>
+                        {selectedOrder.phuong_thuc_thanh_toan && (
+                            <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+                                <strong>Phương thức thanh toán:</strong> <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
+                            </div>
+                        )}
+                        {selectedOrder.phi_van_chuyen !== undefined && (
+                            <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+                                <strong>Phương thức vận chuyển:</strong> {selectedOrder.phi_van_chuyen === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.phi_van_chuyen === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.phi_van_chuyen === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+                            </div>
+                        )}
+                        <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+                            Địa chỉ giao hàng:
+                            <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
+                                {selectedOrder.dia_chi_giao_hang ? (
+                                    <>
+                                        {parseAddress(selectedOrder.dia_chi_giao_hang).street}<br />
+                                        {parseAddress(selectedOrder.dia_chi_giao_hang).ward && <span>Xã/Phường: {parseAddress(selectedOrder.dia_chi_giao_hang).ward}<br /></span>}
+                                        {parseAddress(selectedOrder.dia_chi_giao_hang).district && <span>Quận/Huyện: {parseAddress(selectedOrder.dia_chi_giao_hang).district}<br /></span>}
+                                        {parseAddress(selectedOrder.dia_chi_giao_hang).city && <span>Tỉnh/TP: {parseAddress(selectedOrder.dia_chi_giao_hang).city}</span>}
+                                    </>
+                                ) : (
+                                    'Không có địa chỉ'
+                                )}
+                            </div>
+                        </div>
+                        {selectedOrder.ghi_chu && <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>Ghi chú: <span style={{ fontSize: 14 }}>{selectedOrder.ghi_chu}</span></div>}
+                        <div style={{ marginBottom: 14, color: '#222' }}>Sản phẩm:</div>
+                        {selectedOrder.danh_sach_san_pham && Array.isArray(selectedOrder.danh_sach_san_pham) && selectedOrder.danh_sach_san_pham.map((item, idx) => (
+                            <div key={item._id || idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 10, borderBottom: idx < selectedOrder.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none', paddingBottom: 10 }}>
+                                <div style={{ width: 44, height: 44, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
+                                    <img
+                                        src={item.san_pham_id?.images && item.san_pham_id.images[0] ? (item.san_pham_id.images[0].startsWith('http') ? item.san_pham_id.images[0] : `http://localhost:5000${item.san_pham_id.images[0]}`) : 'https://via.placeholder.com/150'}
+                                        alt={item.san_pham_id?.name || 'Sản phẩm'}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={e => { e.currentTarget.src = 'https://via.placeholder.com/150'; }}
+                                    />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: 14, color: '#222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.san_pham_id?.name || 'Không có tên'}</div>
+                                    <div style={{ fontSize: 12, color: '#666' }}>SL: {item.so_luong || 0} | {item.mau_sac || '---'} | {item.kich_thuoc || '---'}</div>
+                                </div>
+                                <div style={{ color: '#2563eb', marginLeft: 12, fontSize: 14 }}>{((item.gia || 0) * (item.so_luong || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
+                            </div>
+                        ))}
+                        <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+                            {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&
+                                <>
+                                    <strong style={{ marginRight: 'auto', fontSize: '16px' }}>Cập nhật trạng thái:</strong>
+                                    {getNextStatusOptions(selectedOrder.trang_thai).map(status => (
+                                        <button
+                                            key={status}
+                                            onClick={() => {
+                                                if (status === 'đã hủy') {
+                                                    handleAdminCancelOrder(selectedOrder);
+                                                } else {
+                                                    handleStatusChange(selectedOrder._id, status);
+                                                }
+                                            }}
+                                            style={{
+                                                padding: '8px 16px',
+                                                borderRadius: 6,
+                                                background: status === 'đã hủy' ? '#ef4444' : (status === 'đã xác nhận' ? '#3b82f6' : '#10b981'),
+                                                color: '#fff',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                fontWeight: 600,
+                                                fontSize: '14px',
+                                            }}
+                                        >
+                                            {getStatusDisplay(status)}
+                                        </button>
+                                    ))}
+                                </>
+                            }
+                            <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', borderRadius: 6, background: '#6c757d', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 ? 'initial' : 'auto' }}>
+                                Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cancel Order Modal */}
+            {showCancelModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+                    <div style={{ background: '#fff', borderRadius: 8, padding: 24, minWidth: 320 }}>
+                        <h4>Nhập lý do huỷ đơn</h4>
+                        <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} rows={3} style={{ width: '100%', marginBottom: 16 }} />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                            <button className="btn btn-secondary" onClick={() => { setShowCancelModal(false); setCancelReason(''); }}>Huỷ</button>
+                            <button className="btn btn-danger" onClick={confirmAdminCancelOrder}>Xác nhận huỷ</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
