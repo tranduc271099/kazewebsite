@@ -16,7 +16,7 @@ const billSchema = new mongoose.Schema({
   },
   phuong_thuc_thanh_toan: {
     type: String,
-    enum: ['COD', 'MOMO', 'BANKING'], 
+    enum: ['COD', 'MOMO', 'BANKING', 'VNPAY'], 
     default: 'COD'
   },
   ghi_chu: {
@@ -89,6 +89,16 @@ const billSchema = new mongoose.Schema({
     name: { type: String },
     discountType: { type: String },
     discountValue: { type: Number }
+  },
+  orderId: {
+    type: String,
+    unique: true,
+    required: false // sẽ set khi thanh toán VNPAY
+  },
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed'],
+    default: 'pending'
   }
 });
 

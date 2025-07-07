@@ -17,7 +17,9 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.3",
     "multer": "^2.0.1",
+    "qs": "^6.14.0",
     "react-beautiful-dnd": "^13.1.1",
+    "axios": "^1.6.0",
     "slugify": "^1.6.6"
   },
   "devDependencies": {

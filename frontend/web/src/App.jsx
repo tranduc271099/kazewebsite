@@ -19,6 +19,8 @@ import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
 import ChangePassword from './client/pages/ChangePassword';
 import BillUser from './client/pages/Bill/BillUserClient.jsx';
+import Vnpay from './client/pages/Vnpay';
+import PaymentResult from './client/pages/PaymentResult';
 
 // Components
 import Footer from './client/components/Footer';
@@ -68,6 +70,8 @@ function App() {
               <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
               <Route path="/about" element={<><Header /><About /><Footer /></>} />
               <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
+              <Route path="/vnpay" element={<Vnpay/>} />
+              <Route path="/payment-result" element={<PaymentResult />} />
             </Routes>
           </div>
         </Router>

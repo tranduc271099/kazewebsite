@@ -40,6 +40,27 @@ app.use('/api/bill', require('./routes/Bill/billroutes'))
 
 app.use('/api/vouchers', require('./routes/voucher.routes'));
 
+
+// VNPAY routes
+app.use('/api/vnpay', require('./routes/vnpay.routes'));
+
+
 app.listen(process.env.PORT, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
 });
+
+const createPaymentUrl = (orderId, amount, orderInfo) => {
+  const date = new Date();
+  const pad = (n) => n < 10 ? '0' + n : n;
+  const createDate = 
+    date.getFullYear().toString() +
+    pad(date.getMonth() + 1) +
+    pad(date.getDate()) +
+    pad(date.getHours()) +
+    pad(date.getMinutes()) +
+    pad(date.getSeconds());
+
+  // ... các tham số khác ...
+  vnp_Params['vnp_CreateDate'] = createDate;
+  // ...
+};

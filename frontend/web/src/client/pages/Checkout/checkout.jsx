@@ -34,6 +34,7 @@ const Checkout = () => {
     const [discount, setDiscount] = useState(discountFromState);
     const [availableDistricts, setAvailableDistricts] = useState({});
     const [availableWards, setAvailableWards] = useState({});
+
     const [errors, setErrors] = useState({
         fullName: '',
         email: '',
@@ -44,6 +45,11 @@ const Checkout = () => {
         ward: '',
         note: ''
     });
+
+    const [qrCode, setQrCode] = useState('');
+    const [showQrModal, setShowQrModal] = useState(false);
+    const [qrCodeData, setQrCodeData] = useState(null);
+    const [vnpayType, setVnpayType] = useState('qr');
 
     useEffect(() => {
         const fetchProfileForCheckout = async () => {
@@ -175,17 +181,13 @@ const Checkout = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
-
         if (!userData) {
             toast.error('Bạn cần đăng nhập để đặt hàng.');
             navigate('/login');
             return;
         }
-
         try {
             const token = localStorage.getItem('token');
-
-            // Cập nhật thông tin người dùng trước khi đặt hàng
             await axios.put('http://localhost:5000/api/users/me', {
                 name: formData.fullName,
                 phone: formData.phone,
@@ -193,24 +195,52 @@ const Checkout = () => {
             }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-
             const fullAddress = `${formData.address}, ${availableWards[formData.ward]?.Name || formData.ward}, ${availableDistricts[formData.district]?.Name || formData.district}, ${vietnamAddress[formData.city]?.Name || formData.city}`;
-
             const billData = {
                 dia_chi_giao_hang: fullAddress,
                 phuong_thuc_thanh_toan: paymentMethod.toUpperCase(),
                 ghi_chu: formData.note,
                 shippingFee: shipping,
                 danh_sach_san_pham: itemsToCheckout.map(item => ({
-                    id: item.id,
+                    id: item.productId || item.id,
                     color: item.color,
                     size: item.size,
                     quantity: item.quantity
                 })),
                 discount,
-                voucher: voucherFromState
+                voucher: voucherFromState,
+                tong_tien: Number(total)
             };
-
+            if (paymentMethod === 'vnpay') {
+                try {
+                    const orderId = `ORDER_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                    const orderInfo = `Thanh toan don hang ${orderId}`;
+                    const vnpayData = {
+                        orderId: orderId,
+                        amount: Number(total),
+                        orderInfo: orderInfo
+                    };
+                    const res = await axios.post('http://localhost:5000/api/vnpay/create-qrcode', vnpayData);
+                    if (res.data.success) {
+                        if (vnpayType === 'qr') {
+                            setQrCode(res.data.data.qrCodeUrl);
+                            setQrCodeData(res.data.data);
+                            setShowQrModal(true);
+                        } else if (vnpayType === 'redirect') {
+                            window.location.href = res.data.data.paymentUrl;
+                        }
+                        removeItemsFromCart(itemsToCheckout).catch((e) => {
+                            console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng:', e);
+                        });
+                    } else {
+                        toast.error(res.data.message || 'Không tạo được mã QR');
+                    }
+                } catch (err) {
+                    console.error('Lỗi khi tạo QR VNPAY:', err);
+                    toast.error(err.response?.data?.message || 'Lỗi khi tạo QR VNPAY');
+                }
+                return;
+            }
             const response = await fetch('http://localhost:5000/api/bill', {
                 method: 'POST',
                 headers: {
@@ -517,7 +547,17 @@ const Checkout = () => {
                                                                         </div>
                                                                         <div className="flex-grow-1">
                                                                             <h6 className="card-title mb-1" style={{ fontSize: '14px', fontWeight: 600 }}>VNPay</h6>
-                                                                            <p className="card-text mb-0" style={{ fontSize: '12px', color: '#666' }}>Online Payment</p>
+                                                                            <p className="card-text mb-0" style={{ fontSize: '12px', color: '#666' }}>Online Payment (QR/Redirect)</p>
+                                                                            {paymentMethod === 'vnpay' && (
+                                                                                <div className="mt-2">
+                                                                                    <label style={{ marginRight: 16 }}>
+                                                                                        <input type="radio" name="vnpayType" value="qr" checked={vnpayType==='qr'} onChange={()=>setVnpayType('qr')} /> QR Code
+                                                                                    </label>
+                                                                                    <label>
+                                                                                        <input type="radio" name="vnpayType" value="redirect" checked={vnpayType==='redirect'} onChange={()=>setVnpayType('redirect')} /> Redirect
+                                                                                    </label>
+                                                                                </div>
+                                                                            )}
                                                                         </div>
                                                                         <input
                                                                             type="radio"
@@ -654,6 +694,122 @@ const Checkout = () => {
                     </div>
                 </div>
             </div>
+
+            {showQrModal && (
+                <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header bg-primary text-white">
+                                <h5 className="modal-title">
+                                    <i className="bi bi-qr-code me-2"></i>
+                                    Thanh toán VNPAY
+                                </h5>
+                                <button type="button" className="btn-close btn-close-white" onClick={() => setShowQrModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row">
+                                    <div className="col-md-6 text-center">
+                                        <div className="mb-3">
+                                            <h6 className="text-primary mb-2">Quét mã QR để thanh toán</h6>
+                                            <div className="badge bg-success fs-6 mb-3">
+                                                {total.toLocaleString('vi-VN')} VND
+                                            </div>
+                                        </div>
+                                        {qrCode && (
+                                            <div className="qr-container p-3" style={{ 
+                                                background: 'white', 
+                                                border: '2px solid #e9ecef',
+                                                borderRadius: '12px',
+                                                display: 'inline-block'
+                                            }}>
+                                                <img 
+                                                    src={qrCode} 
+                                                    alt="VNPAY QR Code" 
+                                                    style={{ 
+                                                        maxWidth: '250px', 
+                                                        width: '100%',
+                                                        borderRadius: '8px'
+                                                    }} 
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="mt-3">
+                                            <small className="text-muted">
+                                                <i className="bi bi-info-circle me-1"></i>
+                                                Sử dụng app VNPAY để quét mã QR
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div className="col-md-6">
+                                        <div className="payment-info">
+                                            <h6 className="mb-3 text-primary">
+                                                <i className="bi bi-credit-card me-2"></i>
+                                                Thông tin thanh toán
+                                            </h6>
+                                            <div className="info-item mb-2">
+                                                <strong>Phương thức:</strong>
+                                                <span className="badge bg-primary">VNPAY</span>
+                                            </div>
+                                            <div className="info-item mb-2">
+                                                <strong>Mã đơn hàng:</strong>
+                                                <span className="text-muted">{qrCodeData?.orderId || 'N/A'}</span>
+                                            </div>
+                                            <div className="info-item mb-2">
+                                                <strong>Số tiền:</strong>
+                                                <span className="text-success fw-bold">{total.toLocaleString('vi-VN')} VND</span>
+                                            </div>
+                                            <div className="info-item mb-2">
+                                                <strong>Thông tin:</strong>
+                                                <span className="text-muted">{qrCodeData?.orderInfo || 'Thanh toán đơn hàng'}</span>
+                                            </div>
+                                            <div className="info-item mb-2">
+                                                <strong>Trạng thái:</strong>
+                                                <span className="badge bg-warning">Chờ thanh toán</span>
+                                            </div>
+                                            <hr />
+                                            <div className="mt-3">
+                                                <h6 className="mb-2">Hướng dẫn thanh toán:</h6>
+                                                <ol className="text-muted small">
+                                                    <li>Mở ứng dụng VNPAY trên điện thoại</li>
+                                                    <li>Chọn tính năng "Quét mã QR"</li>
+                                                    <li>Quét mã QR bên cạnh</li>
+                                                    <li>Xác nhận thông tin và hoàn tất thanh toán</li>
+                                                </ol>
+                                            </div>
+                                            <div className="alert alert-info mt-3">
+                                                <i className="bi bi-exclamation-triangle me-2"></i>
+                                                <strong>Lưu ý:</strong> Đây là môi trường test VNPAY Sandbox
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-secondary" 
+                                    onClick={() => setShowQrModal(false)}
+                                >
+                                    <i className="bi bi-x-circle me-2"></i>
+                                    Đóng
+                                </button>
+                                <button 
+                                    type="button" 
+                                    className="btn btn-primary"
+                                    onClick={() => {
+                                        if (qrCode) {
+                                            window.open(qrCode.replace('qr-code', 'qr-code').replace('size=200x200', 'size=300x300'), '_blank');
+                                        }
+                                    }}
+                                >
+                                    <i className="bi bi-box-arrow-up-right me-2"></i>
+                                    Mở QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
