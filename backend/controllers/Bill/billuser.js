@@ -27,10 +27,11 @@ class BillController {
         dia_chi_giao_hang,
         phuong_thuc_thanh_toan,
         ghi_chu,
-        shippingFee,
+        // shippingFee, // Không nhận từ client nữa
         danh_sach_san_pham: selectedItems,
         discount = 0,
-        voucher = null
+        voucher = null,
+        orderId // vẫn nhận orderId nếu có
       } = req.body;
       const nguoi_dung_id = req.user.id;
       // Log thông tin tạo đơn hàng
@@ -87,12 +88,17 @@ class BillController {
       if (danh_sach_san_pham.length === 0) {
         return res.status(400).json({ message: 'Không có sản phẩm hợp lệ để tạo đơn hàng.' });
       }
-      const tong_tien = subtotal + (shippingFee || 0);
+      // Tính phí vận chuyển tự động
+      let shippingFee = 30000;
+      if (subtotal > 300000) {
+        shippingFee = 0;
+      }
+      const tong_tien = subtotal + shippingFee;
 
       // --- BẮT ĐẦU: TRỪ KHO (Atomic) ---
       for (const item of danh_sach_san_pham) {
         console.log(`[ADD BILL] Reducing stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
-        
+
         const updateResult = await Product.updateOne(
           {
             _id: item.san_pham_id,
@@ -147,9 +153,10 @@ class BillController {
         phuong_thuc_thanh_toan,
         ghi_chu,
         danh_sach_san_pham,
-        shippingFee,
+        shippingFee, // Lưu shippingFee đã tính
         discount,
-        voucher
+        voucher,
+        orderId
       });
       await newBill.save();
       // Xóa các sản phẩm đã đặt khỏi giỏ hàng, giữ lại sản phẩm chưa đặt
@@ -193,7 +200,7 @@ class BillController {
       // --- BẮT ĐẦU: HOÀN KHO (Atomic) ---
       for (const item of bill.danh_sach_san_pham) {
         console.log(`[CANCEL BILL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
-        
+
         // Thử cập nhật biến thể trước
         const updateResult = await Product.updateOne(
           {
@@ -222,7 +229,7 @@ class BillController {
               $inc: { stock: item.so_luong }
             }
           );
-          
+
           if (fallbackUpdateResult.modifiedCount === 0) {
             console.log(`[CANCEL BILL] Failed to restore stock for product ${item.san_pham_id}`);
           } else {
@@ -310,7 +317,7 @@ class BillController {
         // --- BẮT ĐẦU: HOÀN KHO KHI ADMIN HUỶ (Atomic) ---
         for (const item of bill.danh_sach_san_pham) {
           console.log(`[ADMIN CANCEL BILL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
-          
+
           // Thử cập nhật biến thể trước
           const updateResult = await Product.updateOne(
             {
@@ -339,7 +346,7 @@ class BillController {
                 $inc: { stock: item.so_luong }
               }
             );
-            
+
             if (fallbackUpdateResult.modifiedCount === 0) {
               console.log(`[ADMIN CANCEL BILL] Failed to restore stock for product ${item.san_pham_id}`);
             } else {

@@ -93,7 +93,7 @@ const billSchema = new mongoose.Schema({
   orderId: {
     type: String,
     unique: true,
-    required: false // sẽ set khi thanh toán VNPAY
+    required: true
   },
   paymentStatus: {
     type: String,

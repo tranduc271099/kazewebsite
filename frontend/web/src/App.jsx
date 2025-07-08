@@ -19,8 +19,9 @@ import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
 import ChangePassword from './client/pages/ChangePassword';
 import BillUser from './client/pages/Bill/BillUserClient.jsx';
-import Vnpay from './client/pages/Vnpay';
-import PaymentResult from './client/pages/PaymentResult';
+import PaymentSuccess from './client/pages/PaymentSuccess';
+import PaymentFailure from './client/pages/PaymentFailure';
+
 
 // Components
 import Footer from './client/components/Footer';
@@ -54,6 +55,8 @@ function App() {
                 <Route path="/change-password" element={<><Header /><ChangePassword /><Footer /></>} />
                 <Route path="/bill" element={<><Header /><BillUser /><Footer /></>} />
                 <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-failure" element={<PaymentFailure />} />
               </Route>
 
               {/* Admin Routes - Protected by AdminRoute */}
@@ -70,8 +73,7 @@ function App() {
               <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
               <Route path="/about" element={<><Header /><About /><Footer /></>} />
               <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
-              <Route path="/vnpay" element={<Vnpay/>} />
-              <Route path="/payment-result" element={<PaymentResult />} />
+
             </Routes>
           </div>
         </Router>

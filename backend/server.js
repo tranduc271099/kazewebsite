@@ -40,10 +40,27 @@ app.use('/api/bill', require('./routes/Bill/billroutes'))
 
 app.use('/api/vouchers', require('./routes/voucher.routes'));
 
+// Thêm route payment
+app.use('/api/payment', require('./routes/payment.routes'));
 
-// VNPAY routes
-app.use('/api/vnpay', require('./routes/vnpay.routes'));
+const vnpayReturnController = require('./controllers/vnpayReturn.controller');
+app.get('/vnpay_return', async (req, res) => {
+  try {
+    const result = await vnpayReturnController.handleVnpayReturn(req.query);
+    if (result.status === 200) {
+      res.redirect('http://localhost:3000/payment-success?orderId=' + encodeURIComponent(result.data.orderId || '') + '&transactionNo=' + encodeURIComponent(result.data.transactionNo || ''));
+    } else {
+      res.redirect('http://localhost:3000/payment-failure?orderId=' + encodeURIComponent(result.data.orderId || '') + '&responseCode=' + encodeURIComponent(result.data.responseCode || '') + '&message=' + encodeURIComponent(result.data.message || ''));
+    }
+  } catch (error) {
+    res.redirect('http://localhost:3000/payment-failure?message=Internal%20server%20error');
+  }
+});
 
+// Add a basic route for the root URL
+app.get('/', (req, res) => {
+  res.send('Backend server is running!');
+});
 
 app.listen(process.env.PORT, () => {
     console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);

@@ -1,10 +1,10 @@
 /**
-* Template Name: eStore
-* Template URL: https://bootstrapmade.com/estore-bootstrap-ecommerce-template/
-* Updated: Apr 26 2025 with Bootstrap v5.3.5
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
+ * Template Name: eStore
+ * Template URL: https://bootstrapmade.com/estore-bootstrap-ecommerce-template/
+ * Updated: Apr 26 2025 with Bootstrap v5.3.5
+ * Author: BootstrapMade.com
+ * License: https://bootstrapmade.com/license/
+ */
 
 (function () {
   "use strict";
@@ -13,29 +13,42 @@
    * Apply .scrolled class to the body as the page is scrolled down
    */
   function toggleScrolled() {
-    const selectBody = document.querySelector('body');
-    const selectHeader = document.querySelector('#header');
+    const selectBody = document.querySelector("body");
+    const selectHeader = document.querySelector("#header");
     if (!selectHeader) return;
-    if (!selectHeader.classList.contains('scroll-up-sticky') && !selectHeader.classList.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
-    window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
+    if (
+      !selectHeader.classList.contains("scroll-up-sticky") &&
+      !selectHeader.classList.contains("sticky-top") &&
+      !selectHeader.classList.contains("fixed-top")
+    )
+      return;
+    window.scrollY > 100
+      ? selectBody.classList.add("scrolled")
+      : selectBody.classList.remove("scrolled");
   }
 
-  document.addEventListener('scroll', toggleScrolled);
-  window.addEventListener('load', toggleScrolled);
+  document.addEventListener("scroll", toggleScrolled);
+  window.addEventListener("load", toggleScrolled);
 
   /**
    * Init swiper sliders
    */
-  function initSwiper() {
+  function initSwiper(swiperElement) {
     document.querySelectorAll(".init-swiper").forEach(function (swiperElement) {
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()
       );
 
       if (swiperElement.classList.contains("swiper-tab")) {
-        initSwiperWithCustomPagination(swiperElement, config);
+        if (typeof initSwiperWithCustomPagination === "function") {
+          initSwiperWithCustomPagination(swiperElement, config);
+        }
       } else {
-        new Swiper(swiperElement, config);
+        if (typeof Swiper !== "undefined") {
+          new Swiper(swiperElement, config);
+        } else {
+          console.warn("Swiper library is not loaded!");
+        }
       }
     });
   }
@@ -45,37 +58,36 @@
   /**
    * Mobile nav toggle
    */
-  const mobileNavToggleBtn = document.querySelector('.mobile-nav-toggle');
+  const mobileNavToggleBtn = document.querySelector(".mobile-nav-toggle");
 
   function mobileNavToogle() {
-    document.querySelector('body').classList.toggle('mobile-nav-active');
-    mobileNavToggleBtn.classList.toggle('bi-list');
-    mobileNavToggleBtn.classList.toggle('bi-x');
+    document.querySelector("body").classList.toggle("mobile-nav-active");
+    mobileNavToggleBtn.classList.toggle("bi-list");
+    mobileNavToggleBtn.classList.toggle("bi-x");
   }
   if (mobileNavToggleBtn) {
-    mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
+    mobileNavToggleBtn.addEventListener("click", mobileNavToogle);
   }
 
   /**
    * Hide mobile nav on same-page/hash links
    */
-  document.querySelectorAll('#navmenu a').forEach(navmenu => {
-    navmenu.addEventListener('click', () => {
-      if (document.querySelector('.mobile-nav-active')) {
+  document.querySelectorAll("#navmenu a").forEach((navmenu) => {
+    navmenu.addEventListener("click", () => {
+      if (document.querySelector(".mobile-nav-active")) {
         mobileNavToogle();
       }
     });
-
   });
 
   /**
    * Toggle mobile nav dropdowns
    */
-  document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
-    navmenu.addEventListener('click', function (e) {
+  document.querySelectorAll(".navmenu .toggle-dropdown").forEach((navmenu) => {
+    navmenu.addEventListener("click", function (e) {
       e.preventDefault();
-      this.parentNode.classList.toggle('active');
-      this.parentNode.nextElementSibling.classList.toggle('dropdown-active');
+      this.parentNode.classList.toggle("active");
+      this.parentNode.nextElementSibling.classList.toggle("dropdown-active");
       e.stopImmediatePropagation();
     });
   });
@@ -83,9 +95,9 @@
   /**
    * Preloader
    */
-  const preloader = document.querySelector('#preloader');
+  const preloader = document.querySelector("#preloader");
   if (preloader) {
-    window.addEventListener('load', () => {
+    window.addEventListener("load", () => {
       preloader.remove();
     });
   }
@@ -93,25 +105,27 @@
   /**
    * Scroll top button
    */
-  let scrollTop = document.querySelector('.scroll-top');
+  let scrollTop = document.querySelector(".scroll-top");
 
   function toggleScrollTop() {
     if (scrollTop) {
-      window.scrollY > 100 ? scrollTop.classList.add('active') : scrollTop.classList.remove('active');
+      window.scrollY > 100
+        ? scrollTop.classList.add("active")
+        : scrollTop.classList.remove("active");
     }
   }
   if (scrollTop) {
-    scrollTop.addEventListener('click', (e) => {
+    scrollTop.addEventListener("click", (e) => {
       e.preventDefault();
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     });
   }
 
-  window.addEventListener('load', toggleScrollTop);
-  document.addEventListener('scroll', toggleScrollTop);
+  window.addEventListener("load", toggleScrollTop);
+  document.addEventListener("scroll", toggleScrollTop);
 
   /**
    * Animation on scroll function and init
@@ -119,44 +133,54 @@
   function aosInit() {
     AOS.init({
       duration: 600,
-      easing: 'ease-in-out',
+      easing: "ease-in-out",
       once: true,
-      mirror: false
+      mirror: false,
     });
   }
-  window.addEventListener('load', aosInit);
+  window.addEventListener("load", aosInit);
 
   /**
    * Init isotope layout and filters
    */
-  document.querySelectorAll('.isotope-layout').forEach(function (isotopeItem) {
-    let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
-    let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
-    let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
+  document.querySelectorAll(".isotope-layout").forEach(function (isotopeItem) {
+    let layout = isotopeItem.getAttribute("data-layout") ?? "masonry";
+    let filter = isotopeItem.getAttribute("data-default-filter") ?? "*";
+    let sort = isotopeItem.getAttribute("data-sort") ?? "original-order";
 
     let initIsotope;
-    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function () {
-      initIsotope = new Isotope(isotopeItem.querySelector('.isotope-container'), {
-        itemSelector: '.isotope-item',
-        layoutMode: layout,
-        filter: filter,
-        sortBy: sort
-      });
-    });
-
-    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function (filters) {
-      filters.addEventListener('click', function () {
-        isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
-        this.classList.add('filter-active');
-        initIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        if (typeof aosInit === 'function') {
-          aosInit();
+    imagesLoaded(isotopeItem.querySelector(".isotope-container"), function () {
+      initIsotope = new Isotope(
+        isotopeItem.querySelector(".isotope-container"),
+        {
+          itemSelector: ".isotope-item",
+          layoutMode: layout,
+          filter: filter,
+          sortBy: sort,
         }
-      }, false);
+      );
     });
 
+    isotopeItem
+      .querySelectorAll(".isotope-filters li")
+      .forEach(function (filters) {
+        filters.addEventListener(
+          "click",
+          function () {
+            isotopeItem
+              .querySelector(".isotope-filters .filter-active")
+              .classList.remove("filter-active");
+            this.classList.add("filter-active");
+            initIsotope.arrange({
+              filter: this.getAttribute("data-filter"),
+            });
+            if (typeof aosInit === "function") {
+              aosInit();
+            }
+          },
+          false
+        );
+      });
   });
 
   /**
@@ -166,15 +190,17 @@
 
   function ecommerceCartTools() {
     // Get all quantity buttons and inputs directly
-    const decreaseButtons = document.querySelectorAll('.quantity-btn.decrease');
-    const increaseButtons = document.querySelectorAll('.quantity-btn.increase');
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-    const removeButtons = document.querySelectorAll('.remove-item');
+    const decreaseButtons = document.querySelectorAll(".quantity-btn.decrease");
+    const increaseButtons = document.querySelectorAll(".quantity-btn.increase");
+    const quantityInputs = document.querySelectorAll(".quantity-input");
+    const removeButtons = document.querySelectorAll(".remove-item");
 
     // Decrease quantity buttons
-    decreaseButtons.forEach(btn => {
-      btn.addEventListener('click', function () {
-        const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
+    decreaseButtons.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const quantityInput = btn
+          .closest(".quantity-selector")
+          .querySelector(".quantity-input");
         let currentValue = parseInt(quantityInput.value);
         if (currentValue > 1) {
           quantityInput.value = currentValue - 1;
@@ -183,22 +209,24 @@
     });
 
     // Increase quantity buttons
-    increaseButtons.forEach(btn => {
-      btn.addEventListener('click', function () {
-        const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
+    increaseButtons.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        const quantityInput = btn
+          .closest(".quantity-selector")
+          .querySelector(".quantity-input");
         let currentValue = parseInt(quantityInput.value);
-        if (currentValue < parseInt(quantityInput.getAttribute('max'))) {
+        if (currentValue < parseInt(quantityInput.getAttribute("max"))) {
           quantityInput.value = currentValue + 1;
         }
       });
     });
 
     // Manual quantity inputs
-    quantityInputs.forEach(input => {
-      input.addEventListener('change', function () {
+    quantityInputs.forEach((input) => {
+      input.addEventListener("change", function () {
         let currentValue = parseInt(input.value);
-        const min = parseInt(input.getAttribute('min'));
-        const max = parseInt(input.getAttribute('max'));
+        const min = parseInt(input.getAttribute("min"));
+        const max = parseInt(input.getAttribute("max"));
 
         // Validate input
         if (isNaN(currentValue) || currentValue < min) {
@@ -210,9 +238,9 @@
     });
 
     // Remove item buttons
-    removeButtons.forEach(btn => {
-      btn.addEventListener('click', function () {
-        btn.closest('.cart-item').remove();
+    removeButtons.forEach((btn) => {
+      btn.addEventListener("click", function () {
+        btn.closest(".cart-item").remove();
       });
     });
   }
@@ -227,23 +255,23 @@
     // Initialize Drift for image zoom
     function initDriftZoom() {
       // Check if Drift is available
-      if (typeof Drift === 'undefined') {
-        console.error('Drift library is not loaded');
+      if (typeof Drift === "undefined") {
+        console.error("Drift library is not loaded");
         return;
       }
 
       const driftOptions = {
-        paneContainer: document.querySelector('.image-zoom-container'),
+        paneContainer: document.querySelector(".image-zoom-container"),
         inlinePane: window.innerWidth < 768 ? true : false,
         inlineOffsetY: -85,
         containInline: true,
         hoverBoundingBox: false,
         zoomFactor: 3,
-        handleTouch: false
+        handleTouch: false,
       };
 
       // Initialize Drift on the main product image
-      const mainImage = document.getElementById('main-product-image');
+      const mainImage = document.getElementById("main-product-image");
       if (mainImage) {
         new Drift(mainImage, driftOptions);
       }
@@ -251,23 +279,23 @@
 
     // Thumbnail click functionality
     function initThumbnailClick() {
-      const thumbnails = document.querySelectorAll('.thumbnail-item');
-      const mainImage = document.getElementById('main-product-image');
+      const thumbnails = document.querySelectorAll(".thumbnail-item");
+      const mainImage = document.getElementById("main-product-image");
 
       if (!thumbnails.length || !mainImage) return;
 
-      thumbnails.forEach(thumbnail => {
-        thumbnail.addEventListener('click', function () {
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener("click", function () {
           // Get image path from data attribute
-          const imageSrc = this.getAttribute('data-image');
+          const imageSrc = this.getAttribute("data-image");
 
           // Update main image src and zoom attribute
           mainImage.src = imageSrc;
-          mainImage.setAttribute('data-zoom', imageSrc);
+          mainImage.setAttribute("data-zoom", imageSrc);
 
           // Update active state
-          thumbnails.forEach(item => item.classList.remove('active'));
-          this.classList.add('active');
+          thumbnails.forEach((item) => item.classList.remove("active"));
+          this.classList.add("active");
 
           // Reinitialize Drift for the new image
           initDriftZoom();
@@ -277,27 +305,33 @@
 
     // Image navigation functionality (prev/next buttons)
     function initImageNavigation() {
-      const prevButton = document.querySelector('.image-nav-btn.prev-image');
-      const nextButton = document.querySelector('.image-nav-btn.next-image');
+      const prevButton = document.querySelector(".image-nav-btn.prev-image");
+      const nextButton = document.querySelector(".image-nav-btn.next-image");
 
       if (!prevButton || !nextButton) return;
 
-      const thumbnails = Array.from(document.querySelectorAll('.thumbnail-item'));
+      const thumbnails = Array.from(
+        document.querySelectorAll(".thumbnail-item")
+      );
       if (!thumbnails.length) return;
 
       // Function to navigate to previous or next image
       function navigateImage(direction) {
         // Find the currently active thumbnail
-        const activeIndex = thumbnails.findIndex(thumb => thumb.classList.contains('active'));
+        const activeIndex = thumbnails.findIndex((thumb) =>
+          thumb.classList.contains("active")
+        );
         if (activeIndex === -1) return;
 
         let newIndex;
-        if (direction === 'prev') {
+        if (direction === "prev") {
           // Go to previous image or loop to the last one
-          newIndex = activeIndex === 0 ? thumbnails.length - 1 : activeIndex - 1;
+          newIndex =
+            activeIndex === 0 ? thumbnails.length - 1 : activeIndex - 1;
         } else {
           // Go to next image or loop to the first one
-          newIndex = activeIndex === thumbnails.length - 1 ? 0 : activeIndex + 1;
+          newIndex =
+            activeIndex === thumbnails.length - 1 ? 0 : activeIndex + 1;
         }
 
         // Simulate click on the new thumbnail
@@ -305,8 +339,8 @@
       }
 
       // Add event listeners to navigation buttons
-      prevButton.addEventListener('click', () => navigateImage('prev'));
-      nextButton.addEventListener('click', () => navigateImage('next'));
+      prevButton.addEventListener("click", () => navigateImage("prev"));
+      nextButton.addEventListener("click", () => navigateImage("next"));
     }
 
     // Initialize all features
@@ -322,19 +356,30 @@
    */
   function priceRangeWidget() {
     // Get all price range widgets on the page
-    const priceRangeWidgets = document.querySelectorAll('.price-range-container');
+    const priceRangeWidgets = document.querySelectorAll(
+      ".price-range-container"
+    );
 
-    priceRangeWidgets.forEach(widget => {
-      const minRange = widget.querySelector('.min-range');
-      const maxRange = widget.querySelector('.max-range');
-      const sliderProgress = widget.querySelector('.slider-progress');
-      const minPriceDisplay = widget.querySelector('.current-range .min-price');
-      const maxPriceDisplay = widget.querySelector('.current-range .max-price');
-      const minPriceInput = widget.querySelector('.min-price-input');
-      const maxPriceInput = widget.querySelector('.max-price-input');
-      const applyButton = widget.querySelector('.filter-actions .btn-primary');
+    priceRangeWidgets.forEach((widget) => {
+      const minRange = widget.querySelector(".min-range");
+      const maxRange = widget.querySelector(".max-range");
+      const sliderProgress = widget.querySelector(".slider-progress");
+      const minPriceDisplay = widget.querySelector(".current-range .min-price");
+      const maxPriceDisplay = widget.querySelector(".current-range .max-price");
+      const minPriceInput = widget.querySelector(".min-price-input");
+      const maxPriceInput = widget.querySelector(".max-price-input");
+      const applyButton = widget.querySelector(".filter-actions .btn-primary");
 
-      if (!minRange || !maxRange || !sliderProgress || !minPriceDisplay || !maxPriceDisplay || !minPriceInput || !maxPriceInput) return;
+      if (
+        !minRange ||
+        !maxRange ||
+        !sliderProgress ||
+        !minPriceDisplay ||
+        !maxPriceDisplay ||
+        !minPriceInput ||
+        !maxPriceInput
+      )
+        return;
 
       // Slider configuration
       const sliderMin = parseInt(minRange.min);
@@ -350,7 +395,7 @@
       updateDisplays();
 
       // Min range input event
-      minRange.addEventListener('input', function () {
+      minRange.addEventListener("input", function () {
         minValue = parseInt(this.value);
 
         // Ensure min doesn't exceed max
@@ -366,7 +411,7 @@
       });
 
       // Max range input event
-      maxRange.addEventListener('input', function () {
+      maxRange.addEventListener("input", function () {
         maxValue = parseInt(this.value);
 
         // Ensure max isn't less than min
@@ -382,7 +427,7 @@
       });
 
       // Min price input change
-      minPriceInput.addEventListener('change', function () {
+      minPriceInput.addEventListener("change", function () {
         let value = parseInt(this.value) || sliderMin;
 
         // Ensure value is within range
@@ -402,7 +447,7 @@
       });
 
       // Max price input change
-      maxPriceInput.addEventListener('change', function () {
+      maxPriceInput.addEventListener("change", function () {
         let value = parseInt(this.value) || sliderMax;
 
         // Ensure value is within range
@@ -423,7 +468,7 @@
 
       // Apply button click
       if (applyButton) {
-        applyButton.addEventListener('click', function () {
+        applyButton.addEventListener("click", function () {
           // This would typically trigger a form submission or AJAX request
           console.log(`Applying price filter: $${minValue} - $${maxValue}`);
 
@@ -457,8 +502,10 @@
 
   function initCheckout() {
     // Detect checkout type
-    const isMultiStepCheckout = document.querySelector('.checkout-steps') !== null;
-    const isOnePageCheckout = document.querySelector('.checkout-section') !== null;
+    const isMultiStepCheckout =
+      document.querySelector(".checkout-steps") !== null;
+    const isOnePageCheckout =
+      document.querySelector(".checkout-section") !== null;
 
     // Initialize common functionality
     initInputMasks();
@@ -482,63 +529,70 @@
   // Function to initialize multi-step checkout
   function initMultiStepCheckout() {
     // Get all checkout elements
-    const checkoutSteps = document.querySelectorAll('.checkout-steps .step');
-    const checkoutForms = document.querySelectorAll('.checkout-form');
-    const nextButtons = document.querySelectorAll('.next-step');
-    const prevButtons = document.querySelectorAll('.prev-step');
-    const editButtons = document.querySelectorAll('.btn-edit');
-    const paymentMethods = document.querySelectorAll('.payment-method-header');
-    const summaryToggle = document.querySelector('.btn-toggle-summary');
-    const orderSummaryContent = document.querySelector('.order-summary-content');
+    const checkoutSteps = document.querySelectorAll(".checkout-steps .step");
+    const checkoutForms = document.querySelectorAll(".checkout-form");
+    const nextButtons = document.querySelectorAll(".next-step");
+    const prevButtons = document.querySelectorAll(".prev-step");
+    const editButtons = document.querySelectorAll(".btn-edit");
+    const paymentMethods = document.querySelectorAll(".payment-method-header");
+    const summaryToggle = document.querySelector(".btn-toggle-summary");
+    const orderSummaryContent = document.querySelector(
+      ".order-summary-content"
+    );
 
     // Step Navigation
-    nextButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        const nextStep = parseInt(this.getAttribute('data-next'));
+    nextButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const nextStep = parseInt(this.getAttribute("data-next"));
         navigateToStep(nextStep);
       });
     });
 
-    prevButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        const prevStep = parseInt(this.getAttribute('data-prev'));
+    prevButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const prevStep = parseInt(this.getAttribute("data-prev"));
         navigateToStep(prevStep);
       });
     });
 
-    editButtons.forEach(button => {
-      button.addEventListener('click', function () {
-        const editStep = parseInt(this.getAttribute('data-edit'));
+    editButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const editStep = parseInt(this.getAttribute("data-edit"));
         navigateToStep(editStep);
       });
     });
 
     // Payment Method Selection for multi-step checkout
-    paymentMethods.forEach(header => {
-      header.addEventListener('click', function () {
+    paymentMethods.forEach((header) => {
+      header.addEventListener("click", function () {
         // Get the radio input within this header
         const radio = this.querySelector('input[type="radio"]');
         if (radio) {
           radio.checked = true;
 
           // Update active state for all payment methods
-          const allPaymentMethods = document.querySelectorAll('.payment-method');
-          allPaymentMethods.forEach(method => {
-            method.classList.remove('active');
+          const allPaymentMethods =
+            document.querySelectorAll(".payment-method");
+          allPaymentMethods.forEach((method) => {
+            method.classList.remove("active");
           });
 
           // Add active class to the parent payment method
-          this.closest('.payment-method').classList.add('active');
+          this.closest(".payment-method").classList.add("active");
 
           // Show/hide payment method bodies
-          const allPaymentBodies = document.querySelectorAll('.payment-method-body');
-          allPaymentBodies.forEach(body => {
-            body.classList.add('d-none');
+          const allPaymentBodies = document.querySelectorAll(
+            ".payment-method-body"
+          );
+          allPaymentBodies.forEach((body) => {
+            body.classList.add("d-none");
           });
 
-          const selectedBody = this.closest('.payment-method').querySelector('.payment-method-body');
+          const selectedBody = this.closest(".payment-method").querySelector(
+            ".payment-method-body"
+          );
           if (selectedBody) {
-            selectedBody.classList.remove('d-none');
+            selectedBody.classList.remove("d-none");
           }
         }
       });
@@ -546,67 +600,69 @@
 
     // Order Summary Toggle (Mobile)
     if (summaryToggle) {
-      summaryToggle.addEventListener('click', function () {
-        this.classList.toggle('collapsed');
+      summaryToggle.addEventListener("click", function () {
+        this.classList.toggle("collapsed");
 
         if (orderSummaryContent) {
-          orderSummaryContent.classList.toggle('d-none');
+          orderSummaryContent.classList.toggle("d-none");
         }
 
         // Toggle icon
-        const icon = this.querySelector('i');
+        const icon = this.querySelector("i");
         if (icon) {
-          if (icon.classList.contains('bi-chevron-down')) {
-            icon.classList.remove('bi-chevron-down');
-            icon.classList.add('bi-chevron-up');
+          if (icon.classList.contains("bi-chevron-down")) {
+            icon.classList.remove("bi-chevron-down");
+            icon.classList.add("bi-chevron-up");
           } else {
-            icon.classList.remove('bi-chevron-up');
-            icon.classList.add('bi-chevron-down');
+            icon.classList.remove("bi-chevron-up");
+            icon.classList.add("bi-chevron-down");
           }
         }
       });
     }
 
     // Form Validation for multi-step checkout
-    const forms = document.querySelectorAll('.checkout-form-element');
-    forms.forEach(form => {
-      form.addEventListener('submit', function (e) {
+    const forms = document.querySelectorAll(".checkout-form-element");
+    forms.forEach((form) => {
+      form.addEventListener("submit", function (e) {
         e.preventDefault();
 
         // Basic validation
-        const requiredFields = form.querySelectorAll('[required]');
+        const requiredFields = form.querySelectorAll("[required]");
         let isValid = true;
 
-        requiredFields.forEach(field => {
+        requiredFields.forEach((field) => {
           if (!field.value.trim()) {
             isValid = false;
-            field.classList.add('is-invalid');
+            field.classList.add("is-invalid");
           } else {
-            field.classList.remove('is-invalid');
+            field.classList.remove("is-invalid");
           }
         });
 
         // If it's the final form and valid, show success message
         if (isValid && form.closest('.checkout-form[data-form="4"]')) {
           // Hide form fields
-          const formFields = form.querySelectorAll('.form-group, .review-sections, .form-check, .d-flex');
-          formFields.forEach(field => {
-            field.style.display = 'none';
+          const formFields = form.querySelectorAll(
+            ".form-group, .review-sections, .form-check, .d-flex"
+          );
+          formFields.forEach((field) => {
+            field.style.display = "none";
           });
 
           // Show success message
-          const successMessage = form.querySelector('.success-message');
+          const successMessage = form.querySelector(".success-message");
           if (successMessage) {
-            successMessage.classList.remove('d-none');
+            successMessage.classList.remove("d-none");
 
             // Add animation
-            successMessage.style.animation = 'fadeInUp 0.5s ease forwards';
+            successMessage.style.animation = "fadeInUp 0.5s ease forwards";
           }
 
           // Simulate redirect after 3 seconds
           setTimeout(() => {
             // In a real application, this would redirect to an order confirmation page
-            console.log('Redirecting to order confirmation page...');
+            console.log("Redirecting to order confirmation page...");
           }, 3000);
         }
       });
@@ -615,50 +671,50 @@
     // Function to navigate between steps
     function navigateToStep(stepNumber) {
       // Update steps
-      checkoutSteps.forEach(step => {
-        const stepNum = parseInt(step.getAttribute('data-step'));
+      checkoutSteps.forEach((step) => {
+        const stepNum = parseInt(step.getAttribute("data-step"));
 
         if (stepNum < stepNumber) {
-          step.classList.add('completed');
-          step.classList.remove('active');
+          step.classList.add("completed");
+          step.classList.remove("active");
         } else if (stepNum === stepNumber) {
-          step.classList.add('active');
-          step.classList.remove('completed');
+          step.classList.add("active");
+          step.classList.remove("completed");
         } else {
-          step.classList.remove('active', 'completed');
+          step.classList.remove("active", "completed");
         }
       });
 
       // Update step connectors
-      const connectors = document.querySelectorAll('.step-connector');
+      const connectors = document.querySelectorAll(".step-connector");
       connectors.forEach((connector, index) => {
         if (index + 1 < stepNumber) {
-          connector.classList.add('completed');
-          connector.classList.remove('active');
+          connector.classList.add("completed");
+          connector.classList.remove("active");
         } else if (index + 1 === stepNumber - 1) {
-          connector.classList.add('active');
-          connector.classList.remove('completed');
+          connector.classList.add("active");
+          connector.classList.remove("completed");
         } else {
-          connector.classList.remove('active', 'completed');
+          connector.classList.remove("active", "completed");
         }
       });
 
       // Show the corresponding form
-      checkoutForms.forEach(form => {
-        const formNum = parseInt(form.getAttribute('data-form'));
+      checkoutForms.forEach((form) => {
+        const formNum = parseInt(form.getAttribute("data-form"));
 
         if (formNum === stepNumber) {
-          form.classList.add('active');
+          form.classList.add("active");
 
           // Scroll to top of form on mobile
           if (window.innerWidth < 768) {
             form.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
+              behavior: "smooth",
+              block: "start",
             });
           }
         } else {
-          form.classList.remove('active');
+          form.classList.remove("active");
         }
       });
     }
@@ -667,104 +723,112 @@
   // Function to initialize one-page checkout
   function initOnePageCheckout() {
     // Payment Method Selection for one-page checkout
-    const paymentOptions = document.querySelectorAll('.payment-option input[type="radio"]');
+    const paymentOptions = document.querySelectorAll(
+      '.payment-option input[type="radio"]'
+    );
 
-    paymentOptions.forEach(option => {
-      option.addEventListener('change', function () {
+    paymentOptions.forEach((option) => {
+      option.addEventListener("change", function () {
         // Update active class on payment options
-        document.querySelectorAll('.payment-option').forEach(opt => {
-          opt.classList.remove('active');
+        document.querySelectorAll(".payment-option").forEach((opt) => {
+          opt.classList.remove("active");
         });
 
-        this.closest('.payment-option').classList.add('active');
+        this.closest(".payment-option").classList.add("active");
 
         // Show/hide payment details
         const paymentId = this.id;
-        document.querySelectorAll('.payment-details').forEach(details => {
-          details.classList.add('d-none');
+        document.querySelectorAll(".payment-details").forEach((details) => {
+          details.classList.add("d-none");
         });
 
-        document.getElementById(`${paymentId}-details`).classList.remove('d-none');
+        document
+          .getElementById(`${paymentId}-details`)
+          .classList.remove("d-none");
       });
     });
 
     // Form Validation for one-page checkout
-    const checkoutForm = document.querySelector('.checkout-form');
+    const checkoutForm = document.querySelector(".checkout-form");
 
     if (checkoutForm) {
-      checkoutForm.addEventListener('submit', function (e) {
+      checkoutForm.addEventListener("submit", function (e) {
         e.preventDefault();
 
         // Basic validation
-        const requiredFields = checkoutForm.querySelectorAll('[required]');
+        const requiredFields = checkoutForm.querySelectorAll("[required]");
         let isValid = true;
 
-        requiredFields.forEach(field => {
+        requiredFields.forEach((field) => {
           if (!field.value.trim()) {
             isValid = false;
-            field.classList.add('is-invalid');
+            field.classList.add("is-invalid");
 
             // Scroll to first invalid field
             if (isValid === false) {
               field.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
+                behavior: "smooth",
+                block: "center",
               });
               field.focus();
               isValid = null; // Set to null so we only scroll to the first invalid field
             }
           } else {
-            field.classList.remove('is-invalid');
+            field.classList.remove("is-invalid");
           }
         });
 
         // If form is valid, show success message
         if (isValid === true) {
           // Hide form sections except the last one
-          const sections = document.querySelectorAll('.checkout-section');
+          const sections = document.querySelectorAll(".checkout-section");
           sections.forEach((section, index) => {
             if (index < sections.length - 1) {
-              section.style.display = 'none';
+              section.style.display = "none";
             }
           });
 
           // Hide terms checkbox and place order button
-          const termsCheck = document.querySelector('.terms-check');
-          const placeOrderContainer = document.querySelector('.place-order-container');
+          const termsCheck = document.querySelector(".terms-check");
+          const placeOrderContainer = document.querySelector(
+            ".place-order-container"
+          );
 
-          if (termsCheck) termsCheck.style.display = 'none';
-          if (placeOrderContainer) placeOrderContainer.style.display = 'none';
+          if (termsCheck) termsCheck.style.display = "none";
+          if (placeOrderContainer) placeOrderContainer.style.display = "none";
 
           // Show success message
-          const successMessage = document.querySelector('.success-message');
+          const successMessage = document.querySelector(".success-message");
           if (successMessage) {
-            successMessage.classList.remove('d-none');
-            successMessage.style.animation = 'fadeInUp 0.5s ease forwards';
+            successMessage.classList.remove("d-none");
+            successMessage.style.animation = "fadeInUp 0.5s ease forwards";
           }
 
           // Scroll to success message
-          const orderReview = document.getElementById('order-review');
+          const orderReview = document.getElementById("order-review");
           if (orderReview) {
             orderReview.scrollIntoView({
-              behavior: 'smooth',
-              block: 'start'
+              behavior: "smooth",
+              block: "start",
             });
           }
 
           // Simulate redirect after 3 seconds
           setTimeout(() => {
             // In a real application, this would redirect to an order confirmation page
-            console.log('Redirecting to order confirmation page...');
+            console.log("Redirecting to order confirmation page...");
           }, 3000);
         }
       });
 
       // Add input event listeners to clear validation styling when user types
-      const formInputs = checkoutForm.querySelectorAll('input, select, textarea');
-      formInputs.forEach(input => {
-        input.addEventListener('input', function () {
+      const formInputs = checkoutForm.querySelectorAll(
+        "input, select, textarea"
+      );
+      formInputs.forEach((input) => {
+        input.addEventListener("input", function () {
           if (this.value.trim()) {
-            this.classList.remove('is-invalid');
+            this.classList.remove("is-invalid");
           }
         });
       });
@@ -774,17 +838,17 @@
   // Function to initialize input masks (common for both checkout types)
   function initInputMasks() {
     // Card number input mask (format: XXXX XXXX XXXX XXXX)
-    const cardNumberInput = document.getElementById('card-number');
+    const cardNumberInput = document.getElementById("card-number");
     if (cardNumberInput) {
-      cardNumberInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
+      cardNumberInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "");
         if (value.length > 16) value = value.slice(0, 16);
 
         // Add spaces after every 4 digits
-        let formattedValue = '';
+        let formattedValue = "";
         for (let i = 0; i < value.length; i++) {
           if (i > 0 && i % 4 === 0) {
-            formattedValue += ' ';
+            formattedValue += " ";
           }
           formattedValue += value[i];
         }
@@ -794,15 +858,15 @@
     }
 
     // Expiry date input mask (format: MM/YY)
-    const expiryInput = document.getElementById('expiry');
+    const expiryInput = document.getElementById("expiry");
     if (expiryInput) {
-      expiryInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
+      expiryInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "");
         if (value.length > 4) value = value.slice(0, 4);
 
         // Format as MM/YY
         if (value.length > 2) {
-          value = value.slice(0, 2) + '/' + value.slice(2);
+          value = value.slice(0, 2) + "/" + value.slice(2);
         }
 
         e.target.value = value;
@@ -810,30 +874,36 @@
     }
 
     // CVV input mask (3-4 digits)
-    const cvvInput = document.getElementById('cvv');
+    const cvvInput = document.getElementById("cvv");
     if (cvvInput) {
-      cvvInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
+      cvvInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "");
         if (value.length > 4) value = value.slice(0, 4);
         e.target.value = value;
       });
     }
 
     // Phone number input mask
-    const phoneInput = document.getElementById('phone');
+    const phoneInput = document.getElementById("phone");
     if (phoneInput) {
-      phoneInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
+      phoneInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "");
         if (value.length > 10) value = value.slice(0, 10);
 
         // Format as (XXX) XXX-XXXX
         if (value.length > 0) {
           if (value.length <= 3) {
-            value = '(' + value;
+            value = "(" + value;
           } else if (value.length <= 6) {
-            value = '(' + value.slice(0, 3) + ') ' + value.slice(3);
+            value = "(" + value.slice(0, 3) + ") " + value.slice(3);
           } else {
-            value = '(' + value.slice(0, 3) + ') ' + value.slice(3, 6) + '-' + value.slice(6);
+            value =
+              "(" +
+              value.slice(0, 3) +
+              ") " +
+              value.slice(3, 6) +
+              "-" +
+              value.slice(6);
           }
         }
 
@@ -842,10 +912,10 @@
     }
 
     // ZIP code input mask (5 digits)
-    const zipInput = document.getElementById('zip');
+    const zipInput = document.getElementById("zip");
     if (zipInput) {
-      zipInput.addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
+      zipInput.addEventListener("input", function (e) {
+        let value = e.target.value.replace(/\D/g, "");
         if (value.length > 5) value = value.slice(0, 5);
         e.target.value = value;
       });
@@ -854,11 +924,11 @@
 
   // Function to handle promo code application (common for both checkout types)
   function initPromoCode() {
-    const promoInput = document.querySelector('.promo-code input');
-    const promoButton = document.querySelector('.promo-code button');
+    const promoInput = document.querySelector(".promo-code input");
+    const promoButton = document.querySelector(".promo-code button");
 
     if (promoInput && promoButton) {
-      promoButton.addEventListener('click', function () {
+      promoButton.addEventListener("click", function () {
         const promoCode = promoInput.value.trim();
 
         if (promoCode) {
@@ -866,40 +936,45 @@
           // In a real application, this would make an API call to validate the code
 
           // For demo purposes, let's assume "DISCOUNT20" is a valid code
-          if (promoCode.toUpperCase() === 'DISCOUNT20') {
+          if (promoCode.toUpperCase() === "DISCOUNT20") {
             // Show success state
-            promoInput.classList.add('is-valid');
-            promoInput.classList.remove('is-invalid');
-            promoButton.textContent = 'Applied';
+            promoInput.classList.add("is-valid");
+            promoInput.classList.remove("is-invalid");
+            promoButton.textContent = "Applied";
             promoButton.disabled = true;
 
             // Update order total (in a real app, this would recalculate based on the discount)
-            const orderTotal = document.querySelector('.order-total span:last-child');
-            const btnPrice = document.querySelector('.btn-price');
+            const orderTotal = document.querySelector(
+              ".order-total span:last-child"
+            );
+            const btnPrice = document.querySelector(".btn-price");
 
             if (orderTotal) {
               // Apply a 20% discount
-              const currentTotal = parseFloat(orderTotal.textContent.replace('$', ''));
+              const currentTotal = parseFloat(
+                orderTotal.textContent.replace("$", "")
+              );
               const discountedTotal = (currentTotal * 0.8).toFixed(2);
-              orderTotal.textContent = '$' + discountedTotal;
+              orderTotal.textContent = "$" + discountedTotal;
 
               // Update button price if it exists
               if (btnPrice) {
-                btnPrice.textContent = '$' + discountedTotal;
+                btnPrice.textContent = "$" + discountedTotal;
               }
 
               // Add discount line
-              const orderTotals = document.querySelector('.order-totals');
+              const orderTotals = document.querySelector(".order-totals");
               if (orderTotals) {
-                const discountElement = document.createElement('div');
-                discountElement.className = 'order-discount d-flex justify-content-between';
+                const discountElement = document.createElement("div");
+                discountElement.className =
+                  "order-discount d-flex justify-content-between";
                 discountElement.innerHTML = `
                 <span>Discount (20%)</span>
                 <span>-$${(currentTotal * 0.2).toFixed(2)}</span>
               `;
 
                 // Insert before the total
-                const totalElement = document.querySelector('.order-total');
+                const totalElement = document.querySelector(".order-total");
                 if (totalElement) {
                   orderTotals.insertBefore(discountElement, totalElement);
                 }
@@ -907,12 +982,12 @@
             }
           } else {
             // Show error state
-            promoInput.classList.add('is-invalid');
-            promoInput.classList.remove('is-valid');
+            promoInput.classList.add("is-invalid");
+            promoInput.classList.remove("is-valid");
 
             // Reset after 3 seconds
             setTimeout(() => {
-              promoInput.classList.remove('is-invalid');
+              promoInput.classList.remove("is-invalid");
             }, 3000);
           }
         }
@@ -923,20 +998,27 @@
   // Function to initialize Bootstrap tooltips
   function initTooltips() {
     // Check if Bootstrap's tooltip function exists
-    if (typeof bootstrap !== 'undefined' && typeof bootstrap.Tooltip !== 'undefined') {
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    if (
+      typeof bootstrap !== "undefined" &&
+      typeof bootstrap.Tooltip !== "undefined"
+    ) {
+      const tooltipTriggerList = document.querySelectorAll(
+        '[data-bs-toggle="tooltip"]'
+      );
+      const tooltipList = [...tooltipTriggerList].map(
+        (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+      );
     } else {
       // Fallback for when Bootstrap JS is not loaded
-      const cvvHint = document.querySelector('.cvv-hint');
+      const cvvHint = document.querySelector(".cvv-hint");
       if (cvvHint) {
-        cvvHint.addEventListener('mouseenter', function () {
-          this.setAttribute('data-original-title', this.getAttribute('title'));
-          this.setAttribute('title', '');
+        cvvHint.addEventListener("mouseenter", function () {
+          this.setAttribute("data-original-title", this.getAttribute("title"));
+          this.setAttribute("title", "");
         });
 
-        cvvHint.addEventListener('mouseleave', function () {
-          this.setAttribute('title', this.getAttribute('data-original-title'));
+        cvvHint.addEventListener("mouseleave", function () {
+          this.setAttribute("title", this.getAttribute("data-original-title"));
         });
       }
     }
@@ -946,7 +1028,7 @@
    * Initiate glightbox
    */
   const glightbox = GLightbox({
-    selector: '.glightbox'
+    selector: ".glightbox",
   });
 
   /**
@@ -957,10 +1039,11 @@
   /**
    * Frequently Asked Questions Toggle
    */
-  document.querySelectorAll('.faq-item h3, .faq-item .faq-toggle').forEach((faqItem) => {
-    faqItem.addEventListener('click', () => {
-      faqItem.parentNode.classList.toggle('faq-active');
+  document
+    .querySelectorAll(".faq-item h3, .faq-item .faq-toggle")
+    .forEach((faqItem) => {
+      faqItem.addEventListener("click", () => {
+        faqItem.parentNode.classList.toggle("faq-active");
+      });
     });
-  });
-
 })();
