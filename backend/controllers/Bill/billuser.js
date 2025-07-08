@@ -88,11 +88,8 @@ class BillController {
       if (danh_sach_san_pham.length === 0) {
         return res.status(400).json({ message: 'Không có sản phẩm hợp lệ để tạo đơn hàng.' });
       }
-      // Tính phí vận chuyển tự động
+      // Tính phí vận chuyển luôn là 30,000 cho mỗi đơn hàng
       let shippingFee = 30000;
-      if (subtotal > 300000) {
-        shippingFee = 0;
-      }
       const tong_tien = subtotal + shippingFee;
 
       // --- BẮT ĐẦU: TRỪ KHO (Atomic) ---

@@ -259,7 +259,7 @@ const BillUserClient = () => {
                                     {currentBills.map(bill => (
                                         <div key={bill._id} className="shopee-order-card">
                                             <div className="order-header">
-                                                <span>Mã đơn hàng: {bill._id.slice(-8).toUpperCase()}</span>
+                                                <span>Mã đơn hàng: {(bill.orderId || bill._id.slice(-8).toUpperCase())}</span>
                                                 <span className="order-status">{getStatusDisplay(bill.trang_thai)}</span>
                                             </div>
 
@@ -307,7 +307,7 @@ const BillUserClient = () => {
                     <div className="modal-content order-detail-modern" onClick={e => e.stopPropagation()} style={{ maxWidth: 1050, minWidth: 800 }}>
                         {/* Header */}
                         <div className="order-detail-header">
-                            <span>Chi tiết đơn hàng <b>#{selectedBill._id.slice(-8).toUpperCase()}</b></span>
+                            <span>Chi tiết đơn hàng <b>#{selectedBill.orderId || selectedBill._id.slice(-8).toUpperCase()}</b></span>
                             <span style={{ fontSize: '1rem', color: '#888', fontWeight: 400, marginLeft: 'auto', marginRight: 24 }}>
                                 Ngày đặt hàng: {formatDate(selectedBill.ngay_tao)}
                             </span>
@@ -353,9 +353,9 @@ const BillUserClient = () => {
                                 <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 <div className="order-detail-section">
                                     <div className="order-detail-section-title">THÔNG TIN GIAO HÀNG</div>
-                                    <div>{selectedBill.nguoi_dung_id?.name || '---'}</div>
-                                    <div>{selectedBill.nguoi_dung_id?.phone || '---'}</div>
-                                    <div>{selectedBill.dia_chi_giao_hang || '---'}</div>
+                                    <div><b>Tên người đặt:</b> {selectedBill.nguoi_dung_id?.name || '---'}</div>
+                                    <div><b>Số điện thoại:</b> {selectedBill.nguoi_dung_id?.phone || '---'}</div>
+                                    <div><b>Địa chỉ:</b> {selectedBill.dia_chi_giao_hang || '---'}</div>
                                     {selectedBill.ghi_chu && (
                                         <div style={{ marginTop: 6 }}><b>Ghi chú:</b> {selectedBill.ghi_chu}</div>
                                     )}
@@ -369,7 +369,8 @@ const BillUserClient = () => {
                                 <div className="order-detail-section">
                                     <div className="order-detail-section-title">THANH TOÁN</div>
                                     <div>Phương thức: {selectedBill.phuong_thuc_thanh_toan || '---'}</div>
-                                    <div>Trạng thái: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{selectedBill.thanh_toan ? getStatusDisplay(selectedBill.thanh_toan) : '---'}</span></div>
+                                    <div>Trạng thái thanh toán: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{selectedBill.thanh_toan || '---'}</span></div>
+                                    <div>Trạng thái đơn hàng: <span>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 </div>
                             </div>
                         </div>

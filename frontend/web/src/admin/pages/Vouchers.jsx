@@ -226,6 +226,12 @@ const Vouchers = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Thêm các state filter, search, phân trang
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [sortType, setSortType] = useState('newest');
+
   useEffect(() => {
     fetchVouchers();
   }, []);
@@ -339,12 +345,114 @@ const Vouchers = () => {
     setEditingId(null);
   };
 
+  // Filter, search, sort, phân trang
+  const filteredVouchers = vouchers.filter(v => {
+    const searchText = search.toLowerCase();
+    return (
+      v.name.toLowerCase().includes(searchText) ||
+      (v._id || '').toLowerCase().includes(searchText)
+    );
+  });
+  const sortedVouchers = [...filteredVouchers].sort((a, b) => {
+    if (sortType === 'newest') {
+      return new Date(b.startDate) - new Date(a.startDate);
+    } else if (sortType === 'oldest') {
+      return new Date(a.startDate) - new Date(b.startDate);
+    } else if (sortType === 'minOrder_asc') {
+      return a.minOrder - b.minOrder;
+    } else if (sortType === 'minOrder_desc') {
+      return b.minOrder - a.minOrder;
+    }
+    return 0;
+  });
+  const totalPages = Math.ceil(sortedVouchers.length / limit);
+  const pagedVouchers = sortedVouchers.slice((page - 1) * limit, page * limit);
+
   return (
-    <div className="content-inner">
+    <div className="content-inner" style={{ maxWidth: 1700, margin: '0 auto', padding: '32px 0' }}>
       {error && <div style={{color: 'red', marginBottom: 8}}>{error}</div>}
       {success && <div style={{color: 'green', marginBottom: 8}}>{success}</div>}
-      <VoucherList vouchers={vouchers} handleEdit={handleEdit} handleDelete={handleDelete} onAdd={handleAddVoucher} />
-      {/* Modal Thêm voucher */}
+      <h2 style={{ fontWeight: 700, marginBottom: 24, textAlign: 'center' }}>Quản lý voucher</h2>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
+        <button className="btn btn-primary" onClick={handleAddVoucher}>
+          <i className="fas fa-plus me-1"></i>
+          Thêm voucher
+        </button>
+      </div>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-start' }}>
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo tên, mã voucher..."
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
+        />
+        <select
+          value={sortType}
+          onChange={e => { setSortType(e.target.value); setPage(1); }}
+          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+        >
+          <option value="newest">Mới nhất</option>
+          <option value="oldest">Cũ nhất</option>
+          <option value="minOrder_asc">Đơn tối thiểu tăng dần</option>
+          <option value="minOrder_desc">Đơn tối thiểu giảm dần</option>
+        </select>
+        <span style={{ color: '#888', fontSize: 13 }}>Tổng voucher: {filteredVouchers.length}</span>
+      </div>
+      <div style={{ background: '#181f2a', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 0, marginBottom: 32 }}>
+        <table className="table" style={{ margin: 0, minWidth: 1500 }}>
+          <thead>
+            <tr>
+              <th style={{ textAlign: 'center' }}>Tên</th>
+              <th style={{ textAlign: 'center' }}>Đơn tối thiểu</th>
+              <th style={{ textAlign: 'center' }}>Kiểu giảm</th>
+              <th style={{ textAlign: 'center' }}>Giá trị giảm</th>
+              <th style={{ textAlign: 'center' }}>Bắt đầu</th>
+              <th style={{ textAlign: 'center' }}>Kết thúc</th>
+              <th style={{ textAlign: 'center' }}>Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pagedVouchers.map(v => (
+              <tr key={v._id}>
+                <td style={{ textAlign: 'center', fontWeight: 500 }}>{v.name}</td>
+                <td style={{ textAlign: 'center' }}>{v.minOrder}</td>
+                <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? 'Giá' : '%'}</td>
+                <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? `${v.discountValue} đ` : `${v.discountValue}%`}</td>
+                <td style={{ textAlign: 'center' }}>{v.startDate.slice(0, 10)}</td>
+                <td style={{ textAlign: 'center' }}>{v.endDate.slice(0, 10)}</td>
+                <td style={{ textAlign: 'center' }}>
+                  <div className="action-buttons" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <button className="btn btn-primary btn-sm me-2" style={{ width: 70 }} onClick={() => handleEdit(v)}>Sửa</button>
+                    <button className="btn btn-danger btn-sm" style={{ width: 70 }} onClick={() => handleDelete(v._id)}>Xóa</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {pagedVouchers.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có voucher nào phù hợp</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'center' }}>
+          <button onClick={() => setPage(page - 1)} disabled={page === 1} style={{ padding: '6px 16px' }}>&larr; Trước</button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => setPage(p)}
+              style={{ padding: '6px 12px', background: p === page ? '#2563eb' : '#fff', color: p === page ? '#fff' : '#2563eb', border: '1px solid #2563eb', borderRadius: 4 }}
+            >
+              {p}
+            </button>
+          ))}
+          <button onClick={() => setPage(page + 1)} disabled={page === totalPages} style={{ padding: '6px 16px' }}>Sau &rarr;</button>
+        </div>
+      )}
+      {/* Modal Thêm/Sửa giữ nguyên như cũ */}
       {showAddModal && (
         <div className="edit-modal">
           <div className="edit-modal-content">
@@ -365,7 +473,6 @@ const Vouchers = () => {
           </div>
         </div>
       )}
-      {/* Modal Sửa voucher */}
       {showEditModal && (
         <div className="edit-modal">
           <div className="edit-modal-content">

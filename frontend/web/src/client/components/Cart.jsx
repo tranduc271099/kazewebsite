@@ -114,7 +114,7 @@ function Cart() {
                     </div>
                 </div>
             ) : (
-                <div className="cart-page-container py-5" style={{ width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw', background: '#fff', marginTop: 0 }}>
+                <div className="cart-page-container py-5" style={{ maxWidth: '1400px', margin: '0 auto', background: '#fff', marginTop: 0 }}>
                     <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }}>
                         <div className="row justify-content-center" style={{ marginTop: '20px' }}>
                             {/* Cart Items */}
@@ -274,6 +274,10 @@ function Cart() {
                                             <span>{cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]).reduce((acc, item) => acc + (item.price * item.quantity), 0).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                         </div>
                                         <div className="d-flex justify-content-between mb-2">
+                                            <span>Phí vận chuyển</span>
+                                            <span>{(30000).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
+                                        </div>
+                                        <div className="d-flex justify-content-between mb-2">
                                             <span>Giảm giá</span>
                                             <span className="text-success">-{discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                         </div>
@@ -281,7 +285,11 @@ function Cart() {
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <span style={{ fontWeight: 600, fontSize: 18 }}>Tổng cộng</span>
                                             <span style={{ fontWeight: 700, fontSize: 22 }}>
-                                                {total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                                {(
+                                                    cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]).reduce((acc, item) => acc + (item.price * item.quantity), 0)
+                                                    + 30000
+                                                    - discount
+                                                ).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                                             </span>
                                         </div>
                                         <button className="btn btn-primary w-100 mb-2" style={{ fontWeight: 600, fontSize: 16 }} onClick={handleCheckout}>

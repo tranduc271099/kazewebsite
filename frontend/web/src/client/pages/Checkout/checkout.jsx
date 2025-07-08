@@ -79,7 +79,7 @@ const Checkout = () => {
     fetchProfileForCheckout();
   }, [navigate]);
 
- 
+
   useEffect(() => {
     if (formData.city && vietnamAddress[formData.city]) {
       const districtsArray = vietnamAddress[formData.city].Districts || [];
@@ -599,74 +599,6 @@ const Checkout = () => {
                             className="mb-3"
                             style={{ fontWeight: 600, color: "#333" }}
                           >
-                            Phương thức vận chuyển
-                          </h5>
-                          <div className="row">
-                            <div className="col-md-4 mb-3">
-                              <div
-                                className={`card h-100 border-2 border-primary`}
-                                style={{
-                                  cursor: "not-allowed",
-                                  transition: "all 0.3s ease",
-                                  opacity: 1,
-                                }}
-                              >
-                                <div className="card-body text-center p-3">
-                                  <div className="mb-2">
-                                    <i
-                                      className="bi bi-truck"
-                                      style={{
-                                        fontSize: "24px",
-                                        color: "#0d6efd",
-                                      }}
-                                    ></i>
-                                  </div>
-                                  <h6
-                                    className="card-title mb-1"
-                                    style={{
-                                      fontSize: "14px",
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Tiêu chuẩn
-                                  </h6>
-                                  <p
-                                    className="card-text mb-1"
-                                    style={{ fontSize: "12px", color: "#666" }}
-                                  >
-                                    3-5 ngày
-                                  </p>
-                                  <p
-                                    className="card-text"
-                                    style={{
-                                      fontSize: "14px",
-                                      fontWeight: 600,
-                                      color: "#e53935",
-                                    }}
-                                  >
-                                    {(4990).toLocaleString("vi-VN", {
-                                      style: "currency",
-                                      currency: "VND",
-                                    })}
-                                  </p>
-                                  <input
-                                    type="radio"
-                                    name="shipping"
-                                    checked={true}
-                                    readOnly
-                                    style={{ position: "absolute", opacity: 0 }}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mb-4">
-                          <h5
-                            className="mb-3"
-                            style={{ fontWeight: 600, color: "#333" }}
-                          >
                             Phương thức thanh toán
                           </h5>
                           <div className="row">
@@ -1026,7 +958,7 @@ const Checkout = () => {
                         <div className="d-flex justify-content-between mb-2">
                           <span>Phí vận chuyển</span>
                           <span>
-                            {shipping.toLocaleString("vi-VN", {
+                            {(30000).toLocaleString("vi-VN", {
                               style: "currency",
                               currency: "VND",
                             })}
@@ -1084,7 +1016,11 @@ const Checkout = () => {
                               color: "#e53935",
                             }}
                           >
-                            {total.toLocaleString("vi-VN", {
+                            {(
+                              itemsToCheckout.reduce((acc, item) => acc + item.price * item.quantity, 0)
+                              + 30000
+                              - discount
+                            ).toLocaleString("vi-VN", {
                               style: "currency",
                               currency: "VND",
                             })}

@@ -311,7 +311,7 @@ const ListOrder = () => {
                   const isNewest = trulyNewestOrderId === order._id;
                   return (
                     <tr key={order._id || idx}>
-                      <td style={{ textAlign: 'center', fontWeight: 500 }}>#{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}</td>
+                      <td style={{ textAlign: 'center', fontWeight: 500 }}>#{order.orderId ? order.orderId : (order._id ? order._id.slice(-8).toUpperCase() : 'N/A')}</td>
                       <td>{order.nguoi_dung_id?.name || 'Ẩn danh'}</td>
                       <td style={{ textAlign: 'center' }}>{order.nguoi_dung_id?.phone || '---'}</td>
                       <td style={{ textAlign: 'center' }}>{order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}</td>
@@ -384,7 +384,7 @@ const ListOrder = () => {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
               <div style={{ fontSize: 24, color: '#222', fontWeight: 700 }}>
-                Mã hóa đơn #{selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A'}
+                Mã hóa đơn #{selectedOrder.orderId ? selectedOrder.orderId : (selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A')}
               </div>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 32, cursor: 'pointer', color: '#888', lineHeight: 1 }}>×</button>
             </div>
