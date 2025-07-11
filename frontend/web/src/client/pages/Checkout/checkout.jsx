@@ -111,6 +111,17 @@ const Checkout = () => {
 
   useEffect(() => { }, [itemsToCheckout]);
 
+  useEffect(() => {
+    // Tính tổng tiền sản phẩm
+    const itemsTotal = itemsToCheckout.reduce(
+      (sum, item) => sum + (item.price * item.quantity),
+      0
+    );
+    // Tổng tiền = tổng sản phẩm + phí ship - giảm giá
+    const calculatedTotal = itemsTotal + shipping - discount;
+    setTotal(calculatedTotal > 0 ? calculatedTotal : 0);
+  }, [itemsToCheckout, shipping, discount]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({

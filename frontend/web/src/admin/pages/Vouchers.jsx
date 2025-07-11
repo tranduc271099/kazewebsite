@@ -4,6 +4,8 @@ import '../styles/UserManagement.css';
 
 const initialForm = {
   name: '',
+  code: '',
+  description: '',
   minOrder: '',
   discountType: 'amount',
   discountValue: '',
@@ -24,6 +26,29 @@ const VoucherAdd = ({ form, setForm, handleSubmit, editingId, setEditingId, init
         value={form.name}
         onChange={e => setForm({ ...form, name: e.target.value })}
         required
+        style={{ width: '100%' }}
+      />
+    </div>
+    <div className="form-group" style={{ marginBottom: 12 }}>
+      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mã voucher *</label>
+      <input
+        type="text"
+        name="code"
+        className="form-control"
+        placeholder="Mã voucher"
+        value={form.code}
+        readOnly
+        style={{ width: '100%' }}
+      />
+    </div>
+    <div className="form-group" style={{ marginBottom: 12 }}>
+      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mô tả</label>
+      <textarea
+        name="description"
+        className="form-control"
+        placeholder="Mô tả voucher"
+        value={form.description}
+        onChange={e => setForm({ ...form, description: e.target.value })}
         style={{ width: '100%' }}
       />
     </div>
@@ -108,6 +133,30 @@ const VoucherEdit = ({ form, setForm, handleSubmit, setEditingId, initialForm, e
         style={{ width: '100%' }}
       />
     </div>
+    <div className="form-group" style={{ marginBottom: 12 }}>
+      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mã voucher *</label>
+      <input
+        type="text"
+        name="code"
+        className="form-control"
+        placeholder="Mã voucher"
+        value={form.code}
+        disabled
+        style={{ width: '100%' }}
+      />
+    </div>
+    <div className="form-group" style={{ marginBottom: 12 }}>
+      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mô tả *</label>
+      <textarea
+        name="description"
+        className="form-control"
+        placeholder="Mô tả voucher"
+        value={form.description}
+        onChange={e => setForm({ ...form, description: e.target.value })}
+        required
+        style={{ width: '100%' }}
+      />
+    </div>
     <div className="form-group" style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
       <input
         type="number"
@@ -173,18 +222,28 @@ const VoucherEdit = ({ form, setForm, handleSubmit, setEditingId, initialForm, e
 // VoucherList component
 const VoucherList = ({ vouchers, handleEdit, handleDelete, onAdd }) => (
   <div className="user-management-container">
-    <div className="user-management-header">
-      <h2>Quản lý voucher</h2>
-      <button className="btn btn-primary" onClick={onAdd}>
-        <i className="fas fa-plus me-1"></i>
-        Thêm voucher
-      </button>
+    <div className="user-management-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <h2 style={{ margin: 0 }}>Quản lý voucher</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'flex-end' }}>
+        <input
+          type="text"
+          placeholder="Tìm kiếm theo tên, mã voucher..."
+          style={{ padding: '6px 10px', borderRadius: 4, border: '1px solid #ccc', minWidth: 180, marginRight: 8 }}
+          // Nếu có state search, thêm value và onChange ở đây
+        />
+        <button className="btn btn-primary" onClick={onAdd} style={{ padding: '4px 14px', fontSize: 14, height: 32, minWidth: 0 }}>
+          <i className="fas fa-plus me-1"></i>
+          Thêm
+        </button>
+      </div>
     </div>
     <div className="table-responsive">
       <table className="table">
         <thead>
           <tr>
             <th>Tên</th>
+            <th>Mã voucher</th>
+            <th>Mô tả</th>
             <th>Đơn tối thiểu</th>
             <th>Kiểu giảm</th>
             <th>Giá trị giảm</th>
@@ -197,6 +256,8 @@ const VoucherList = ({ vouchers, handleEdit, handleDelete, onAdd }) => (
           {vouchers.map(v => (
             <tr key={v._id}>
               <td>{v.name}</td>
+              <td>{v.code}</td>
+              <td>{v.description}</td>
               <td>{v.minOrder}</td>
               <td>{v.discountType === 'amount' ? 'Giá' : '%'}</td>
               <td>{v.discountType === 'amount' ? `${v.discountValue} đ` : `${v.discountValue}%`}</td>
@@ -215,6 +276,16 @@ const VoucherList = ({ vouchers, handleEdit, handleDelete, onAdd }) => (
     </div>
   </div>
 );
+
+// Thêm hàm sinh mã voucher ngẫu nhiên:
+function generateVoucherCode(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 // Main Vouchers component
 const Vouchers = () => {
@@ -260,7 +331,7 @@ const Vouchers = () => {
   };
 
   const validateForm = () => {
-    if (!form.name || !form.minOrder || !form.discountValue || !form.startDate || !form.endDate) {
+    if (!form.name || !form.minOrder || !form.discountValue || !form.startDate || !form.endDate || (editingId && !form.description)) {
       setError('Vui lòng nhập đầy đủ thông tin');
       return false;
     }
@@ -306,6 +377,8 @@ const Vouchers = () => {
   const handleEdit = (voucher) => {
     setForm({
       name: voucher.name,
+      code: voucher.code,
+      description: voucher.description,
       minOrder: voucher.minOrder,
       discountType: voucher.discountType,
       discountValue: voucher.discountValue,
@@ -332,9 +405,10 @@ const Vouchers = () => {
     }
   };
 
+  // Khi mở form thêm voucher, tự động sinh mã code:
   const handleAddVoucher = () => {
     setEditingId(null);
-    setForm(initialForm);
+    setForm({ ...initialForm, code: generateVoucherCode() });
     setShowAddModal(true);
   };
 
@@ -373,37 +447,41 @@ const Vouchers = () => {
       {error && <div style={{color: 'red', marginBottom: 8}}>{error}</div>}
       {success && <div style={{color: 'green', marginBottom: 8}}>{success}</div>}
       <h2 style={{ fontWeight: 700, marginBottom: 24, textAlign: 'center' }}>Quản lý voucher</h2>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-        <button className="btn btn-primary" onClick={handleAddVoucher}>
-          <i className="fas fa-plus me-1"></i>
-          Thêm voucher
-        </button>
-      </div>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-start' }}>
-        <input
-          type="text"
-          placeholder="Tìm kiếm theo tên, mã voucher..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
-        />
-        <select
-          value={sortType}
-          onChange={e => { setSortType(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
-        >
-          <option value="newest">Mới nhất</option>
-          <option value="oldest">Cũ nhất</option>
-          <option value="minOrder_asc">Đơn tối thiểu tăng dần</option>
-          <option value="minOrder_desc">Đơn tối thiểu giảm dần</option>
-        </select>
-        <span style={{ color: '#888', fontSize: 13 }}>Tổng voucher: {filteredVouchers.length}</span>
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên, mã voucher..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
+          />
+          <select
+            value={sortType}
+            onChange={e => { setSortType(e.target.value); setPage(1); }}
+            style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="minOrder_asc">Đơn tối thiểu tăng dần</option>
+            <option value="minOrder_desc">Đơn tối thiểu giảm dần</option>
+          </select>
+          <span style={{ color: '#888', fontSize: 13 }}>Tổng voucher: {filteredVouchers.length}</span>
+        </div>
+        <div style={{ flex: 'none', display: 'flex', justifyContent: 'flex-end', width: 120 }}>
+          <button className="btn btn-primary" onClick={handleAddVoucher} style={{ padding: '4px 14px', fontSize: 14, height: 32, minWidth: 0, width: '100%' }}>
+            <i className="fas fa-plus me-1"></i>
+            Thêm
+          </button>
+        </div>
       </div>
       <div style={{ background: '#181f2a', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 0, marginBottom: 32 }}>
         <table className="table" style={{ margin: 0, minWidth: 1500 }}>
           <thead>
             <tr>
               <th style={{ textAlign: 'center' }}>Tên</th>
+              <th style={{ textAlign: 'center' }}>Mã voucher</th>
+              <th style={{ textAlign: 'center' }}>Mô tả</th>
               <th style={{ textAlign: 'center' }}>Đơn tối thiểu</th>
               <th style={{ textAlign: 'center' }}>Kiểu giảm</th>
               <th style={{ textAlign: 'center' }}>Giá trị giảm</th>
@@ -416,6 +494,8 @@ const Vouchers = () => {
             {pagedVouchers.map(v => (
               <tr key={v._id}>
                 <td style={{ textAlign: 'center', fontWeight: 500 }}>{v.name}</td>
+                <td style={{ textAlign: 'center' }}>{v.code}</td>
+                <td style={{ textAlign: 'center' }}>{v.description}</td>
                 <td style={{ textAlign: 'center' }}>{v.minOrder}</td>
                 <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? 'Giá' : '%'}</td>
                 <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? `${v.discountValue} đ` : `${v.discountValue}%`}</td>
@@ -431,7 +511,7 @@ const Vouchers = () => {
             ))}
             {pagedVouchers.length === 0 && (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có voucher nào phù hợp</td>
+                <td colSpan={9} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có voucher nào phù hợp</td>
               </tr>
             )}
           </tbody>

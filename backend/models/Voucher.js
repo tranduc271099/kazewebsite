@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const voucherSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  code: { type: String, required: true, unique: true },
+  description: { type: String },
   minOrder: { type: Number, required: true },
   discountType: { type: String, enum: ['amount', 'percent'], required: true },
   discountValue: { type: Number, required: true },

@@ -24,6 +24,12 @@ exports.createPaymentUrl = (req, res) => {
   const orderId = req.body.orderId; // Lấy đúng orderId từ frontend truyền xuống
 
   let amount = req.body.amount;
+  if (!amount || isNaN(amount)) {
+    return res.status(400).json({ message: "Số tiền không hợp lệ" });
+  }
+  if (amount < 5000 || amount >= 1000000000) {
+    return res.status(400).json({ message: "Số tiền phải từ 5,000 đến dưới 1 tỷ đồng" });
+  }
   let bankCode = req.body.bankCode;
   let orderInfo = req.body.orderInfo || req.body.orderDescription;
   // Sanitize orderInfo: remove Vietnamese diacritics and replace spaces
