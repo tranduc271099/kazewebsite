@@ -456,7 +456,7 @@ const Dashboard = () => {
                                     <div style={{ textAlign: 'center', fontSize: 12 }}>
                                         <div style={{ color: theme.palette.text.secondary }}>{formatDate(day._id)}</div>
                                         <div style={{ color: theme.palette.text.primary, fontWeight: 600 }}>{formatCurrency(day.revenue)}</div>
-                                    </div>
+                                        </div>
                                 </div>
                             ))}
                         </div>
