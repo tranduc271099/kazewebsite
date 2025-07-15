@@ -51,6 +51,19 @@ const ListOrder = () => {
     }
   };
 
+  const getStatusDisplayForModal = (status) => {
+    switch (status) {
+      case 'chờ xác nhận': return 'Chờ xác nhận';
+      case 'đã xác nhận': return 'Xác nhận';
+      case 'đang giao hàng': return 'Đang giao';
+      case 'đã giao hàng': return 'Đã giao';
+      case 'đã nhận hàng': return 'Đã nhận';
+      case 'hoàn thành': return 'Hoàn thành';
+      case 'đã hủy': return 'Hủy';
+      default: return status;
+    }
+  };
+
   const fetchOrders = async (pageNum = 1) => {
     setLoading(true);
     setError('');
@@ -134,14 +147,6 @@ const ListOrder = () => {
   };
 
   const filteredOrders = orders.filter(order => {
-    // Tạm thời bỏ filter loại bỏ đơn hàng ảo để hiển thị tất cả đơn hàng
-    // const isFakeOrder =
-    //   !order.nguoi_dung_id?.name ||
-    //   order.tong_tien === 0 ||
-    //   !order.dia_chi_giao_hang ||
-    //   order.nguoi_dung_id.name === 'Ẩn danh' ||
-    //   order.nguoi_dung_id.name === 'Không có thông tin';
-    // if (isFakeOrder) return false;
     const searchText = search.toLowerCase();
     const matchSearch =
       (order.nguoi_dung_id?.name || '').toLowerCase().includes(searchText) ||
@@ -399,7 +404,7 @@ const ListOrder = () => {
             </div>
             <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
               <strong>Trạng thái:</strong> <span style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 16 }}>
-                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplay(selectedOrder.trang_thai || 'chờ xác nhận')}
+                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
               </span>
               {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
                 <div style={{ marginTop: 8, color: '#d32f2f', fontSize: 16 }}><strong>Lý do huỷ:</strong> {selectedOrder.ly_do_huy}</div>
@@ -415,6 +420,19 @@ const ListOrder = () => {
                 <strong>Phương thức vận chuyển:</strong> {selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
               </div>
             )}
+            <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+              <strong>Trạng thái thanh toán:</strong> 
+              <span style={{ 
+                background: selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? '#10b981' : '#f59e0b', 
+                color: '#fff', 
+                padding: '4px 10px', 
+                borderRadius: 4, 
+                marginLeft: 8, 
+                fontSize: 14 
+              }}>
+                {selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+              </span>
+            </div>
             <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
               Địa chỉ giao hàng:
               <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
@@ -474,7 +492,7 @@ const ListOrder = () => {
                         fontSize: '14px',
                       }}
                     >
-                      {getStatusDisplay(status)}
+                      {getStatusDisplayForModal(status)}
                     </button>
                   ))}
                 </>

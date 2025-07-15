@@ -161,6 +161,19 @@ const Dashboard = () => {
         }
     };
 
+    const getStatusDisplayForModal = (status) => {
+        switch (status) {
+            case 'chờ xác nhận': return 'Chờ xác nhận';
+            case 'đã xác nhận': return 'Xác nhận';
+            case 'đang giao hàng': return 'Đang giao';
+            case 'đã giao hàng': return 'Đã giao';
+            case 'đã nhận hàng': return 'Đã nhận';
+            case 'hoàn thành': return 'Hoàn thành';
+            case 'đã hủy': return 'Hủy';
+            default: return status;
+        }
+    };
+
     const getNextStatusOptions = (currentStatus) => {
         switch (currentStatus) {
             case 'chờ xác nhận':
@@ -750,7 +763,7 @@ const Dashboard = () => {
                         </div>
                         <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
                             <strong>Trạng thái:</strong> <span style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 16 }}>
-                                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplay(selectedOrder.trang_thai || 'chờ xác nhận')}
+                                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
                             </span>
                             {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
                                 <div style={{ marginTop: 8, color: '#d32f2f', fontSize: 16 }}><strong>Lý do huỷ:</strong> {selectedOrder.ly_do_huy}</div>
@@ -761,11 +774,24 @@ const Dashboard = () => {
                                 <strong>Phương thức thanh toán:</strong> <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
                             </div>
                         )}
-                        {selectedOrder.phi_van_chuyen !== undefined && (
+                        {selectedOrder.shippingFee !== undefined && (
                             <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                                <strong>Phương thức vận chuyển:</strong> {selectedOrder.phi_van_chuyen === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.phi_van_chuyen === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.phi_van_chuyen === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+                                <strong>Phương thức vận chuyển:</strong> {selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
                             </div>
                         )}
+                        <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
+                            <strong>Trạng thái thanh toán:</strong> 
+                            <span style={{ 
+                                background: selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? '#10b981' : '#f59e0b', 
+                                color: '#fff', 
+                                padding: '4px 10px', 
+                                borderRadius: 4, 
+                                marginLeft: 8, 
+                                fontSize: 14 
+                            }}>
+                                {selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                            </span>
+                        </div>
                         <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
                             Địa chỉ giao hàng:
                             <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
@@ -825,7 +851,7 @@ const Dashboard = () => {
                                                 fontSize: '14px',
                                             }}
                                         >
-                                            {getStatusDisplay(status)}
+                                            {getStatusDisplayForModal(status)}
                                         </button>
                                     ))}
                                 </>
