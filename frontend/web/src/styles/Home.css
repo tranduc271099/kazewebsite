@@ -21,3 +21,7 @@
 .main .container>.row.gy-4 {
     margin-top: 0 !important;
 }
+
+.slick-slider .slick-track {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
