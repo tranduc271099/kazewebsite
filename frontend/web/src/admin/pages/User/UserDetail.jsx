@@ -1,4 +1,5 @@
 import React from 'react';
+import './UserDetail.css';
 
 const keyMap = {
     _id: 'Mã người dùng',
@@ -26,29 +27,40 @@ const UserDetail = ({ user }) => {
     }
 
     return (
-        <div style={{ padding: 24, background: '#181c24', color: '#fff', borderRadius: 10 }}>
-            <h4 style={{ color: '#fff', marginBottom: 20 }}>Chi tiết người dùng</h4>
-            <table style={{ width: '100%', background: 'transparent', borderCollapse: 'collapse' }}>
-                <tbody>
+        <div className="user-detail-container">
+            <div className="user-detail-left">
+                <div className="user-avatar">
+                    {user.image ? (
+                        <img src={user.image} alt={user.name} />
+                    ) : (
+                        <div className="avatar-placeholder">No Image</div>
+                    )}
+                </div>
+                <div className="user-main-info">
+                    <h2>{user.name}</h2>
+                    <div className="user-role">{user.role}</div>
+                    <div className={`user-status ${user.isLocked ? 'locked' : 'active'}`}>{user.isLocked ? 'Đã khóa' : 'Hoạt động'}</div>
+                </div>
+            </div>
+            <div className="user-detail-right">
+                <h4>Chi tiết người dùng</h4>
+                <div className="user-detail-grid">
                     {Object.entries(user).map(([key, value]) => {
-                        if (key === 'password' || key === '__v') return null;
+                        if (['password', '__v', 'image', 'name', 'role', 'isLocked'].includes(key)) return null;
                         let displayValue = value;
                         if (value === null || value === undefined || value === '') displayValue = 'Chưa có';
                         if (key === 'createdAt' || key === 'updatedAt') displayValue = formatDate(value);
                         if (Array.isArray(value)) displayValue = value.length > 0 ? value.join(', ') : 'Chưa có';
-                        if (typeof value === 'boolean') displayValue = key === 'isLocked' ? (value ? 'Đã khóa' : 'Hoạt động') : (value ? 'Có' : 'Không');
-                        if (key === 'image') displayValue = value !== 'Chưa có' ? <a href={value} target="_blank" rel="noopener noreferrer" style={{ color: '#4fa3ff' }}>{value}</a> : 'Chưa có';
+                        if (typeof value === 'boolean') displayValue = value ? 'Có' : 'Không';
                         return (
-                            <tr key={key} style={{ borderBottom: '1px solid #222' }}>
-                                <td style={{ fontWeight: 600, padding: '8px 12px', color: '#b0b8c1', width: 180 }}>
-                                    {keyMap[key] || key}
-                                </td>
-                                <td style={{ padding: '8px 12px', color: '#fff' }}>{displayValue}</td>
-                            </tr>
+                            <div className="detail-item" key={key}>
+                                <div className="detail-label">{keyMap[key] || key}</div>
+                                <div className="detail-value">{displayValue}</div>
+                            </div>
                         );
                     })}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     );
 };

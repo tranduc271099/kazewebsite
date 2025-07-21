@@ -1,0 +1,131 @@
+.user-detail-container {
+    display: flex;
+    gap: 40px;
+    background: #23293a;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    padding: 32px 24px;
+    color: #fff;
+    margin-bottom: 32px;
+}
+
+.user-detail-left {
+    min-width: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #38405a;
+    padding-right: 32px;
+}
+
+.user-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #38405a;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    color: #aaa;
+    font-size: 18px;
+}
+
+.user-main-info h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.user-role {
+    background: #4fa3ff;
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.user-status {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.user-status.active {
+    color: #4fa3ff;
+}
+
+.user-status.locked {
+    color: #ff6b6b;
+}
+
+.user-detail-right {
+    flex: 1;
+    padding-left: 32px;
+}
+
+.user-detail-right h4 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px 32px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-label {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.detail-value {
+    font-size: 1.08rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .user-detail-container {
+        flex-direction: column;
+        gap: 18px;
+        padding: 18px 8px;
+    }
+
+    .user-detail-left {
+        border-right: none;
+        border-bottom: 1px solid #38405a;
+        padding-right: 0;
+        padding-bottom: 18px;
+        margin-bottom: 12px;
+    }
+
+    .user-detail-right {
+        padding-left: 0;
+    }
+
+    .user-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -26,6 +26,8 @@
     display: flex;
     gap: 15px;
     align-items: center;
+    background: transparent;
+    padding: 0;
 }
 
 .filter-group {
@@ -94,6 +96,26 @@
     font-size: 24px;
     font-weight: 700;
     color: #333;
+}
+
+/* Tổng doanh thu */
+.stat-total-revenue {
+    border-left: 6px solid #3b82f6;
+    background: linear-gradient(90deg, #e3f0ff 0%, #f8fafc 100%);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.08);
+}
+
+/* Doanh thu hoàn thành */
+.stat-completed-revenue {
+    border-left: 6px solid #10b981;
+    background: linear-gradient(90deg, #e6fff7 0%, #f8fafc 100%);
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.08);
+}
+
+.stat-total-revenue,
+.stat-completed-revenue {
+    padding-left: 32px !important;
+    box-sizing: border-box;
 }
 
 /* Chart Section */

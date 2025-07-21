@@ -33,7 +33,7 @@ const Dashboard = () => {
     const [newStatus, setNewStatus] = useState('');
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
-    
+
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
 
@@ -50,6 +50,8 @@ const Dashboard = () => {
             const params = new URLSearchParams();
             if (dateRange.startDate) params.append('startDate', dateRange.startDate);
             if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+            // Nếu không có filter ngày, lấy 7 ngày gần nhất
+            if (!dateRange.startDate && !dateRange.endDate) params.append('lastDays', 7);
 
             const response = await axios.get(`http://localhost:5000/api/dashboard/stats?${params}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -356,29 +358,72 @@ const Dashboard = () => {
     return (
         <div style={{ padding: 20, background: theme.palette.background.default, minHeight: '100vh', transition: 'background 0.2s' }}>
             {/* Header với filter ngày */}
-            <Paper elevation={2} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
+            <Paper elevation={2} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, flexWrap: 'wrap', gap: 20 }}>
                 <h2 style={{ color: theme.palette.text.primary, margin: 0 }}>Bảng điều khiển</h2>
-                <div style={{ display: 'flex', gap: 15, alignItems: 'center' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                        <label style={{ fontSize: 12, color: theme.palette.text.secondary, fontWeight: 500 }}>Từ ngày:</label>
+                <form
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 16,
+                        background: isDark ? '#232526' : '#f4f6f8',
+                        padding: '10px 18px',
+                        borderRadius: 8,
+                        boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.12)' : '0 1px 4px rgba(0,0,0,0.06)',
+                    }}
+                    onSubmit={e => e.preventDefault()}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                        <label style={{ fontSize: 13, color: theme.palette.text.secondary, fontWeight: 500, marginBottom: 2 }}>Từ ngày</label>
                         <input
                             type="date"
                             value={dateRange.startDate}
                             onChange={(e) => handleDateChange('startDate', e.target.value)}
-                            style={{ padding: '8px 12px', border: `1px solid ${theme.palette.divider}`, borderRadius: 5, fontSize: 14, background: theme.palette.background.default, color: theme.palette.text.primary }}
+                            style={{
+                                padding: '7px 12px',
+                                border: `1px solid ${theme.palette.divider}`,
+                                borderRadius: 5,
+                                fontSize: 14,
+                                background: theme.palette.background.default,
+                                color: theme.palette.text.primary,
+                                minWidth: 120
+                            }}
                         />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                        <label style={{ fontSize: 12, color: theme.palette.text.secondary, fontWeight: 500 }}>Đến ngày:</label>
+                    <span style={{ color: theme.palette.text.secondary, fontWeight: 600, fontSize: 16, margin: '0 4px' }}>–</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                        <label style={{ fontSize: 13, color: theme.palette.text.secondary, fontWeight: 500, marginBottom: 2 }}>Đến ngày</label>
                         <input
                             type="date"
                             value={dateRange.endDate}
                             onChange={(e) => handleDateChange('endDate', e.target.value)}
-                            style={{ padding: '8px 12px', border: `1px solid ${theme.palette.divider}`, borderRadius: 5, fontSize: 14, background: theme.palette.background.default, color: theme.palette.text.primary }}
+                            style={{
+                                padding: '7px 12px',
+                                border: `1px solid ${theme.palette.divider}`,
+                                borderRadius: 5,
+                                fontSize: 14,
+                                background: theme.palette.background.default,
+                                color: theme.palette.text.primary,
+                                minWidth: 120
+                            }}
                         />
                     </div>
-                    <Button variant="outlined" color="secondary" onClick={clearDateFilter}>Xóa filter</Button>
-                </div>
+                    <Button
+                        variant="contained"
+                        color="secondary"
+                        onClick={clearDateFilter}
+                        style={{
+                            marginLeft: 12,
+                            fontWeight: 700,
+                            letterSpacing: 0.5,
+                            padding: '8px 18px',
+                            borderRadius: 6,
+                            boxShadow: 'none',
+                            textTransform: 'none',
+                        }}
+                    >
+                        Xóa lọc
+                    </Button>
+                </form>
             </Paper>
 
             {/* Thống kê tổng quan */}
@@ -436,42 +481,76 @@ const Dashboard = () => {
                         Doanh thu theo ngày
                     </h3>
                 </div>
-                <div style={{ minHeight: 250, padding: '0 16px 16px 16px' }}>
+                <div style={{ minHeight: 250, padding: '0 16px 24px 16px' }}>
                     {dashboardData.dailyStats.length > 0 ? (
                         <div style={{
                             display: 'flex',
-                            alignItems: 'end',
-                            gap: 20,
+                            alignItems: 'flex-end',
+                            gap: 40, // tăng khoảng cách giữa các cột
                             height: 200,
                             width: '100%',
+                            justifyContent: 'center', // căn giữa các cột
+                            paddingBottom: 16,
                         }}>
-                            {dashboardData.dailyStats.map((day, index) => (
-                                <div key={day._id} style={{
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    gap: 10,
-                                    minWidth: 60,
-                                }}>
-                                    <div
-                                        style={{
-                                            width: '100%',
+                            {dashboardData.dailyStats.map((day, index) => {
+                                const maxRevenue = Math.max(...dashboardData.dailyStats.map(d => d.revenue));
+                                const barHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
+                                return (
+                                    <div key={day._id} style={{
+                                        flex: '0 0 60px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        minWidth: 60,
+                                    }}>
+                                        <div style={{
+                                            width: 36,
+                                            height: barHeight,
                                             background: isDark
                                                 ? 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)'
                                                 : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            borderRadius: '5px 5px 0 0',
-                                            minHeight: 10,
-                                            height: `${(day.revenue / Math.max(...dashboardData.dailyStats.map(d => d.revenue))) * 200}px`,
+                                            borderRadius: '8px 8px 0 0',
                                             transition: 'all 0.3s ease',
-                                        }}
-                                    ></div>
-                                    <div style={{ textAlign: 'center', fontSize: 12 }}>
-                                        <div style={{ color: theme.palette.text.secondary }}>{formatDate(day._id)}</div>
-                                        <div style={{ color: theme.palette.text.primary, fontWeight: 600 }}>{formatCurrency(day.revenue)}</div>
+                                            marginBottom: 8,
+                                            boxShadow: isDark ? '0 2px 8px rgba(66,165,245,0.12)' : '0 2px 8px rgba(102,126,234,0.10)'
+                                        }}></div>
+                                        <div style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            marginTop: 0,
+                                            marginBottom: 0,
+                                        }}>
+                                            <span style={{
+                                                color: theme.palette.text.primary,
+                                                fontWeight: 700,
+                                                fontSize: 15,
+                                                lineHeight: 1.2,
+                                                textAlign: 'center',
+                                                display: 'block',
+                                            }}>
+                                                {day.revenue.toLocaleString('vi-VN')}
+                                                <span style={{
+                                                    fontWeight: 400,
+                                                    fontSize: 13,
+                                                    marginLeft: 2,
+                                                    color: theme.palette.text.primary,
+                                                }}>₫</span>
+                                            </span>
+                                            <span style={{
+                                                marginTop: 4,
+                                                color: theme.palette.text.secondary,
+                                                fontSize: 13,
+                                                fontWeight: 500,
+                                                textAlign: 'center',
+                                                display: 'block',
+                                            }}>
+                                                {formatDate(day._id)}
+                                            </span>
                                         </div>
-                                </div>
-                            ))}
+                                    </div>
+                                );
+                            })}
                         </div>
                     ) : (
                         <p style={{ color: theme.palette.text.secondary }}>Không có dữ liệu doanh thu</p>
@@ -540,9 +619,9 @@ const Dashboard = () => {
                     }}>
                         <thead>
                             <tr>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '12%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '12%',
                                     minWidth: '100px',
                                     textAlign: 'center',
                                     padding: '12px 8px',
@@ -551,9 +630,9 @@ const Dashboard = () => {
                                 }}>
                                     Mã đơn
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '18%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '18%',
                                     minWidth: '120px',
                                     textAlign: 'left',
                                     padding: '12px 8px',
@@ -562,9 +641,9 @@ const Dashboard = () => {
                                 }}>
                                     Khách hàng
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '12%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '12%',
                                     minWidth: '100px',
                                     textAlign: 'center',
                                     padding: '12px 8px',
@@ -573,9 +652,9 @@ const Dashboard = () => {
                                 }}>
                                     SĐT
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '18%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '18%',
                                     minWidth: '140px',
                                     textAlign: 'center',
                                     padding: '12px 8px',
@@ -584,9 +663,9 @@ const Dashboard = () => {
                                 }}>
                                     Ngày đặt
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '15%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '15%',
                                     minWidth: '120px',
                                     textAlign: 'center',
                                     padding: '12px 8px',
@@ -595,9 +674,9 @@ const Dashboard = () => {
                                 }}>
                                     Trạng thái
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '15%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '15%',
                                     minWidth: '120px',
                                     textAlign: 'right',
                                     padding: '12px 8px',
@@ -606,9 +685,9 @@ const Dashboard = () => {
                                 }}>
                                     Tổng tiền
                                 </th>
-                                <th style={{ 
-                                    ...thStyle, 
-                                    width: '10%', 
+                                <th style={{
+                                    ...thStyle,
+                                    width: '10%',
                                     minWidth: '100px',
                                     textAlign: 'center',
                                     padding: '12px 8px',
@@ -624,15 +703,15 @@ const Dashboard = () => {
                             {latestOrders && latestOrders.length > 0 ? (
                                 latestOrders.map(order => (
                                     <tr key={order._id} style={{ borderBottom: `1px solid ${theme.palette.divider}` }}>
-                                        <td style={{ 
-                                            ...tdStyle, 
-                                            textAlign: 'center', 
+                                        <td style={{
+                                            ...tdStyle,
+                                            textAlign: 'center',
                                             fontWeight: 500
                                         }}>
                                             #{order._id ? order._id.slice(-8).toUpperCase() : 'N/A'}
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
+                                        <td style={{
+                                            ...tdStyle,
                                             maxWidth: '120px',
                                             overflow: 'hidden',
                                             textOverflow: 'ellipsis',
@@ -641,20 +720,20 @@ const Dashboard = () => {
                                         }}>
                                             {order.nguoi_dung_id?.name || 'Ẩn danh'}
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
+                                        <td style={{
+                                            ...tdStyle,
                                             textAlign: 'center'
                                         }}>
                                             {order.nguoi_dung_id?.phone || '---'}
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
+                                        <td style={{
+                                            ...tdStyle,
                                             textAlign: 'center'
                                         }}>
                                             {order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
+                                        <td style={{
+                                            ...tdStyle,
                                             textAlign: 'center'
                                         }}>
                                             <span style={{
@@ -671,16 +750,16 @@ const Dashboard = () => {
                                                 {getStatusDisplay(order.trang_thai)}
                                             </span>
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
-                                            color: '#2563eb', 
-                                            fontWeight: 600, 
+                                        <td style={{
+                                            ...tdStyle,
+                                            color: '#2563eb',
+                                            fontWeight: 600,
                                             textAlign: 'right'
                                         }}>
                                             {formatCurrency(order.tong_tien)}
                                         </td>
-                                        <td style={{ 
-                                            ...tdStyle, 
+                                        <td style={{
+                                            ...tdStyle,
                                             textAlign: 'center'
                                         }}>
                                             <button
@@ -713,9 +792,9 @@ const Dashboard = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" style={{ 
-                                        ...tdStyle, 
-                                        color: theme.palette.text.secondary, 
+                                    <td colSpan="7" style={{
+                                        ...tdStyle,
+                                        color: theme.palette.text.secondary,
                                         textAlign: 'center',
                                         padding: '40px 20px',
                                         fontSize: '16px'
@@ -780,14 +859,14 @@ const Dashboard = () => {
                             </div>
                         )}
                         <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                            <strong>Trạng thái thanh toán:</strong> 
-                            <span style={{ 
-                                background: selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? '#10b981' : '#f59e0b', 
-                                color: '#fff', 
-                                padding: '4px 10px', 
-                                borderRadius: 4, 
-                                marginLeft: 8, 
-                                fontSize: 14 
+                            <strong>Trạng thái thanh toán:</strong>
+                            <span style={{
+                                background: selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? '#10b981' : '#f59e0b',
+                                color: '#fff',
+                                padding: '4px 10px',
+                                borderRadius: 4,
+                                marginLeft: 8,
+                                fontSize: 14
                             }}>
                                 {selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                             </span>
