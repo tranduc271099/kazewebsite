@@ -8,8 +8,8 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:4000', 'http://localhost:3001'],
-    credentials: true
+  origin: ['http://localhost:3000', 'http://localhost:4000', 'http://localhost:3001'],
+  credentials: true
 }));
 
 // Routes that need multipart/form-data should come before express.json()
@@ -26,8 +26,8 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('✅ MongoDB connected'))
-    .catch(err => console.error('❌ DB connection error:', err));
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ DB connection error:', err));
 
 // Routes
 app.use('/api/users', require('./routes/user.routes'));
@@ -42,6 +42,8 @@ app.use('/api/vouchers', require('./routes/voucher.routes'));
 
 // Thêm route payment
 app.use('/api/payment', require('./routes/payment.routes'));
+
+app.use('/api/banners', require('./routes/bannerRoutes'));
 
 const vnpayReturnController = require('./controllers/vnpayReturn.controller');
 app.get('/vnpay_return', async (req, res) => {
@@ -63,13 +65,13 @@ app.get('/', (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
+  console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
 });
 
 const createPaymentUrl = (orderId, amount, orderInfo) => {
   const date = new Date();
   const pad = (n) => n < 10 ? '0' + n : n;
-  const createDate = 
+  const createDate =
     date.getFullYear().toString() +
     pad(date.getMonth() + 1) +
     pad(date.getDate()) +

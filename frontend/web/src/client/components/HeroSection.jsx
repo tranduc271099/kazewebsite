@@ -1,60 +1,73 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import Slider from "react-slick";
 
-const HeroSection = () => (
-    <section className="ecommerce-hero-1 hero section" id="hero">
-        <div className="container">
-            <div className="row align-items-center">
-                <div className="col-lg-6 content-col" data-aos="fade-right" data-aos-delay="100">
-                    <div className="content">
-                        <span className="promo-badge">Bộ sưu tập mới 2025</span>
-                        <h1>Khám phá Phong cách <span>Thời trang</span> Cho Mọi Mùa</h1>
-                        <p>Chào mừng bạn đến với cửa hàng của chúng tôi. Nơi bạn có thể tìm thấy những bộ trang phục thời thượng và phong cách nhất, phù hợp với mọi cá tính và mọi mùa trong năm.</p>
-                        <div className="hero-cta">
-                            <a href="#" className="btn btn-shop">Mua ngay <i className="bi bi-arrow-right"></i></a>
-                            <a href="#" className="btn btn-collection">Xem bộ sưu tập</a>
-                        </div>
-                        <div className="hero-features">
-                            <div className="feature-item">
-                                <i className="bi bi-truck"></i>
-                                <span>Giao hàng miễn phí</span>
+const HeroSection = () => {
+    const [banners, setBanners] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/banners/active")
+            .then(res => setBanners(res.data))
+            .catch(err => console.error("Lỗi lấy banner:", err));
+    }, []);
+
+    if (banners.length === 0) {
+        return <div>Đang tải banner...</div>;
+    }
+
+    const settings = {
+        dots: true,
+        infinite: banners.length > 1,
+        speed: 800, // tăng lên 800ms cho mượt
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: banners.length > 1,
+        autoplaySpeed: 4000,
+        arrows: banners.length > 1,
+        cssEase: "cubic-bezier(0.4,0,0.2,1)", // thêm easing mượt
+        pauseOnHover: true,
+        pauseOnFocus: true,
+    };
+
+    return (
+        <section className="ecommerce-hero-1 hero section" id="hero">
+            <div className="container">
+                {banners.length > 1 ? (
+                    <Slider {...settings}>
+                        {banners.map((banner) => (
+                            <div key={banner._id} style={{ textAlign: "center" }}>
+                                <img
+                                    src={banner.imageUrl}
+                                    alt="Banner"
+                                    style={{
+                                        width: "100%",
+                                        height: "600px",
+                                        objectFit: "cover",
+                                        borderRadius: "12px"
+                                    }}
+                                />
                             </div>
-                            <div className="feature-item">
-                                <i className="bi bi-shield-check"></i>
-                                <span>Thanh toán an toàn</span>
-                            </div>
-                            <div className="feature-item">
-                                <i className="bi bi-arrow-repeat"></i>
-                                <span>Đổi trả dễ dàng</span>
-                            </div>
-                        </div>
+                        ))}
+                    </Slider>
+                ) : (
+                    <div style={{ textAlign: "center" }}>
+                        <img
+                            src={banners[0].imageUrl}
+                            alt="Banner"
+                            style={{
+                                width: "100%",
+                                height: "600px",
+                                objectFit: "cover",
+                                borderRadius: "12px"
+                            }}
+                        />
                     </div>
-                </div>
-                <div className="col-lg-6 image-col" data-aos="fade-left" data-aos-delay="200">
-                    <div className="hero-image">
-                        <img src="/assets/img/product/product-f-9.webp" alt="Sản phẩm thời trang" className="main-product" loading="lazy" />
-                        <div className="floating-product product-1" data-aos="fade-up" data-aos-delay="300">
-                            <img src="/assets/img/product/product-4.webp" alt="Product 2" />
-                            <div className="product-info">
-                                <h4>Bộ sưu tập Hè</h4>
-                                <span className="price">2.250.000đ</span>
-                            </div>
-                        </div>
-                        <div className="floating-product product-2" data-aos="fade-up" data-aos-delay="400">
-                            <img src="/assets/img/product/product-3.webp" alt="Product 3" />
-                            <div className="product-info">
-                                <h4>Trang phục thường ngày</h4>
-                                <span className="price">1.500.000đ</span>
-                            </div>
-                        </div>
-                        <div className="discount-badge" data-aos="zoom-in" data-aos-delay="500">
-                            <span className="percent">30%</span>
-                            <span className="text">GIẢM</span>
-                        </div>
-                    </div>
-                </div>
+                )}
             </div>
-        </div>
-    </section>
-);
+        </section>
+    );
+};
 
-export default HeroSection; 
+export default HeroSection;

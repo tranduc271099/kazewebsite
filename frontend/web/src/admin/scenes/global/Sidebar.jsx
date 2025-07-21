@@ -18,6 +18,7 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -175,6 +176,13 @@ const Sidebar = () => {
               title="Quản lý Đơn hàng"
               to="/admin/bill"
               icon={<Inventory2OutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Quản lý Banner"
+              to="/admin/banners"
+              icon={<PhotoLibraryOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
