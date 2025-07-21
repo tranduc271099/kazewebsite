@@ -3,12 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import '../styles/Auth.css';
-import { useDispatch } from 'react-redux';
-import { LOGIN_SUCCESS } from '../redux/types';
+import { useUser } from '../context/UserContext'; // Import useUser
 
 const Login = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const { setUser } = useUser(); // Lấy hàm setUser từ context
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -54,8 +53,8 @@ const Login = () => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            // Lưu vào Redux
-            dispatch({ type: LOGIN_SUCCESS, payload: { token, user } });
+            // Cập nhật user context
+            setUser(user);
 
             // Kiểm tra role và chuyển hướng
             if (user?.role === 'admin') {
@@ -83,8 +82,8 @@ const Login = () => {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            // Lưu vào Redux
-            dispatch({ type: LOGIN_SUCCESS, payload: { token, user } });
+            // Cập nhật user context
+            setUser(user);
 
             // Kiểm tra role và chuyển hướng
             if (user?.role === 'admin') {

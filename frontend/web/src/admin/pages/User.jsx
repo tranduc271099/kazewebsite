@@ -170,9 +170,7 @@ const User = () => {
                                 expandedUserId === user._id && (
                                     <tr key={user._id + '-detail'}>
                                         <td colSpan={3}>
-                                            <pre style={{ textAlign: 'left', background: '#222', color: '#fff', padding: 16, borderRadius: 8, margin: 0 }}>
-                                                {JSON.stringify(user, null, 2)}
-                                            </pre>
+                                            <UserDetail user={user} />
                                         </td>
                                     </tr>
                                 )

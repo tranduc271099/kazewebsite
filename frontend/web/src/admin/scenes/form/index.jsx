@@ -170,6 +170,29 @@ const Form = () => {
                       borderRadius: '50%'
                     }}
                   />
+                  <label htmlFor="avatar-upload" style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    background: '#4fa3ff',
+                    borderRadius: '50%',
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                  }} title="Đổi ảnh đại diện">
+                    <svg width="18" height="18" fill="#fff" viewBox="0 0 24 24"><path d="M21.7 6.3l-4-4a1 1 0 0 0-1.4 0l-11 11A1 1 0 0 0 5 14v4a1 1 0 0 0 1 1h4a1 1 0 0 0 .7-.3l11-11a1 1 0 0 0 0-1.4zM7 17v-2.59l9-9L18.59 8l-9 9H7zm12.29-10.29l-1 1-2-2 1-1a.996.996 0 0 1 1.41 0l.59.59a.996.996 0 0 1 0 1.41z" /></svg>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => handleImageChange(e, setFieldValue)}
+                    />
+                  </label>
                 </Box>
               </Box>
               <TextField
