@@ -2,25 +2,6 @@ import React from "react";
 
 const Footer = () => (
   <footer id="footer" className="footer">
-    <div className="footer-newsletter">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-lg-8 text-center">
-            <h2>Đăng ký nhận bản tin</h2>
-            <p>Đăng ký để nhận các ưu đãi đặc biệt, quà tặng miễn phí và các ưu đãi chỉ có một lần trong đời.</p>
-            <form action="forms/newsletter.php" method="post" className="php-email-form">
-              <div className="newsletter-form d-flex">
-                <input type="email" name="email" placeholder="Địa chỉ email của bạn" required="" />
-                <button type="submit">Đăng ký</button>
-              </div>
-              <div className="loading">Đang tải</div>
-              <div className="error-message"></div>
-              <div className="sent-message">Yêu cầu đăng ký của bạn đã được gửi. Cảm ơn bạn!</div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
     <div className="footer-main">
       <div className="container">
         <div className="row gy-4">

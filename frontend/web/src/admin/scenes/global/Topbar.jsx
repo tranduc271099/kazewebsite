@@ -59,9 +59,6 @@ const Topbar = () => {
         <IconButton>
           <NotificationsOutlinedIcon />
         </IconButton>
-        <IconButton>
-          <SettingsOutlinedIcon />
-        </IconButton>
         <Box ref={anchorRef} position="relative">
           <IconButton onClick={() => setOpen((prev) => !prev)}>
             <PersonOutlinedIcon />

@@ -83,3 +83,45 @@ const createPaymentUrl = (orderId, amount, orderInfo) => {
   vnp_Params['vnp_CreateDate'] = createDate;
   // ...
 };
+
+// --- TỰ ĐỘNG HỦY ĐƠN HÀNG VNPAY CHƯA THANH TOÁN SAU 5 PHÚT ---
+const Bill = require('./models/Bill/BillUser');
+setInterval(async () => {
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  try {
+    const bills = await Bill.find({
+      phuong_thuc_thanh_toan: 'VNPAY',
+      thanh_toan: 'chưa thanh toán',
+      trang_thai: { $ne: 'đã hủy' },
+      ngay_tao: { $lte: fiveMinutesAgo },
+      orderId: { $exists: true, $ne: null }
+    });
+    for (const bill of bills) {
+      bill.trang_thai = 'đã hủy';
+      bill.ly_do_huy = 'Khách không hoàn tất thanh toán VNPAY trong 5 phút';
+      await bill.save();
+      console.log(`[AUTO CANCEL] Đã hủy đơn hàng VNPAY ${bill.orderId} do không thanh toán sau 5 phút.`);
+    }
+  } catch (err) {
+    console.error('[AUTO CANCEL] Lỗi khi kiểm tra/hủy đơn hàng VNPAY:', err);
+  }
+}, 60 * 1000); // 1 phút chạy 1 lần
+
+// --- TỰ ĐỘNG CHUYỂN ĐƠN HÀNG SANG 'ĐÃ NHẬN HÀNG' SAU 3 NGÀY ---
+setInterval(async () => {
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  try {
+    const bills = await Bill.find({
+      trang_thai: 'đã giao hàng',
+      ngay_cap_nhat: { $lte: threeDaysAgo }
+    });
+    for (const bill of bills) {
+      bill.trang_thai = 'đã nhận hàng';
+      bill.ngay_cap_nhat = new Date();
+      await bill.save();
+      console.log(`[AUTO UPDATE] Đơn hàng ${bill.orderId} đã tự động chuyển sang 'đã nhận hàng' sau 3 ngày.`);
+    }
+  } catch (err) {
+    console.error('[AUTO UPDATE] Lỗi khi tự động cập nhật trạng thái đơn hàng:', err);
+  }
+}, 60 * 60 * 1000); // 1 tiếng chạy 1 lần

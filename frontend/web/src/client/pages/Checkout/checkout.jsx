@@ -31,7 +31,7 @@ const Checkout = () => {
     note: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cod");
-  const [shipping, setShipping] = useState(4990);
+  const [shipping, setShipping] = useState(30000);
   const [total, setTotal] = useState(0);
   const [discount, setDiscount] = useState(discountFromState);
   const [availableDistricts, setAvailableDistricts] = useState({});
@@ -244,13 +244,14 @@ const Checkout = () => {
       };
 
       if (paymentMethod === "cod") {
+        const orderId = Date.now().toString();
         const response = await fetch("http://localhost:5000/api/bill", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(billData),
+          body: JSON.stringify({ ...billData, orderId }),
         });
 
         const result = await response.json();

@@ -259,8 +259,8 @@ const BillUserClient = () => {
                                     {currentBills.map(bill => (
                                         <div key={bill._id} className="shopee-order-card">
                                             <div className="order-header">
-                                                <span>Mã đơn hàng: {(bill.orderId || bill._id.slice(-8).toUpperCase())}</span>
-                                                <span className="order-status">{getStatusDisplay(bill.trang_thai)}</span>
+                                                <span style={{ color: '#000' }}>Mã đơn hàng: {(bill.orderId || bill._id.slice(-8).toUpperCase())}</span>
+                                                <span className="order-status" style={{ color: '#000' }}>{getStatusDisplay(bill.trang_thai)}</span>
                                             </div>
 
                                             {bill.danh_sach_san_pham.map(item => (
@@ -271,7 +271,7 @@ const BillUserClient = () => {
                                                         className="product-image"
                                                     />
                                                     <div className="product-details">
-                                                        <p className="product-name">{item.san_pham_id.name}</p>
+                                                        <p className="product-name" style={{ color: '#000' }}>{item.san_pham_id.name}</p>
                                                         <p className="product-variation">Phân loại: {item.mau_sac}, {item.kich_thuoc}</p>
                                                         <p className="product-quantity">x{item.so_luong}</p>
                                                     </div>
@@ -350,27 +350,27 @@ const BillUserClient = () => {
                             </div>
                             {/* Bên phải: Box thông tin trạng thái, giao hàng, thanh toán */}
                             <div className="order-detail-right-box">
-                                <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
+                                <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span style={{ color: '#000' }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 <div className="order-detail-section">
                                     <div className="order-detail-section-title">THÔNG TIN GIAO HÀNG</div>
-                                    <div><b>Tên người đặt:</b> {selectedBill.nguoi_dung_id?.name || '---'}</div>
-                                    <div><b>Số điện thoại:</b> {selectedBill.nguoi_dung_id?.phone || '---'}</div>
-                                    <div><b>Địa chỉ:</b> {selectedBill.dia_chi_giao_hang || '---'}</div>
+                                    <div><b style={{ color: '#000' }}>Tên người đặt:</b> <span style={{ color: '#000' }}>{selectedBill.nguoi_dung_id?.name || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Số điện thoại:</b> <span style={{ color: '#000' }}>{selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Địa chỉ:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang || '---'}</span></div>
                                     {selectedBill.ghi_chu && (
                                         <div style={{ marginTop: 6 }}><b>Ghi chú:</b> {selectedBill.ghi_chu}</div>
                                     )}
                                     {selectedBill.trang_thai === 'đã hủy' && (
                                         <>
-                                            <div style={{ marginTop: 6 }}><b>Lý do hủy:</b> {selectedBill.ly_do_huy || 'Không có lý do'}</div>
+                                            <div style={{ marginTop: 6, color: '#ef4444' }}><b>Lý do hủy:</b> {selectedBill.ly_do_huy || 'Không có lý do'}</div>
                                             <div><b>Người hủy:</b> {selectedBill.nguoi_huy?.id?.name || 'Không rõ'}{selectedBill.nguoi_huy?.loai ? ` (${selectedBill.nguoi_huy.loai})` : ''}</div>
                                         </>
                                     )}
                                 </div>
                                 <div className="order-detail-section">
-                                    <div className="order-detail-section-title">THANH TOÁN</div>
-                                    <div>Phương thức: {selectedBill.phuong_thuc_thanh_toan || '---'}</div>
-                                    <div>Trạng thái thanh toán: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : '#f59e0b', fontWeight: 600 }}>{selectedBill.thanh_toan || '---'}</span></div>
-                                    <div>Trạng thái đơn hàng: <span>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
+                                    <div className="order-detail-section-title" style={{ color: '#000' }}>THANH TOÁN</div>
+                                    <div style={{ color: '#000' }}>Phương thức: {selectedBill.phuong_thuc_thanh_toan || '---'}</div>
+                                    <div style={{ color: '#000' }}>Trạng thái thanh toán: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : selectedBill.thanh_toan === 'chưa thanh toán' ? '#f59e0b' : '#000', fontWeight: 600 }}>{selectedBill.thanh_toan || '---'}</span></div>
+                                    <div style={{ color: '#000' }}>Trạng thái đơn hàng: <span style={{ color: selectedBill.trang_thai === 'đã hoàn thành' || selectedBill.trang_thai === 'hoàn thành' ? '#10b981' : selectedBill.trang_thai === 'đã hủy' ? '#ef4444' : selectedBill.trang_thai === 'chờ xác nhận' ? '#2563eb' : '#000' }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 </div>
                             </div>
                         </div>

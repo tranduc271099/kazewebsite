@@ -34,6 +34,8 @@ class BillController {
         orderId // vẫn nhận orderId nếu có
       } = req.body;
       const nguoi_dung_id = req.user.id;
+      // Nếu không có orderId từ client, tự sinh orderId
+      const finalOrderId = orderId || Date.now().toString();
       // Log thông tin tạo đơn hàng
       console.log(`[ADD BILL] userId: ${nguoi_dung_id}, time: ${new Date().toISOString()}, ip: ${req.ip}`);
       const cart = await Cart.findOne({ userId: nguoi_dung_id }).populate('items.productId');
@@ -153,7 +155,7 @@ class BillController {
         shippingFee, // Lưu shippingFee đã tính
         discount,
         voucher,
-        orderId
+        orderId: finalOrderId
       });
       await newBill.save();
       // Xóa các sản phẩm đã đặt khỏi giỏ hàng, giữ lại sản phẩm chưa đặt
@@ -356,6 +358,11 @@ class BillController {
         // --- KẾT THÚC: HOÀN KHO KHI ADMIN HUỶ ---
       }
 
+      // Nếu admin hoặc client chuyển sang hoàn thành thì luôn cập nhật đã thanh toán
+      if (trang_thai === 'hoàn thành') {
+        bill.thanh_toan = 'đã thanh toán';
+      }
+
       // Cập nhật trạng thái thanh toán nếu có
       if (thanh_toan) {
         bill.thanh_toan = thanh_toan;
@@ -384,6 +391,7 @@ class BillController {
       }
 
       bill.trang_thai = 'hoàn thành';
+      bill.thanh_toan = 'đã thanh toán';
       await bill.save();
       res.json({ message: 'Đã xác nhận nhận hàng', bill });
     } catch (error) {
