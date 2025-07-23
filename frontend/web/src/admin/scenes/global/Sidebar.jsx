@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme } from "@mui/material";
+import { Box, IconButton, Typography, useTheme, Badge } from "@mui/material";
 import { Link } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
@@ -20,8 +20,11 @@ import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
+import io from 'socket.io-client';
 
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const socket = io('http://localhost:5000');
+
+const Item = ({ title, to, icon, selected, setSelected, badgeContent }) => {
   const theme = useTheme();
   const colors = tokens();
   return (
@@ -31,7 +34,15 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
         color: colors.grey[100],
       }}
       onClick={() => setSelected(title)}
-      icon={icon}
+      icon={
+        badgeContent > 0 ? (
+          <Badge badgeContent={badgeContent} color="error">
+            {icon}
+          </Badge>
+        ) : (
+          icon
+        )
+      }
     >
       <Typography>{title}</Typography>
       <Link to={to} />
@@ -44,6 +55,7 @@ const Sidebar = () => {
   const colors = tokens();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const [chatNotifications, setChatNotifications] = useState(0);
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("user"));
@@ -60,6 +72,21 @@ const Sidebar = () => {
   }
   const name = user?.name || "Tên người dùng";
   const role = user?.role || "user";
+
+  useEffect(() => {
+    socket.on('new_chat_session', () => {
+      setChatNotifications(prev => prev + 1);
+    });
+
+    return () => {
+      socket.off('new_chat_session');
+    };
+  }, []);
+
+  const handleChatClick = () => {
+    setChatNotifications(0);
+    setSelected("Quản lý Tin nhắn");
+  };
 
   return (
     <Box
@@ -200,8 +227,10 @@ const Sidebar = () => {
               to="/admin/chat-management"
               icon={<ChatOutlinedIcon />}
               selected={selected}
-              setSelected={setSelected}
+              setSelected={handleChatClick}
+              badgeContent={chatNotifications}
             />
+
             <Typography
               variant="h6"
               color={colors.grey[300]}
@@ -213,6 +242,56 @@ const Sidebar = () => {
               title="Hồ sơ"
               to="/admin/form"
               icon={<PersonOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Lịch"
+              to="/admin/calendar"
+              icon={<CalendarTodayOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="FAQ Page"
+              to="/admin/faq"
+              icon={<HelpOutlineOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+
+            <Typography
+              variant="h6"
+              color={colors.grey[300]}
+              sx={{ m: "15px 0 5px 20px" }}
+            >
+              Charts
+            </Typography>
+            <Item
+              title="Bar Chart"
+              to="/admin/bar"
+              icon={<BarChartOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Pie Chart"
+              to="/admin/pie"
+              icon={<PieChartOutlineOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Line Chart"
+              to="/admin/line"
+              icon={<TimelineOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Geography Chart"
+              to="/admin/geography"
+              icon={<MapOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />

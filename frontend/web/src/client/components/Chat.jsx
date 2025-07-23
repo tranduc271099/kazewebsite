@@ -78,7 +78,8 @@ function Chat() {
                 time: new Date(Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             };
             await socket.emit('send_message', messageData);
-            setMessageList((list) => [...list, messageData]);
+            // Tin nhắn sẽ được thêm vào messageList khi nhận được từ server
+            // thông qua socket.on('receive_message')
             setMessage('');
         }
     };
@@ -120,14 +121,20 @@ function Chat() {
             }]);
         };
 
+        const handleChatHistory = (history) => {
+            setMessageList(history);
+        };
+
         socket.on('receive_message', handleReceiveMessage);
         socket.on('chat_ended', handleChatEnded);
         socket.on('admin_joined', handleAdminJoined);
+        socket.on('chat_history', handleChatHistory);
 
         return () => {
             socket.off('receive_message', handleReceiveMessage);
             socket.off('chat_ended', handleChatEnded);
             socket.off('admin_joined', handleAdminJoined);
+            socket.off('chat_history', handleChatHistory);
         };
     }, []);
 

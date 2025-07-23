@@ -4,7 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import { toast } from 'react-toastify';
+import io from 'socket.io-client';
 import '../styles/Dashboard.css';
+
+const socket = io('http://localhost:5000');
 
 const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState({
@@ -40,6 +43,18 @@ const Dashboard = () => {
         fetchDashboardData();
         fetchLatestOrders();
     }, [dateRange]);
+
+    useEffect(() => {
+        // Listen for new chat sessions
+        socket.on('new_chat_session', (data) => {
+            toast.info(`Có cuộc trò chuyện mới từ: ${data.username}`);
+        });
+
+        // Clean up the socket connection when the component unmounts
+        return () => {
+            socket.off('new_chat_session');
+        };
+    }, []);
 
     const fetchDashboardData = async () => {
         try {
@@ -955,4 +970,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard; 
+export default Dashboard;

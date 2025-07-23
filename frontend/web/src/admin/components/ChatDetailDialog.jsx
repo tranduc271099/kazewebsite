@@ -45,67 +45,50 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
   };
 
   useEffect(() => {
-    if (chatData) {
-      setMessages(chatData.messages || []);
-      
-      // Cleanup previous listeners
-      socket.off('receive_message');
-      socket.off('chat_ended');
-      socket.off('admin_joined');
-      
-      // Join room khi mở dialog
-      socket.emit('join_room', {
-        room: chatData.roomId,
-        username: adminUsername,
-        isAdmin: true
-      });
+    if (!chatData || !socket) return;
 
-      // Lắng nghe tin nhắn mới
-      const handleReceiveMessage = (data) => {
-        if (data.room === chatData.roomId) {
-          setMessages(prev => [...prev, {
-            author: data.author,
-            message: data.message,
-            timestamp: data.time
-          }]);
-        }
-      };
-
-      // Lắng nghe khi chat kết thúc
-      const handleChatEnded = (data) => {
-        if (typeof data === 'string') {
-          // Backward compatibility
-          alert(data);
-        } else {
-          // New format với thông tin chi tiết
-          alert(`${data.message}\nThời gian: ${new Date(data.timestamp).toLocaleString('vi-VN')}`);
-        }
-        // Tự động đóng dialog khi chat kết thúc
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      };
-
-      // Lắng nghe khi admin tham gia
-      const handleAdminJoined = (data) => {
-        // Hiển thị thông báo admin đã tham gia
+    // Hàm xử lý khi nhận được tin nhắn mới
+    const handleReceiveMessage = (data) => {
+      if (data.room === chatData.roomId) {
         setMessages(prev => [...prev, {
-          author: 'System',
+          author: data.author,
           message: data.message,
-          timestamp: new Date(),
-          isSystemMessage: true
+          timestamp: data.time || new Date()
         }]);
-      };
+      }
+    };
 
-      socket.on('receive_message', handleReceiveMessage);
-      socket.on('chat_ended', handleChatEnded);
-      socket.on('admin_joined', handleAdminJoined);
-    }
+    // Hàm xử lý khi nhận được lịch sử chat
+    const handleChatHistory = (history) => {
+      setMessages(history || []);
+    };
 
+    // Hàm xử lý khi chat kết thúc
+    const handleChatEnded = (data) => {
+      const endedBy = data.endedBy === 'admin' ? `admin (${data.username})` : `khách hàng (${data.username})`;
+      alert(`Cuộc trò chuyện đã được ${endedBy} kết thúc.\nThời gian: ${new Date(data.timestamp).toLocaleString('vi-VN')}`);
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    };
+    
+    // Đăng ký các listeners
+    socket.on('receive_message', handleReceiveMessage);
+    socket.on('chat_history', handleChatHistory);
+    socket.on('chat_ended', handleChatEnded);
+
+    // Gửi sự kiện join_room để lấy lịch sử chat và thông báo cho server
+    socket.emit('join_room', {
+      room: chatData.roomId,
+      username: adminUsername,
+      isAdmin: true
+    });
+
+    // Cleanup function
     return () => {
-      socket.off('receive_message');
-      socket.off('chat_ended');
-      socket.off('admin_joined');
+      socket.off('receive_message', handleReceiveMessage);
+      socket.off('chat_history', handleChatHistory);
+      socket.off('chat_ended', handleChatEnded);
     };
   }, [chatData, socket, adminUsername, onClose]);
 
