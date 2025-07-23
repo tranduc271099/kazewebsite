@@ -2,9 +2,21 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const http = require('http'); // Thêm http
+const { Server } = require("socket.io"); // Thêm Server từ socket.io
+const Chat = require('./models/Chat'); // Thêm import model Chat
 require('dotenv').config();
 
 const app = express();
+const server = http.createServer(app); // Tạo máy chủ HTTP
+
+// Khởi tạo Socket.IO server
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Địa chỉ của frontend
+    methods: ["GET", "POST"]
+  }
+});
 
 // CORS configuration
 app.use(cors({
@@ -44,6 +56,7 @@ app.use('/api/vouchers', require('./routes/voucher.routes'));
 app.use('/api/payment', require('./routes/payment.routes'));
 
 app.use('/api/banners', require('./routes/bannerRoutes'));
+app.use('/api/chats', require('./routes/chat.routes.js'));
 
 const vnpayReturnController = require('./controllers/vnpayReturn.controller');
 app.get('/vnpay_return', async (req, res) => {
@@ -64,7 +77,130 @@ app.get('/', (req, res) => {
   res.send('Backend server is running!');
 });
 
-app.listen(process.env.PORT, () => {
+// Logic xử lý chat thời gian thực đã nâng cấp
+io.on('connection', (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  // Khi client hoặc admin tham gia phòng
+  socket.on('join_room', async (data) => { // data = { room, username, isAdmin }
+    socket.join(data.room);
+    console.log(`User '${data.username}' (ID: ${socket.id}) joined room: ${data.room}`);
+
+    try {
+      // Nếu là client (người dùng mới)
+      if (!data.isAdmin) {
+        // Kiểm tra xem phòng chat đã tồn tại chưa
+        const existingChat = await Chat.findOne({ roomId: data.room });
+        
+        if (!existingChat) {
+          // Tạo phiên chat mới trong DB
+          const newChat = new Chat({
+            roomId: data.room,
+            clientUsername: data.username,
+            status: 'mới'
+          });
+          await newChat.save();
+          
+          // Thông báo cho tất cả admin về phiên chat mới
+          console.log('Emitting new_chat_session to all clients:', {
+            roomId: data.room,
+            username: data.username,
+            timestamp: new Date()
+          });
+          io.emit('new_chat_session', {
+            roomId: data.room,
+            username: data.username,
+            timestamp: new Date()
+          });
+        }
+      } else { // Nếu là admin tham gia
+        // Cập nhật trạng thái và thêm tên admin thực tế
+        const updatedChat = await Chat.findOneAndUpdate(
+          { roomId: data.room },
+          { 
+            status: 'đang diễn ra', 
+            adminUsername: data.username // Lấy tên admin thực tế từ data.username
+          },
+          { new: true }
+        );
+        
+        if (updatedChat) {
+          // Thông báo cho client rằng admin đã tham gia
+          io.to(data.room).emit('admin_joined', {
+            message: `${data.username} đã tham gia cuộc trò chuyện`,
+            adminName: data.username
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error handling join_room:', error);
+    }
+  });
+
+  // Khi có tin nhắn mới
+  socket.on('send_message', async (data) => { // data = { room, author, message, time }
+    try {
+      console.log('Received message:', data); // Debug log
+      
+      // Lưu tin nhắn vào DB
+      const updatedChat = await Chat.findOneAndUpdate(
+        { roomId: data.room },
+        {
+          $push: {
+            messages: {
+              author: data.author,
+              message: data.message,
+              timestamp: new Date() // Dùng timestamp của server cho chính xác
+            }
+          }
+        },
+        { new: true }
+      );
+      
+      if (updatedChat) {
+        console.log('Message saved to DB, broadcasting to room:', data.room);
+        // Gửi tin nhắn đến mọi người trong phòng
+        io.to(data.room).emit('receive_message', data);
+      } else {
+        console.error('Chat room not found:', data.room);
+      }
+    } catch (error) {
+      console.error('Error handling send_message:', error);
+    }
+  });
+
+  // Khi admin hoặc client kết thúc cuộc trò chuyện
+  socket.on('end_chat', async (data) => { // data = { roomId, endedBy, username }
+    try {
+      const updatedChat = await Chat.findOneAndUpdate(
+        { roomId: data.roomId }, 
+        { status: 'đã kết thúc' },
+        { new: true }
+      );
+      
+      if (updatedChat) {
+        // Thông báo cho tất cả người trong phòng rằng chat đã kết thúc
+        io.to(data.roomId).emit('chat_ended', {
+          message: `Cuộc trò chuyện đã được ${data.endedBy} kết thúc.`,
+          endedBy: data.endedBy,
+          username: data.username,
+          timestamp: new Date()
+        });
+        
+        console.log(`Chat ${data.roomId} ended by ${data.endedBy}: ${data.username}`);
+      }
+    } catch (error) {
+      console.error('Error ending chat:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User Disconnected', socket.id);
+  });
+});
+
+
+server.listen(process.env.PORT, () => { // Thay app.listen bằng server.listen
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
 });
 
@@ -79,7 +215,5 @@ const createPaymentUrl = (orderId, amount, orderInfo) => {
     pad(date.getMinutes()) +
     pad(date.getSeconds());
 
-  // ... các tham số khác ...
   vnp_Params['vnp_CreateDate'] = createDate;
-  // ...
 };

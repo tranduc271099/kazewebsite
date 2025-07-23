@@ -6,7 +6,7 @@ import { CartProvider } from './client/context/CartContext';
 import { UserProvider } from './client/context/UserContext';
 import './admin/index.css'; // Import admin CSS
 // import Navbar from './components/Navbar'; // Đã xóa Navbar
-
+import Chat from './client/components/Chat.jsx';
 
 // Pages
 import Home from './client/pages/Home';
@@ -76,6 +76,7 @@ function App() {
               <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
 
             </Routes>
+            <Chat />
           </div>
         </Router>
       </UserProvider>

@@ -1,0 +1,302 @@
+.chat-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 500px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: white;
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Nút bong bóng chat khi cửa sổ bị ẩn */
+.chat-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: all 0.3s ease-in-out;
+}
+
+.chat-bubble:hover {
+    transform: scale(1.1);
+}
+
+.joinChatContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.joinChatContainer h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.joinChatContainer input {
+    width: 80%;
+    height: 40px;
+    margin: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0 15px;
+    font-size: 16px;
+}
+
+.joinChatContainer button {
+    width: calc(80% + 30px);
+    height: 50px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 16px;
+    background: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.joinChatContainer button:hover {
+    background-color: #0056b3;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.chat-header {
+    height: 50px;
+    background: #007bff;
+    color: white;
+    display: flex;
+    justify-content: space-between; /* Căn chỉnh các item */
+    align-items: center;
+    padding: 0 1em;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+}
+
+.chat-header div {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.end-chat-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    line-height: 1;
+}
+
+.end-chat-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Nút đóng cửa sổ chat */
+.close-chat-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.chat-header p {
+    margin: 0;
+    font-weight: bold;
+}
+
+.chat-body {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+#you {
+    align-items: flex-end;
+}
+
+#you .message-content {
+    background-color: #007bff;
+    color: white;
+    border-radius: 15px 15px 0 15px;
+}
+
+#other {
+    align-items: flex-start;
+}
+
+#other .message-content {
+    background-color: #e9e9eb;
+    color: black;
+    border-radius: 15px 15px 15px 0;
+}
+
+.message-content {
+    max-width: 70%;
+    padding: 10px 15px;
+    word-wrap: break-word;
+}
+
+.message-meta {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    margin-top: 5px;
+}
+
+#you .message-meta {
+    justify-content: flex-end;
+}
+
+#other .message-meta {
+    justify-content: flex-start;
+}
+
+.message-meta #author {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.chat-footer {
+    height: 60px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    background-color: #fff;
+}
+
+.chat-footer input {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.chat-footer input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.chat-footer button {
+    width: 50px;
+    height: 50px;
+    border: none;
+    background: #007bff;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.chat-footer button:hover {
+    background-color: #0056b3;
+}
+
+/* Disabled states */
+.chat-footer input:disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.chat-footer button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* System messages */
+.system-message {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.system-message p {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #0056b3;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-style: italic;
+    margin: 0;
+    display: inline-block;
+    border: 1px solid rgba(0, 123, 255, 0.2);
+}
+
+/* Resetting container */
+.resetting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+
+.resetting-container h4 {
+    margin: 15px 0 10px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
