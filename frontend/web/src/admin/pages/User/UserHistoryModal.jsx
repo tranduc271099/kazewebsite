@@ -45,9 +45,6 @@ const UserHistoryModal = ({ isOpen, onClose, userId, userName }) => {
         if (changes.name) descriptions.push(`Tên: "${changes.name}"`);
         if (changes.email) descriptions.push(`Email: "${changes.email}"`);
         if (changes.role) descriptions.push(`Vai trò: "${changes.role}"`);
-        if (changes.isLocked !== undefined) {
-            descriptions.push(`Trạng thái: "${changes.isLocked ? 'Đã khóa' : 'Đã mở khóa'}"`);
-        }
         return descriptions.join(' | ');
     };
 

@@ -1,0 +1,49 @@
+/* frontend/web/src/admin/styles/Voucher.css */
+
+.MuiDataGrid-root {
+    border: none !important;
+}
+
+.MuiDataGrid-cell {
+    border-bottom: none !important;
+}
+
+.MuiDataGrid-columnHeaders {
+    background-color: #181f2a;
+    border-bottom: none !important;
+}
+
+.MuiDataGrid-virtualScroller {
+    background-color: #181f2a;
+}
+
+.MuiDataGrid-footerContainer {
+    background-color: #181f2a;
+    border-top: none !important;
+}
+
+.MuiDataGrid-toolbarContainer .MuiButton-text {
+    color: #fff !important;
+}
+
+.MuiDataGrid-row {
+    background-color: #181f2a;
+}
+
+.MuiDataGrid-columnHeaderTitle {
+    color: #fff !important;
+}
+
+.MuiSvgIcon-root {
+    color: #fff !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-cell:focus,
+.MuiDataGrid-root .MuiDataGrid-columnHeader:focus {
+    outline: none !important;
+}
+
+.MuiDataGrid-root .MuiDataGrid-cell:focus-within,
+.MuiDataGrid-root .MuiDataGrid-columnHeader:focus-within {
+    outline: none !important;
+}

@@ -3,6 +3,10 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 // @ts-ignore
 import styles from '../../styles/ProductLayout.module.css';
+import { BiSearch } from 'react-icons/bi'; // Import icon tìm kiếm
+import { FaFileExcel } from 'react-icons/fa'; // Import icon Excel
+import { FiRefreshCcw } from 'react-icons/fi'; // Import icon Refresh
+import { AiOutlineEye, AiOutlineEdit } from 'react-icons/ai'; // Import icons cho thao tác
 
 const statusOptions = [
   'chờ xác nhận',
@@ -12,6 +16,10 @@ const statusOptions = [
   'đã nhận hàng',
   'hoàn thành',
   'đã hủy',
+];
+
+const paymentMethods = [
+  'COD', 'VNPAY'
 ];
 
 console.log('ListOrder component mounted');
@@ -27,12 +35,15 @@ const ListOrder = () => {
   const [showModal, setShowModal] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState('');
-  const [search, setSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // Đổi từ search thành searchTerm
   const [sortType, setSortType] = useState('newest');
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateFilter, setDateFilter] = useState('');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState(''); // Filter mới cho phương thức thanh toán
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [allFetchedOrders, setAllFetchedOrders] = useState([]); // Thêm state mới để lưu tất cả đơn hàng từ backend
   const [shipping, setShipping] = useState(() => {
     const saved = localStorage.getItem('selectedShipping');
     return saved !== null ? Number(saved) : 4990;
@@ -69,17 +80,19 @@ const ListOrder = () => {
     setError('');
     try {
       const token = localStorage.getItem('token');
-      console.log('Fetching orders...');
-      const res = await axios.get(`http://localhost:5000/api/bill/all`, {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('search', searchTerm);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (paymentMethodFilter) params.append('paymentMethod', paymentMethodFilter);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+
+      const res = await axios.get(`http://localhost:5000/api/bill/all?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Orders response:', res.data);
-      setOrders(res.data.bills);
-      console.log('Set orders:', res.data.bills);
-      setTotal(res.data.bills.length);
+      setAllFetchedOrders(res.data.bills); // Lưu tất cả đơn hàng đã fetch
+      setTotal(res.data.bills.length); // Total ban đầu là tổng số đơn hàng đã fetch
     } catch (err) {
-      console.error('Error fetching orders:', err);
-      console.error('Error response:', err.response?.data);
       setError(err.response?.data?.message || 'Lỗi khi tải danh sách đơn hàng');
     } finally {
       setLoading(false);
@@ -88,7 +101,7 @@ const ListOrder = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [paymentMethodFilter, searchTerm, startDate, endDate]); // Xóa statusFilter khỏi dependencies
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -146,20 +159,14 @@ const ListOrder = () => {
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const searchText = search.toLowerCase();
-    const matchSearch =
-      (order.nguoi_dung_id?.name || '').toLowerCase().includes(searchText) ||
-      (order._id || '').toLowerCase().includes(searchText) ||
-      (order.nguoi_dung_id?.phone || '').toLowerCase().includes(searchText);
-    const matchStatus = statusFilter === 'all' || order.trang_thai === statusFilter;
-    let matchDate = true;
-    if (dateFilter) {
-      const orderDate = new Date(order.ngay_tao);
-      const filterDate = new Date(dateFilter);
-      matchDate = orderDate.toISOString().slice(0, 10) === filterDate.toISOString().slice(0, 10);
-    }
-    return matchSearch && matchStatus && matchDate;
+  // Filter and sort logic moved to fetchOrders or handled by backend
+  // const filteredOrders = orders.filter(...) - REMOVED
+  // const sortedOrders = [...filteredOrders].sort(...) - REMOVED
+
+  const filteredAndSortedOrders = allFetchedOrders.filter(order => {
+    // Áp dụng statusFilter ở frontend
+    const matchStatus = statusFilter === 'all' ? true : order.trang_thai === statusFilter;
+    return matchStatus;
   });
 
   const statusOrder = [
@@ -171,27 +178,13 @@ const ListOrder = () => {
     'hoàn thành',
     'đã hủy',
   ];
-  const sortedOrders = [...filteredOrders].sort((a, b) => {
-    if (sortType === 'newest') {
-      return new Date(b.ngay_tao || 0).getTime() - new Date(a.ngay_tao || 0).getTime();
-    } else if (sortType === 'oldest') {
-      return new Date(a.ngay_tao || 0).getTime() - new Date(b.ngay_tao || 0).getTime();
-    } else if (sortType === 'price_asc') {
-      return (a.tong_tien || 0) - (b.tong_tien || 0);
-    } else if (sortType === 'price_desc') {
-      return (b.tong_tien || 0) - (a.tong_tien || 0);
-    } else if (sortType === 'status') {
-      return statusOrder.indexOf(a.trang_thai) - statusOrder.indexOf(b.trang_thai);
-    }
-    return 0;
-  });
 
-  const totalPages = Math.ceil(sortedOrders.length / limit);
-  const pagedOrders = sortedOrders.slice((page - 1) * limit, page * limit);
+  const totalPages = Math.ceil(filteredAndSortedOrders.length / limit);
+  const pagedOrders = filteredAndSortedOrders.slice((page - 1) * limit, page * limit);
 
-  const trulyNewestOrder = orders.length > 0
-    ? orders.reduce((latest, order) =>
-      new Date(order.ngay_tao) > new Date(latest.ngay_tao) ? order : latest, orders[0])
+  const trulyNewestOrder = filteredAndSortedOrders.length > 0
+    ? filteredAndSortedOrders.reduce((latest, order) =>
+      new Date(order.ngay_tao) > new Date(latest.ngay_tao) ? order : latest, filteredAndSortedOrders[0])
     : null;
   const trulyNewestOrderId = trulyNewestOrder?._id;
 
@@ -253,101 +246,124 @@ const ListOrder = () => {
   };
 
   return (
-    <div style={{ padding: 32 }}>
-      <h2 style={{ fontWeight: 700, marginBottom: 24 }}>Quản lý đơn hàng</h2>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
+    <div className={styles.container}>
+      <h1 className={styles.title}>Đơn hàng</h1>
+
+      {/* Status Tabs */}
+      <div className={styles.orderStatusTabs}>
+        {['all', ...statusOptions].map(status => (
+          <button
+            key={status}
+            className={`${styles.statusTab} ${statusFilter === status ? styles.statusTabActive : ''}`}
+            onClick={() => { setStatusFilter(status); setPage(1); }}
+          >
+            {status === 'all' ? 'Tất cả' : getStatusDisplay(status)} ({allFetchedOrders.filter(order => status === 'all' ? true : order.trang_thai === status).length})
+          </button>
+        ))}
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className={styles.filterBar} style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', marginTop: '20px' }}>
         <input
-          type="text"
-          placeholder="Tìm kiếm theo tên, mã đơn, SĐT..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
+          type="date"
+          value={startDate}
+          onChange={e => { setStartDate(e.target.value); setPage(1); }}
+          className={styles.input}
+          style={{ width: '150px' }}
+        />
+        <span style={{ color: 'var(--text-secondary)' }}>&rarr;</span>
+        <input
+          type="date"
+          value={endDate}
+          onChange={e => { setEndDate(e.target.value); setPage(1); }}
+          className={styles.input}
+          style={{ width: '150px' }}
         />
         <select
-          value={statusFilter}
-          onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+          className={styles.select}
+          value={paymentMethodFilter}
+          onChange={e => { setPaymentMethodFilter(e.target.value); setPage(1); }}
+          style={{ width: '150px' }}
         >
-          <option value="all">Tất cả trạng thái</option>
-          {statusOptions.map(st => (
-            <option key={st} value={st}>{st}</option>
+          <option value="">Phương thức TT</option>
+          {paymentMethods.map(method => (
+            <option key={method} value={method}>{method}</option>
           ))}
         </select>
         <input
-          type="date"
-          value={dateFilter}
-          onChange={e => { setDateFilter(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
+          type="text"
+          className={styles.input}
+          placeholder="Tìm kiếm đơn hàng..."
+          value={searchTerm}
+          onChange={e => { setSearchTerm(e.target.value); setPage(1); }}
+          style={{ flexGrow: 1 }}
         />
-        <select
-          value={sortType}
-          onChange={e => { setSortType(e.target.value); setPage(1); }}
-          style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
-        >
-          <option value="newest">Mới nhất</option>
-          <option value="oldest">Cũ nhất</option>
-          <option value="price_asc">Tổng tiền tăng dần</option>
-          <option value="price_desc">Tổng tiền giảm dần</option>
-        </select>
-        <span style={{ color: '#888', fontSize: 13 }}>Tổng sản phẩm: {total}</span>
+        <button onClick={() => fetchOrders()} className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: 'auto', padding: '10px 18px' }}>
+          <BiSearch size={20} />
+        </button>
       </div>
+
       {loading ? (
-        <div>Đang tải...</div>
+        <div style={{ textAlign: 'center', padding: '20px' }}>Đang tải đơn hàng...</div>
       ) : error ? (
-        <div style={{ color: 'red' }}>{error}</div>
+        <div className="error-banner">{error}</div>
       ) : (
         <>
           <div className={styles.card} style={{ marginTop: 16 }}>
             <table className={styles.productTable} style={{ fontSize: '16px' }}>
               <thead>
                 <tr>
-                  <th style={{ textAlign: 'center' }}>Mã đơn</th>
+                  <th style={{ textAlign: 'center' }}>STT</th>
+                  <th style={{ textAlign: 'left' }}>Mã đơn hàng</th>
                   <th style={{ textAlign: 'left' }}>Khách hàng</th>
                   <th style={{ textAlign: 'center' }}>SĐT</th>
-                  <th style={{ textAlign: 'center' }}>Ngày đặt</th>
+                  <th style={{ textAlign: 'right' }}>Giá trị đơn hàng (VND)</th>
+                  <th style={{ textAlign: 'center' }}>Ngày đặt hàng</th>
+                  <th style={{ textAlign: 'center' }}>Phương thức thanh toán</th>
                   <th style={{ textAlign: 'center' }}>Trạng thái</th>
-                  <th style={{ textAlign: 'right' }}>Tổng tiền</th>
-                  <th style={{ textAlign: 'center' }}>Phương thức</th>
                   <th style={{ textAlign: 'center' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedOrders.map((order, idx) => {
-                  const isNewest = trulyNewestOrderId === order._id;
+                  const displayedIndex = (page - 1) * limit + idx + 1;
                   return (
                     <tr key={order._id || idx}>
-                      <td style={{ textAlign: 'center', fontWeight: 500 }}>#{order.orderId ? order.orderId : (order._id ? order._id.slice(-8).toUpperCase() : 'N/A')}</td>
-                      <td>{order.nguoi_dung_id?.name || 'Ẩn danh'}</td>
+                      <td style={{ textAlign: 'center' }}>{displayedIndex}</td>
+                      <td style={{ textAlign: 'left', fontWeight: 500 }}>#{order.orderId ? order.orderId : (order._id ? order._id.slice(-8).toUpperCase() : 'N/A')}</td>
+                      <td style={{ textAlign: 'left' }}>{order.nguoi_dung_id?.name || 'Ẩn danh'}</td>
                       <td style={{ textAlign: 'center' }}>{order.nguoi_dung_id?.phone || '---'}</td>
-                      <td style={{ textAlign: 'center' }}>{order.ngay_tao ? new Date(order.ngay_tao).toLocaleString('vi-VN') : '---'}</td>
+                      <td style={{ color: '#7c3aed', fontWeight: 600, textAlign: 'right' }}>
+                        {((order.tong_tien || 0) - (order.discount || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>{order.ngay_tao ? new Date(order.ngay_tao).toLocaleDateString('vi-VN') : '---'}</td>
+                      <td style={{ textAlign: 'center' }}>{order.phuong_thuc_thanh_toan || '---'}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <span className={styles.status + ' ' + (order.trang_thai === 'đã hủy' ? styles.statusInactive : styles.statusActive)}>
+                        <span className={styles.status} style={{ backgroundColor: getStatusColor(order.trang_thai), color: 'white' }}>
                           {getStatusDisplay(order.trang_thai || 'chờ xác nhận')}
                         </span>
                       </td>
-                      <td style={{ color: '#2563eb', fontWeight: 600, textAlign: 'right' }}>
-                        {((order.tong_tien || 0) - (order.discount || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>{order.phuong_thuc_thanh_toan || '---'}</td>
                       <td style={{ textAlign: 'center' }}>
-                        <button
-                          className={styles.actionBtn}
-                          style={{ padding: '4px 10px', borderRadius: 4, border: '1px solid #2563eb', background: '#fff', color: '#2563eb', fontWeight: 600, fontSize: 13, marginRight: 4 }}
-                          onClick={() => {
-                            setSelectedOrder(order);
-                            setShowModal(true);
-                            setNewStatus(order.trang_thai || 'chờ xác nhận');
-                          }}
-                        >
-                          Chi tiết
-                        </button>
+                        <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                          <button
+                            className={`${styles.actionBtn} ${styles.iconBtn}`}
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowModal(true);
+                              setNewStatus(order.trang_thai || 'chờ xác nhận');
+                            }}
+                            title="Cập nhật trạng thái"
+                          >
+                            <AiOutlineEdit size={20} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
                 })}
                 {pagedOrders.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có đơn hàng nào phù hợp</td>
+                    <td colSpan={10} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>Không có đơn hàng nào phù hợp</td>
                   </tr>
                 )}
               </tbody>
@@ -355,17 +371,18 @@ const ListOrder = () => {
           </div>
           {totalPages > 1 && (
             <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'center' }}>
-              <button onClick={() => setPage(page - 1)} disabled={page === 1} style={{ padding: '6px 16px' }}>&larr; Trước</button>
+              <button onClick={() => setPage(page - 1)} disabled={page === 1} className={`${styles.btn} ${styles.btnSecondary}`}>&larr; Trước</button>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  style={{ padding: '6px 12px', background: p === page ? '#2563eb' : '#fff', color: p === page ? '#fff' : '#2563eb', border: '1px solid #2563eb', borderRadius: 4 }}
+                  className={`${styles.btn} ${styles.btnSecondary}`}
+                  style={{ background: p === page ? '#7c3aed' : 'var(--input-bg)', color: p === page ? '#fff' : 'var(--text-primary)', border: '1px solid var(--input-border)' }}
                 >
                   {p}
                 </button>
               ))}
-              <button onClick={() => setPage(page + 1)} disabled={page === totalPages} style={{ padding: '6px 16px' }}>Sau &rarr;</button>
+              <button onClick={() => setPage(page + 1)} disabled={page === totalPages} className={`${styles.btn} ${styles.btnSecondary}`}>Sau &rarr;</button>
             </div>
           )}
         </>
@@ -374,103 +391,117 @@ const ListOrder = () => {
       {showModal && selectedOrder && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+          background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
         }}>
-          <div style={{
-            background: '#fff',
+          <div className={styles.card} style={{
+            background: 'var(--card-bg)',
             borderRadius: 12,
             padding: 32,
-            maxWidth: 700,
+            maxWidth: 800,
             width: '95%',
             maxHeight: '85vh',
             overflow: 'auto',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-            fontSize: '18px'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            fontSize: '1rem',
+            color: 'var(--text-primary)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-              <div style={{ fontSize: 24, color: '#222', fontWeight: 700 }}>
-                Mã hóa đơn #{selectedOrder.orderId ? selectedOrder.orderId : (selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A')}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, borderBottom: '1px solid var(--card-border)', paddingBottom: 15 }}>
+              <div style={{ fontSize: '1.8rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+                Chi tiết đơn hàng #{selectedOrder.orderId ? selectedOrder.orderId : (selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A')}
               </div>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 32, cursor: 'pointer', color: '#888', lineHeight: 1 }}>×</button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '2rem', cursor: 'pointer', color: 'var(--text-secondary)', lineHeight: 1 }}>×</button>
             </div>
-            <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-              <strong>Khách hàng:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
-            </div>
-            <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-              <strong>SĐT:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
-            </div>
-            <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-              <strong>Ngày đặt:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
-            </div>
-            <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-              <strong>Trạng thái:</strong> <span style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 16 }}>
-                {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
-              </span>
+            <div className={styles.detailModalContent}>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Khách hàng:</span>
+                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>SĐT:</span>
+                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Ngày đặt:</span>
+                <span className={styles.detailValue}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Trạng thái:</span>
+                <span className={styles.detailValue} style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: '0.9rem' }}>
+                  {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
+                </span>
+              </div>
               {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
-                <div style={{ marginTop: 8, color: '#d32f2f', fontSize: 16 }}><strong>Lý do huỷ:</strong> {selectedOrder.ly_do_huy}</div>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel} style={{ color: '#d32f2f' }}>Lý do huỷ:</span>
+                  <span className={styles.detailValue} style={{ color: '#d32f2f' }}>{selectedOrder.ly_do_huy}</span>
+                </div>
               )}
-            </div>
-            {selectedOrder.phuong_thuc_thanh_toan && (
-              <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                <strong>Phương thức thanh toán:</strong> <span style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: 14 }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
-              </div>
-            )}
-            {selectedOrder.shippingFee !== undefined && (
-              <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                <strong>Phương thức vận chuyển:</strong> {selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
-              </div>
-            )}
-            <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-              <strong>Trạng thái thanh toán:</strong> 
-              <span style={{ 
-                background: selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? '#10b981' : '#f59e0b', 
-                color: '#fff', 
-                padding: '4px 10px', 
-                borderRadius: 4, 
-                marginLeft: 8, 
-                fontSize: 14 
-              }}>
-                {selectedOrder.trang_thai === 'đã giao hàng' || selectedOrder.trang_thai === 'đã nhận hàng' || selectedOrder.trang_thai === 'hoàn thành' ? 'Đã thanh toán' : 'Chưa thanh toán'}
-              </span>
-            </div>
-            <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-              Địa chỉ giao hàng:
-              <div style={{ marginTop: 4, fontSize: 14, color: '#222', textAlign: 'left' }}>
-                {selectedOrder.dia_chi_giao_hang ? (
-                  <>
-                    {parseAddress(selectedOrder.dia_chi_giao_hang).street}<br />
-                    {parseAddress(selectedOrder.dia_chi_giao_hang).ward && <span>Xã/Phường: {parseAddress(selectedOrder.dia_chi_giao_hang).ward}<br /></span>}
-                    {parseAddress(selectedOrder.dia_chi_giao_hang).district && <span>Quận/Huyện: {parseAddress(selectedOrder.dia_chi_giao_hang).district}<br /></span>}
-                    {parseAddress(selectedOrder.dia_chi_giao_hang).city && <span>Tỉnh/TP: {parseAddress(selectedOrder.dia_chi_giao_hang).city}</span>}
-                  </>
-                ) : (
-                  'Không có địa chỉ'
-                )}
-              </div>
-            </div>
-            {selectedOrder.ghi_chu && <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>Ghi chú: <span style={{ fontSize: 14 }}>{selectedOrder.ghi_chu}</span></div>}
-            <div style={{ marginBottom: 14, color: '#222' }}>Sản phẩm:</div>
-            {selectedOrder.danh_sach_san_pham && Array.isArray(selectedOrder.danh_sach_san_pham) && selectedOrder.danh_sach_san_pham.map((item, idx) => (
-              <div key={item._id || idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 10, borderBottom: idx < selectedOrder.danh_sach_san_pham.length - 1 ? '1px solid #eee' : 'none', paddingBottom: 10 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 6, overflow: 'hidden', background: '#f9fafb', border: '1px solid #eee', marginRight: 12, flexShrink: 0 }}>
-                  <img
-                    src={item.san_pham_id?.images && item.san_pham_id.images[0] ? (item.san_pham_id.images[0].startsWith('http') ? item.san_pham_id.images[0] : `http://localhost:5000${item.san_pham_id.images[0]}`) : 'https://via.placeholder.com/150'}
-                    alt={item.san_pham_id?.name || 'Sản phẩm'}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    onError={e => { e.currentTarget.src = 'https://via.placeholder.com/150'; }}
-                  />
+              {selectedOrder.phuong_thuc_thanh_toan && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Phương thức thanh toán:</span>
+                  <span className={styles.detailValue} style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, color: '#222', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.san_pham_id?.name || 'Không có tên'}</div>
-                  <div style={{ fontSize: 12, color: '#666' }}>SL: {item.so_luong || 0} | {item.mau_sac || '---'} | {item.kich_thuoc || '---'}</div>
+              )}
+              {selectedOrder.shippingFee !== undefined && (
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Phí vận chuyển:</span>
+                  <span className={styles.detailValue}>{selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}</span>
                 </div>
-                <div style={{ color: '#2563eb', marginLeft: 12, fontSize: 14 }}>{((item.gia || 0) * (item.so_luong || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
+              )}
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Trạng thái thanh toán:</span>
+                <span className={styles.detailValue} style={{ background: selectedOrder.paymentStatus === 'paid' ? '#10b981' : '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>
+                  {selectedOrder.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                </span>
               </div>
-            ))}
-            <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+              <div className={styles.detailRow} style={{ alignItems: 'flex-start' }}>
+                <span className={styles.detailLabel}>Địa chỉ giao hàng:</span>
+                <span className={styles.detailValue}>
+                  {selectedOrder.dia_chi_giao_hang ? (
+                    <>
+                      {parseAddress(selectedOrder.dia_chi_giao_hang).street}<br />
+                      {parseAddress(selectedOrder.dia_chi_giao_hang).ward && <span>Xã/Phường: {parseAddress(selectedOrder.dia_chi_giao_hang).ward}<br /></span>}
+                      {parseAddress(selectedOrder.dia_chi_giao_hang).district && <span>Quận/Huyện: {parseAddress(selectedOrder.dia_chi_giao_hang).district}<br /></span>}
+                      {parseAddress(selectedOrder.dia_chi_giao_hang).city && <span>Tỉnh/TP: {parseAddress(selectedOrder.dia_chi_giao_hang).city}</span>}
+                    </>
+                  ) : (
+                    'Không có địa chỉ'
+                  )}
+                </span>
+              </div>
+              {selectedOrder.ghi_chu &&
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Ghi chú:</span>
+                  <span className={styles.detailValue}>{selectedOrder.ghi_chu}</span>
+                </div>
+              }
+              <h3 style={{ marginTop: 20, marginBottom: 15, fontSize: '1.2rem', color: 'var(--text-primary)', borderBottom: '1px solid var(--card-border)', paddingBottom: 10 }}>Sản phẩm trong đơn hàng:</h3>
+              {selectedOrder.danh_sach_san_pham && Array.isArray(selectedOrder.danh_sach_san_pham) && selectedOrder.danh_sach_san_pham.map((item, idx) => (
+                <div key={item._id || idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 15, borderBottom: idx < selectedOrder.danh_sach_san_pham.length - 1 ? '1px solid var(--card-border)' : 'none', paddingBottom: 15 }}>
+                  <div style={{ width: 60, height: 60, borderRadius: 8, overflow: 'hidden', background: 'var(--input-bg)', border: '1px solid var(--input-border)', marginRight: 15, flexShrink: 0 }}>
+                    <img
+                      src={item.san_pham_id?.images && item.san_pham_id.images[0] ? (item.san_pham_id.images[0].startsWith('http') ? item.san_pham_id.images[0] : `http://localhost:5000${item.san_pham_id.images[0]}`) : 'https://via.placeholder.com/150'}
+                      alt={item.san_pham_id?.name || 'Sản phẩm'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={e => { e.currentTarget.src = 'https://via.placeholder.com/150'; }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: 500 }}>{item.san_pham_id?.name || 'Không có tên'}</div>
+                    <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: 3 }}>SL: {item.so_luong || 0} | {item.mau_sac || '---'} | {item.kich_thuoc || '---'}</div>
+                  </div>
+                  <div style={{ color: '#7c3aed', marginLeft: 20, fontSize: '1.1rem', fontWeight: 600 }}>{((item.gia || 0) * (item.so_luong || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
+                </div>
+              ))}
+              <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 15, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                Tổng cộng: {((selectedOrder.tong_tien || 0) - (selectedOrder.discount || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+              </div>
+            </div>
+
+            <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
               {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&
                 <>
-                  <strong style={{ marginRight: 'auto', fontSize: '16px' }}>Cập nhật trạng thái:</strong>
+                  <strong style={{ marginRight: 'auto', fontSize: '1rem', color: 'var(--text-primary)' }}>Cập nhật trạng thái:</strong>
                   {getNextStatusOptions(selectedOrder.trang_thai).map(status => (
                     <button
                       key={status}
@@ -489,7 +520,7 @@ const ListOrder = () => {
                         border: 'none',
                         cursor: 'pointer',
                         fontWeight: 600,
-                        fontSize: '14px',
+                        fontSize: '0.9rem',
                       }}
                     >
                       {getStatusDisplayForModal(status)}
@@ -497,7 +528,7 @@ const ListOrder = () => {
                   ))}
                 </>
               }
-              <button onClick={() => setShowModal(false)} style={{ padding: '8px 20px', borderRadius: 6, background: '#6c757d', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 ? 'initial' : 'auto' }}>
+              <button onClick={() => setShowModal(false)} className={`${styles.btn} ${styles.btnSecondary}`} style={{ padding: '8px 20px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 ? 'initial' : 'auto' }}>
                 Đóng
               </button>
             </div>
@@ -506,13 +537,21 @@ const ListOrder = () => {
       )}
 
       {showCancelModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div style={{ background: '#fff', borderRadius: 8, padding: 24, minWidth: 320 }}>
-            <h4>Nhập lý do huỷ đơn</h4>
-            <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} rows={3} style={{ width: '100%', marginBottom: 16 }} />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button className="btn btn-secondary" onClick={() => { setShowCancelModal(false); setCancelReason(''); }}>Huỷ</button>
-              <button className="btn btn-danger" onClick={confirmAdminCancelOrder}>Xác nhận huỷ</button>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div className={styles.card} style={{
+            background: 'var(--card-bg)',
+            borderRadius: 12,
+            padding: 24,
+            minWidth: 400,
+            maxWidth: 500,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            color: 'var(--text-primary)'
+          }}>
+            <h4 style={{ fontSize: '1.5rem', marginBottom: 15, color: 'var(--text-primary)' }}>Nhập lý do huỷ đơn</h4>
+            <textarea value={cancelReason} onChange={e => setCancelReason(e.target.value)} rows={4} className={styles.textarea} style={{ width: '100%', marginBottom: 20 }} />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => { setShowCancelModal(false); setCancelReason(''); }}>Huỷ</button>
+              <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={confirmAdminCancelOrder} style={{ background: '#ef4444' }}>Xác nhận huỷ</button>
             </div>
           </div>
         </div>

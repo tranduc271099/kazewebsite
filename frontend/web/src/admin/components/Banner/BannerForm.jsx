@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import styles from '../../styles/ProductLayout.module.css';
 
 const BannerForm = ({ banner, onSubmit, onClose }) => {
     const [image, setImage] = useState(null);
+    const [title, setTitle] = useState(banner ? banner.title : ''); // Add title state
     const [isActive, setIsActive] = useState(banner ? banner.isActive : true);
 
     const handleImageChange = (e) => {
@@ -12,21 +14,32 @@ const BannerForm = ({ banner, onSubmit, onClose }) => {
         e.preventDefault();
         const formData = new FormData();
         if (image) formData.append('image', image);
+        formData.append('title', title); // Append title
         formData.append('isActive', isActive);
         onSubmit(formData);
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <div className={styles.modalBackdrop}>
+            <div className={styles.modalContent}>
                 <form onSubmit={handleSubmit}>
-                    <h2>{banner ? 'Chỉnh sửa Banner' : 'Thêm Banner mới'}</h2>
-                    <div className="form-group">
-                        <label>Ảnh banner *</label>
-                        <input type="file" accept="image/*" onChange={handleImageChange} required={!banner} />
+                    <h3 className={styles.modalTitle}>{banner ? 'Chỉnh sửa Banner' : 'Thêm Banner mới'}</h3>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Tiêu đề banner *</label>
+                        <input
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            required
+                            className={styles.input}
+                        />
                     </div>
-                    <div className="form-group form-group-checkbox">
-                        <label>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>Ảnh banner *</label>
+                        <input type="file" accept="image/*" onChange={handleImageChange} required={!banner} className={styles.input} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>
                             <input
                                 type="checkbox"
                                 checked={isActive}
@@ -35,9 +48,9 @@ const BannerForm = ({ banner, onSubmit, onClose }) => {
                             Đang hoạt động
                         </label>
                     </div>
-                    <div className="form-actions">
-                        <button type="submit" className="btn-save">Lưu</button>
-                        <button type="button" onClick={onClose} className="btn-cancel">Hủy</button>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                        <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>Lưu</button>
+                        <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnSecondary}`}>Hủy</button>
                     </div>
                 </form>
             </div>

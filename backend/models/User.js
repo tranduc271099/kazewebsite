@@ -9,7 +9,9 @@ const userSchema = new mongoose.Schema({
     address: String,
     image: { type: String, required: false },
     vouchers: [{ type: String }],
-    isLocked: { type: Boolean, default: false },
+    gender: { type: String, enum: ['Nam', 'Nữ', 'Khác'], required: false },
+    dob: { type: Date, required: false },
+    isActive: { type: Boolean, default: true }, // Add isActive field
 }, { timestamps: true })
 
 module.exports = mongoose.model('User', userSchema);

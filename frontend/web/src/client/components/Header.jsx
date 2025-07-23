@@ -34,7 +34,7 @@ const Header = () => {
                     <ul>
                         <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Trang chủ</Link></li>
                         <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>Giới thiệu</Link></li>
-                        <li><Link to="/category" className={location.pathname === "/category" ? "active" : ""}>Danh mục</Link></li>
+                        <li><Link to="/category" className={location.pathname.startsWith("/category") ? "active" : ""}>Sản phẩm</Link></li>
                         <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Giỏ hàng</Link></li>
                     </ul>
                 </nav>

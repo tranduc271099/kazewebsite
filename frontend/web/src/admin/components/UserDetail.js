@@ -34,15 +34,6 @@ const UserDetail = ({ user }) => {
 
             <div className="user-detail-grid">
                 <div className="detail-item">
-                    <div className="detail-label">Trạng thái</div>
-                    <div className="detail-value">
-                        <span className={`status-badge ${user.isLocked ? 'locked' : 'active'}`}>
-                            {user.isLocked ? 'Đã khóa' : 'Hoạt động'}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="detail-item">
                     <div className="detail-label">Thông tin liên hệ</div>
                     <div className="contact-info">
                         <div className="contact-item">

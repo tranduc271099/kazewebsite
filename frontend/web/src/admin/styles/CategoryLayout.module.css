@@ -1,4 +1,4 @@
-:global(body.dark) {
+:root {
     --page-bg: #111827;
     --card-bg: #232a36;
     --card-border: #374151;
@@ -12,17 +12,17 @@
 
 .card,
 .tableCard {
-    background: var(--card-bg, #fff);
+    background: var(--card-bg);
     border-radius: 16px;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
     padding: 40px 32px 32px 32px;
     margin-bottom: 32px;
-    border: 1px solid var(--card-border, #ececec);
+    border: 1px solid var(--card-border);
     max-width: 900px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    color: var(--text-primary, #222);
+    color: var(--text-primary);
 }
 
 .card {
@@ -37,7 +37,7 @@
     margin-bottom: 32px;
     text-align: center;
     letter-spacing: -1px;
-    color: var(--text-primary, #222);
+    color: var(--text-primary);
 }
 
 .tabBar {
@@ -80,25 +80,25 @@
 .label {
     font-size: 1.08rem;
     font-weight: 600;
-    color: var(--text-secondary, #444);
+    color: var(--text-secondary);
     margin-bottom: 4px;
 }
 
-body.dark .label {
+.label {
     color: #eee;
 }
 
 .input {
-    border: 1.5px solid var(--input-border, #e0e0e0);
+    border: 1.5px solid var(--input-border);
     border-radius: 8px;
     padding: 12px 16px;
     font-size: 1.08rem;
-    background: var(--input-bg, #fafbfc);
-    color: var(--text-primary, #222);
+    background: var(--input-bg);
+    color: var(--text-primary);
     transition: border 0.2s;
 }
 
-body.dark .input {
+.input {
     --input-bg: #23272f;
     --input-color: #fff;
     border-color: #444;
@@ -162,19 +162,19 @@ body.dark .input {
 .table td {
     padding: 16px 18px;
     text-align: left;
-    color: var(--text-primary, #222);
+    color: var(--text-primary);
 }
 
 .table th {
-    background: var(--card-bg, #f3f4f6);
-    color: var(--text-primary, #222);
+    background: var(--card-bg);
+    color: var(--text-primary);
     font-weight: 700;
-    border-bottom: 2.5px solid var(--card-border, #d1d5db);
+    border-bottom: 2.5px solid var(--card-border);
     font-size: 1.08rem;
     letter-spacing: 0.5px;
 }
 
-body.dark .table th {
+.table th {
     background: var(--card-bg, #23272f);
     color: var(--text-primary, #fff);
     border-bottom: 2.5px solid var(--card-border, #444);
@@ -185,7 +185,7 @@ body.dark .table th {
 }
 
 .table tr:not(:last-child) td {
-    border-bottom: 1px solid var(--card-border, #e5e7eb);
+    border-bottom: 1px solid var(--card-border);
 }
 
 .actionBtn {
@@ -217,8 +217,8 @@ body.dark .table th {
     background: #fecaca;
 }
 
-body.dark .table td {
-    color: var(--text-primary, #fff);
+.table td {
+    color: var(--text-primary);
 }
 
 @media (max-width: 1000px) {
@@ -237,32 +237,32 @@ body.dark .table td {
     }
 }
 
-body.dark .card,
-body.dark .tableCard {
-    color: var(--text-primary, #fff);
+.card,
+.tableCard {
+    color: var(--text-primary);
 }
 
-body.dark .label {
-    color: var(--text-secondary, #eee);
+.label {
+    color: var(--text-secondary);
 }
 
-body.dark .input {
-    background: var(--input-bg, #23272f);
-    color: var(--text-primary, #fff);
-    border-color: var(--input-border, #444);
+.input {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border-color: var(--input-border);
 }
 
-:global(body.dark) .table th {
+.table th {
     background: #23272f !important;
     color: #fff !important;
     border-bottom: 2.5px solid #444 !important;
 }
 
-:global(body.dark) .table td {
+.table td {
     color: #fff !important;
 }
 
-:global(body.dark) .label {
+.label {
     color: #fff !important;
 }
 
@@ -296,8 +296,8 @@ body.dark .input {
 }
 
 .detailModalBox {
-    background: var(--card-bg, #fff);
-    color: var(--text-primary, #222);
+    background: var(--card-bg);
+    color: var(--text-primary);
     border-radius: 16px;
     padding: 32px 32px 24px 32px;
     min-width: 340px;
@@ -328,7 +328,7 @@ body.dark .input {
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-primary, #222);
+    color: var(--text-primary);
     margin-left: 12px;
 }
 
@@ -347,9 +347,9 @@ body.dark .input {
 }
 
 .detailModalTable th {
-    background: var(--input-bg, #f3f4f6);
+    background: var(--input-bg);
     font-weight: 700;
-    color: var(--text-primary, #222);
+    color: var(--text-primary);
 }
 
 .detailModalTable tr:last-child td {

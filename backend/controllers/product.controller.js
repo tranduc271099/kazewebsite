@@ -20,9 +20,20 @@ const getPublicIdFromUrl = (url) => {
 exports.getProducts = async (req, res) => {
     try {
         const filter = {};
-        if (req.query.activeOnly === 'true') {
+        const { search, category, activeOnly } = req.query;
+
+        if (activeOnly === 'true') {
             filter.isActive = true;
         }
+
+        if (search) {
+            filter.name = { $regex: search, $options: 'i' }; // Tìm kiếm không phân biệt chữ hoa, chữ thường
+        }
+
+        if (category) {
+            filter.category = category;
+        }
+
         const products = await Product.find(filter)
             .populate('category', 'name')
             .sort({ createdAt: -1 });
@@ -336,36 +347,6 @@ exports.updateProduct = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi khi cập nhật sản phẩm' });
-    }
-};
-
-// Delete a product
-exports.deleteProduct = async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        const product = await Product.findById(id);
-        if (!product) {
-            return res.status(404).json({ message: 'Không tìm thấy sản phẩm' });
-        }
-
-        // Lấy danh sách tất cả ảnh cần xóa
-        const mainImages = product.images || [];
-        const variantImages = (product.variants || []).flatMap(v => v.images || []);
-        const allImagesToDelete = [...mainImages, ...variantImages];
-
-        // Xóa ảnh từ Cloudinary
-        if (allImagesToDelete.length > 0) {
-            const publicIdsToDelete = allImagesToDelete.map(getPublicIdFromUrl).filter(id => id);
-            if (publicIdsToDelete.length > 0) {
-                await Promise.all(publicIdsToDelete.map(publicId => cloudinary.uploader.destroy(publicId)));
-            }
-        }
-
-        await Product.findByIdAndDelete(id);
-        res.json({ message: 'Xóa sản phẩm thành công' });
-    } catch (error) {
-        res.status(500).json({ message: 'Lỗi khi xóa sản phẩm' });
     }
 };
 

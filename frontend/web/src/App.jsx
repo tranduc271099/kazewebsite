@@ -1,14 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CartProvider } from './client/context/CartContext';
 import { UserProvider } from './client/context/UserContext';
 import './admin/index.css'; // Import admin CSS
-// import Navbar from './components/Navbar'; // Đã xóa Navbar
 import Chat from './client/components/Chat.jsx';
-
-// Pages
 import Home from './client/pages/Home';
 import Products from './client/pages/Products';
 import ProductDetail from './client/pages/ProductDetail';
@@ -22,24 +19,31 @@ import ChangePassword from './client/pages/ChangePassword';
 import BillUser from './client/pages/Bill/BillUserClient.jsx';
 import PaymentSuccess from './client/pages/PaymentSuccess';
 import PaymentFailure from './client/pages/PaymentFailure';
-
-
-// Components
+import Checkout from './client/pages/Checkout/checkout.jsx';
 import Footer from './client/components/Footer';
 import Header from './client/components/Header';
 import AuthLayout from './client/components/AuthLayout';
 import ProtectedRoute from './client/components/ProtectedRoute'; // Import ProtectedRoute
 import AdminRoute from './admin/components/AdminRoute'; // Import AdminRoute
-
-// Admin App - New Dashboard
 import AdminApp from './admin/App';
-import Checkout from './client/pages/Checkout/checkout.jsx';
+
+// Custom Scroll to Top component
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   return (
     <CartProvider>
       <UserProvider>
         <Router>
+          <ScrollToTop /> {/* Add ScrollToTop component here */}
           <ToastContainer position="top-right" autoClose={3000} />
           <div className="App">
             {/* <Navbar />  Đã xóa Navbar */}
@@ -73,7 +77,8 @@ function App() {
               <Route path="/product-details/:productId" element={<><Header /><ProductDetail /><Footer /></>} />
               <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
               <Route path="/about" element={<><Header /><About /><Footer /></>} />
-              <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} />
+              <Route path="/category/:categoryName" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Modified route to accept categoryName parameter */}
+              <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Keep this for /category base path */}
 
             </Routes>
             <Chat />

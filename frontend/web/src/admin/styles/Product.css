@@ -2,6 +2,8 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    background: #23272f;
+    color: #fff;
 }
 
 .product-header {
@@ -9,7 +11,7 @@
 }
 
 .product-header h2 {
-    color: #333;
+    color: #fff;
     font-size: 24px;
 }
 
@@ -22,10 +24,12 @@
 }
 
 .product-form {
-    background: white;
+    background: #23272f;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    border-color: #333;
 }
 
 .form-group {
@@ -35,7 +39,7 @@
 .form-group label {
     display: block;
     margin-bottom: 5px;
-    color: #333;
+    color: #eee;
     font-weight: 500;
 }
 
@@ -44,9 +48,11 @@
 .form-group select {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 14px;
+    background: #23272f;
+    color: #fff;
 }
 
 .form-group textarea {
@@ -57,8 +63,10 @@
 .variant-section {
     margin-top: 20px;
     padding: 15px;
-    background: #f5f5f5;
+    background: #23272f;
     border-radius: 4px;
+    color: #fff;
+    border-color: #333;
 }
 
 .variant-list {
@@ -70,9 +78,11 @@
     align-items: center;
     gap: 10px;
     padding: 10px;
-    background: white;
+    background: #23272f;
     border-radius: 4px;
     margin-bottom: 10px;
+    color: #fff;
+    border-color: #333;
 }
 
 .variant-item button {
@@ -96,24 +106,28 @@
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-    background: white;
+    background: #23272f;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    border-color: #333;
 }
 
 .product-table th,
 .product-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #333;
+    background: #23272f;
+    color: #fff;
 }
 
 .product-table th {
-    background-color: #f8f9fa;
+    background-color: #23272f;
     font-weight: 600;
 }
 
 .product-table tr:hover {
-    background-color: #f5f5f5;
+    background-color: #333;
 }
 
 .action-buttons {
@@ -189,7 +203,7 @@
     width: 100%;
     margin: 0;
     padding: 0;
-    background: #f4f6f9;
+    background: #1a1d23;
 }
 
 .content-wrapper {
@@ -199,7 +213,7 @@
     max-width: 100% !important;
     float: none !important;
     display: block !important;
-    background: #f4f6f9;
+    background: #1a1d23;
     box-sizing: border-box;
     padding: 0 24px;
 }
@@ -221,7 +235,7 @@ body .content-wrapper .row {
     bottom: 0;
     margin-left: 250px;
     width: calc(100% - 250px);
-    background: #fff;
+    background: #23272f;
     padding: 10px 24px;
     box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.03);
     display: flex;
@@ -242,36 +256,5 @@ body {
     margin: 0 auto;
     padding: 20px;
     box-sizing: border-box;
-}
-
-body.dark .product-container,
-body.dark .product-form,
-body.dark .product-list,
-body.dark .product-table,
-body.dark .variant-section,
-body.dark .variant-item {
-    background: #23272f !important;
-    color: #fff !important;
-    border-color: #333 !important;
-}
-
-body.dark .product-header h2 {
-    color: #fff !important;
-}
-
-body.dark .form-group label {
-    color: #eee !important;
-}
-
-body.dark .form-group input,
-body.dark .form-group textarea,
-body.dark .form-group select {
-    background: #23272f !important;
-    color: #fff !important;
-    border-color: #444 !important;
-}
-
-body.dark .product-table th {
-    background: #23272f !important;
-    color: #fff !important;
+    background: #1a1d23 !important;
 }

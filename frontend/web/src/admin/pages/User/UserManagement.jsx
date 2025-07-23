@@ -130,25 +130,6 @@ const UserManagement = () => {
         }
     };
 
-    const handleToggleLock = async (user) => {
-        if (user.role !== 'user') return;
-        try {
-            const token = localStorage.getItem('token');
-            const newLockedStatus = !user.isLocked;
-            
-            await axios.put(
-                `http://localhost:5000/api/users/admin/users/${user._id}`,
-                { ...user, isLocked: newLockedStatus },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-
-            fetchUsers();
-        } catch (err) {
-            setError('Không thể cập nhật trạng thái khóa');
-            handleApiError(err);
-        }
-    };
-
     const handleViewHistory = (user) => {
         setSelectedUserForHistory(user);
         setShowHistoryModal(true);
@@ -166,7 +147,7 @@ const UserManagement = () => {
             <div className="user-management-container">
                 <div className="user-management-header">
                     <h2>Quản lý tài khoản</h2>
-                    <button 
+                    <button
                         className="btn btn-primary"
                         onClick={() => setShowAddModal(true)}
                     >
@@ -182,7 +163,6 @@ const UserManagement = () => {
                     currentUser={currentUser}
                     handleEdit={handleEdit}
                     handleDelete={handleDelete}
-                    handleToggleLock={handleToggleLock}
                     handleViewHistory={handleViewHistory}
                     loading={loading}
                     error={error}

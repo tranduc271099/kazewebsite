@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllUsers, lockUser, register, login, getProfile, updateProfile, changePassword, getUserHistory } = require('../controllers/user.controller');
+const { getAllUsers, register, login, getProfile, updateProfile, changePassword, getUserHistory, getUserById } = require('../controllers/user.controller');
 const auth = require('../middleware/auth');
 const { upload } = require('../middleware/upload');
 
@@ -15,9 +15,11 @@ router.put('/me', auth, upload.single('image'), updateProfile);
 // Đổi mật khẩu
 router.put('/change-password', auth, changePassword);
 
-// Lấy danh sách user và khóa/mở khóa user
+// Lấy danh sách user
 router.get('/', auth, getAllUsers);
-router.put('/:id/lock', auth, lockUser);
+
+// Lấy thông tin user bằng ID
+router.get('/:userId', auth, getUserById);
 
 // Lấy lịch sử chỉnh sửa user (chỉ admin)
 router.get('/admin/users/:userId/history', auth, getUserHistory);

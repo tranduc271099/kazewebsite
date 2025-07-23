@@ -23,7 +23,7 @@ import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   return (
     <MenuItem
       active={selected === title}
@@ -41,7 +41,7 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 
 const Sidebar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
+  const colors = tokens();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
   let user = null;
@@ -145,17 +145,18 @@ const Sidebar = () => {
               setSelected={setSelected}
             />
 
-            <Typography
-              variant="h6"
-              color={colors.grey[300]}
-              sx={{ m: "15px 0 5px 20px" }}
-            >
-              Data
-            </Typography>
+
             <Item
-              title="Quản lý tài khoản"
-              to="/admin/user"
-              icon={<PersonOutlinedIcon />}
+              title="Danh sách khách hàng"
+              to="/admin/users/customers"
+              icon={<PeopleOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Danh sách nhân sự"
+              to="/admin/users/staffs"
+              icon={<ContactsOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />
@@ -168,7 +169,7 @@ const Sidebar = () => {
             />
             <Item
               title="Quản lý Sản phẩm"
-              to="/admin/product"
+              to="/admin/products"
               icon={<Inventory2OutlinedIcon />}
               selected={selected}
               setSelected={setSelected}

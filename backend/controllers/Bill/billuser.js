@@ -249,18 +249,62 @@ class BillController {
   // Lấy tất cả đơn hàng (admin)
   async getAll(req, res) {
     try {
-      console.log('Getting all bills...');
-      const bills = await Bill.find()
+      const { search, status, paymentMethod, startDate, endDate } = req.query;
+      const filter = {};
+
+      // Remove status filter here, it will be handled by frontend for tab counts
+      // if (status && status !== 'all') {
+      //   filter.trang_thai = status;
+      // }
+
+      if (paymentMethod) {
+        filter.phuong_thuc_thanh_toan = paymentMethod;
+      }
+
+      if (search) {
+        const searchOrConditions = [
+          { orderId: { $regex: search, $options: 'i' } },
+          { 'danh_sach_san_pham.ten_san_pham': { $regex: search, $options: 'i' } }
+        ];
+
+        // Find users by name or phone and add their IDs to the filter
+        const matchingUsers = await mongoose.model('User').find({
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { phone: { $regex: search, $options: 'i' } }
+          ]
+        }).select('_id');
+
+        const userIds = matchingUsers.map(user => user._id);
+        if (userIds.length > 0) {
+          searchOrConditions.push({ nguoi_dung_id: { $in: userIds } });
+        }
+
+        filter.$or = searchOrConditions;
+      }
+
+      if (startDate || endDate) {
+        filter.ngay_tao = {};
+        if (startDate) {
+          filter.ngay_tao.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          const endOfDay = new Date(endDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          filter.ngay_tao.$lte = endOfDay;
+        }
+      }
+
+      const bills = await Bill.find(filter)
         .populate('nguoi_dung_id', 'name email phone')
         .populate({
           path: 'danh_sach_san_pham.san_pham_id',
           select: 'name images'
         })
         .sort({ ngay_tao: -1 });
-      console.log('Found bills:', bills.length);
       res.json({ bills });
     } catch (error) {
-      console.error('Error getting all bills:', error);
+      console.error('Error getting all bills (filtered):', error);
       res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
   }

@@ -7,17 +7,7 @@ const UserHistory = ({ history }) => {
         return <div className="text-center p-3">Chưa có lịch sử chỉnh sửa</div>;
     }
 
-    const formatValue = (key, value) => {
-        if (key === 'isLocked') {
-            return value ? 'Đã khóa' : 'Đã mở khóa';
-        }
-        return value;
-    };
-
     const getChangeItemClass = (key, value) => {
-        if (key === 'isLocked') {
-            return value ? 'change-item locked' : 'change-item unlocked';
-        }
         return 'change-item';
     };
 
@@ -32,10 +22,9 @@ const UserHistory = ({ history }) => {
                             label: {
                                 name: 'Tên',
                                 email: 'Email',
-                                role: 'Vai trò',
-                                isLocked: 'Trạng thái'
+                                role: 'Vai trò'
                             }[key],
-                            value: formatValue(key, value)
+                            value: value
                         }));
 
                     return (

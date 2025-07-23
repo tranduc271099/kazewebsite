@@ -1,579 +1,430 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/UserManagement.css';
+import { format } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import Swal from 'sweetalert2';
+import { BiSearch } from 'react-icons/bi';
+import { AiOutlineEye, AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlinePlus } from 'react-icons/ai'; // Import for the plus icon
+// @ts-ignore
+import styles from '../styles/ProductLayout.module.css';
 
-const initialForm = {
-  name: '',
-  code: '',
-  description: '',
-  minOrder: '',
-  discountType: 'amount',
-  discountValue: '',
-  startDate: '',
-  endDate: ''
+const initialFormState = {
+    code: '',
+    name: '',
+    description: '',
+    minOrder: 0, // Changed to 0 as it's a number field
+    discountType: 'percent',
+    discountValue: '',
+    startDate: '',
+    endDate: '',
+    quantity: '',
 };
 
-// VoucherAdd component
-const VoucherAdd = ({ form, setForm, handleSubmit, editingId, setEditingId, initialForm, error, success }) => (
-  <form onSubmit={handleSubmit} style={{ marginBottom: 24, minWidth: 320 }}>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Tên voucher *</label>
-      <input
-        type="text"
-        name="name"
-        className="form-control"
-        placeholder="Tên voucher"
-        value={form.name}
-        onChange={e => setForm({ ...form, name: e.target.value })}
-        required
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mã voucher *</label>
-      <input
-        type="text"
-        name="code"
-        className="form-control"
-        placeholder="Mã voucher"
-        value={form.code}
-        readOnly
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mô tả</label>
-      <textarea
-        name="description"
-        className="form-control"
-        placeholder="Mô tả voucher"
-        value={form.description}
-        onChange={e => setForm({ ...form, description: e.target.value })}
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-      <input
-        type="number"
-        name="minOrder"
-        className="form-control"
-        placeholder="Giá trị đơn hàng tối thiểu"
-        value={form.minOrder}
-        onChange={e => setForm({ ...form, minOrder: e.target.value })}
-        required
-        style={{ flex: 2 }}
-      />
-      <select
-        name="discountType"
-        className="form-control"
-        value={form.discountType}
-        onChange={e => setForm({ ...form, discountType: e.target.value })}
-        style={{ flex: 1 }}
-      >
-        <option value="amount">Giảm theo giá</option>
-        <option value="percent">Giảm theo %</option>
-      </select>
-    </div>
-    <div className="form-group" style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-      <input
-        type="number"
-        name="discountValue"
-        className="form-control"
-        placeholder={form.discountType === 'amount' ? 'Số tiền giảm' : 'Phần trăm giảm'}
-        value={form.discountValue}
-        onChange={e => setForm({ ...form, discountValue: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-      <input
-        type="date"
-        name="startDate"
-        className="form-control"
-        value={form.startDate}
-        onChange={e => setForm({ ...form, startDate: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-      <input
-        type="date"
-        name="endDate"
-        className="form-control"
-        value={form.endDate}
-        onChange={e => setForm({ ...form, endDate: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-    </div>
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-      <button type="submit" className="btn btn-primary">
-        {editingId ? 'Cập nhật' : 'Thêm'} voucher
-      </button>
-    </div>
-    {editingId && (
-      <button type="button" onClick={() => { setForm(initialForm); setEditingId(null); }}>Hủy</button>
-    )}
-    {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-    {success && <div style={{ color: 'green', marginBottom: 8 }}>{success}</div>}
-  </form>
-);
-
-// VoucherEdit component
-const VoucherEdit = ({ form, setForm, handleSubmit, setEditingId, initialForm, error, success }) => (
-  <form onSubmit={handleSubmit} style={{ marginBottom: 24, minWidth: 320 }}>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Tên voucher *</label>
-      <input
-        type="text"
-        name="name"
-        className="form-control"
-        placeholder="Tên voucher"
-        value={form.name}
-        onChange={e => setForm({ ...form, name: e.target.value })}
-        required
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mã voucher *</label>
-      <input
-        type="text"
-        name="code"
-        className="form-control"
-        placeholder="Mã voucher"
-        value={form.code}
-        disabled
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12 }}>
-      <label style={{ fontWeight: 600, marginBottom: 4, display: 'block' }}>Mô tả *</label>
-      <textarea
-        name="description"
-        className="form-control"
-        placeholder="Mô tả voucher"
-        value={form.description}
-        onChange={e => setForm({ ...form, description: e.target.value })}
-        required
-        style={{ width: '100%' }}
-      />
-    </div>
-    <div className="form-group" style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-      <input
-        type="number"
-        name="minOrder"
-        className="form-control"
-        placeholder="Giá trị đơn hàng tối thiểu"
-        value={form.minOrder}
-        onChange={e => setForm({ ...form, minOrder: e.target.value })}
-        required
-        style={{ flex: 2 }}
-      />
-      <select
-        name="discountType"
-        className="form-control"
-        value={form.discountType}
-        onChange={e => setForm({ ...form, discountType: e.target.value })}
-        style={{ flex: 1 }}
-      >
-        <option value="amount">Giảm theo giá</option>
-        <option value="percent">Giảm theo %</option>
-      </select>
-    </div>
-    <div className="form-group" style={{ marginBottom: 12, display: 'flex', gap: 8 }}>
-      <input
-        type="number"
-        name="discountValue"
-        className="form-control"
-        placeholder={form.discountType === 'amount' ? 'Số tiền giảm' : 'Phần trăm giảm'}
-        value={form.discountValue}
-        onChange={e => setForm({ ...form, discountValue: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-      <input
-        type="date"
-        name="startDate"
-        className="form-control"
-        value={form.startDate}
-        onChange={e => setForm({ ...form, startDate: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-      <input
-        type="date"
-        name="endDate"
-        className="form-control"
-        value={form.endDate}
-        onChange={e => setForm({ ...form, endDate: e.target.value })}
-        required
-        style={{ flex: 1 }}
-      />
-    </div>
-    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-      <button type="submit" className="btn btn-primary">
-        Cập nhật voucher
-      </button>
-    </div>
-    {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-    {success && <div style={{ color: 'green', marginBottom: 8 }}>{success}</div>}
-  </form>
-);
-
-// VoucherList component
-const VoucherList = ({ vouchers, handleEdit, handleDelete, onAdd }) => (
-  <div className="user-management-container">
-    <div className="user-management-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-      <h2 style={{ margin: 0 }}>Quản lý voucher</h2>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, justifyContent: 'flex-end' }}>
-        <input
-          type="text"
-          placeholder="Tìm kiếm theo tên, mã voucher..."
-          style={{ padding: '6px 10px', borderRadius: 4, border: '1px solid #ccc', minWidth: 180, marginRight: 8 }}
-          // Nếu có state search, thêm value và onChange ở đây
-        />
-        <button className="btn btn-primary" onClick={onAdd} style={{ padding: '4px 14px', fontSize: 14, height: 32, minWidth: 0 }}>
-          <i className="fas fa-plus me-1"></i>
-          Thêm
-        </button>
-      </div>
-    </div>
-    <div className="table-responsive">
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Tên</th>
-            <th>Mã voucher</th>
-            <th>Mô tả</th>
-            <th>Đơn tối thiểu</th>
-            <th>Kiểu giảm</th>
-            <th>Giá trị giảm</th>
-            <th>Bắt đầu</th>
-            <th>Kết thúc</th>
-            <th>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {vouchers.map(v => (
-            <tr key={v._id}>
-              <td>{v.name}</td>
-              <td>{v.code}</td>
-              <td>{v.description}</td>
-              <td>{v.minOrder}</td>
-              <td>{v.discountType === 'amount' ? 'Giá' : '%'}</td>
-              <td>{v.discountType === 'amount' ? `${v.discountValue} đ` : `${v.discountValue}%`}</td>
-              <td>{v.startDate.slice(0, 10)}</td>
-              <td>{v.endDate.slice(0, 10)}</td>
-              <td>
-                <div className="action-buttons">
-                  <button className="btn btn-primary btn-sm me-2" onClick={() => handleEdit(v)}>Sửa</button>
-                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(v._id)}>Xóa</button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
-
-// Thêm hàm sinh mã voucher ngẫu nhiên:
 function generateVoucherCode(length = 8) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }
 
-// Main Vouchers component
 const Vouchers = () => {
-  const [vouchers, setVouchers] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+    const [vouchers, setVouchers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [formData, setFormData] = useState(initialFormState);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentVoucherId, setCurrentVoucherId] = useState(null);
+    const [searchText, setSearchText] = useState('');
+    const [sortType, setSortType] = useState('newest'); // Add sortType state
 
-  // Thêm các state filter, search, phân trang
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [sortType, setSortType] = useState('newest');
+    useEffect(() => {
+        fetchVouchers();
+    }, []);
 
-  useEffect(() => {
-    fetchVouchers();
-  }, []);
+    const fetchVouchers = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:5000/api/vouchers', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setVouchers(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching vouchers:', err);
+            setError('Failed to fetch vouchers.');
+            setVouchers([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess('');
-        setError('');
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, error]);
+    const handleOpenModal = (voucher = null) => {
+        if (voucher) {
+            setIsEditing(true);
+            setCurrentVoucherId(voucher._id);
+            const formattedStartDate = voucher.startDate && !isNaN(new Date(voucher.startDate).getTime())
+                ? format(new Date(voucher.startDate), 'yyyy-MM-dd')
+                : '';
+            const formattedEndDate = voucher.endDate && !isNaN(new Date(voucher.endDate).getTime())
+                ? format(new Date(voucher.endDate), 'yyyy-MM-dd')
+                : '';
 
-  const fetchVouchers = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5000/api/vouchers', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setVouchers(res.data);
-    } catch (err) {
-      setVouchers([]);
-      setError('Không thể tải danh sách voucher');
-    }
-  };
+            setFormData({
+                ...voucher,
+                startDate: formattedStartDate,
+                endDate: formattedEndDate,
+                description: voucher.description || '',
+                quantity: voucher.quantity || ''
+            });
+        } else {
+            setIsEditing(false);
+            setCurrentVoucherId(null);
+            setFormData({ ...initialFormState, code: generateVoucherCode() });
+        }
+        setIsModalOpen(true);
+    };
 
-  const validateForm = () => {
-    if (!form.name || !form.minOrder || !form.discountValue || !form.startDate || !form.endDate || (editingId && !form.description)) {
-      setError('Vui lòng nhập đầy đủ thông tin');
-      return false;
-    }
-    if (new Date(form.endDate) < new Date(form.startDate)) {
-      setError('Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu');
-      return false;
-    }
-    setError('');
-    return true;
-  };
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setFormData(initialFormState);
+        setIsEditing(false);
+        setCurrentVoucherId(null);
+    };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    try {
-      const token = localStorage.getItem('token');
-      let submitForm = {
-        ...form,
-        minOrder: Number(form.minOrder),
-        discountValue: Number(form.discountValue)
-      };
-      if (editingId) {
-        await axios.put(`http://localhost:5000/api/vouchers/${editingId}`, submitForm, {
-          headers: { Authorization: `Bearer ${token}` }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        Swal.fire({
+            title: isEditing ? 'Cập nhật voucher' : 'Thêm voucher mới',
+            text: isEditing ? 'Đang cập nhật voucher...' : 'Đang thêm voucher...',
+            icon: 'info',
+            allowOutsideClick: false,
+            showConfirmButton: false,
         });
-        setSuccess('Cập nhật voucher thành công!');
-      } else {
-        await axios.post('http://localhost:5000/api/vouchers', submitForm, {
-          headers: { Authorization: `Bearer ${token}` }
+
+        const payload = {
+            ...formData,
+            discountValue: Number(formData.discountValue),
+            minOrder: Number(formData.minOrder),
+            quantity: Number(formData.quantity),
+        };
+
+        // Validation for discountType === 'percent'
+        if (payload.discountType === 'percent' && payload.discountValue > 100) {
+            Swal.fire('Lỗi!', 'Giá trị giảm phần trăm không được vượt quá 100%.', 'error');
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+            if (isEditing) {
+                await axios.put(`http://localhost:5000/api/vouchers/${currentVoucherId}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                Swal.fire('Thành công!', 'Voucher đã được cập nhật.', 'success');
+            } else {
+                await axios.post('http://localhost:5000/api/vouchers', payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                Swal.fire('Thành công!', 'Voucher mới đã được thêm.', 'success');
+            }
+            fetchVouchers();
+            handleCloseModal();
+        } catch (err) {
+            console.error('Error saving voucher:', err);
+            Swal.fire('Lỗi!', err.response?.data?.message || 'Không thể lưu voucher.', 'error');
+        }
+    };
+
+    const handleDelete = async (id) => {
+        Swal.fire({
+            title: 'Bạn có chắc muốn xóa voucher này?',
+            text: 'Hành động này không thể hoàn tác!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Vâng, xóa nó!',
+            cancelButtonText: 'Hủy bỏ',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const token = localStorage.getItem('token');
+                    await axios.delete(`http://localhost:5000/api/vouchers/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    Swal.fire('Đã xóa!', 'Voucher đã được xóa thành công.', 'success');
+                    fetchVouchers();
+                } catch (err) {
+                    console.error('Error deleting voucher:', err);
+                    Swal.fire('Lỗi!', err.response?.data?.message || 'Không thể xóa voucher.', 'error');
+                }
+            }
         });
-        setSuccess('Thêm voucher thành công!');
-      }
-      setForm(initialForm);
-      setEditingId(null);
-      setShowAddModal(false);
-      setShowEditModal(false);
-      fetchVouchers();
-    } catch (err) {
-      setError('Có lỗi xảy ra khi lưu voucher');
-    }
-  };
+    };
 
-  const handleEdit = (voucher) => {
-    setForm({
-      name: voucher.name,
-      code: voucher.code,
-      description: voucher.description,
-      minOrder: voucher.minOrder,
-      discountType: voucher.discountType,
-      discountValue: voucher.discountValue,
-      startDate: voucher.startDate.slice(0, 10),
-      endDate: voucher.endDate.slice(0, 10)
-    });
-    setEditingId(voucher._id);
-    setShowEditModal(true);
-    setError('');
-    setSuccess('');
-  };
+    const getStatusColor = (isExpired, isOutOfStock) => {
+        if (isExpired || isOutOfStock) return '#ef4444'; // red
+        return '#10b981'; // green
+    };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa voucher này?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5000/api/vouchers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSuccess('Đã xóa voucher!');
-      fetchVouchers();
-    } catch (err) {
-      setError('Không thể xóa voucher');
-    }
-  };
-
-  // Khi mở form thêm voucher, tự động sinh mã code:
-  const handleAddVoucher = () => {
-    setEditingId(null);
-    setForm({ ...initialForm, code: generateVoucherCode() });
-    setShowAddModal(true);
-  };
-
-  const closeModal = () => {
-    setShowAddModal(false);
-    setShowEditModal(false);
-    setForm(initialForm);
-    setEditingId(null);
-  };
-
-  // Filter, search, sort, phân trang
-  const filteredVouchers = vouchers.filter(v => {
-    const searchText = search.toLowerCase();
-    return (
-      v.name.toLowerCase().includes(searchText) ||
-      (v._id || '').toLowerCase().includes(searchText)
+    const filteredVouchers = vouchers.filter((voucher) =>
+        voucher.code.toLowerCase().includes(searchText.toLowerCase()) ||
+        voucher.name.toLowerCase().includes(searchText.toLowerCase())
     );
-  });
-  const sortedVouchers = [...filteredVouchers].sort((a, b) => {
-    if (sortType === 'newest') {
-      return new Date(b.startDate) - new Date(a.startDate);
-    } else if (sortType === 'oldest') {
-      return new Date(a.startDate) - new Date(b.startDate);
-    } else if (sortType === 'minOrder_asc') {
-      return a.minOrder - b.minOrder;
-    } else if (sortType === 'minOrder_desc') {
-      return b.minOrder - a.minOrder;
-    }
-    return 0;
-  });
-  const totalPages = Math.ceil(sortedVouchers.length / limit);
-  const pagedVouchers = sortedVouchers.slice((page - 1) * limit, page * limit);
 
-  return (
-    <div className="content-inner" style={{ maxWidth: 1700, margin: '0 auto', padding: '32px 0' }}>
-      {error && <div style={{color: 'red', marginBottom: 8}}>{error}</div>}
-      {success && <div style={{color: 'green', marginBottom: 8}}>{success}</div>}
-      <h2 style={{ fontWeight: 700, marginBottom: 24, textAlign: 'center' }}>Quản lý voucher</h2>
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo tên, mã voucher..."
-            value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
-            style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', minWidth: 220, fontSize: 14 }}
-          />
-          <select
-            value={sortType}
-            onChange={e => { setSortType(e.target.value); setPage(1); }}
-            style={{ padding: '8px 14px', borderRadius: 6, border: '1px solid #ddd', fontSize: 14 }}
-          >
-            <option value="newest">Mới nhất</option>
-            <option value="oldest">Cũ nhất</option>
-            <option value="minOrder_asc">Đơn tối thiểu tăng dần</option>
-            <option value="minOrder_desc">Đơn tối thiểu giảm dần</option>
-          </select>
-          <span style={{ color: '#888', fontSize: 13 }}>Tổng voucher: {filteredVouchers.length}</span>
-        </div>
-        <div style={{ flex: 'none', display: 'flex', justifyContent: 'flex-end', width: 120 }}>
-          <button className="btn btn-primary" onClick={handleAddVoucher} style={{ padding: '4px 14px', fontSize: 14, height: 32, minWidth: 0, width: '100%' }}>
-            <i className="fas fa-plus me-1"></i>
-            Thêm
-          </button>
-        </div>
-      </div>
-      <div style={{ background: '#181f2a', borderRadius: 16, boxShadow: '0 4px 24px rgba(0,0,0,0.10)', padding: 0, marginBottom: 32 }}>
-        <table className="table" style={{ margin: 0, minWidth: 1500 }}>
-          <thead>
-            <tr>
-              <th style={{ textAlign: 'center' }}>Tên</th>
-              <th style={{ textAlign: 'center' }}>Mã voucher</th>
-              <th style={{ textAlign: 'center' }}>Mô tả</th>
-              <th style={{ textAlign: 'center' }}>Đơn tối thiểu</th>
-              <th style={{ textAlign: 'center' }}>Kiểu giảm</th>
-              <th style={{ textAlign: 'center' }}>Giá trị giảm</th>
-              <th style={{ textAlign: 'center' }}>Bắt đầu</th>
-              <th style={{ textAlign: 'center' }}>Kết thúc</th>
-              <th style={{ textAlign: 'center' }}>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pagedVouchers.map(v => (
-              <tr key={v._id}>
-                <td style={{ textAlign: 'center', fontWeight: 500 }}>{v.name}</td>
-                <td style={{ textAlign: 'center' }}>{v.code}</td>
-                <td style={{ textAlign: 'center' }}>{v.description}</td>
-                <td style={{ textAlign: 'center' }}>{v.minOrder}</td>
-                <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? 'Giá' : '%'}</td>
-                <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? `${v.discountValue} đ` : `${v.discountValue}%`}</td>
-                <td style={{ textAlign: 'center' }}>{v.startDate.slice(0, 10)}</td>
-                <td style={{ textAlign: 'center' }}>{v.endDate.slice(0, 10)}</td>
-                <td style={{ textAlign: 'center' }}>
-                  <div className="action-buttons" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <button className="btn btn-primary btn-sm me-2" style={{ width: 70 }} onClick={() => handleEdit(v)}>Sửa</button>
-                    <button className="btn btn-danger btn-sm" style={{ width: 70 }} onClick={() => handleDelete(v._id)}>Xóa</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {pagedVouchers.length === 0 && (
-              <tr>
-                <td colSpan={9} style={{ textAlign: 'center', padding: 24, color: '#888' }}>Không có voucher nào phù hợp</td>
-              </tr>
+    const sortedVouchers = [...filteredVouchers].sort((a, b) => {
+        if (sortType === 'newest') {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+        } else if (sortType === 'oldest') {
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        } else if (sortType === 'minOrder_asc') {
+            return a.minOrder - b.minOrder;
+        } else if (sortType === 'minOrder_desc') {
+            return b.minOrder - a.minOrder;
+        }
+        return 0;
+    });
+
+    return (
+        <div className={styles.container}>
+            <h1 className={styles.title}>Mã giảm giá</h1>
+
+            <div className={styles.filterBar} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--input-bg)', borderRadius: '8px', flexGrow: 1, padding: '5px 10px', height: '42px' }}>
+                    <input
+                        type="text"
+                        className={styles.input}
+                        placeholder="Tìm kiếm theo tên, mã voucher..."
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                        style={{ border: 'none', background: 'transparent', flexGrow: 1, outline: 'none', color: 'var(--text-primary)', padding: '0 5px' }}
+                    />
+                    <BiSearch size={20} style={{ color: 'var(--text-secondary)', cursor: 'pointer' }} />
+                </div>
+
+                <select
+                    className={styles.select}
+                    value={sortType}
+                    onChange={e => setSortType(e.target.value)}
+                    style={{ width: '150px', height: '42px' }}
+                >
+                    <option value="newest">Mới nhất</option>
+                    <option value="oldest">Cũ nhất</option>
+                    <option value="minOrder_asc">Đơn tối thiểu tăng dần</option>
+                    <option value="minOrder_desc">Đơn tối thiểu giảm dần</option>
+                </select>
+                <span style={{ color: 'var(--text-secondary)' }}>Tổng voucher: {filteredVouchers.length}</span>
+                <button onClick={handleOpenModal} className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: 'auto', padding: '10px 18px', height: '42px' }}>
+                    <AiOutlinePlus size={20} style={{ marginRight: '5px' }} />
+                    Thêm mới
+                </button>
+            </div>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '20px' }}>Đang tải voucher...</div>
+            ) : error ? (
+                <div className="error-banner">{error}</div>
+            ) : (
+                <div className={styles.card} style={{ marginTop: 16 }}>
+                    <table className={styles.productTable} style={{ fontSize: '16px' }}>
+                        <thead>
+                            <tr>
+                                <th style={{ textAlign: 'center' }}>STT</th>
+                                <th style={{ textAlign: 'center' }}>Mã</th>
+                                <th style={{ textAlign: 'left' }}>Tên mã</th>
+                                <th style={{ textAlign: 'center' }}>Loại phiếu giảm giá</th>
+                                <th style={{ textAlign: 'center' }}>Đơn Tối Thiểu</th>
+                                <th style={{ textAlign: 'right' }}>Giá trị giảm</th>
+                                <th style={{ textAlign: 'center' }}>Ngày áp dụng</th>
+                                <th style={{ textAlign: 'center' }}>Ngày kết thúc</th>
+                                <th style={{ textAlign: 'center' }}>Số lượng còn lại</th>
+                                <th style={{ textAlign: 'center' }}>Số lượng đã dùng</th>
+                                <th style={{ textAlign: 'center' }}>Trạng thái</th>
+                                <th style={{ textAlign: 'center' }}>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {sortedVouchers.map((v, index) => {
+                                const isExpired = new Date(v.endDate) < new Date();
+                                const isOutOfStock = v.quantity - v.usedCount <= 0;
+                                const statusText = isExpired || isOutOfStock ? 'Dừng áp dụng' : 'Đang áp dụng';
+                                const statusColor = getStatusColor(isExpired, isOutOfStock);
+
+                                return (
+                                    <tr key={v._id}>
+                                        <td style={{ textAlign: 'center' }}>{index + 1}</td>
+                                        <td style={{ textAlign: 'center', fontWeight: 500 }}>{v.code}</td>
+                                        <td style={{ textAlign: 'left' }}>{v.name}</td>
+                                        <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? 'fix_amount' : 'percent'}</td>
+                                        <td style={{ textAlign: 'center' }}>{v.minOrder.toLocaleString('vi-VN')}₫</td>
+                                        <td style={{ textAlign: 'right' }}>{v.discountType === 'amount' ? `${v.discountValue} ₫` : `${v.discountValue}%`}</td>
+                                        <td style={{ textAlign: 'center' }}>{new Date(v.startDate).toLocaleDateString('vi-VN')}</td>
+                                        <td style={{ textAlign: 'center' }}>{new Date(v.endDate).toLocaleDateString('vi-VN')}</td>
+                                        <td style={{ textAlign: 'center' }}>{(v.quantity - v.usedCount) > 0 ? (v.quantity - v.usedCount) : 0}</td>
+                                        <td style={{ textAlign: 'center' }}>{v.usedCount}</td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <span className={styles.status} style={{ backgroundColor: statusColor, color: 'white' }}>
+                                                {statusText}
+                                            </span>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+                                                <button
+                                                    className={`${styles.actionBtn} ${styles.iconBtn}`}
+                                                    onClick={() => handleOpenModal(v)}
+                                                    title="Xem / Sửa Voucher"
+                                                >
+                                                    <AiOutlineEye size={20} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {filteredVouchers.length === 0 && (
+                                <tr>
+                                    <td colSpan={10} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>Không có voucher nào phù hợp</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             )}
-          </tbody>
-        </table>
-      </div>
-      {totalPages > 1 && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 24, justifyContent: 'center' }}>
-          <button onClick={() => setPage(page - 1)} disabled={page === 1} style={{ padding: '6px 16px' }}>&larr; Trước</button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              style={{ padding: '6px 12px', background: p === page ? '#2563eb' : '#fff', color: p === page ? '#fff' : '#2563eb', border: '1px solid #2563eb', borderRadius: 4 }}
-            >
-              {p}
-            </button>
-          ))}
-          <button onClick={() => setPage(page + 1)} disabled={page === totalPages} style={{ padding: '6px 16px' }}>Sau &rarr;</button>
+
+            {isModalOpen && (
+                <div className={styles.modalBackdrop}>
+                    <div className={styles.modalContent}>
+                        <h3 className={styles.modalTitle}>{isEditing ? 'Cập nhật Voucher' : 'Thêm Voucher Mới'}</h3>
+                        <form onSubmit={handleSubmit}>
+                            <div className={`${styles.formGrid} ${styles.gridCol2}`}>
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Mã Voucher:</label>
+                                    <input
+                                        type="text"
+                                        name="code"
+                                        value={formData.code}
+                                        onChange={handleChange}
+                                        readOnly={isEditing}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Tên Voucher:</label>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+
+                                <div className={`${styles.formGroup} ${styles.span2}`}> {/* Mô tả spans two columns */}
+                                    <label className={styles.label}>Mô tả:</label>
+                                    <textarea
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        className={styles.textarea}
+                                        rows="3"
+                                    ></textarea>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Loại Giảm Giá:</label>
+                                    <select name="discountType" value={formData.discountType} onChange={handleChange} required className={styles.select}>
+                                        <option value="percent">Phần trăm</option>
+                                        <option value="amount">Số tiền</option>
+                                    </select>
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Giá Trị Giảm Giá:</label>
+                                    <input
+                                        type="number"
+                                        name="discountValue"
+                                        value={formData.discountValue}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Đơn Hàng Tối Thiểu:</label>
+                                    <input
+                                        type="number"
+                                        name="minOrder"
+                                        value={formData.minOrder}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Số lượng voucher:</label>
+                                    <input
+                                        type="number"
+                                        name="quantity"
+                                        value={formData.quantity}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                        min="1" // Ensure quantity is at least 1
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Ngày Bắt Đầu:</label>
+                                    <input
+                                        type="date"
+                                        name="startDate"
+                                        value={formData.startDate}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Ngày Kết Thúc:</label>
+                                    <input
+                                        type="date"
+                                        name="endDate"
+                                        value={formData.endDate}
+                                        onChange={handleChange}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+                                <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleCloseModal}>Hủy</button>
+                                <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>
+                                    {isEditing ? 'Cập nhật' : 'Thêm'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-      {/* Modal Thêm/Sửa giữ nguyên như cũ */}
-      {showAddModal && (
-        <div className="edit-modal">
-          <div className="edit-modal-content">
-            <h3>Thêm voucher</h3>
-            <VoucherAdd
-              form={form}
-              setForm={setForm}
-              handleSubmit={handleSubmit}
-              editingId={editingId}
-              setEditingId={setEditingId}
-              initialForm={initialForm}
-              error={error}
-              success={success}
-            />
-            <div className="modal-buttons">
-              <button className="btn btn-secondary" onClick={closeModal}>Đóng</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {showEditModal && (
-        <div className="edit-modal">
-          <div className="edit-modal-content">
-            <h3>Cập nhật voucher</h3>
-            <VoucherEdit
-              form={form}
-              setForm={setForm}
-              handleSubmit={handleSubmit}
-              setEditingId={setEditingId}
-              initialForm={initialForm}
-              error={error}
-              success={success}
-            />
-            <div className="modal-buttons">
-              <button className="btn btn-secondary" onClick={closeModal}>Đóng</button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Vouchers; 

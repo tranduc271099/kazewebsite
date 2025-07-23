@@ -1,13 +1,4 @@
 :root {
-    --card-bg: #fff;
-    --card-border: #ececec;
-    --text-primary: #222;
-    --text-secondary: #888;
-    --input-bg: #fafbfc;
-    --input-border: #e0e0e0;
-}
-
-body.dark {
     --card-bg: #232a36;
     --card-border: #374151;
     --text-primary: #f9fafb;
@@ -85,65 +76,65 @@ body.dark {
     margin-bottom: 20px;
 }
 
-body.dark .user-container,
-body.dark .table,
-body.dark .table thead th {
+:root .user-container,
+:root .table,
+:root .table thead th {
     background: #23272f !important;
     color: #fff !important;
     border-color: #333 !important;
 }
 
-body.dark .user-header h2,
-body.dark .user-header h3 {
+:root .user-header h2,
+:root .user-header h3 {
     color: #fff !important;
 }
 
-body.dark .table tbody tr:hover {
+:root .table tbody tr:hover {
     background: #333 !important;
 }
 
-body.dark .btn-info,
-body.dark .btn-warning,
-body.dark .btn-secondary {
+:root .btn-info,
+:root .btn-warning,
+:root .btn-secondary {
     color: #fff !important;
 }
 
-body.dark .content-inner {
+:root .content-inner {
     background: #1a1d23 !important;
 }
 
-body.dark .table-responsive {
+:root .table-responsive {
     background: #23272f !important;
 }
 
-body.dark .table th,
-body.dark .table td {
+:root .table th,
+:root .table td {
     background: #23272f !important;
     color: #fff !important;
     border-color: #333 !important;
 }
 
-body.dark .table tr {
+:root .table tr {
     background: #23272f !important;
 }
 
-body.dark .btn-info {
+:root .btn-info {
     background: #0ea5e9 !important;
     color: #fff !important;
     border: none !important;
 }
 
-body.dark .btn-info:hover {
+:root .btn-info:hover {
     background: #0369a1 !important;
 }
 
-body.dark .btn-warning {
+:root .btn-warning {
     background: #f59e42 !important;
     color: #fff !important;
     border: none !important;
 }
 
-body.dark .btn-warning:hover {
+:root .btn-warning:hover {
     background: #b45309 !important;
 }
 

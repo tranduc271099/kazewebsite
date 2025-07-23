@@ -35,7 +35,6 @@ const Dashboard = () => {
     const [cancelReason, setCancelReason] = useState('');
 
     const theme = useTheme();
-    const isDark = theme.palette.mode === 'dark';
 
     useEffect(() => {
         fetchDashboardData();
@@ -239,15 +238,15 @@ const Dashboard = () => {
 
     const getStatusBadgeClass = (status) => {
         const statusClasses = {
-            'chờ xác nhận': isDark ? 'badge-warning-dark' : 'badge-warning',
-            'đã xác nhận': isDark ? 'badge-info-dark' : 'badge-info',
-            'đang giao hàng': isDark ? 'badge-primary-dark' : 'badge-primary',
-            'đã giao hàng': isDark ? 'badge-success-dark' : 'badge-success',
-            'đã nhận hàng': isDark ? 'badge-success-dark' : 'badge-success',
-            'hoàn thành': isDark ? 'badge-success-dark' : 'badge-success',
-            'đã hủy': isDark ? 'badge-danger-dark' : 'badge-danger'
+            'chờ xác nhận': 'badge-warning',
+            'đã xác nhận': 'badge-info',
+            'đang giao hàng': 'badge-primary',
+            'đã giao hàng': 'badge-success',
+            'đã nhận hàng': 'badge-success',
+            'hoàn thành': 'badge-success',
+            'đã hủy': 'badge-danger'
         };
-        return statusClasses[status] || (isDark ? 'badge-secondary-dark' : 'badge-secondary');
+        return statusClasses[status] || 'badge-secondary';
     };
 
     const handleDateChange = (field, value) => {
@@ -282,9 +281,7 @@ const Dashboard = () => {
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '50%',
-        background: isDark
-            ? 'linear-gradient(135deg, #232526 0%, #414345 100%)'
-            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
         color: '#fff',
         marginRight: 20,
     };
@@ -313,7 +310,7 @@ const Dashboard = () => {
         background: theme.palette.background.paper,
     };
     const thStyle = {
-        background: isDark ? theme.palette.background.default : '#f8f9fa',
+        background: theme.palette.background.default,
         color: theme.palette.text.primary,
         padding: '12px 8px',
         textAlign: 'left',
@@ -365,10 +362,10 @@ const Dashboard = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 16,
-                        background: isDark ? '#232526' : '#f4f6f8',
+                        background: '#232526',
                         padding: '10px 18px',
                         borderRadius: 8,
-                        boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.12)' : '0 1px 4px rgba(0,0,0,0.06)',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
                     }}
                     onSubmit={e => e.preventDefault()}
                 >
@@ -506,13 +503,11 @@ const Dashboard = () => {
                                         <div style={{
                                             width: 36,
                                             height: barHeight,
-                                            background: isDark
-                                                ? 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)'
-                                                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
                                             borderRadius: '8px 8px 0 0',
                                             transition: 'all 0.3s ease',
                                             marginBottom: 8,
-                                            boxShadow: isDark ? '0 2px 8px rgba(66,165,245,0.12)' : '0 2px 8px rgba(102,126,234,0.10)'
+                                            boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
                                         }}></div>
                                         <div style={{
                                             display: 'flex',
@@ -565,7 +560,7 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {dashboardData.topUsers.length > 0 ? (
                             dashboardData.topUsers.map((user, index) => (
-                                <div key={user.userId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: isDark ? '#232526' : '#f8f9fa', borderRadius: 8 }}>
+                                <div key={user.userId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
                                     <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: 5 }}>{user.userName}</div>
@@ -587,7 +582,7 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {dashboardData.topProducts.length > 0 ? (
                             dashboardData.topProducts.map((product, index) => (
-                                <div key={product.productId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: isDark ? '#232526' : '#f8f9fa', borderRadius: 8 }}>
+                                <div key={product.productId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
                                     <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: 5 }}>{product.productName}</div>

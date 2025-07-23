@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const cloudinary = require('../config/cloudinary');
 const mongoose = require('mongoose');
 const UserHistory = require('../models/UserHistory');
+const Bill = require('../models/Bill/BillUser'); // Import Bill model
 
 // Đăng ký
 exports.register = async (req, res) => {
@@ -63,11 +64,6 @@ exports.login = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Email không tồn tại' });
-        }
-
-        // Kiểm tra tài khoản bị khóa
-        if (user.isLocked) {
-            return res.status(403).json({ message: 'Tài khoản đã bị khóa' });
         }
 
         // Kiểm tra password
@@ -139,6 +135,8 @@ exports.updateProfile = async (req, res) => {
         user.name = name || user.name;
         user.phone = phone || user.phone;
         user.address = address || user.address;
+        user.gender = req.body.gender || user.gender; // Add gender update
+        user.dob = req.body.dob || user.dob;         // Add dob update
         // Nếu có file upload thì upload lên cloudinary và cập nhật image
         if (req.file) {
             // Bọc upload_stream vào Promise
@@ -167,7 +165,8 @@ exports.updateProfile = async (req, res) => {
                         name: user.name,
                         email: user.email,
                         role: user.role,
-                        isLocked: user.isLocked
+                        gender: user.gender, // Add gender to history
+                        dob: user.dob,       // Add dob to history
                     },
                     updatedAt: new Date()
                 });
@@ -186,7 +185,8 @@ exports.updateProfile = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
-                isLocked: user.isLocked
+                gender: user.gender, // Add gender to history
+                dob: user.dob,       // Add dob to history
             },
             updatedAt: new Date()
         });
@@ -220,47 +220,79 @@ exports.changePassword = async (req, res) => {
     }
 };
 
+// Lấy thông tin user bằng ID (chỉ admin)
+exports.getUserById = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
+        }
+
+        const { userId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'ID người dùng không hợp lệ' });
+        }
+
+        const user = await User.findById(userId).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+        }
+
+        // Calculate total spent for this user
+        const totalSpentResult = await Bill.aggregate([
+            { $match: { nguoi_dung_id: user._id, trang_thai: 'hoàn thành' } },
+            { $group: { _id: null, total: { $sum: '$tong_tien' } } }
+        ]);
+
+        const totalSpent = totalSpentResult.length > 0 ? totalSpentResult[0].total : 0;
+
+        res.json({ ...user.toObject(), totalSpent });
+    } catch (err) {
+        console.error('Error in getUserById:', err);
+        res.status(500).json({ message: 'Không thể lấy thông tin người dùng', error: err.message });
+    }
+};
+
 // Lấy danh sách tất cả user (chỉ admin)
 exports.getAllUsers = async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
         }
-        const users = await User.find().select('-password');
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ message: 'Không thể lấy danh sách user' });
-    }
-};
 
-// Khóa/mở khóa user (chỉ admin, không cho phép khóa admin)
-exports.lockUser = async (req, res) => {
-    try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
+        const { role, search } = req.query;
+        const filter = {};
+
+        if (role && (role === 'user' || role === 'admin')) {
+            filter.role = role;
         }
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ message: 'Không tìm thấy user' });
-        if (user.role === 'admin') {
-            return res.status(403).json({ message: 'Không thể khóa admin khác!' });
+
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } },
+                { phone: { $regex: search, $options: 'i' } }
+            ];
         }
-        user.isLocked = !user.isLocked;
-        await user.save();
-        // Lưu lịch sử chỉnh sửa
-        await UserHistory.create({
-            userId: user._id,
-            updatedBy: req.user.id,
-            changes: {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                isLocked: user.isLocked
-            },
-            updatedAt: new Date()
-        });
-        res.json({ message: user.isLocked ? 'Đã khóa user' : 'Đã mở khóa user', isLocked: user.isLocked });
+
+        const users = await User.find(filter).select('-password');
+
+        // Calculate total spent for each user
+        const usersWithTotalSpent = await Promise.all(users.map(async (user) => {
+            const totalSpent = await Bill.aggregate([
+                { $match: { nguoi_dung_id: user._id, trang_thai: 'hoàn thành' } },
+                { $group: { _id: null, total: { $sum: '$tong_tien' } } }
+            ]);
+            return {
+                ...user.toObject(),
+                totalSpent: totalSpent.length > 0 ? totalSpent[0].total : 0
+            };
+        }));
+
+        res.json(usersWithTotalSpent);
     } catch (err) {
-        res.status(500).json({ message: 'Thao tác thất bại' });
+        console.error('Error in getAllUsers:', err);
+        res.status(500).json({ message: 'Không thể lấy danh sách user', error: err.message });
     }
 };
 

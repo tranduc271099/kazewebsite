@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import '../../admin/styles/Category.css';
 import { CartContext } from '../context/CartContext';
 
 const Category = () => {
     // State cho filter bar và pagination
+    const { categoryName } = useParams(); // Get category name from URL parameters
+    const navigate = useNavigate(); // Initialize useNavigate
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("featured");
     const [itemsPerPage, setItemsPerPage] = useState(12);
@@ -53,7 +55,7 @@ const Category = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedCategorySidebar, setSelectedCategorySidebar] = useState('*');
+    const [selectedCategorySidebar, setSelectedCategorySidebar] = useState(categoryName ? categoryName.toLowerCase() : '*'); // Initialize from URL param
     const backendUrl = 'http://localhost:5000';
 
     const { addToCart } = useContext(CartContext);
@@ -74,7 +76,7 @@ const Category = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [categoryName]); // Add categoryName to dependency array
 
     // Trích xuất danh sách thương hiệu
     useEffect(() => {
@@ -218,13 +220,19 @@ const Category = () => {
                                 <ul className="category-tree list-unstyled mb-0">
                                     <li className={`category-item${selectedCategorySidebar === '*' ? ' active' : ''}`}
                                         style={{ cursor: 'pointer' }}
-                                        onClick={() => setSelectedCategorySidebar('*')}>
+                                        onClick={() => {
+                                            setSelectedCategorySidebar('*');
+                                            navigate('/category'); // Navigate to base category URL
+                                        }}>
                                         <span className="category-link">Tất cả</span>
                                     </li>
                                     {categories.map(category => (
                                         <li key={category._id} className={`category-item${selectedCategorySidebar === category.name.toLowerCase() ? ' active' : ''}`}
                                             style={{ cursor: 'pointer' }}
-                                            onClick={() => setSelectedCategorySidebar(category.name.toLowerCase())}>
+                                            onClick={() => {
+                                                setSelectedCategorySidebar(category.name.toLowerCase());
+                                                navigate(`/category/${category.name.toLowerCase()}`); // Navigate to category-specific URL
+                                            }}>
                                             <span className="category-link">{category.name}</span>
                                         </li>
                                     ))}

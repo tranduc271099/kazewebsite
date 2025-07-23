@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { Link } from "react-router-dom"; // Import Link
 
 const CategorySliderSection = () => {
     const [categories, setCategories] = useState([]);
@@ -37,23 +38,25 @@ const CategorySliderSection = () => {
                 >
                     {categories.map((cat, idx) => (
                         <SwiperSlide key={cat._id}>
-                            <div
-                                className="category-card text-center h-100 d-flex flex-column align-items-center justify-content-center"
-                                style={{
-                                    padding: '18px 8px',
-                                    borderRadius: 16,
-                                    background: '#fafbfc',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-                                }}
-                                data-aos="fade-up"
-                                data-aos-delay={100 + idx * 100}
-                            >
-                                <div className="category-image mb-2">
-                                    <img style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }} src={cat.image} alt={cat.name} className="img-fluid" />
+                            <Link to={`/category/${cat.name.toLowerCase()}`} style={{ textDecoration: 'none', color: 'inherit' }}> {/* Wrap with Link */}
+                                <div
+                                    className="category-card text-center h-100 d-flex flex-column align-items-center justify-content-center"
+                                    style={{
+                                        padding: '18px 8px',
+                                        borderRadius: 16,
+                                        background: '#fafbfc',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                                    }}
+                                    data-aos="fade-up"
+                                    data-aos-delay={100 + idx * 100}
+                                >
+                                    <div className="category-image mb-2">
+                                        <img style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'contain' }} src={cat.image} alt={cat.name} className="img-fluid" />
+                                    </div>
+                                    <h3 className="category-title mb-1" style={{ fontSize: '1rem' }}>{cat.name}</h3>
+                                    <p className="category-count mb-0" style={{ fontSize: '0.9rem', color: '#888' }}>{cat.productCount || 0} Sản phẩm</p>
                                 </div>
-                                <h3 className="category-title mb-1" style={{ fontSize: '1rem' }}>{cat.name}</h3>
-                                <p className="category-count mb-0" style={{ fontSize: '0.9rem', color: '#888' }}>{cat.productCount || 0} Sản phẩm</p>
-                            </div>
+                            </Link>
                         </SwiperSlide>
                     ))}
                 </Swiper>

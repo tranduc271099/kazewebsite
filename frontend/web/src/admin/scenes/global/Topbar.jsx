@@ -1,9 +1,7 @@
 import { Box, IconButton, useTheme } from "@mui/material";
-import { useContext, useState, useRef, useEffect } from "react";
-import { ColorModeContext, tokens } from "../../theme";
+import { useState, useRef, useEffect } from "react";
+import { tokens } from "../../theme";
 import InputBase from "@mui/material/InputBase";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
@@ -11,8 +9,7 @@ import AdminChatManager from "../../components/AdminChatManager"; // Import Admi
 
 const Topbar = () => {
   const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-  const colorMode = useContext(ColorModeContext);
+  const colors = tokens();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
 
@@ -49,14 +46,6 @@ const Topbar = () => {
 
       {/* ICONS */}
       <Box display="flex" alignItems="center"> {/* Thêm alignItems="center" */}
-        <IconButton onClick={colorMode.toggleColorMode}>
-          {theme.palette.mode === "dark" ? (
-            <DarkModeOutlinedIcon />
-          ) : (
-            <LightModeOutlinedIcon />
-          )}
-        </IconButton>
-        {/* Thay thế icon chuông cũ bằng AdminChatManager */}
         <AdminChatManager adminUsername="Admin" />
 
         <IconButton>

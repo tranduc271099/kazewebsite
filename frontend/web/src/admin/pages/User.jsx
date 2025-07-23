@@ -10,7 +10,6 @@ const User = () => {
     const [error, setError] = useState('');
     const [selectedUser, setSelectedUser] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [lockLoading, setLockLoading] = useState(false);
     const [userHistory, setUserHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
     const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -32,22 +31,6 @@ const User = () => {
             setError('Không thể tải danh sách người dùng');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleLock = async (id) => {
-        if (!window.confirm('Bạn có chắc chắn muốn khóa/mở khóa tài khoản này?')) return;
-        try {
-            setLockLoading(true);
-            const token = localStorage.getItem('token');
-            await axios.put(`/api/users/${id}/lock`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            fetchUsers();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Không thể khóa/mở khóa tài khoản');
-        } finally {
-            setLockLoading(false);
         }
     };
 
@@ -96,7 +79,6 @@ const User = () => {
                             <tr>
                                 <th>Tên</th>
                                 <th>Email</th>
-                                <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
@@ -105,9 +87,6 @@ const User = () => {
                                 <tr key={user._id}>
                                     <td>{user.name}</td>
                                     <td>{user.email}</td>
-                                    <td style={{ color: user.isLocked ? 'red' : 'green' }}>
-                                        {user.isLocked ? 'Đã khóa' : 'Hoạt động'}
-                                    </td>
                                     <td>
                                         <button
                                             className="btn btn-info btn-sm me-2"
@@ -124,20 +103,11 @@ const User = () => {
                                         >
                                             <i className="fas fa-history"></i> Lịch sử
                                         </button>
-                                        {currentUser?.role === 'admin' && (
-                                            <button
-                                                className="btn btn-warning btn-sm"
-                                                onClick={() => handleLock(user._id)}
-                                                disabled={lockLoading}
-                                            >
-                                                {user.isLocked ? 'Mở khóa' : 'Khóa'}
-                                            </button>
-                                        )}
                                     </td>
                                 </tr>,
                                 expandedUserId === user._id && (
                                     <tr key={user._id + '-detail'}>
-                                        <td colSpan={4}>
+                                        <td colSpan={3}>
                                             <UserDetail user={user} />
                                         </td>
                                     </tr>

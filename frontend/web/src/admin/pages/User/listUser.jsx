@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleToggleLock, handleViewHistory, loading, error }) => {
+const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleViewHistory, loading, error }) => {
     if (loading) return <div>Đang tải...</div>;
     return (
         <div className="table-responsive">
@@ -44,14 +44,6 @@ const ListUser = ({ users, currentUser, handleEdit, handleDelete, handleToggleLo
                                     >
                                         Xóa
                                     </button>
-                                    {user.role === 'user' && (
-                                        <button
-                                            className={`btn btn-${user.isLocked ? 'secondary' : 'warning'} btn-sm`}
-                                            onClick={() => handleToggleLock(user)}
-                                        >
-                                            {user.isLocked ? 'Mở khóa' : 'Khóa'}
-                                        </button>
-                                    )}
                                 </div>
                             </td>
                         </tr>

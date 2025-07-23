@@ -13,15 +13,6 @@ const InfoCardsSection = () => (
                         <p>Chúng tôi miễn phí vận chuyển cho tất cả các đơn hàng có giá trị từ 500.000đ trở lên trên toàn quốc.</p>
                     </div>
                 </div>
-                <div className="col-12 col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="300">
-                    <div className="info-card text-center">
-                        <div className="icon-box">
-                            <i className="bi bi-piggy-bank"></i>
-                        </div>
-                        <h3>Đảm bảo hoàn tiền</h3>
-                        <p>Nếu bạn không hài lòng với sản phẩm, chúng tôi cam kết hoàn tiền 100% trong vòng 30 ngày.</p>
-                    </div>
-                </div>
                 <div className="col-12 col-sm-6 col-lg-3" data-aos="fade-up" data-aos-delay="400">
                     <div className="info-card text-center">
                         <div className="icon-box">

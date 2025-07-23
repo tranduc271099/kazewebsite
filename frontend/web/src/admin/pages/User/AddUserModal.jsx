@@ -48,6 +48,28 @@ const AddUserModal = ({ showAddModal, setShowAddModal, newUser, setNewUser, hand
                             <option value="admin">Admin</option>
                         </select>
                     </div>
+                    <div className="form-group">
+                        <label>Giới tính:</label>
+                        <select
+                            value={newUser.gender || ''}
+                            onChange={(e) => setNewUser({ ...newUser, gender: e.target.value })}
+                            className="form-control"
+                        >
+                            <option value="">Chọn giới tính</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+                    <div className="form-group">
+                        <label>Ngày sinh:</label>
+                        <input
+                            type="date"
+                            value={newUser.dob ? new Date(newUser.dob).toISOString().split('T')[0] : ''}
+                            onChange={(e) => setNewUser({ ...newUser, dob: e.target.value })}
+                            className="form-control"
+                        />
+                    </div>
                     <div className="modal-buttons">
                         <button type="submit" className="btn btn-success">Thêm</button>
                         <button

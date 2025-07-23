@@ -16,7 +16,8 @@ const Profile = () => {
         image: '',
         imageFile: null,
         role: '',
-        isLocked: false
+        gender: '', // Add gender field
+        dob: '',    // Add dob field
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -46,7 +47,8 @@ const Profile = () => {
                 image: res.data.image || '',
                 imageFile: null,
                 role: res.data.role || '',
-                isLocked: res.data.isLocked || false
+                gender: res.data.gender || '', // Populate gender
+                dob: res.data.dob ? new Date(res.data.dob).toISOString().split('T')[0] : '', // Populate dob
             });
             localStorage.setItem('user', JSON.stringify(res.data));
         } catch (err) {
@@ -97,6 +99,8 @@ const Profile = () => {
             form.append('name', formData.name);
             form.append('phone', formData.phone);
             form.append('address', formData.address);
+            form.append('gender', formData.gender); // Append gender
+            form.append('dob', formData.dob);       // Append dob
             if (formData.imageFile) {
                 form.append('image', formData.imageFile);
             }
@@ -173,16 +177,31 @@ const Profile = () => {
                             <input type="text" value={formData.address} onChange={handleChange} name="address"
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
                         </div>
+                        {/* Gender */}
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Giới tính</label>
+                            <select
+                                value={formData.gender}
+                                onChange={handleChange}
+                                name="gender"
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }}
+                            >
+                                <option value="">Chọn giới tính</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        {/* Date of Birth */}
+                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Ngày sinh</label>
+                            <input type="date" value={formData.dob} onChange={handleChange} name="dob"
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
+                        </div>
                         {/* Role (readonly) */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Vai trò</label>
                             <input type="text" value={formData.role || ''} disabled
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
-                        </div>
-                        {/* isLocked (readonly) */}
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Trạng thái</label>
-                            <input type="text" value={formData.isLocked ? 'Bị khóa' : 'Hoạt động'} disabled
                                 style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
                         </div>
                         {/* Nút lưu */}

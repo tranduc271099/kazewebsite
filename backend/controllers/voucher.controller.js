@@ -20,9 +20,21 @@ exports.getAvailableVouchers = async (req, res) => {
 
 exports.createVoucher = async (req, res) => {
   try {
-    const voucher = new Voucher(req.body);
-    await voucher.save();
-    res.status(201).json(voucher);
+    const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity } = req.body;
+    const newVoucher = new Voucher({
+      code,
+      name,
+      description,
+      minOrder,
+      discountType,
+      discountValue,
+      startDate,
+      endDate,
+      quantity: quantity || 1, // Set default to 1 if not provided
+      usedCount: 0 // Initialize usedCount to 0
+    });
+    await newVoucher.save();
+    res.status(201).json(newVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi tạo voucher', error: err.message });
   }
@@ -30,9 +42,21 @@ exports.createVoucher = async (req, res) => {
 
 exports.updateVoucher = async (req, res) => {
   try {
-    const voucher = await Voucher.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!voucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
-    res.json(voucher);
+    const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity, isActive } = req.body;
+    const updatedVoucher = await Voucher.findByIdAndUpdate(req.params.id, {
+      code,
+      name,
+      description,
+      minOrder,
+      discountType,
+      discountValue,
+      startDate,
+      endDate,
+      quantity,
+      isActive
+    }, { new: true });
+    if (!updatedVoucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
+    res.json(updatedVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi cập nhật voucher', error: err.message });
   }
