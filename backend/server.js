@@ -6,6 +6,8 @@ const http = require('http'); // Thêm http
 const { Server } = require("socket.io"); // Thêm Server từ socket.io
 const Chat = require('./models/Chat'); // Thêm import model Chat
 require('dotenv').config();
+const cron = require('node-cron');
+const { exec } = require('child_process');
 
 const app = express();
 const server = http.createServer(app); // Tạo máy chủ HTTP

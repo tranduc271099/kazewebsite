@@ -170,15 +170,19 @@ const Category = () => {
     };
 
     const handleAddToCart = (product) => {
+        const variant = product.variants?.find(
+            v => v.attributes.color === (product.attributes?.colors?.[0] || '') && v.attributes.size === (product.attributes?.sizes?.[0] || '')
+        );
+        const price = variant ? variant.price : product.price;
         const itemToAdd = {
             id: product._id,
             name: product.name,
-            price: product.price,
+            price,
             image: product.images?.[0] || '',
             color: product.attributes?.colors?.[0] || '',
             size: product.attributes?.sizes?.[0] || '',
             quantity: 1,
-            stock: product.stock
+            stock: variant ? variant.stock : product.stock
         };
         addToCart(itemToAdd);
     };

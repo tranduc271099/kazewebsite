@@ -57,12 +57,22 @@ class BillController {
             if (!product) {
               throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại.`);
             }
-            subtotal += product.price * item.quantity;
+            // Lấy giá biến thể nếu có
+            let variantPrice = product.price;
+            if (Array.isArray(product.variants) && product.variants.length > 0) {
+              const variant = product.variants.find(v =>
+                v.attributes && v.attributes.color === item.color && v.attributes.size === item.size
+              );
+              if (variant && typeof variant.price === 'number') {
+                variantPrice = variant.price;
+              }
+            }
+            subtotal += variantPrice * item.quantity;
             return {
               san_pham_id: product._id,
               ten_san_pham: product.name,
               so_luong: item.quantity,
-              gia: product.price,
+              gia: variantPrice,
               mau_sac: item.color,
               kich_thuoc: item.size,
             };
@@ -76,12 +86,22 @@ class BillController {
             if (!product) {
               throw new Error(`Sản phẩm với ID ${item.productId} không tồn tại.`);
             }
-            subtotal += product.price * item.quantity;
+            // Lấy giá biến thể nếu có
+            let variantPrice = product.price;
+            if (Array.isArray(product.variants) && product.variants.length > 0) {
+              const variant = product.variants.find(v =>
+                v.attributes && v.attributes.color === item.color && v.attributes.size === item.size
+              );
+              if (variant && typeof variant.price === 'number') {
+                variantPrice = variant.price;
+              }
+            }
+            subtotal += variantPrice * item.quantity;
             return {
               san_pham_id: product._id,
               ten_san_pham: product.name,
               so_luong: item.quantity,
-              gia: product.price,
+              gia: variantPrice,
               mau_sac: item.color,
               kich_thuoc: item.size,
             };
@@ -436,6 +456,7 @@ class BillController {
 
       bill.trang_thai = 'hoàn thành';
       bill.thanh_toan = 'đã thanh toán';
+      bill.paymentStatus = 'paid';
       await bill.save();
       res.json({ message: 'Đã xác nhận nhận hàng', bill });
     } catch (error) {

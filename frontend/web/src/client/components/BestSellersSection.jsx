@@ -85,15 +85,19 @@ const BestSellersSection = () => {
             return;
         }
 
+        const variant = selectedProduct.variants?.find(
+            v => v.attributes.color === selectedColor && v.attributes.size === selectedSize
+        );
+        const price = variant ? variant.price : selectedProduct.price;
         const cartItem = {
             id: selectedProduct._id,
             name: selectedProduct.name,
-            price: selectedProduct.price,
+            price,
             image: selectedProduct.images?.[0] || '',
             color: selectedColor,
             size: selectedSize,
             quantity: selectedQuantity,
-            stock: selectedProduct.stock,
+            stock: variant ? variant.stock : selectedProduct.stock,
             slug: selectedProduct.slug
         };
 
