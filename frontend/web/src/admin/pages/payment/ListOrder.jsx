@@ -450,8 +450,8 @@ const ListOrder = () => {
               )}
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Trạng thái thanh toán:</span>
-                <span className={styles.detailValue} style={{ background: selectedOrder.paymentStatus === 'paid' ? '#10b981' : '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>
-                  {selectedOrder.paymentStatus === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                <span className={styles.detailValue} style={{ background: (selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? '#10b981' : '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>
+                  {(selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? 'Đã thanh toán' : 'Chưa thanh toán'}
                 </span>
               </div>
               <div className={styles.detailRow} style={{ alignItems: 'flex-start' }}>

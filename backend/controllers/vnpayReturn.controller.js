@@ -78,6 +78,7 @@ const handleVnpayReturn = async (vnpParams) => {
   if (transactionStatus === "00") {
     // Thanh toán thành công
     order.thanh_toan = "đã thanh toán";
+    order.paymentStatus = "paid"; // <--- Thêm dòng này để cập nhật trạng thái cho admin
     order.trang_thai = "chờ xác nhận"; // hoặc trạng thái phù hợp
 
     // Bước 1: Trừ số lượng tồn kho (nếu cần)

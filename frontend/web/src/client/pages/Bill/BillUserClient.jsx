@@ -325,6 +325,12 @@ const BillUserClient = () => {
                                             <div className="order-detail-product-variant">
                                                 Phân loại: {item.kich_thuoc} - {item.mau_sac} &nbsp;|&nbsp; SL: {item.so_luong}
                                             </div>
+                                            <div className="order-detail-product-variant-price" style={{ fontSize: 14, color: '#2563eb', marginTop: 2 }}>
+                                                Giá biến thể: {formatPrice(item.gia)}
+                                            </div>
+                                            <div className="order-detail-product-variant-total" style={{ fontSize: 13, color: '#666', marginTop: 2 }}>
+                                                Tổng: {formatPrice(item.gia * item.so_luong)}
+                                            </div>
                                         </div>
                                         <div className="order-detail-product-price">{formatPrice(item.gia)}</div>
                                     </div>
