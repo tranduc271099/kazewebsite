@@ -19,6 +19,7 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
+import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -190,6 +191,13 @@ const Sidebar = () => {
               title="Quản lý Voucher"
               to="/admin/voucher"
               icon={<ReceiptOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+            <Item
+              title="Quản lý Tin nhắn"
+              to="/admin/chat-management"
+              icon={<ChatOutlinedIcon />}
               selected={selected}
               setSelected={setSelected}
             />

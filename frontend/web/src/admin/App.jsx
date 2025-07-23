@@ -16,7 +16,8 @@ import Product from "./pages/Product";
 import { UserProvider } from "./UserContext";
 import ListOrder from "./pages/payment/ListOrder.jsx";
 import Vouchers from "./pages/Vouchers.jsx"
-import BannerManagement from "./pages/BannerManagement";
+import BannerManagement from "./pages/BannerManagement.jsx";
+import ChatManagement from "./pages/ChatManagement.jsx";
 
 function App() {
   const [theme, colorMode] = useMode();
@@ -64,6 +65,7 @@ function App() {
                 <Route path="/faq" element={<FAQ />} /> */}
                 <Route path="/voucher" element={<Vouchers />} />
                 <Route path="/banners" element={<BannerManagement />} />
+                <Route path="/chat-management" element={<ChatManagement />} />
               </Routes>
             </main>
           </div>
