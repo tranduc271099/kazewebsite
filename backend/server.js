@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
       if (!data.isAdmin) {
         // Kiểm tra xem phòng chat đã tồn tại chưa
         const existingChat = await Chat.findOne({ roomId: data.room });
-        
+
         if (!existingChat) {
           // Tạo phiên chat mới trong DB
           const newChat = new Chat({
@@ -100,7 +100,7 @@ io.on('connection', (socket) => {
             status: 'mới'
           });
           await newChat.save();
-          
+
           // Thông báo cho tất cả admin về phiên chat mới
           console.log('Emitting new_chat_session to all clients:', {
             roomId: data.room,
@@ -117,13 +117,13 @@ io.on('connection', (socket) => {
         // Cập nhật trạng thái và thêm tên admin thực tế
         const updatedChat = await Chat.findOneAndUpdate(
           { roomId: data.room },
-          { 
-            status: 'đang diễn ra', 
+          {
+            status: 'đang diễn ra',
             adminUsername: data.username // Lấy tên admin thực tế từ data.username
           },
           { new: true }
         );
-        
+
         if (updatedChat) {
           // Thông báo cho client rằng admin đã tham gia
           io.to(data.room).emit('admin_joined', {
@@ -141,7 +141,7 @@ io.on('connection', (socket) => {
   socket.on('send_message', async (data) => { // data = { room, author, message, time }
     try {
       console.log('Received message:', data); // Debug log
-      
+
       // Lưu tin nhắn vào DB
       const updatedChat = await Chat.findOneAndUpdate(
         { roomId: data.room },
@@ -156,7 +156,7 @@ io.on('connection', (socket) => {
         },
         { new: true }
       );
-      
+
       if (updatedChat) {
         console.log('Message saved to DB, broadcasting to room:', data.room);
         // Gửi tin nhắn đến mọi người trong phòng
@@ -173,11 +173,11 @@ io.on('connection', (socket) => {
   socket.on('end_chat', async (data) => { // data = { roomId, endedBy, username }
     try {
       const updatedChat = await Chat.findOneAndUpdate(
-        { roomId: data.roomId }, 
+        { roomId: data.roomId },
         { status: 'đã kết thúc' },
         { new: true }
       );
-      
+
       if (updatedChat) {
         // Thông báo cho tất cả người trong phòng rằng chat đã kết thúc
         io.to(data.roomId).emit('chat_ended', {
@@ -186,7 +186,7 @@ io.on('connection', (socket) => {
           username: data.username,
           timestamp: new Date()
         });
-        
+
         console.log(`Chat ${data.roomId} ended by ${data.endedBy}: ${data.username}`);
       }
     } catch (error) {
@@ -216,4 +216,48 @@ const createPaymentUrl = (orderId, amount, orderInfo) => {
     pad(date.getSeconds());
 
   vnp_Params['vnp_CreateDate'] = createDate;
+
 };
+
+// --- TỰ ĐỘNG HỦY ĐƠN HÀNG VNPAY CHƯA THANH TOÁN SAU 5 PHÚT ---
+const Bill = require('./models/Bill/BillUser');
+setInterval(async () => {
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+  try {
+    const bills = await Bill.find({
+      phuong_thuc_thanh_toan: 'VNPAY',
+      thanh_toan: 'chưa thanh toán',
+      trang_thai: { $ne: 'đã hủy' },
+      ngay_tao: { $lte: fiveMinutesAgo },
+      orderId: { $exists: true, $ne: null }
+    });
+    for (const bill of bills) {
+      bill.trang_thai = 'đã hủy';
+      bill.ly_do_huy = 'Khách không hoàn tất thanh toán VNPAY trong 5 phút';
+      await bill.save();
+      console.log(`[AUTO CANCEL] Đã hủy đơn hàng VNPAY ${bill.orderId} do không thanh toán sau 5 phút.`);
+    }
+  } catch (err) {
+    console.error('[AUTO CANCEL] Lỗi khi kiểm tra/hủy đơn hàng VNPAY:', err);
+  }
+}, 60 * 1000); // 1 phút chạy 1 lần
+
+// --- TỰ ĐỘNG CHUYỂN ĐƠN HÀNG SANG 'ĐÃ NHẬN HÀNG' SAU 3 NGÀY ---
+setInterval(async () => {
+  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+  try {
+    const bills = await Bill.find({
+      trang_thai: 'đã giao hàng',
+      ngay_cap_nhat: { $lte: threeDaysAgo }
+    });
+    for (const bill of bills) {
+      bill.trang_thai = 'đã nhận hàng';
+      bill.ngay_cap_nhat = new Date();
+      await bill.save();
+      console.log(`[AUTO UPDATE] Đơn hàng ${bill.orderId} đã tự động chuyển sang 'đã nhận hàng' sau 3 ngày.`);
+    }
+  } catch (err) {
+    console.error('[AUTO UPDATE] Lỗi khi tự động cập nhật trạng thái đơn hàng:', err);
+  }
+}, 60 * 60 * 1000); // 1 tiếng chạy 1 lần
+

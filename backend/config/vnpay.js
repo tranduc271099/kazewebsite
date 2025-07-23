@@ -1,7 +1,6 @@
 module.exports = {
-  vnp_TmnCode: "2RDFGTDQ",
-  vnp_HashSecret: "DFFAUFZZRDGL52U23YXWVYPXEUS4VV2D",
+  vnp_TmnCode: "OKEV8OH4",
+  vnp_HashSecret: "DQ7CR6HNXI6XZM6XM0KE63NFN6O7LX9A",
   vnp_Url: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
-  vnp_ReturnUrl: "https://720693e59dee.ngrok-free.app/vnpay_return",
-
+  vnp_ReturnUrl: "https://localhost:5000/vnpay_return",
 }; 
