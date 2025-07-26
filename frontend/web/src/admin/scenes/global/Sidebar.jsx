@@ -230,7 +230,13 @@ const Sidebar = () => {
               setSelected={handleChatClick}
               badgeContent={chatNotifications}
             />
-
+            <Item
+              title="Quản lý bình luận"
+              to="/admin/comments"
+              icon={<ChatOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             <Typography
               variant="h6"
               color={colors.grey[300]}

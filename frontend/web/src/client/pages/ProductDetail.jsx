@@ -211,13 +211,17 @@ function ProductDetail() {
         }
     }, [selectedVariant, mainImage]);
 
-    // Lấy danh sách bình luận
+    // Lấy danh sách bình luận (chỉ hiển thị những comment đã được duyệt và không bị ẩn)
     useEffect(() => {
         const fetchComments = async () => {
             setLoadingComments(true);
             try {
                 const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
-                setComments(res.data);
+                // Lọc chỉ hiển thị comments đã được duyệt và không bị ẩn
+                const approvedComments = res.data.filter(comment => 
+                    comment.status === 'approved' && !comment.isHidden && !comment.isDeleted
+                );
+                setComments(approvedComments);
             } catch (err) {
                 setComments([]);
             } finally {
@@ -261,16 +265,41 @@ function ProductDetail() {
             });
             setReviewContent('');
             setReviewRating(5);
+            toast.success('Đánh giá đã được gửi và đang chờ duyệt!');
             // Reload bình luận và order hợp lệ
             const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
-            setComments(res.data);
+            const approvedComments = res.data.filter(comment => 
+                comment.status === 'approved' && !comment.isHidden && !comment.isDeleted
+            );
+            setComments(approvedComments);
             const eligibleRes = await axios.get(`http://localhost:5000/api/comments/eligible-orders/${productId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setCanReviewOrders(eligibleRes.data);
             if (eligibleRes.data.length > 0) setSelectedOrderId(eligibleRes.data[0].orderId);
         } catch (err) {
-            alert(err.response?.data?.message || 'Lỗi khi gửi đánh giá');
+            toast.error(err.response?.data?.message || 'Lỗi khi gửi đánh giá');
+        }
+    };
+
+    // Báo cáo bình luận
+    const handleReportComment = async (commentId) => {
+        const reason = prompt('Lý do báo cáo (spam/inappropriate/offensive/fake/other):');
+        if (!reason) return;
+        
+        const description = prompt('Mô tả chi tiết (tùy chọn):');
+        
+        try {
+            const token = localStorage.getItem('token');
+            await axios.post(`http://localhost:5000/api/comments/${commentId}/report`, {
+                reason,
+                description
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Đã báo cáo bình luận thành công!');
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Lỗi khi báo cáo bình luận');
         }
     };
 
@@ -535,62 +564,151 @@ function ProductDetail() {
                                         <div className="product-reviews">
                                             {/* Form đánh giá nếu đủ điều kiện */}
                                             {canReviewOrders.length > 0 && (
-                                                <form onSubmit={handleReviewSubmit} className="mb-4">
-                                                    <div className="mb-2">
-                                                        <label>Đánh giá:</label>
-                                                        <select value={reviewRating} onChange={e => setReviewRating(Number(e.target.value))}>
-                                                            {[5,4,3,2,1].map(star => (
-                                                                <option key={star} value={star}>{star} sao</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="mb-2">
-                                                        <label>Nội dung:</label>
-                                                        <textarea value={reviewContent} onChange={e => setReviewContent(e.target.value)} rows={3} style={{width:'100%'}} required />
-                                                    </div>
-                                                    {canReviewOrders.length > 1 && (
-                                                        <div className="mb-2">
-                                                            <label>Chọn đơn hàng:</label>
-                                                            <select value={selectedOrderId} onChange={e => setSelectedOrderId(e.target.value)}>
-                                                                {canReviewOrders.map(o => (
-                                                                    <option key={o.orderId} value={o.orderId}>
-                                                                        Đơn #{o.orderId.slice(-5)} - {new Date(o.ngay_tao).toLocaleDateString('vi-VN')}
-                                                                    </option>
+                                                <div className="review-form-container mb-4 p-3 border rounded">
+                                                    <h6 className="mb-3">Viết đánh giá của bạn</h6>
+                                                    <form onSubmit={handleReviewSubmit}>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Đánh giá:</label>
+                                                            <div className="rating-selector">
+                                                                {[5,4,3,2,1].map(star => (
+                                                                    <button
+                                                                        key={star}
+                                                                        type="button"
+                                                                        className={`btn btn-sm ${reviewRating >= star ? 'btn-warning' : 'btn-outline-warning'}`}
+                                                                        onClick={() => setReviewRating(star)}
+                                                                        style={{ marginRight: '5px' }}
+                                                                    >
+                                                                        ★ {star}
+                                                                    </button>
                                                                 ))}
-                                                            </select>
+                                                            </div>
                                                         </div>
-                                                    )}
-                                                    <button type="submit" className="btn btn-primary">Gửi đánh giá</button>
-                                                </form>
+                                                        <div className="mb-3">
+                                                            <label className="form-label">Nội dung đánh giá:</label>
+                                                            <textarea 
+                                                                className="form-control"
+                                                                value={reviewContent} 
+                                                                onChange={e => setReviewContent(e.target.value)} 
+                                                                rows={3} 
+                                                                placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                                                                required 
+                                                            />
+                                                        </div>
+                                                        {canReviewOrders.length > 1 && (
+                                                            <div className="mb-3">
+                                                                <label className="form-label">Chọn đơn hàng:</label>
+                                                                <select 
+                                                                    className="form-select"
+                                                                    value={selectedOrderId} 
+                                                                    onChange={e => setSelectedOrderId(e.target.value)}
+                                                                >
+                                                                    {canReviewOrders.map(o => (
+                                                                        <option key={o.orderId} value={o.orderId}>
+                                                                            Đơn #{o.orderId.slice(-5)} - {new Date(o.ngay_tao).toLocaleDateString('vi-VN')}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                        )}
+                                                        <button type="submit" className="btn btn-primary">
+                                                            <i className="bi bi-send"></i> Gửi đánh giá
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             )}
                                             {canReviewOrders.length === 0 && (
-                                                <div className="alert alert-info mb-4">Chỉ khách đã mua và hoàn thành đơn hàng mới được đánh giá sản phẩm này.</div>
+                                                <div className="alert alert-info mb-4">
+                                                    <i className="bi bi-info-circle"></i>
+                                                    Chỉ khách đã mua và hoàn thành đơn hàng mới được đánh giá sản phẩm này.
+                                                </div>
                                             )}
                                             {/* Danh sách bình luận */}
-                                            <h5>Đánh giá sản phẩm</h5>
-                                            {loadingComments ? <div>Đang tải đánh giá...</div> : (
-                                                comments.length === 0 ? <div>Chưa có đánh giá nào.</div> : (
-                                                    <>
-                                                        {(showAllComments ? comments : comments.slice(0, 5)).map((c, idx) => (
-                                                            <div key={c._id || idx} className="border rounded p-2 mb-2">
-                                                                <div className="fw-bold">Tên: {c.userId?.name || 'Ẩn danh'}</div>
-                                                                <div>Bình luận: {c.content}</div>
-                                                                <div>Ngày bình luận: <span className="text-muted" style={{fontSize:'0.9em'}}>{new Date(c.createdAt).toLocaleString('vi-VN')}</span></div>
-                                                                <div className="text-warning">{Array(c.rating).fill('★').join('')}{Array(5-c.rating).fill('☆').join('')}</div>
+                                            <h5 className="mb-3">Đánh giá sản phẩm ({comments.length})</h5>
+                                            {loadingComments ? (
+                                                <div className="text-center py-3">
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        <span className="visually-hidden">Đang tải...</span>
+                                                    </div>
+                                                    <p className="mt-2">Đang tải đánh giá...</p>
+                                                </div>
+                                            ) : comments.length === 0 ? (
+                                                <div className="text-center py-4">
+                                                    <i className="bi bi-chat-dots text-muted" style={{fontSize: '3rem'}}></i>
+                                                    <p className="text-muted mt-2">Chưa có đánh giá nào cho sản phẩm này.</p>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {(showAllComments ? comments : comments.slice(0, 5)).map((c, idx) => (
+                                                        <div key={c._id || idx} className="comment-item border rounded p-3 mb-3">
+                                                            <div className="d-flex justify-content-between align-items-start mb-2">
+                                                                <div>
+                                                                    <div className="fw-bold text-primary">
+                                                                        {c.userId?.name || 'Ẩn danh'}
+                                                                    </div>
+                                                                    <div className="text-muted small">
+                                                                        {new Date(c.createdAt).toLocaleString('vi-VN')}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="d-flex gap-1">
+                                                                    <button
+                                                                        className="btn btn-sm btn-outline-secondary"
+                                                                        onClick={() => handleReportComment(c._id)}
+                                                                        title="Báo cáo bình luận"
+                                                                    >
+                                                                        <i className="bi bi-flag"></i>
+                                                                    </button>
+                                                                </div>
                                                             </div>
-                                                        ))}
-                                                        {comments.length > 5 && !showAllComments && (
-                                                            <button className="btn btn-link" onClick={() => setShowAllComments(true)}>
-                                                                Hiển thị thêm
-                                                            </button>
-                                                        )}
-                                                        {comments.length > 5 && showAllComments && (
-                                                            <button className="btn btn-link" onClick={() => setShowAllComments(false)}>
-                                                                Ẩn bớt
-                                                            </button>
-                                                        )}
-                                                    </>
-                                                )
+                                                            
+                                                            <div className="rating-display mb-2">
+                                                                {Array(5).fill(null).map((_, index) => (
+                                                                    <span key={index} className={index < c.rating ? 'text-warning' : 'text-muted'}>
+                                                                        ★
+                                                                    </span>
+                                                                ))}
+                                                                <span className="ms-2 text-muted">({c.rating}/5)</span>
+                                                            </div>
+                                                            
+                                                            <div className="comment-content mb-2">
+                                                                <p className="mb-0">{c.content}</p>
+                                                            </div>
+                                                            
+                                                            {/* Admin Reply */}
+                                                            {c.adminReply && (
+                                                                <div className="admin-reply bg-light border-start border-primary ps-3 py-2 mt-2">
+                                                                    <div className="d-flex align-items-center mb-1">
+                                                                        <i className="bi bi-shield-check text-primary me-2"></i>
+                                                                        <small className="fw-bold text-primary">Phản hồi từ Admin</small>
+                                                                    </div>
+                                                                    <p className="mb-0 small">{c.adminReply.content}</p>
+                                                                    <small className="text-muted">
+                                                                        {new Date(c.adminReply.repliedAt).toLocaleString('vi-VN')}
+                                                                    </small>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    
+                                                    {comments.length > 5 && (
+                                                        <div className="text-center">
+                                                            {!showAllComments ? (
+                                                                <button 
+                                                                    className="btn btn-outline-primary" 
+                                                                    onClick={() => setShowAllComments(true)}
+                                                                >
+                                                                    <i className="bi bi-chevron-down"></i> Hiển thị thêm ({comments.length - 5} đánh giá)
+                                                                </button>
+                                                            ) : (
+                                                                <button 
+                                                                    className="btn btn-outline-secondary" 
+                                                                    onClick={() => setShowAllComments(false)}
+                                                                >
+                                                                    <i className="bi bi-chevron-up"></i> Ẩn bớt
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </div>
