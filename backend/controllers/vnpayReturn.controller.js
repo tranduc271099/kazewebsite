@@ -98,14 +98,67 @@ const handleVnpayReturn = async (vnpParams) => {
       },
     };
   } else {
-    // Thanh toán thất bại
+    // Thanh toán thất bại hoặc bị hủy
     order.thanh_toan = "chưa thanh toán";
+    
+    // Tự động hủy đơn hàng ngay lập tức khi thanh toán thất bại
+    order.trang_thai = "đã hủy";
+    order.ly_do_huy = "Khách hủy thanh toán VNPay";
+    order.nguoi_huy = {
+      id: order.nguoi_dung_id,
+      loai: "User"
+    };
+    
+    // Hoàn kho khi hủy đơn hàng
+    const Product = require("../models/Product.js");
+    for (const item of order.danh_sach_san_pham) {
+      console.log(`[VNPAY CANCEL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+
+      // Thử cập nhật biến thể trước
+      const updateResult = await Product.updateOne(
+        {
+          _id: item.san_pham_id,
+          "variants": {
+            $elemMatch: {
+              "attributes.color": item.mau_sac,
+              "attributes.size": item.kich_thuoc
+            }
+          }
+        },
+        {
+          $inc: { "variants.$.stock": item.so_luong }
+        }
+      );
+
+      // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
+      if (updateResult.modifiedCount === 0) {
+        console.log(`[VNPAY CANCEL] Variant not found, trying to update main product stock`);
+        const fallbackUpdateResult = await Product.updateOne(
+          {
+            _id: item.san_pham_id,
+            $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+          },
+          {
+            $inc: { stock: item.so_luong }
+          }
+        );
+
+        if (fallbackUpdateResult.modifiedCount === 0) {
+          console.log(`[VNPAY CANCEL] Failed to restore stock for product ${item.san_pham_id}`);
+        } else {
+          console.log(`[VNPAY CANCEL] Successfully restored main product stock for ${item.san_pham_id}`);
+        }
+      } else {
+        console.log(`[VNPAY CANCEL] Successfully restored variant stock for product ${item.san_pham_id}`);
+      }
+    }
+    
     await order.save();
 
     return {
       status: 400,
       data: {
-        message: "Thanh toán thất bại",
+        message: "Thanh toán thất bại - Đơn hàng đã được hủy",
         orderId: order.orderId,
         responseCode: vnpParams.vnp_ResponseCode,
       },

@@ -380,6 +380,29 @@ class BillController {
     }
   }
 
+  async getByOrderId(req, res) {
+    try {
+      const { orderId } = req.params;
+      const userId = req.user.id;
+      
+      const bill = await Bill.findOne({ orderId, nguoi_dung_id: userId })
+        .populate('nguoi_dung_id', 'name email phone')
+        .populate('nguoi_huy.id', 'name')
+        .populate({
+          path: 'danh_sach_san_pham.san_pham_id',
+          select: 'name images'
+        });
+      
+      if (!bill) {
+        return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+      }
+      
+      res.json(bill);
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+  }
+
   // Cập nhật trạng thái đơn hàng (admin)
   async updateStatus(req, res) {
     try {

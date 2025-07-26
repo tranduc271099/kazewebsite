@@ -26,7 +26,8 @@ import AuthLayout from './client/components/AuthLayout';
 import ProtectedRoute from './client/components/ProtectedRoute'; // Import ProtectedRoute
 import AdminRoute from './admin/components/AdminRoute'; // Import AdminRoute
 import AdminApp from './admin/App';
-import Contact from './client/pages/Contact';
+import CategoryFilterBar from './client/components/CategoryFilterBar';
+import Search from './client/pages/Search';
 
 // Custom Scroll to Top component
 function ScrollToTop() {
@@ -72,15 +73,15 @@ function App() {
               </Route>
 
               {/* Main Routes */}
-              <Route path="/" element={<><Header /><Home /><Footer /></>} />
-              <Route path="/products" element={<><Header /><Products /><Footer /></>} />
-              <Route path="/products/:id" element={<><Header /><ProductDetail /><Footer /></>} />
-              <Route path="/product-details/:productId" element={<><Header /><ProductDetail /><Footer /></>} />
-              <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
-              <Route path="/about" element={<><Header /><About /><Footer /></>} />
-              <Route path="/contact" element={<><Header /><Contact /><Footer /></>} />
-              <Route path="/category/:categoryName" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Modified route to accept categoryName parameter */}
-              <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Keep this for /category base path */}
+              <Route path="/" element={<><Header /><CategoryFilterBar /><Home /><Footer /></>} />
+              <Route path="/products" element={<><Header /><CategoryFilterBar /><Products /><Footer /></>} />
+              <Route path="/products/:id" element={<><Header /><CategoryFilterBar /><ProductDetail /><Footer /></>} />
+              <Route path="/product-details/:productId" element={<><Header /><CategoryFilterBar /><ProductDetail /><Footer /></>} />
+              <Route path="/cart" element={<><Header /><CategoryFilterBar /><Cart /><Footer /></>} />
+              <Route path="/about" element={<><Header /><CategoryFilterBar /><About /><Footer /></>} />
+              <Route path="/search" element={<><Header /><CategoryFilterBar /><Search /><Footer /></>} />
+              <Route path="/category/:categoryName" element={<><Header /><CategoryFilterBar /><ClientCategory /><Footer /></>} /> {/* Modified route to accept categoryName parameter */}
+              <Route path="/category" element={<><Header /><CategoryFilterBar /><ClientCategory /><Footer /></>} /> {/* Keep this for /category base path */}
 
             </Routes>
             <Chat />

@@ -141,6 +141,74 @@
     color: #333;
 }
 
+/* Search Dropdown Styles */
+.search-container {
+    position: relative;
+}
+
+.search-toggle {
+    transition: all 0.3s ease;
+}
+
+.search-toggle:hover {
+    color: #007bff;
+    transform: scale(1.1);
+}
+
+.search-dropdown {
+    animation: slideDown 0.3s ease;
+}
+
+.search-dropdown::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid #fff;
+}
+
+.search-dropdown .input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.search-dropdown .form-control {
+    flex: 1;
+    transition: border-color 0.3s ease;
+}
+
+.search-dropdown .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.search-dropdown .btn {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.search-dropdown .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
 @media (max-width: 991px) {
     .navbar {
         display: none;
@@ -148,6 +216,12 @@
 
     .mobile-nav-toggle {
         display: block;
+    }
+
+    .search-dropdown {
+        width: 300px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
     }
 
     .navbar.active {
@@ -173,5 +247,25 @@
 
     .user-menu {
         right: -20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-dropdown {
+        width: 280px !important;
+        padding: 15px !important;
+    }
+    
+    .search-dropdown h5 {
+        font-size: 14px !important;
+    }
+    
+    .search-dropdown .form-control {
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+    }
+    
+    .search-dropdown .btn {
+        padding: 10px 15px !important;
     }
 }

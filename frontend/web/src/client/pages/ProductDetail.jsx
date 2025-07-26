@@ -5,7 +5,8 @@ import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
 
 function ProductDetail() {
-    const { productId } = useParams();
+    const params = useParams();
+    const productId = params.productId || params.id; // Ưu tiên id nếu có, fallback productId
     const [product, setProduct] = useState(null);
     const [mainImage, setMainImage] = useState('');
     const [selectedAttributes, setSelectedAttributes] = useState({});
