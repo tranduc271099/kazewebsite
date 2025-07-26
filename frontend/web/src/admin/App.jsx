@@ -25,6 +25,7 @@ import ListStaff from "./pages/User/ListStaff.jsx";       // Import ListStaff
 // import UserDetail from "./pages/User/UserDetail.jsx"; // Placeholder for user detail page
 // import UserEdit from "./pages/User/UserEdit.jsx";       // Placeholder for user edit page
 import UserDetail from "./pages/User/UserDetail.jsx"; // Placeholder for user detail page
+import ListComment from "./pages/Comment/ListComment.jsx"; // Import ListComment
 
 function App() {
   const [theme] = useMode();
@@ -72,6 +73,7 @@ function App() {
               <Route path="/voucher" element={<Vouchers />} />
               <Route path="/banners" element={<BannerManagement />} />
               <Route path="/chat-management" element={<ChatManagement />} />
+              <Route path="/comments" element={<ListComment />} />
             </Routes>
           </main>
         </div>
