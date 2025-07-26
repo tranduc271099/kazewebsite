@@ -162,7 +162,16 @@ exports.getTopProducts = async (req, res) => {
                     totalQuantity: 1,
                     totalRevenue: 1,
                     orderCount: 1,
-                    productImage: { $arrayElemAt: ['$productInfo.images', 0] }
+                    productImage: { $arrayElemAt: ['$productInfo.images', 0] },
+                    stock: {
+                        $cond: {
+                            if: { $gt: [{ $size: '$productInfo.variants' }, 0] },
+                            then: { $sum: '$productInfo.variants.stock' },
+                            else: '$productInfo.stock'
+                        }
+                    },
+                    attributes: '$productInfo.attributes',
+                    variants: '$productInfo.variants'
                 }
             }
         ]);

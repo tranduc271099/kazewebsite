@@ -80,6 +80,39 @@ function ProductDetail() {
         fetchProduct();
     }, [productId]);
 
+    // Lắng nghe sự kiện thay đổi tồn kho
+    useEffect(() => {
+        const handleStockUpdate = async (event) => {
+            if (event.detail.productId === productId) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    
+                    const updatedProduct = res.data;
+                    const images = updatedProduct.images?.map(img =>
+                        img.startsWith('/uploads/') ? `http://localhost:5000${img}` : img
+                    ) || [];
+                    setProduct({ ...updatedProduct, images });
+                    
+                    // Cập nhật selectedVariant với thông tin tồn kho mới
+                    const updatedVariant = updatedProduct.variants.find(
+                        v => v.attributes.color === selectedAttributes.colors && v.attributes.size === selectedAttributes.sizes
+                    );
+                    setSelectedVariant(updatedVariant);
+                } catch (error) {
+                    console.error('Lỗi khi cập nhật thông tin sản phẩm:', error);
+                }
+            }
+        };
+
+        window.addEventListener('stockUpdated', handleStockUpdate);
+        return () => {
+            window.removeEventListener('stockUpdated', handleStockUpdate);
+        };
+    }, [productId, selectedAttributes]);
+
     const handleAttributeChange = (attributeName, value) => {
         const newAttributes = { ...selectedAttributes, [attributeName]: value };
         setSelectedAttributes(newAttributes);
@@ -89,7 +122,7 @@ function ProductDetail() {
         setSelectedVariant(variant);
     };
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         if (!selectedVariant) {
             toast.warning('Vui lòng chọn đầy đủ các thuộc tính sản phẩm');
             return;
@@ -104,7 +137,32 @@ function ProductDetail() {
             quantity: quantity,
             stock: selectedVariant.stock
         };
-        addToCart(itemToAdd);
+        
+        try {
+            await addToCart(itemToAdd);
+            
+            // Fetch lại thông tin sản phẩm để cập nhật số lượng tồn kho
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            // Cập nhật product state với thông tin mới
+            const updatedProduct = res.data;
+            const images = updatedProduct.images?.map(img =>
+                img.startsWith('/uploads/') ? `http://localhost:5000${img}` : img
+            ) || [];
+            setProduct({ ...updatedProduct, images });
+            
+            // Cập nhật selectedVariant với thông tin tồn kho mới
+            const updatedVariant = updatedProduct.variants.find(
+                v => v.attributes.color === selectedAttributes.colors && v.attributes.size === selectedAttributes.sizes
+            );
+            setSelectedVariant(updatedVariant);
+            
+        } catch (error) {
+            console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        }
     };
 
     const handleImageZoom = (e) => {

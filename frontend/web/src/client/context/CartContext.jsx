@@ -6,12 +6,23 @@ const API_URL = 'http://localhost:5000/api'; // Define backend API URL
 
 export const CartContext = createContext();
 
+// Event system để thông báo khi tồn kho thay đổi
+const stockUpdateEvent = new CustomEvent('stockUpdated');
+
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
 
     const getToken = () => {
         // Assuming your token is stored in localStorage as 'token' or 'userToken'
         return localStorage.getItem('token') || localStorage.getItem('userToken');
+    };
+
+    // Hàm thông báo khi tồn kho thay đổi
+    const notifyStockUpdate = (productId) => {
+        const event = new CustomEvent('stockUpdated', { 
+            detail: { productId } 
+        });
+        window.dispatchEvent(event);
     };
 
     // Load cart items from backend on initial render
@@ -118,6 +129,9 @@ export const CartProvider = ({ children }) => {
                 });
             setCartItems(formattedItems);
             toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+            
+            // Thông báo khi tồn kho thay đổi
+            notifyStockUpdate(item.id);
         } catch (error) {
             console.error('Lỗi khi thêm sản phẩm vào giỏ hàng:', error.response?.data?.message || error.message);
             toast.error(error.response?.data?.message || 'Không thể thêm sản phẩm vào giỏ hàng.');
@@ -164,6 +178,9 @@ export const CartProvider = ({ children }) => {
                 });
             setCartItems(formattedItems);
             toast.success('Đã xóa sản phẩm khỏi giỏ hàng!');
+            
+            // Thông báo khi tồn kho thay đổi
+            notifyStockUpdate(itemId);
         } catch (error) {
             console.error('Lỗi khi xóa sản phẩm khỏi giỏ hàng:', error.response?.data?.message || error.message);
             toast.error(error.response?.data?.message || 'Không thể xóa sản phẩm khỏi giỏ hàng.');
@@ -214,6 +231,9 @@ export const CartProvider = ({ children }) => {
                 });
             setCartItems(formattedItems);
             toast.success('Đã cập nhật số lượng sản phẩm!');
+            
+            // Thông báo khi tồn kho thay đổi
+            notifyStockUpdate(itemId);
         } catch (error) {
             console.error('Lỗi khi cập nhật số lượng:', error.response?.data?.message || error.message);
             toast.error(error.response?.data?.message || 'Không thể cập nhật số lượng.');
@@ -227,6 +247,9 @@ export const CartProvider = ({ children }) => {
             return;
         }
         try {
+            // Lưu danh sách product IDs trước khi clear để thông báo
+            const productIds = cartItems.map(item => item.id);
+            
             await axios.delete(`${API_URL}/cart/clear`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -234,6 +257,11 @@ export const CartProvider = ({ children }) => {
             });
             setCartItems([]);
             toast.success('Giỏ hàng đã được làm trống!');
+            
+            // Thông báo khi tồn kho thay đổi cho tất cả sản phẩm
+            productIds.forEach(productId => {
+                notifyStockUpdate(productId);
+            });
         } catch (error) {
             // Nếu lỗi là "giỏ hàng không tồn tại", không hiện toast lỗi
             if (error.response?.data?.message !== 'Giỏ hàng không tồn tại') {
@@ -297,6 +325,9 @@ export const CartProvider = ({ children }) => {
                 });
             setCartItems(formattedItems);
             toast.success('Đã cập nhật thuộc tính sản phẩm!');
+            
+            // Thông báo khi tồn kho thay đổi
+            notifyStockUpdate(productId);
         } catch (error) {
             console.error('Lỗi khi cập nhật thuộc tính sản phẩm:', error.response?.data?.message || error.message);
             toast.error(error.response?.data?.message || 'Không thể cập nhật thuộc tính sản phẩm.');
@@ -344,6 +375,11 @@ export const CartProvider = ({ children }) => {
                     };
                 });
             setCartItems(formattedItems);
+            
+            // Thông báo khi tồn kho thay đổi cho tất cả sản phẩm đã xóa
+            items.forEach(item => {
+                notifyStockUpdate(item.id);
+            });
         } catch (error) {
             setCartItems([]);
         }
@@ -361,6 +397,7 @@ export const CartProvider = ({ children }) => {
                 getCartItemsCount,
                 updateCartItemAttributes,
                 removeItemsFromCart,
+                notifyStockUpdate, // Add notifyStockUpdate to context
             }}
         >
             {children}

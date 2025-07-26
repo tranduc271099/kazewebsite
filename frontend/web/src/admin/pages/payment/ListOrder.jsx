@@ -236,10 +236,7 @@ const ListOrder = () => {
         return ['đang giao hàng', 'đã hủy'];
       case 'đang giao hàng':
         return ['đã giao hàng'];
-      case 'đã giao hàng':
-        return ['hoàn thành'];
-      case 'đã nhận hàng':
-        return ['hoàn thành'];
+      // Không cho phép admin chuyển sang 'hoàn thành' hoặc 'đã nhận hàng'
       default:
         return [];
     }
@@ -499,6 +496,11 @@ const ListOrder = () => {
             </div>
 
             <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
+              {/* Debug: Hiển thị trạng thái hiện tại và các tùy chọn */}
+              <div style={{ marginRight: 'auto', fontSize: '12px', color: '#666' }}>
+                Trạng thái hiện tại: {selectedOrder.trang_thai} | 
+                Tùy chọn: {getNextStatusOptions(selectedOrder.trang_thai).join(', ')}
+              </div>
               {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&
                 <>
                   <strong style={{ marginRight: 'auto', fontSize: '1rem', color: 'var(--text-primary)' }}>Cập nhật trạng thái:</strong>

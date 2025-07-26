@@ -42,6 +42,39 @@ const ProductListSection = () => {
         fetchData();
     }, []);
 
+    // Lắng nghe sự kiện thay đổi tồn kho
+    useEffect(() => {
+        const handleStockUpdate = async (event) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${backendUrl}/api/products/${event.detail.productId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const updatedProduct = res.data;
+                
+                // Cập nhật danh sách products với thông tin mới
+                setProducts(prevProducts => 
+                    prevProducts.map(p => 
+                        p._id === event.detail.productId ? updatedProduct : p
+                    )
+                );
+                
+                // Cập nhật selectedProduct nếu đang được chọn
+                if (selectedProduct && selectedProduct._id === event.detail.productId) {
+                    setSelectedProduct(updatedProduct);
+                }
+            } catch (error) {
+                console.error('Lỗi khi cập nhật thông tin sản phẩm:', error);
+            }
+        };
+
+        window.addEventListener('stockUpdated', handleStockUpdate);
+        return () => {
+            window.removeEventListener('stockUpdated', handleStockUpdate);
+        };
+    }, [selectedProduct]);
+
     useEffect(() => {
         const style = document.createElement('style');
         style.innerHTML = `
@@ -190,6 +223,29 @@ const ProductListSection = () => {
         };
         try {
             await addToCart(cartItem);
+            
+            // Fetch lại thông tin sản phẩm từ API để cập nhật số lượng tồn kho
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`${backendUrl}/api/products/${selectedProduct._id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const updatedProduct = res.data;
+                
+                // Cập nhật selectedProduct với thông tin mới
+                setSelectedProduct(updatedProduct);
+                
+                // Cập nhật danh sách products với thông tin mới
+                setProducts(prevProducts => 
+                    prevProducts.map(p => 
+                        p._id === selectedProduct._id ? updatedProduct : p
+                    )
+                );
+            } catch (fetchError) {
+                console.error('Lỗi khi fetch lại thông tin sản phẩm:', fetchError);
+            }
+            
             closePopover();
         } catch (error) {
             toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng');

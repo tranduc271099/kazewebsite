@@ -26,6 +26,7 @@ import AuthLayout from './client/components/AuthLayout';
 import ProtectedRoute from './client/components/ProtectedRoute'; // Import ProtectedRoute
 import AdminRoute from './admin/components/AdminRoute'; // Import AdminRoute
 import AdminApp from './admin/App';
+import Contact from './client/pages/Contact';
 
 // Custom Scroll to Top component
 function ScrollToTop() {
@@ -77,6 +78,7 @@ function App() {
               <Route path="/product-details/:productId" element={<><Header /><ProductDetail /><Footer /></>} />
               <Route path="/cart" element={<><Header /><Cart /><Footer /></>} />
               <Route path="/about" element={<><Header /><About /><Footer /></>} />
+              <Route path="/contact" element={<><Header /><Contact /><Footer /></>} />
               <Route path="/category/:categoryName" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Modified route to accept categoryName parameter */}
               <Route path="/category" element={<><Header /><ClientCategory /><Footer /></>} /> {/* Keep this for /category base path */}
 

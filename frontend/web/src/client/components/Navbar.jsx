@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
+import { CartContext } from '../context/CartContext';
 import '../styles/Navbar.css';
 
 const Header = styled.header`
@@ -146,8 +147,8 @@ const NavList = styled.ul`
 
 const Navbar = () => {
   const { isAuthenticated, user } = useSelector(state => state.auth);
-  const { items } = useSelector(state => state.cart);
-  const cartItemsCount = items.reduce((total, item) => total + item.quantity, 0);
+  const { getCartItemsCount } = useContext(CartContext);
+  const cartItemsCount = getCartItemsCount();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleUserMenuToggle = () => setUserMenuOpen(open => !open);

@@ -33,6 +33,17 @@ app.use('/api/products', require('./routes/product.routes'));
 // Thêm middleware để parse JSON body
 app.use(express.json());
 
+// Middleware để thêm socket instance vào request
+app.use('/api/cart', (req, res, next) => {
+    req.io = io;
+    next();
+});
+
+app.use('/api/bill', (req, res, next) => {
+    req.io = io;
+    next();
+});
+
 // Cấu hình static cho thư mục uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

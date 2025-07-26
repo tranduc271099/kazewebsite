@@ -1,6 +1,18 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
+// Socket function to notify admin about cart changes
+const notifyAdminCartChange = (req, action, productName) => {
+    if (req.io) {
+        req.io.emit('client_cart_update', {
+            action: action,
+            productName: productName,
+            username: req.user.name || req.user.username || 'Khách hàng',
+            timestamp: new Date()
+        });
+    }
+};
+
 // Get user's cart
 exports.getCart = async (req, res) => {
     try {
@@ -61,8 +73,9 @@ exports.addItemToCart = async (req, res) => {
             const existingItem = cart.items[existingItemIndex];
             const newQuantity = existingItem.quantity + quantity;
 
-            if (newQuantity > variant.stock) { // Check against variant stock
-                return res.status(400).json({ message: `Số lượng vượt quá tồn kho của biến thể! Tồn kho hiện tại: ${variant.stock}` });
+            // Kiểm tra: tồn kho hiện tại >= số lượng mới (không cộng thêm số lượng đã có trong giỏ)
+            if (newQuantity > variant.stock) {
+                return res.status(400).json({ message: `Số lượng vượt quá tồn kho! Tồn kho hiện tại: ${variant.stock}, Yêu cầu: ${newQuantity}` });
             }
             existingItem.quantity = newQuantity;
         } else {
@@ -73,9 +86,14 @@ exports.addItemToCart = async (req, res) => {
             cart.items.push({ productId, quantity, color, size, priceAtTimeOfAddition: variant.price || product.price });
         }
 
+        // KHÔNG giảm tồn kho khi thêm vào giỏ hàng - chỉ lưu vào giỏ hàng
         await cart.save();
+        
         // Populate product details for the added/updated item before sending response
         const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+
+        // Notify admin about cart change (không giảm tồn kho nên không cần thông báo stock update)
+        notifyAdminCartChange(req, 'thêm vào giỏ hàng', product.name);
 
         res.status(200).json(updatedCart);
     } catch (error) {
@@ -117,16 +135,27 @@ exports.updateCartItemQuantity = async (req, res) => {
         );
 
         if (itemIndex > -1) {
+            const currentQuantity = cart.items[itemIndex].quantity;
+
             if (quantity <= 0) {
                 // Remove item if quantity is 0 or less
                 cart.items.splice(itemIndex, 1);
-            } else if (quantity > variant.stock) { // Check against variant stock
-                return res.status(400).json({ message: `Số lượng vượt quá tồn kho của biến thể! Tồn kho hiện tại: ${variant.stock}` });
             } else {
+                // Cập nhật số lượng - chỉ kiểm tra tồn kho có đủ không
+                if (quantity > variant.stock) {
+                    return res.status(400).json({ message: `Số lượng vượt quá tồn kho! Tồn kho hiện tại: ${variant.stock}, Yêu cầu: ${quantity}` });
+                }
                 cart.items[itemIndex].quantity = quantity;
             }
+
+            // KHÔNG điều chỉnh tồn kho khi thay đổi số lượng trong giỏ hàng
             await cart.save();
             const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+            
+            // Notify admin about cart change
+            const action = quantity <= 0 ? 'xóa khỏi giỏ hàng' : 'cập nhật số lượng';
+            notifyAdminCartChange(req, action, product.name);
+            
             res.status(200).json(updatedCart);
         } else {
             res.status(404).json({ message: 'Sản phẩm không có trong giỏ hàng' });
@@ -148,6 +177,15 @@ exports.removeCartItem = async (req, res) => {
             return res.status(404).json({ message: 'Giỏ hàng không tồn tại' });
         }
 
+        // Tìm item cần xóa để lấy số lượng
+        const itemToRemove = cart.items.find(
+            item => item.productId.toString() === productId && item.color === color && item.size === size
+        );
+
+        if (!itemToRemove) {
+            return res.status(404).json({ message: 'Sản phẩm không có trong giỏ hàng' });
+        }
+
         const initialLength = cart.items.length;
         cart.items = cart.items.filter(
             item => !(item.productId.toString() === productId && item.color === color && item.size === size)
@@ -158,8 +196,16 @@ exports.removeCartItem = async (req, res) => {
             return res.status(404).json({ message: 'Sản phẩm không có trong giỏ hàng' });
         }
 
+        // KHÔNG hoàn trả tồn kho khi xóa khỏi giỏ hàng
         await cart.save();
         const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+        
+        // Notify admin about cart change
+        const product = await Product.findById(productId);
+        if (product) {
+            notifyAdminCartChange(req, 'xóa khỏi giỏ hàng', product.name);
+        }
+        
         res.status(200).json(updatedCart);
     } catch (error) {
         console.error(error);
@@ -177,8 +223,13 @@ exports.clearCart = async (req, res) => {
             return res.status(404).json({ message: 'Giỏ hàng không tồn tại' });
         }
 
+        // KHÔNG hoàn trả tồn kho khi làm trống giỏ hàng
         cart.items = [];
         await cart.save();
+        
+        // Notify admin about cart change
+        notifyAdminCartChange(req, 'làm trống giỏ hàng', 'tất cả sản phẩm');
+        
         res.status(200).json({ message: 'Giỏ hàng đã được làm trống' });
     } catch (error) {
         console.error(error);

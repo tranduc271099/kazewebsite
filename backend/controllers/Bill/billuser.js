@@ -3,6 +3,32 @@ const Product = require('../../models/Product');
 const Cart = require('../../models/Cart');
 const mongoose = require('mongoose');
 
+// Socket function to notify admin about order creation and stock reduction
+const notifyAdminOrderCreated = (req, orderData) => {
+    if (req.io) {
+        req.io.emit('order_created', {
+            orderId: orderData.orderId,
+            totalAmount: orderData.tong_tien,
+            productCount: orderData.danh_sach_san_pham.length,
+            username: req.user.name || req.user.username || 'Khách hàng',
+            timestamp: new Date()
+        });
+        
+        // Thông báo cho từng sản phẩm đã giảm tồn kho
+        orderData.danh_sach_san_pham.forEach(item => {
+            req.io.emit('stock_reduced', {
+                productId: item.san_pham_id,
+                productName: item.ten_san_pham,
+                quantity: item.so_luong,
+                color: item.mau_sac,
+                size: item.kich_thuoc,
+                username: req.user.name || req.user.username || 'Khách hàng',
+                timestamp: new Date()
+            });
+        });
+    }
+};
+
 class BillController {
   async getList(req, res) {
     try {
@@ -191,6 +217,14 @@ class BillController {
       } else {
         await Cart.findByIdAndDelete(cart._id);
       }
+      
+      // Notify admin about order creation and stock reduction
+      notifyAdminOrderCreated(req, {
+        orderId: finalOrderId,
+        tong_tien,
+        danh_sach_san_pham
+      });
+      
       res.status(201).json({ message: 'Tạo hóa đơn thành công', bill: newBill });
     } catch (error) {
       console.error('[ADD BILL ERROR]', error);

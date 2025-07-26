@@ -78,6 +78,34 @@ const Category = () => {
         fetchData();
     }, [categoryName]); // Add categoryName to dependency array
 
+    // Lắng nghe sự kiện thay đổi tồn kho
+    useEffect(() => {
+        const handleStockUpdate = async (event) => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const updatedProduct = res.data;
+                
+                // Cập nhật danh sách products với thông tin mới
+                setProducts(prevProducts => 
+                    prevProducts.map(p => 
+                        p._id === event.detail.productId ? updatedProduct : p
+                    )
+                );
+            } catch (error) {
+                console.error('Lỗi khi cập nhật thông tin sản phẩm:', error);
+            }
+        };
+
+        window.addEventListener('stockUpdated', handleStockUpdate);
+        return () => {
+            window.removeEventListener('stockUpdated', handleStockUpdate);
+        };
+    }, []);
+
     // Trích xuất danh sách thương hiệu
     useEffect(() => {
         if (products.length > 0) {
@@ -169,7 +197,7 @@ const Category = () => {
         margin: '0 auto'
     };
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = async (product) => {
         const variant = product.variants?.find(
             v => v.attributes.color === (product.attributes?.colors?.[0] || '') && v.attributes.size === (product.attributes?.sizes?.[0] || '')
         );
@@ -184,7 +212,31 @@ const Category = () => {
             quantity: 1,
             stock: variant ? variant.stock : product.stock
         };
-        addToCart(itemToAdd);
+        
+        try {
+            await addToCart(itemToAdd);
+            
+            // Fetch lại thông tin sản phẩm từ API để cập nhật số lượng tồn kho
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get(`http://localhost:5000/api/products/${product._id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                const updatedProduct = res.data;
+                
+                // Cập nhật danh sách products với thông tin mới
+                setProducts(prevProducts => 
+                    prevProducts.map(p => 
+                        p._id === product._id ? updatedProduct : p
+                    )
+                );
+            } catch (fetchError) {
+                console.error('Lỗi khi fetch lại thông tin sản phẩm:', fetchError);
+            }
+        } catch (error) {
+            console.error('Lỗi khi thêm vào giỏ hàng:', error);
+        }
     };
 
     const handleBrandChange = (isChecked, brand) => {

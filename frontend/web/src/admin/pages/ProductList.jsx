@@ -5,6 +5,9 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -34,6 +37,62 @@ const ProductList = () => {
         fetchProducts();
         fetchCategories();
     }, [searchTerm, filterCategory]);
+
+    useEffect(() => {
+        // Listen for stock updates from client cart operations
+        socket.on('client_cart_update', (data) => {
+            toast.info(`${data.username} đã ${data.action} sản phẩm: ${data.productName}`);
+            // Refresh products to get updated stock
+            fetchProducts();
+        });
+
+        // Listen for order creation
+        socket.on('order_created', (data) => {
+            toast.success(`${data.username} đã tạo đơn hàng #${data.orderId} - ${data.productCount} sản phẩm`);
+            // Refresh products to get updated stock
+            fetchProducts();
+        });
+
+        // Listen for stock reduction from orders
+        socket.on('stock_reduced', (data) => {
+            toast.info(`${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`);
+            // Refresh products to get updated stock
+            fetchProducts();
+        });
+
+        // Listen for stock updates
+        const handleStockUpdate = async (event) => {
+            if (event.detail.productId) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    
+                    // Update products with new stock info
+                    setProducts(prev => 
+                        prev.map(product => 
+                            product._id === event.detail.productId ? res.data : product
+                        )
+                    );
+                    
+                    // Hiển thị thông báo tồn kho đã cập nhật
+                    toast.success(`Tồn kho sản phẩm "${res.data.name}" đã được cập nhật!`);
+                } catch (error) {
+                    console.error('Lỗi khi cập nhật thông tin sản phẩm:', error);
+                }
+            }
+        };
+
+        window.addEventListener('stockUpdated', handleStockUpdate);
+
+        return () => {
+            socket.off('client_cart_update');
+            socket.off('order_created');
+            socket.off('stock_reduced');
+            window.removeEventListener('stockUpdated', handleStockUpdate);
+        };
+    }, []);
 
     const fetchProducts = async () => {
         try {
@@ -86,6 +145,24 @@ const ProductList = () => {
         return date.toLocaleString('vi-VN');
     };
 
+    // Hàm tính tổng tồn kho của sản phẩm (bao gồm cả variants)
+    const calculateTotalStock = (product) => {
+        if (product.variants && product.variants.length > 0) {
+            // Nếu có variants, tính tổng tồn kho của tất cả variants
+            return product.variants.reduce((total, variant) => total + (variant.stock || 0), 0);
+        } else {
+            // Nếu không có variants, sử dụng tồn kho sản phẩm gốc
+            return product.stock || 0;
+        }
+    };
+
+    // Hàm lấy màu sắc cho tồn kho
+    const getStockColor = (stock) => {
+        if (stock > 10) return '#4caf50'; // Xanh lá
+        if (stock > 0) return '#ff9800'; // Cam
+        return '#f44336'; // Đỏ
+    };
+
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Danh sách sản phẩm</h1>
@@ -131,10 +208,11 @@ const ProductList = () => {
                     <thead>
                         <tr>
                             <th>Ảnh</th>
-                            <th style={{ width: '25%', maxWidth: '25%' }}>Tên sản phẩm</th>
+                            <th style={{ width: '20%', maxWidth: '20%' }}>Tên sản phẩm</th>
                             <th>Thương hiệu</th>
                             <th>Giá bán (VND)</th>
                             <th>Tồn kho</th>
+                            <th>Chi tiết variants</th>
                             <th>Ngày tạo</th>
                             <th>Ngày cập nhật</th>
                             <th>Trạng thái</th>
@@ -144,7 +222,7 @@ const ProductList = () => {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
+                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
                             </tr>
                         ) : products.length > 0 ? (
                             products.map(product => (
@@ -158,10 +236,28 @@ const ProductList = () => {
                                             style={{ cursor: 'pointer' }}
                                         />
                                     </td>
-                                    <td style={{ width: '25%', maxWidth: '25%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</td>
+                                    <td style={{ width: '20%', maxWidth: '20%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</td>
                                     <td>{product.brand || '---'}</td>
                                     <td>{product.price.toLocaleString('vi-VN')}</td>
-                                    <td>{product.stock}</td>
+                                    <td style={{ color: getStockColor(calculateTotalStock(product)), fontWeight: 'bold' }}>
+                                        {calculateTotalStock(product)}
+                                    </td>
+                                    <td>
+                                        {product.variants && product.variants.length > 0 ? (
+                                            <div style={{ fontSize: '12px', maxHeight: '60px', overflowY: 'auto' }}>
+                                                {product.variants.map((variant, index) => (
+                                                    <div key={index} style={{ 
+                                                        marginBottom: '2px',
+                                                        color: getStockColor(variant.stock || 0)
+                                                    }}>
+                                                        {variant.attributes?.color || 'N/A'} - {variant.attributes?.size || 'N/A'}: {variant.stock || 0}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span style={{ color: '#999', fontSize: '12px' }}>Không có variants</span>
+                                        )}
+                                    </td>
                                     <td>{formatDateTime(product.createdAt)}</td>
                                     <td>{formatDateTime(product.updatedAt)}</td>
                                     <td>
@@ -183,7 +279,7 @@ const ProductList = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="9" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
+                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
                             </tr>
                         )}
                     </tbody>

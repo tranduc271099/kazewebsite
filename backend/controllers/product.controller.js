@@ -36,6 +36,7 @@ exports.getProducts = async (req, res) => {
 
         const products = await Product.find(filter)
             .populate('category', 'name')
+            .select('name brand price stock isActive images attributes variants createdAt updatedAt category')
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
