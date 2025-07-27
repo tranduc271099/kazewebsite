@@ -48,7 +48,7 @@ function ProductDetail() {
         const fetchProduct = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${productId}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 console.log('API trả về:', res.data);
@@ -87,16 +87,16 @@ function ProductDetail() {
             if (event.detail.productId === productId) {
                 try {
                     const token = localStorage.getItem('token');
-                    const res = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+                    const res = await axios.get(`http://localhost:5000/api/products/${productId}?activeOnly=true`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    
+
                     const updatedProduct = res.data;
                     const images = updatedProduct.images?.map(img =>
                         img.startsWith('/uploads/') ? `http://localhost:5000${img}` : img
                     ) || [];
                     setProduct({ ...updatedProduct, images });
-                    
+
                     // Cập nhật selectedVariant với thông tin tồn kho mới
                     const updatedVariant = updatedProduct.variants.find(
                         v => v.attributes.color === selectedAttributes.colors && v.attributes.size === selectedAttributes.sizes
@@ -138,29 +138,29 @@ function ProductDetail() {
             quantity: quantity,
             stock: selectedVariant.stock
         };
-        
+
         try {
             await addToCart(itemToAdd);
-            
+
             // Fetch lại thông tin sản phẩm để cập nhật số lượng tồn kho
             const token = localStorage.getItem('token');
-            const res = await axios.get(`http://localhost:5000/api/products/${productId}`, {
+            const res = await axios.get(`http://localhost:5000/api/products/${productId}?activeOnly=true`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             // Cập nhật product state với thông tin mới
             const updatedProduct = res.data;
             const images = updatedProduct.images?.map(img =>
                 img.startsWith('/uploads/') ? `http://localhost:5000${img}` : img
             ) || [];
             setProduct({ ...updatedProduct, images });
-            
+
             // Cập nhật selectedVariant với thông tin tồn kho mới
             const updatedVariant = updatedProduct.variants.find(
                 v => v.attributes.color === selectedAttributes.colors && v.attributes.size === selectedAttributes.sizes
             );
             setSelectedVariant(updatedVariant);
-            
+
         } catch (error) {
             console.error('Lỗi khi thêm vào giỏ hàng:', error);
         }
@@ -219,7 +219,7 @@ function ProductDetail() {
             try {
                 const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
                 // Lọc chỉ hiển thị comments đã được duyệt và không bị ẩn
-                const approvedComments = res.data.filter(comment => 
+                const approvedComments = res.data.filter(comment =>
                     comment.status === 'approved' && !comment.isHidden && !comment.isDeleted
                 );
                 setComments(approvedComments);
@@ -269,7 +269,7 @@ function ProductDetail() {
             toast.success('Đánh giá đã được gửi và đang chờ duyệt!');
             // Reload bình luận và order hợp lệ
             const res = await axios.get(`http://localhost:5000/api/comments/${productId}`);
-            const approvedComments = res.data.filter(comment => 
+            const approvedComments = res.data.filter(comment =>
                 comment.status === 'approved' && !comment.isHidden && !comment.isDeleted
             );
             setComments(approvedComments);
@@ -287,9 +287,9 @@ function ProductDetail() {
     const handleReportComment = async (commentId) => {
         const reason = prompt('Lý do báo cáo (spam/inappropriate/offensive/fake/other):');
         if (!reason) return;
-        
+
         const description = prompt('Mô tả chi tiết (tùy chọn):');
-        
+
         try {
             const token = localStorage.getItem('token');
             await axios.post(`http://localhost:5000/api/comments/${commentId}/report`, {
@@ -571,7 +571,7 @@ function ProductDetail() {
                                                         <div className="mb-3">
                                                             <label className="form-label">Đánh giá:</label>
                                                             <div className="rating-selector">
-                                                                {[5,4,3,2,1].map(star => (
+                                                                {[5, 4, 3, 2, 1].map(star => (
                                                                     <button
                                                                         key={star}
                                                                         type="button"
@@ -586,21 +586,21 @@ function ProductDetail() {
                                                         </div>
                                                         <div className="mb-3">
                                                             <label className="form-label">Nội dung đánh giá:</label>
-                                                            <textarea 
+                                                            <textarea
                                                                 className="form-control"
-                                                                value={reviewContent} 
-                                                                onChange={e => setReviewContent(e.target.value)} 
-                                                                rows={3} 
+                                                                value={reviewContent}
+                                                                onChange={e => setReviewContent(e.target.value)}
+                                                                rows={3}
                                                                 placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-                                                                required 
+                                                                required
                                                             />
                                                         </div>
                                                         {canReviewOrders.length > 1 && (
                                                             <div className="mb-3">
                                                                 <label className="form-label">Chọn đơn hàng:</label>
-                                                                <select 
+                                                                <select
                                                                     className="form-select"
-                                                                    value={selectedOrderId} 
+                                                                    value={selectedOrderId}
                                                                     onChange={e => setSelectedOrderId(e.target.value)}
                                                                 >
                                                                     {canReviewOrders.map(o => (
@@ -634,7 +634,7 @@ function ProductDetail() {
                                                 </div>
                                             ) : comments.length === 0 ? (
                                                 <div className="text-center py-4">
-                                                    <i className="bi bi-chat-dots text-muted" style={{fontSize: '3rem'}}></i>
+                                                    <i className="bi bi-chat-dots text-muted" style={{ fontSize: '3rem' }}></i>
                                                     <p className="text-muted mt-2">Chưa có đánh giá nào cho sản phẩm này.</p>
                                                 </div>
                                             ) : (
@@ -660,7 +660,7 @@ function ProductDetail() {
                                                                     </button>
                                                                 </div>
                                                             </div>
-                                                            
+
                                                             <div className="rating-display mb-2">
                                                                 {Array(5).fill(null).map((_, index) => (
                                                                     <span key={index} className={index < c.rating ? 'text-warning' : 'text-muted'}>
@@ -669,11 +669,11 @@ function ProductDetail() {
                                                                 ))}
                                                                 <span className="ms-2 text-muted">({c.rating}/5)</span>
                                                             </div>
-                                                            
+
                                                             <div className="comment-content mb-2">
                                                                 <p className="mb-0">{c.content}</p>
                                                             </div>
-                                                            
+
                                                             {/* Admin Reply */}
                                                             {c.adminReply && (
                                                                 <div className="admin-reply bg-light border-start border-primary ps-3 py-2 mt-2">
@@ -689,19 +689,19 @@ function ProductDetail() {
                                                             )}
                                                         </div>
                                                     ))}
-                                                    
+
                                                     {comments.length > 5 && (
                                                         <div className="text-center">
                                                             {!showAllComments ? (
-                                                                <button 
-                                                                    className="btn btn-outline-primary" 
+                                                                <button
+                                                                    className="btn btn-outline-primary"
                                                                     onClick={() => setShowAllComments(true)}
                                                                 >
                                                                     <i className="bi bi-chevron-down"></i> Hiển thị thêm ({comments.length - 5} đánh giá)
                                                                 </button>
                                                             ) : (
-                                                                <button 
-                                                                    className="btn btn-outline-secondary" 
+                                                                <button
+                                                                    className="btn btn-outline-secondary"
                                                                     onClick={() => setShowAllComments(false)}
                                                                 >
                                                                     <i className="bi bi-chevron-up"></i> Ẩn bớt

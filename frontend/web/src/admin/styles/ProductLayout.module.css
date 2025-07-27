@@ -257,9 +257,10 @@
 
 .productTable th,
 .productTable td {
-    padding: 14px;
     border-bottom: 1px solid var(--card-border);
     text-align: left;
+    vertical-align: middle;
+    height: 70px;
 }
 
 .productImage {
@@ -267,6 +268,43 @@
     height: 50px;
     border-radius: 8px;
     object-fit: cover;
+}
+
+.productNameCell {
+    width: 35%;
+    /* Tăng từ 25% lên 35% */
+    max-width: 400px;
+    /* Tăng từ 300px lên 400px */
+    min-width: 250px;
+    /* Tăng từ 200px lên 250px */
+    overflow: visible;
+    /* Cho phép hiển thị đầy đủ */
+    text-overflow: clip;
+    /* Bỏ dấu ... */
+    white-space: normal;
+    /* Cho phép xuống dòng */
+    padding: 12px 14px !important;
+    vertical-align: middle;
+    word-wrap: break-word;
+    /* Ngắt từ khi cần thiết */
+    text-align: left;
+}
+
+.productNameHeader {
+    width: 35%;
+    /* Tăng từ 25% lên 35% */
+    max-width: 400px;
+    /* Tăng từ 300px lên 400px */
+    min-width: 250px;
+    /* Tăng từ 200px lên 250px */
+}
+
+.productTable tbody tr {
+    border-bottom: 1px solid var(--card-border);
+}
+
+.productTable tbody tr:hover {
+    background-color: var(--hover-bg);
 }
 
 .status {
@@ -662,55 +700,127 @@
     vertical-align: middle;
 }
 
-/* Adjustments for the new order table headers */
+/* Adjustments for the product table headers */
 .productTable thead th:nth-child(1) {
-    width: 30px;
+    width: 60px;
+    /* Ảnh */
     text-align: center;
+    padding: 12px 8px;
 }
 
 .productTable thead th:nth-child(2) {
-    width: 5%;
-    text-align: center;
+    width: 35%;
+    /* Tên sản phẩm - tăng kích thước lên 35% */
+    text-align: left;
+    padding: 12px 14px;
 }
 
 .productTable thead th:nth-child(3) {
-    width: 15%;
-    text-align: left;
+    width: 10%;
+    /* Thương hiệu - thu nhỏ */
+    text-align: center;
+    padding: 12px 8px;
 }
 
 .productTable thead th:nth-child(4) {
-    width: 15%;
-    text-align: left;
+    width: 8%;
+    /* Giá bán (VND) - thu nhỏ hơn */
+    text-align: center;
+    padding: 12px 6px;
 }
 
 .productTable thead th:nth-child(5) {
-    width: 10%;
+    width: 6%;
+    /* Tồn kho - thu nhỏ hơn */
     text-align: center;
+    padding: 12px 6px;
 }
 
 .productTable thead th:nth-child(6) {
-    width: 15%;
-    text-align: right;
+    width: 8%;
+    /* Ngày tạo - thu nhỏ hơn */
+    text-align: center;
+    padding: 12px 6px;
 }
 
 .productTable thead th:nth-child(7) {
-    width: 15%;
+    width: 8%;
+    /* Ngày cập nhật - thu nhỏ hơn */
     text-align: center;
+    padding: 12px 6px;
 }
 
 .productTable thead th:nth-child(8) {
     width: 10%;
+    /* Trạng thái */
     text-align: center;
+    padding: 12px 8px;
 }
 
 .productTable thead th:nth-child(9) {
-    width: 15%;
+    width: 12%;
+    /* Thao tác */
     text-align: center;
+    padding: 12px 8px;
 }
 
-.productTable thead th:nth-child(10) {
-    width: 10%;
+/* Căn chỉnh nội dung các cột trong tbody */
+.productTable tbody td:nth-child(1) {
+    /* Ảnh */
     text-align: center;
+    padding: 12px 8px;
+}
+
+.productTable tbody td:nth-child(2) {
+    /* Tên sản phẩm */
+    text-align: left;
+    padding: 12px 14px;
+}
+
+.productTable tbody td:nth-child(3) {
+    /* Thương hiệu */
+    text-align: center;
+    padding: 12px 8px;
+}
+
+.productTable tbody td:nth-child(4) {
+    /* Giá bán (VND) */
+    text-align: center;
+    padding: 12px 6px;
+    font-weight: 500;
+}
+
+.productTable tbody td:nth-child(5) {
+    /* Tồn kho */
+    text-align: center;
+    padding: 12px 6px;
+    font-weight: 500;
+}
+
+.productTable tbody td:nth-child(6) {
+    /* Ngày tạo */
+    text-align: center;
+    padding: 12px 6px;
+    font-size: 0.9rem;
+}
+
+.productTable tbody td:nth-child(7) {
+    /* Ngày cập nhật */
+    text-align: center;
+    padding: 12px 6px;
+    font-size: 0.9rem;
+}
+
+.productTable tbody td:nth-child(8) {
+    /* Trạng thái */
+    text-align: center;
+    padding: 12px 8px;
+}
+
+.productTable tbody td:nth-child(9) {
+    /* Thao tác */
+    text-align: center;
+    padding: 12px 8px;
 }
 
 /* Styles for the detail modal content */
@@ -1004,7 +1114,6 @@
 
 /* Ensure the entire row for image/name is aligned */
 .productTable td:nth-child(2) {
-    display: flex;
     align-items: center;
     gap: 10px;
 }
@@ -1040,4 +1149,22 @@
     margin-bottom: 25px;
     color: var(--text-primary);
     text-align: center;
+}
+
+/* Chat Management specific styles */
+.deleteBtn {
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.deleteBtn:hover {
+    color: #ef4444;
+}
+
+.iconBtn {
+    color: var(--primary-color);
+}
+
+.iconBtn:hover {
+    background-color: var(--hover-background-color);
 }

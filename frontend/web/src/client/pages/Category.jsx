@@ -65,7 +65,7 @@ const Category = () => {
             try {
                 const [categoriesRes, productsRes] = await Promise.all([
                     axios.get('http://localhost:5000/api/categories'),
-                    axios.get('http://localhost:5000/api/products')
+                    axios.get('http://localhost:5000/api/products?activeOnly=true')
                 ]);
                 setCategories(categoriesRes.data);
                 setProducts(productsRes.data);
@@ -83,15 +83,15 @@ const Category = () => {
         const handleStockUpdate = async (event) => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 const updatedProduct = res.data;
-                
+
                 // Cập nhật danh sách products với thông tin mới
-                setProducts(prevProducts => 
-                    prevProducts.map(p => 
+                setProducts(prevProducts =>
+                    prevProducts.map(p =>
                         p._id === event.detail.productId ? updatedProduct : p
                     )
                 );
@@ -212,22 +212,22 @@ const Category = () => {
             quantity: 1,
             stock: variant ? variant.stock : product.stock
         };
-        
+
         try {
             await addToCart(itemToAdd);
-            
+
             // Fetch lại thông tin sản phẩm từ API để cập nhật số lượng tồn kho
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${product._id}`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${product._id}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 const updatedProduct = res.data;
-                
+
                 // Cập nhật danh sách products với thông tin mới
-                setProducts(prevProducts => 
-                    prevProducts.map(p => 
+                setProducts(prevProducts =>
+                    prevProducts.map(p =>
                         p._id === product._id ? updatedProduct : p
                     )
                 );
