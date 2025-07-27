@@ -180,13 +180,7 @@ const ProductList = () => {
                         <option key={cat._id} value={cat._id}>{cat.name}</option>
                     ))}
                 </select>
-                <select
-                    className={styles.select}
-                    style={{ width: '150px' }}
-                >
-                    <option value="">Chọn thương hiệu</option>
-                    {/* Thêm các option thương hiệu nếu có */}
-                </select>
+                
                 <input
                     type="text"
                     className={styles.input}
@@ -209,7 +203,6 @@ const ProductList = () => {
                         <tr>
                             <th>Ảnh</th>
                             <th className={styles.productNameHeader}>Tên sản phẩm</th>
-                            <th>Thương hiệu</th>
                             <th>Giá bán (VND)</th>
                             <th>Tồn kho</th>
                             <th>Ngày tạo</th>
@@ -236,7 +229,6 @@ const ProductList = () => {
                                         />
                                     </td>
                                     <td className={styles.productNameCell}>{product.name}</td>
-                                    <td>{product.brand || '---'}</td>
                                     <td>{product.price.toLocaleString('vi-VN')}</td>
                                     <td style={{ color: getStockColor(calculateTotalStock(product)), fontWeight: 'bold' }}>
                                         {calculateTotalStock(product)}
