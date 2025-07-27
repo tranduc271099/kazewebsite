@@ -47,7 +47,15 @@ exports.getProducts = async (req, res) => {
 // Get product by ID
 exports.getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id)
+        const { activeOnly } = req.query;
+        const filter = { _id: req.params.id };
+
+        // Nếu là client request (activeOnly=true), chỉ lấy sản phẩm đang hoạt động
+        if (activeOnly === 'true') {
+            filter.isActive = true;
+        }
+
+        const product = await Product.findOne(filter)
             .populate('category', 'name');
 
         if (!product) {
@@ -354,7 +362,14 @@ exports.updateProduct = async (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
-        const products = await Product.find({ category: categoryId });
+        const { activeOnly } = req.query;
+
+        const filter = { category: categoryId };
+        if (activeOnly === 'true') {
+            filter.isActive = true;
+        }
+
+        const products = await Product.find(filter);
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi lấy sản phẩm theo danh mục' });

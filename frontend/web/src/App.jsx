@@ -40,6 +40,18 @@ function ScrollToTop() {
   return null;
 }
 
+// Component để hiển thị Chat có điều kiện
+function ConditionalChat() {
+  const location = useLocation();
+
+  // Không hiển thị chat trong admin panel
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/dashboard')) {
+    return null;
+  }
+
+  return <Chat />;
+}
+
 function App() {
   return (
     <CartProvider>
@@ -84,7 +96,7 @@ function App() {
               <Route path="/category" element={<><Header /><CategoryFilterBar /><ClientCategory /><Footer /></>} /> {/* Keep this for /category base path */}
 
             </Routes>
-            <Chat />
+            <ConditionalChat />
           </div>
         </Router>
       </UserProvider>

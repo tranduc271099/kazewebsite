@@ -16,7 +16,7 @@ const Search = () => {
             setLoading(true);
             setError('');
             try {
-                const query = [];
+                const query = ['activeOnly=true'];
                 if (searchTerm) query.push(`search=${encodeURIComponent(searchTerm)}`);
                 if (category) query.push(`category=${category}`);
                 const res = await axios.get(`http://localhost:5000/api/products?${query.join('&')}`);

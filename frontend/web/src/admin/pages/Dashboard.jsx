@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import io from 'socket.io-client';
 import '../styles/Dashboard.css';
 
@@ -47,12 +47,16 @@ const Dashboard = () => {
     useEffect(() => {
         // Listen for new chat sessions
         socket.on('new_chat_session', (data) => {
-            toast.info(`Có cuộc trò chuyện mới từ: ${data.username}`);
+            toast(`Có cuộc trò chuyện mới từ: ${data.username}`, {
+                icon: '💬',
+            });
         });
 
         // Listen for stock updates from client cart operations
         socket.on('client_cart_update', (data) => {
-            toast.info(`${data.username} đã ${data.action} sản phẩm: ${data.productName}`);
+            toast(`${data.username} đã ${data.action} sản phẩm: ${data.productName}`, {
+                icon: 'ℹ️',
+            });
             // Refresh dashboard data to get updated stock
             fetchDashboardData();
         });
@@ -67,7 +71,9 @@ const Dashboard = () => {
 
         // Listen for stock reduction from orders
         socket.on('stock_reduced', (data) => {
-            toast.info(`${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`);
+            toast(`${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`, {
+                icon: '📦',
+            });
             // Refresh dashboard data to get updated stock
             fetchDashboardData();
         });
@@ -80,11 +86,11 @@ const Dashboard = () => {
                     const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    
+
                     // Update topProducts with new stock info
                     setDashboardData(prev => ({
                         ...prev,
-                        topProducts: prev.topProducts.map(product => 
+                        topProducts: prev.topProducts.map(product =>
                             product.productId === event.detail.productId ? res.data : product
                         )
                     }));
@@ -651,11 +657,11 @@ const Dashboard = () => {
                                         <div style={{ display: 'flex', gap: 15, fontSize: 12, color: theme.palette.text.secondary }}>
                                             <span>{product.totalQuantity} sản phẩm</span>
                                             <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{formatCurrency(product.totalRevenue)}</span>
-                                            <span style={{ 
-                                                color: product.stock > 10 ? theme.palette.success.main : 
-                                                       product.stock > 0 ? theme.palette.warning.main : 
-                                                       theme.palette.error.main,
-                                                fontWeight: 600 
+                                            <span style={{
+                                                color: product.stock > 10 ? theme.palette.success.main :
+                                                    product.stock > 0 ? theme.palette.warning.main :
+                                                        theme.palette.error.main,
+                                                fontWeight: 600
                                             }}>
                                                 Tồn kho: {product.stock || 0}
                                             </span>
@@ -973,7 +979,7 @@ const Dashboard = () => {
                         <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid #eee', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
                             {/* Debug: Hiển thị trạng thái hiện tại và các tùy chọn */}
                             <div style={{ marginRight: 'auto', fontSize: '12px', color: '#666' }}>
-                                Trạng thái hiện tại: {selectedOrder.trang_thai} | 
+                                Trạng thái hiện tại: {selectedOrder.trang_thai} |
                                 Tùy chọn: {getNextStatusOptions(selectedOrder.trang_thai).join(', ')}
                             </div>
                             {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&

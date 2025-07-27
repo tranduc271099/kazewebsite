@@ -17,13 +17,21 @@ const notifyAdminCartChange = (req, action, productName) => {
 exports.getCart = async (req, res) => {
     try {
         const userId = req.user.id; // User ID from auth middleware
-        let cart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+        let cart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
 
         if (!cart) {
             // If no cart exists for the user, create an empty one
             cart = new Cart({ userId, items: [] });
             await cart.save();
         }
+
+        // Debug: Log cart items with isActive
+        console.log('DEBUG: Cart items with isActive field:');
+        cart.items.forEach(item => {
+            if (item.productId) {
+                console.log(`  Product: ${item.productId.name}, isActive: ${item.productId.isActive}`);
+            }
+        });
 
         res.status(200).json(cart);
     } catch (error) {
@@ -88,9 +96,9 @@ exports.addItemToCart = async (req, res) => {
 
         // KHÔNG giảm tồn kho khi thêm vào giỏ hàng - chỉ lưu vào giỏ hàng
         await cart.save();
-        
+
         // Populate product details for the added/updated item before sending response
-        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
 
         // Notify admin about cart change (không giảm tồn kho nên không cần thông báo stock update)
         notifyAdminCartChange(req, 'thêm vào giỏ hàng', product.name);
@@ -150,12 +158,12 @@ exports.updateCartItemQuantity = async (req, res) => {
 
             // KHÔNG điều chỉnh tồn kho khi thay đổi số lượng trong giỏ hàng
             await cart.save();
-            const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
-            
+            const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
+
             // Notify admin about cart change
             const action = quantity <= 0 ? 'xóa khỏi giỏ hàng' : 'cập nhật số lượng';
             notifyAdminCartChange(req, action, product.name);
-            
+
             res.status(200).json(updatedCart);
         } else {
             res.status(404).json({ message: 'Sản phẩm không có trong giỏ hàng' });
@@ -198,14 +206,14 @@ exports.removeCartItem = async (req, res) => {
 
         // KHÔNG hoàn trả tồn kho khi xóa khỏi giỏ hàng
         await cart.save();
-        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
-        
+        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
+
         // Notify admin about cart change
         const product = await Product.findById(productId);
         if (product) {
             notifyAdminCartChange(req, 'xóa khỏi giỏ hàng', product.name);
         }
-        
+
         res.status(200).json(updatedCart);
     } catch (error) {
         console.error(error);
@@ -226,10 +234,10 @@ exports.clearCart = async (req, res) => {
         // KHÔNG hoàn trả tồn kho khi làm trống giỏ hàng
         cart.items = [];
         await cart.save();
-        
+
         // Notify admin about cart change
         notifyAdminCartChange(req, 'làm trống giỏ hàng', 'tất cả sản phẩm');
-        
+
         res.status(200).json({ message: 'Giỏ hàng đã được làm trống' });
     } catch (error) {
         console.error(error);
@@ -319,7 +327,7 @@ exports.updateCartItemAttributes = async (req, res) => {
         await cart.save();
 
         // Re-populate and send the updated cart
-        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock');
+        const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
         res.status(200).json(updatedCart);
     } catch (error) {
         console.error('Lỗi khi cập nhật thuộc tính giỏ hàng:', error);

@@ -7,7 +7,6 @@ import '../styles/Header.css';
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const location = useLocation();
     const navigate = useNavigate();
@@ -30,7 +29,7 @@ const Header = () => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setIsSearchOpen(false);
+                setShowSuggestions(false);
             }
         };
 
@@ -50,7 +49,7 @@ const Header = () => {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(async () => {
             try {
-                const res = await axios.get(`http://localhost:5000/api/products?search=${encodeURIComponent(searchTerm.trim())}`);
+                const res = await axios.get(`http://localhost:5000/api/products?activeOnly=true&search=${encodeURIComponent(searchTerm.trim())}`);
                 setSuggestions(res.data.slice(0, 6));
             } catch {
                 setSuggestions([]);
@@ -63,7 +62,7 @@ const Header = () => {
         e.preventDefault();
         if (searchTerm.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchTerm.trim())}`);
-            setIsSearchOpen(false);
+            setShowSuggestions(false);
             setSearchTerm('');
         }
     };
@@ -90,127 +89,91 @@ const Header = () => {
                     </ul>
                 </nav>
 
-                <div className="user-actions" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                    {/* Search Icon */}
-                    <div className="search-container" ref={searchRef} style={{ position: 'relative' }}>
-                        <button
-                            className="search-toggle"
-                            onClick={() => setIsSearchOpen(!isSearchOpen)}
+                {/* Search Bar */}
+                <div className="search-container" ref={searchRef} style={{
+                    position: 'relative',
+                    flex: '1',
+                    maxWidth: '400px',
+                    margin: '0 20px'
+                }}>
+                    <form onSubmit={handleSearchSubmit} style={{ position: 'relative', width: '100%' }}>
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Tìm kiếm sản phẩm..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onFocus={() => searchTerm && setShowSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                             style={{
-                                background: 'none',
+                                width: '100%',
+                                padding: '10px 45px 10px 15px',
+                                border: '2px solid #e0e0e0',
+                                borderRadius: '25px',
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'all 0.3s ease',
+                                backgroundColor: '#f8f9fa',
+                                color: '#333'
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            style={{
+                                position: 'absolute',
+                                right: '5px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
                                 border: 'none',
-                                fontSize: '1.5rem',
-                                color: '#333',
+                                borderRadius: '50%',
+                                width: '35px',
+                                height: '35px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
                                 cursor: 'pointer',
-                                padding: '8px'
+                                fontSize: '14px',
+                                transition: 'background 0.3s ease'
                             }}
                         >
                             <i className="bi bi-search"></i>
                         </button>
-                        {isSearchOpen && (
-                            <div className="search-dropdown" style={{
-                                position: 'absolute',
-                                top: '100%',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                width: '400px',
-                                background: '#fff',
-                                borderRadius: '12px',
-                                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15)',
-                                zIndex: 1000,
-                                padding: '20px',
-                                marginTop: '10px'
-                            }}>
-                                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                                    <h5 style={{ 
-                                        color: '#333', 
-                                        margin: 0, 
-                                        fontSize: '16px',
-                                        fontWeight: '600',
-                                        textTransform: 'uppercase'
-                                    }}>
-                                        TÌM KIẾM
-                                    </h5>
+                    </form>
+                    {showSuggestions && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            background: '#fff',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+                            zIndex: 2000,
+                            maxHeight: 260,
+                            overflowY: 'auto',
+                            border: '1px solid #e3eaf5',
+                            padding: '0',
+                            marginTop: '5px'
+                        }}>
+                            {suggestions.length === 0 ? (
+                                <div style={{ padding: '16px', color: '#888', textAlign: 'center' }}>Không tìm thấy sản phẩm</div>
+                            ) : suggestions.map(product => (
+                                <div
+                                    key={product._id}
+                                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', cursor: 'pointer', borderBottom: '1px solid #f2f2f2' }}
+                                    onMouseDown={() => { navigate(`/products/${product._id}`); setShowSuggestions(false); setSearchTerm(''); }}
+                                >
+                                    <img src={product.images?.[0]?.url || product.images?.[0] || '/assets/img/no-image.png'} alt={product.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, background: '#f5f5f5' }} />
+                                    <span style={{ fontSize: 15, color: '#222' }}>{product.name}</span>
                                 </div>
-                                <form onSubmit={handleSearchSubmit} style={{ position: 'relative' }}>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Tìm kiếm sản phẩm..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        style={{
-                                            borderRadius: '8px',
-                                            border: '2px solid #b3d4fc',
-                                            padding: '10px 14px',
-                                            fontSize: '15px',
-                                            width: '100%',
-                                            boxSizing: 'border-box',
-                                            outline: 'none',
-                                            transition: 'border-color 0.2s',
-                                            marginBottom: '12px'
-                                        }}
-                                        autoFocus
-                                        onFocus={() => searchTerm && setShowSuggestions(true)}
-                                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                                    />
-                                    {showSuggestions && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: 54,
-                                            left: 0,
-                                            right: 0,
-                                            background: '#fff',
-                                            borderRadius: '8px',
-                                            boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-                                            zIndex: 2000,
-                                            maxHeight: 260,
-                                            overflowY: 'auto',
-                                            border: '1px solid #e3eaf5',
-                                            padding: '0',
-                                        }}>
-                                            {suggestions.length === 0 ? (
-                                                <div style={{ padding: '16px', color: '#888', textAlign: 'center' }}>Không tìm thấy sản phẩm</div>
-                                            ) : suggestions.map(product => (
-                                                <div
-                                                    key={product._id}
-                                                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 16px', cursor: 'pointer', borderBottom: '1px solid #f2f2f2' }}
-                                                    onMouseDown={() => { navigate(`/products/${product._id}`); setShowSuggestions(false); setIsSearchOpen(false); setSearchTerm(''); }}
-                                                >
-                                                    <img src={product.images?.[0]?.url || product.images?.[0] || '/assets/img/no-image.png'} alt={product.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, background: '#f5f5f5' }} />
-                                                    <span style={{ fontSize: 15, color: '#222' }}>{product.name}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                    <button
-                                        className="btn btn-primary"
-                                        type="submit"
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: '48px',
-                                            height: '48px',
-                                            borderRadius: '24px',
-                                            background: 'linear-gradient(135deg, #2196f3 0%, #1976d2 100%)',
-                                            border: 'none',
-                                            margin: '0 auto',
-                                            fontSize: '22px',
-                                            color: '#fff',
-                                            boxShadow: '0 2px 8px rgba(33,150,243,0.10)',
-                                            transition: 'background 0.2s',
-                                            marginTop: '0',
-                                            marginBottom: '0',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        <i className="bi bi-search"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="user-actions" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     {/* Cart Icon with Badge */}
                     <Link to="/cart" className="cart-icon" style={{ position: 'relative', color: '#333', textDecoration: 'none' }}>
                         <i className="bi bi-cart3" style={{ fontSize: '1.5rem' }}></i>

@@ -3,9 +3,18 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
 import ApplyVoucher from '../pages/ApplyVoucher';
+import '../styles/Cart.css';
 
 function Cart() {
-    const { cartItems, removeFromCart, updateQuantity, clearCart, updateCartItemAttributes } = useContext(CartContext);
+    const {
+        cartItems,
+        cartNotifications,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        updateCartItemAttributes,
+        refreshCart
+    } = useContext(CartContext);
     const navigate = useNavigate();
 
     const [total, setTotal] = useState(0);
@@ -28,11 +37,40 @@ function Cart() {
         if (cartItems.length > 0) {
             const initialSelected = {};
             cartItems.forEach(item => {
-                initialSelected[`${item.id}-${item.color}-${item.size}`] = true;
+                const itemId = `${item.id}-${item.color}-${item.size}`;
+                // Chỉ chọn item nếu không bị ẩn và còn hàng
+                if (item.isActive !== false && item.stock > 0) {
+                    initialSelected[itemId] = true;
+                }
             });
             setSelectedItems(initialSelected);
         } else {
             setSelectedItems({});
+        }
+    }, [cartItems]);
+
+    // Effect để tự động bỏ chọn các item bị ẩn hoặc hết hàng
+    useEffect(() => {
+        if (cartItems.length > 0) {
+            setSelectedItems(prevSelected => {
+                const newSelected = { ...prevSelected };
+                let hasChanges = false;
+
+                cartItems.forEach(item => {
+                    const itemId = `${item.id}-${item.color}-${item.size}`;
+                    // Nếu item bị ẩn hoặc hết hàng và đang được chọn, bỏ chọn nó
+                    if ((item.isActive === false || item.stock <= 0) && newSelected[itemId]) {
+                        delete newSelected[itemId];
+                        hasChanges = true;
+                    }
+                });
+
+                if (hasChanges) {
+                    toast.warning('Đã tự động bỏ chọn các sản phẩm bị ẩn hoặc hết hàng!');
+                }
+
+                return newSelected;
+            });
         }
     }, [cartItems]);
 
@@ -79,10 +117,22 @@ function Cart() {
 
     const handleCheckout = () => {
         const selectedCartItems = cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]);
+
+        // Kiểm tra xem có sản phẩm nào bị ẩn hoặc hết hàng trong selection không
+        const invalidItems = selectedCartItems.filter(item =>
+            item.isActive === false || item.stock <= 0
+        );
+
+        if (invalidItems.length > 0) {
+            toast.error('Vui lòng xóa các sản phẩm bị ẩn hoặc hết hàng khỏi giỏ hàng trước khi thanh toán!');
+            return;
+        }
+
         if (selectedCartItems.length === 0) {
             toast.warning('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!');
             return;
         }
+
         navigate('/checkout', { state: { selectedCartItems, discount, voucher: selectedVoucher } });
     };
 
@@ -100,147 +150,249 @@ function Cart() {
                 </div>
             </div>
             {cartItems.length === 0 ? (
-                <div className="empty-cart text-center py-5">
-                    <i className="bi bi-cart-x" style={{ fontSize: '4rem', color: '#ccc' }}></i>
-                    <h3 className="mt-3">Giỏ hàng trống</h3>
-                    <p className="text-muted">Thêm sản phẩm vào giỏ hàng để xem ở đây</p>
-                    <div className="mt-3">
-                        <Link to="/category" className="btn btn-primary me-2">
+                <div className="cart-empty py-5">
+                    <i className="bi bi-cart-x" style={{ fontSize: '5rem' }}></i>
+                    <h3 className="mt-4 mb-3" style={{ fontWeight: 600, color: '#374151' }}>Giỏ hàng trống</h3>
+                    <p className="text-muted mb-4">Khám phá những sản phẩm tuyệt vời và thêm vào giỏ hàng của bạn</p>
+                    <div className="mt-4">
+                        <Link to="/category" className="btn btn-primary me-3 px-4 py-2" style={{ borderRadius: '8px', fontWeight: 500 }}>
+                            <i className="bi bi-bag-plus me-2"></i>
                             Tiếp tục mua sắm
                         </Link>
-                        <Link to="/orders" className="btn btn-outline-primary">
-                            Xem đơn hàng của tôi
+                        <Link to="/orders" className="btn btn-outline-secondary px-4 py-2" style={{ borderRadius: '8px', fontWeight: 500 }}>
+                            <i className="bi bi-clock-history me-2"></i>
+                            Xem đơn hàng
                         </Link>
                     </div>
                 </div>
             ) : (
                 <div className="cart-page-container py-5" style={{ maxWidth: '1400px', margin: '0 auto', background: '#fff', marginTop: 0 }}>
                     <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }}>
+                        {/* Cart Notifications */}
+                        {cartNotifications && cartNotifications.length > 0 && (
+                            <div className="cart-notifications mb-4">
+                                {cartNotifications.map((notification, index) => (
+                                    <div
+                                        key={index}
+                                        className={`alert ${notification.type === 'product_hidden' ? 'alert-danger' :
+                                            notification.type === 'out_of_stock' ? 'alert-warning' :
+                                                'alert-info'
+                                            } d-flex align-items-center`}
+                                    >
+                                        <i className={`bi ${notification.type === 'product_hidden' ? 'bi-eye-slash' :
+                                            notification.type === 'out_of_stock' ? 'bi-exclamation-triangle' :
+                                                'bi-info-circle'
+                                            } me-2`}></i>
+                                        <span>{notification.message}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         <div className="row justify-content-center" style={{ marginTop: '20px' }}>
                             {/* Cart Items */}
                             <div className="col-lg-8 mb-4">
                                 <div className="card shadow-sm border-0">
                                     <div className="card-body p-4">
-                                        <h4 className="mb-4" style={{ fontWeight: 600 }}>GIỎ HÀNG</h4>
+                                        <div className="d-flex justify-content-between align-items-center mb-4">
+                                            <h4 className="mb-0" style={{ fontWeight: 600 }}>GIỎ HÀNG</h4>
+                                            <button
+                                                className="btn btn-outline-primary btn-sm btn-refresh"
+                                                onClick={refreshCart}
+                                                title="Làm mới giỏ hàng"
+                                            >
+                                                <i className="bi bi-arrow-clockwise me-1"></i>
+                                                Làm mới
+                                            </button>
+                                        </div>
                                         {cartItems.map((item) => {
                                             const itemId = `${item.id}-${item.color}-${item.size}`;
+                                            const isDisabled = item.isActive === false || item.stock <= 0;
                                             return (
-                                                <div key={itemId} className="cart-item-row d-flex flex-column mb-3 p-3 rounded" style={{ background: '#fafbfc', border: '1px solid #e5e7eb', minHeight: 110 }}>
-                                                    {/* Tên sản phẩm */}
-                                                    <div
-                                                        className="cart-col cart-col-name d-flex align-items-center"
-                                                        style={{
-                                                            flex: 2,
-                                                            minWidth: 0,
-                                                            fontWeight: 500,
-                                                            fontSize: 17,
-                                                            whiteSpace: 'normal',
-                                                            wordBreak: 'break-word',
-                                                            overflow: 'hidden',
-                                                            textAlign: 'left'
-                                                        }}
-                                                    >
-                                                        {item.name}
-                                                    </div>
-                                                    {/* Hàng thuộc tính và thao tác */}
-                                                    <div className="d-flex align-items-center w-100">
-                                                        {/* Checkbox */}
-                                                        <div className="cart-col cart-col-checkbox d-flex align-items-center justify-content-center" style={{ width: 48, minWidth: 48 }}>
-                                                            <input
-                                                                type="checkbox"
-                                                                className="form-check-input"
-                                                                checked={selectedItems[itemId] || false}
-                                                                onChange={(e) => handleItemSelection(itemId, e.target.checked)}
-                                                                style={{ transform: 'scale(1.3)' }}
-                                                            />
+                                                <div
+                                                    key={itemId}
+                                                    className={`cart-item-card mb-3 rounded-3 shadow-sm ${isDisabled ? 'disabled-item' : ''}`}
+                                                    style={{
+                                                        background: isDisabled ? '#fff5f5' : '#ffffff',
+                                                        border: isDisabled ? '2px solid #fecaca' : '1px solid #e5e7eb',
+                                                        opacity: isDisabled ? 0.8 : 1,
+                                                        transition: 'all 0.2s ease'
+                                                    }}
+                                                >
+                                                    <div className="p-4">
+                                                        {/* Header: Product name và status badges */}
+                                                        <div className="d-flex align-items-center justify-content-between mb-3">
+                                                            <div className="d-flex align-items-center">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="form-check-input me-3"
+                                                                    checked={selectedItems[itemId] || false}
+                                                                    disabled={isDisabled}
+                                                                    onChange={(e) => handleItemSelection(itemId, e.target.checked)}
+                                                                    style={{ transform: 'scale(1.2)' }}
+                                                                />
+                                                                <h6 className={`mb-0 ${item.isActive === false ? 'text-muted text-decoration-line-through' : 'text-dark'}`}
+                                                                    style={{ fontWeight: 600, fontSize: '16px' }}>
+                                                                    {item.name}
+                                                                </h6>
+                                                            </div>
+                                                            <div className="d-flex gap-2">
+                                                                {item.isActive === false && (
+                                                                    <span className="badge bg-danger">Đã ẩn</span>
+                                                                )}
+                                                                {item.isActive !== false && item.stock <= 0 && (
+                                                                    <span className="badge bg-warning text-dark">Hết hàng</span>
+                                                                )}
+                                                                {item.isActive !== false && item.quantity > item.stock && item.stock > 0 && (
+                                                                    <span className="badge bg-info">Vượt tồn kho</span>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        {/* Ảnh sản phẩm */}
-                                                        <div className="cart-col cart-col-image d-flex align-items-center justify-content-center" style={{ width: 90, minWidth: 90, margin: '0 4px' }}>
-                                                            <img src={item.image} alt={item.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, background: '#fff', border: '1px solid #eee' }} />
-                                                        </div>
-                                                        {/* Màu sắc */}
-                                                        <div className="cart-col cart-col-color d-flex align-items-center" style={{ width: 120, minWidth: 120 }}>
-                                                            {item.availableColors && item.availableColors.length > 0 && (
-                                                                <>
-                                                                    <span className="me-2">Màu:</span>
-                                                                    <select
-                                                                        className="form-select form-select-sm"
-                                                                        style={{ width: 'auto', minWidth: 60 }}
-                                                                        value={item.color || ''}
-                                                                        onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'color', e.target.value)}
-                                                                    >
-                                                                        {item.availableColors.map((colorOption) => (
-                                                                            <option key={colorOption} value={colorOption}>{colorOption}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                        {/* Kích thước */}
-                                                        <div className="cart-col cart-col-size d-flex align-items-center" style={{ width: 120, minWidth: 120 }}>
-                                                            {item.availableSizes && item.availableSizes.length > 0 && (
-                                                                <>
-                                                                    <span className="me-2">Kích thước:</span>
-                                                                    <select
-                                                                        className="form-select form-select-sm"
-                                                                        style={{ width: 'auto', minWidth: 60 }}
-                                                                        value={item.size || ''}
-                                                                        onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'size', e.target.value)}
-                                                                    >
-                                                                        {item.availableSizes.map((sizeOption) => (
-                                                                            <option key={sizeOption} value={sizeOption}>{sizeOption}</option>
-                                                                        ))}
-                                                                    </select>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                        {/* Giá */}
-                                                        <div className="cart-col cart-col-price d-flex align-items-center justify-content-end" style={{ width: 120, minWidth: 120, textAlign: 'right', fontWeight: 600, fontSize: 16, color: '#222' }}>
-                                                            {item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                                        </div>
-                                                        {/* Số lượng */}
-                                                        <div className="cart-col cart-col-qty d-flex align-items-center justify-content-center" style={{ width: 130, minWidth: 130 }}>
-                                                            <button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleUpdateQuantity(item.id, item.color, item.size, Math.max(1, item.quantity - 1))}>
-                                                                <i className="bi bi-dash"></i>
-                                                            </button>
-                                                            <input
-                                                                type="number"
-                                                                className="form-control text-center"
-                                                                style={{ width: 50 }}
-                                                                value={item.quantity}
-                                                                min="1"
-                                                                max={item.stock}
-                                                                onChange={e => {
-                                                                    const rawValue = parseInt(e.target.value, 10);
-                                                                    const newQuantity = isNaN(rawValue) ? 1 : Math.max(1, Math.min(item.stock, rawValue));
-                                                                    if (newQuantity !== item.quantity) {
-                                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
-                                                                    }
-                                                                }}
-                                                            />
-                                                            <button
-                                                                className="btn btn-outline-secondary btn-sm ms-1"
-                                                                onClick={() => {
-                                                                    const newQuantity = item.quantity + 1;
-                                                                    if (newQuantity <= item.stock) {
-                                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
-                                                                    } else {
-                                                                        toast.warning(`Số lượng đã đạt tối đa! Tồn kho hiện tại: ${item.stock}`);
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <i className="bi bi-plus"></i>
-                                                            </button>
-                                                        </div>
-                                                        {/* Tổng tiền */}
-                                                        <div className="cart-col cart-col-total d-flex align-items-center justify-content-end" style={{ width: 120, minWidth: 120, textAlign: 'right', fontWeight: 600, fontSize: 16, color: '#e53935' }}>
-                                                            {(item.price * item.quantity).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                                        </div>
-                                                        {/* Nút xóa */}
-                                                        <div className="cart-col cart-col-remove d-flex align-items-center justify-content-center" style={{ width: 70, minWidth: 70, textAlign: 'center' }}>
-                                                            <button className="btn btn-link text-danger p-0" style={{ fontSize: 15 }} onClick={() => handleRemoveFromCart(item.id, item.color, item.size)}>
-                                                                Xóa
-                                                            </button>
+
+                                                        {/* Main content: Image và details */}
+                                                        <div className="row align-items-center">
+                                                            {/* Product Image */}
+                                                            <div className="col-md-2 col-3 mb-3 mb-md-0">
+                                                                <div className="position-relative">
+                                                                    <img
+                                                                        src={item.image}
+                                                                        alt={item.name}
+                                                                        className="img-fluid rounded-2"
+                                                                        style={{
+                                                                            width: '100%',
+                                                                            height: '80px',
+                                                                            objectFit: 'cover',
+                                                                            border: '1px solid #f1f5f9'
+                                                                        }}
+                                                                    />
+                                                                    {isDisabled && (
+                                                                        <div className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-25 rounded-2">
+                                                                            <i className="bi bi-ban text-white fs-4"></i>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Product Details */}
+                                                            <div className="col-md-10 col-9">
+                                                                <div className="row align-items-center">
+                                                                    {/* Attributes */}
+                                                                    <div className="col-lg-4 col-md-6 mb-2 mb-lg-0">
+                                                                        <div className="d-flex flex-column gap-2">
+                                                                            {/* Color */}
+                                                                            {item.availableColors && item.availableColors.length > 0 && (
+                                                                                <div className="d-flex align-items-center">
+                                                                                    <small className="text-muted me-2" style={{ minWidth: '35px' }}>Màu:</small>
+                                                                                    <select
+                                                                                        className="form-select form-select-sm"
+                                                                                        style={{ maxWidth: '120px' }}
+                                                                                        value={item.color || ''}
+                                                                                        disabled={isDisabled}
+                                                                                        onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'color', e.target.value)}
+                                                                                    >
+                                                                                        {item.availableColors.map((colorOption) => (
+                                                                                            <option key={colorOption} value={colorOption}>{colorOption}</option>
+                                                                                        ))}
+                                                                                    </select>
+                                                                                </div>
+                                                                            )}
+                                                                            {/* Size */}
+                                                                            {item.availableSizes && item.availableSizes.length > 0 && (
+                                                                                <div className="d-flex align-items-center">
+                                                                                    <small className="text-muted me-2" style={{ minWidth: '35px' }}>Size:</small>
+                                                                                    <select
+                                                                                        className="form-select form-select-sm"
+                                                                                        style={{ maxWidth: '120px' }}
+                                                                                        value={item.size || ''}
+                                                                                        disabled={isDisabled}
+                                                                                        onChange={(e) => handleAttributeChange(item.id, item.color, item.size, 'size', e.target.value)}
+                                                                                    >
+                                                                                        {item.availableSizes.map((sizeOption) => (
+                                                                                            <option key={sizeOption} value={sizeOption}>{sizeOption}</option>
+                                                                                        ))}
+                                                                                    </select>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Price */}
+                                                                    <div className="col-lg-2 col-md-3 col-6 mb-2 mb-lg-0 text-center">
+                                                                        <div className="text-muted small mb-1">Đơn giá</div>
+                                                                        <div className="fw-bold text-primary">
+                                                                            {item.price.toLocaleString('vi-VN')}₫
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Quantity */}
+                                                                    <div className="col-lg-3 col-md-3 col-6 mb-2 mb-lg-0">
+                                                                        <div className="text-muted small mb-1 text-center">Số lượng</div>
+                                                                        <div className="d-flex align-items-center justify-content-center">
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm"
+                                                                                style={{ width: '32px', height: '32px' }}
+                                                                                disabled={isDisabled}
+                                                                                onClick={() => handleUpdateQuantity(item.id, item.color, item.size, Math.max(1, item.quantity - 1))}
+                                                                            >
+                                                                                <i className="bi bi-dash"></i>
+                                                                            </button>
+                                                                            <input
+                                                                                type="number"
+                                                                                className="form-control text-center mx-2"
+                                                                                style={{ width: '60px', height: '32px' }}
+                                                                                value={item.quantity}
+                                                                                min="1"
+                                                                                max={item.stock}
+                                                                                disabled={isDisabled}
+                                                                                onChange={e => {
+                                                                                    const rawValue = parseInt(e.target.value, 10);
+                                                                                    const newQuantity = isNaN(rawValue) ? 1 : Math.max(1, Math.min(item.stock, rawValue));
+                                                                                    if (newQuantity !== item.quantity) {
+                                                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                            <button
+                                                                                className="btn btn-outline-secondary btn-sm"
+                                                                                style={{ width: '32px', height: '32px' }}
+                                                                                disabled={isDisabled}
+                                                                                onClick={() => {
+                                                                                    const newQuantity = item.quantity + 1;
+                                                                                    if (newQuantity <= item.stock) {
+                                                                                        handleUpdateQuantity(item.id, item.color, item.size, newQuantity);
+                                                                                    } else {
+                                                                                        toast.warning(`Số lượng đã đạt tối đa! Tồn kho hiện tại: ${item.stock}`);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <i className="bi bi-plus"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="text-center mt-1">
+                                                                            <small className="text-muted">Kho: {item.stock}</small>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Total & Actions */}
+                                                                    <div className="col-lg-3 col-md-12">
+                                                                        <div className="d-flex align-items-center justify-content-between">
+                                                                            <div className="text-center">
+                                                                                <div className="text-muted small mb-1">Thành tiền</div>
+                                                                                <div className="fw-bold text-success fs-6">
+                                                                                    {(item.price * item.quantity).toLocaleString('vi-VN')}₫
+                                                                                </div>
+                                                                            </div>
+                                                                            <button
+                                                                                className="btn btn-outline-danger btn-sm"
+                                                                                onClick={() => handleRemoveFromCart(item.id, item.color, item.size)}
+                                                                                title="Xóa sản phẩm"
+                                                                            >
+                                                                                <i className="bi bi-trash3"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
