@@ -30,7 +30,6 @@ const ProductAdd = () => {
         attributes: { size: '', color: '' },
         stock: '',
         price: '',
-        costPrice: '', // Thêm giá nhập hàng cho variant
         images: []
     });
     const [editingVariantIdx, setEditingVariantIdx] = useState(null);
@@ -231,7 +230,6 @@ const ProductAdd = () => {
             attributes: { size: '', color: '' },
             stock: '',
             price: '',
-            costPrice: '', // Thêm giá nhập hàng
             images: []
         });
         setError('');
@@ -287,7 +285,6 @@ const ProductAdd = () => {
             attributes: { size: '', color: '' },
             stock: '',
             price: '',
-            costPrice: '', // Thêm giá nhập hàng
             images: []
         });
     };
@@ -511,10 +508,6 @@ const ProductAdd = () => {
                                 <label className={styles.label}>Giá bán</label>
                                 <input type="number" name="price" value={currentVariant.price} onChange={handleVariantChange} className={styles.input} placeholder="Giá bán biến thể" />
                             </div>
-                            <div className={styles.formGroup}>
-                                <label className={styles.label}>Giá nhập</label>
-                                <input type="number" name="costPrice" value={currentVariant.costPrice} onChange={handleVariantChange} className={styles.input} placeholder="Giá nhập biến thể" />
-                            </div>
                             <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                                 <button
                                     type="button"
@@ -597,33 +590,18 @@ const ProductAdd = () => {
                                         <th>Màu</th>
                                         <th>Tồn kho</th>
                                         <th>Giá bán</th>
-                                        <th>Giá nhập</th>
-                                        <th>Lãi</th>
                                         <th>Ảnh</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {formData.variants.map((v, idx) => {
-                                        const profit = v.costPrice && v.price ? (v.price - v.costPrice) : null;
-                                        const profitMargin = profit && v.price ? ((profit / v.price) * 100).toFixed(1) : null;
-
                                         return (
                                             <tr key={idx}>
                                                 <td>{v.attributes.size}</td>
                                                 <td>{v.attributes.color}</td>
                                                 <td>{v.stock}</td>
                                                 <td>{v.price?.toLocaleString()}đ</td>
-                                                <td>{v.costPrice?.toLocaleString()}đ</td>
-                                                <td>
-                                                    {profit !== null ? (
-                                                        <span style={{ color: profit > 0 ? 'green' : 'red' }}>
-                                                            {profit.toLocaleString()}đ ({profitMargin}%)
-                                                        </span>
-                                                    ) : (
-                                                        <span style={{ color: '#999' }}>-</span>
-                                                    )}
-                                                </td>
                                                 <td>
                                                     {v.images && v.images.length > 0 ? (
                                                         <div className={styles.variantImages}>

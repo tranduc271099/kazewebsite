@@ -184,32 +184,17 @@ const ProductView = () => {
                                 <th>Màu</th>
                                 <th>Tồn kho</th>
                                 <th>Giá bán</th>
-                                <th>Giá nhập</th>
-                                <th>Lãi</th>
                                 <th>Ảnh biến thể</th>
                             </tr>
                         </thead>
                         <tbody>
                             {product.variants.map((variant, index) => {
-                                const profit = variant.costPrice && variant.price ? (variant.price - variant.costPrice) : null;
-                                const profitMargin = profit && variant.price ? ((profit / variant.price) * 100).toFixed(1) : null;
-
                                 return (
                                     <tr key={index}>
                                         <td>{variant.attributes?.size || '---'}</td>
                                         <td>{variant.attributes?.color || '---'}</td>
                                         <td>{variant.stock || 0}</td>
                                         <td>{variant.price ? variant.price.toLocaleString('vi-VN') + ' VND' : '---'}</td>
-                                        <td>{variant.costPrice ? variant.costPrice.toLocaleString('vi-VN') + ' VND' : '---'}</td>
-                                        <td>
-                                            {profit !== null ? (
-                                                <span style={{ color: profit > 0 ? 'green' : 'red', fontWeight: 'bold' }}>
-                                                    {profit.toLocaleString('vi-VN')} VND ({profitMargin}%)
-                                                </span>
-                                            ) : (
-                                                <span style={{ color: '#999' }}>---</span>
-                                            )}
-                                        </td>
                                         <td>
                                             <div className={styles.variantImages}>
                                                 {variant.images && variant.images.length > 0 ? (

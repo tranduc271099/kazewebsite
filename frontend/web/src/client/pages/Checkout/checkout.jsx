@@ -617,8 +617,8 @@ const Checkout = () => {
                             <div className="col-md-6 mb-3">
                               <div
                                 className={`card h-100 border-2 ${paymentMethod === "cod"
-                                    ? "border-primary"
-                                    : "border-light"
+                                  ? "border-primary"
+                                  : "border-light"
                                   }`}
                                 style={{
                                   cursor: "pointer",
@@ -675,135 +675,12 @@ const Checkout = () => {
                                 </div>
                               </div>
                             </div>
-                            <div className="col-md-6 mb-3">
-                              <div
-                                className={`card h-100 border-2 ${paymentMethod === "banking"
-                                    ? "border-primary"
-                                    : "border-light"
-                                  }`}
-                                style={{
-                                  cursor: "pointer",
-                                  transition: "all 0.3s ease",
-                                }}
-                                onClick={() => setPaymentMethod("banking")}
-                              >
-                                <div className="card-body p-3">
-                                  <div className="d-flex align-items-center">
-                                    <div className="me-3">
-                                      <i
-                                        className="bi bi-bank"
-                                        style={{
-                                          fontSize: "24px",
-                                          color:
-                                            paymentMethod === "banking"
-                                              ? "#0d6efd"
-                                              : "#6c757d",
-                                        }}
-                                      ></i>
-                                    </div>
-                                    <div className="flex-grow-1">
-                                      <h6
-                                        className="card-title mb-1"
-                                        style={{
-                                          fontSize: "14px",
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Chuyển khoản ngân hàng
-                                      </h6>
-                                      <p
-                                        className="card-text mb-0"
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#666",
-                                        }}
-                                      >
-                                        Bank Transfer
-                                      </p>
-                                    </div>
-                                    <input
-                                      type="radio"
-                                      name="payment"
-                                      value="banking"
-                                      checked={paymentMethod === "banking"}
-                                      onChange={() =>
-                                        setPaymentMethod("banking")
-                                      }
-                                      style={{
-                                        position: "absolute",
-                                        opacity: 0,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-md-6 mb-3">
-                              <div
-                                className={`card h-100 border-2 ${paymentMethod === "momo"
-                                    ? "border-primary"
-                                    : "border-light"
-                                  }`}
-                                style={{
-                                  cursor: "pointer",
-                                  transition: "all 0.3s ease",
-                                }}
-                                onClick={() => setPaymentMethod("momo")}
-                              >
-                                <div className="card-body p-3">
-                                  <div className="d-flex align-items-center">
-                                    <div className="me-3">
-                                      <i
-                                        className="bi bi-wallet2"
-                                        style={{
-                                          fontSize: "24px",
-                                          color:
-                                            paymentMethod === "momo"
-                                              ? "#0d6efd"
-                                              : "#6c757d",
-                                        }}
-                                      ></i>
-                                    </div>
-                                    <div className="flex-grow-1">
-                                      <h6
-                                        className="card-title mb-1"
-                                        style={{
-                                          fontSize: "14px",
-                                          fontWeight: 600,
-                                        }}
-                                      >
-                                        Ví MoMo
-                                      </h6>
-                                      <p
-                                        className="card-text mb-0"
-                                        style={{
-                                          fontSize: "12px",
-                                          color: "#666",
-                                        }}
-                                      >
-                                        Mobile Money
-                                      </p>
-                                    </div>
-                                    <input
-                                      type="radio"
-                                      name="payment"
-                                      value="momo"
-                                      checked={paymentMethod === "momo"}
-                                      onChange={() => setPaymentMethod("momo")}
-                                      style={{
-                                        position: "absolute",
-                                        opacity: 0,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+
                             <div className="col-md-6 mb-3">
                               <div
                                 className={`card h-100 border-2 ${paymentMethod === "vnpay"
-                                    ? "border-primary"
-                                    : "border-light"
+                                  ? "border-primary"
+                                  : "border-light"
                                   }`}
                                 style={{
                                   cursor: "pointer",

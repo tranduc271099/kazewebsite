@@ -82,8 +82,13 @@ exports.createProduct = async (req, res) => {
             isActive
         } = req.body;
 
+        // Parse và validate các giá trị số
+        const parsedPrice = price ? parseFloat(price) : undefined;
+        const parsedCostPrice = costPrice !== undefined && costPrice !== null && costPrice !== '' ? parseFloat(costPrice) : undefined;
+        const parsedStock = stock ? parseInt(stock) : undefined;
+
         // Validate dữ liệu đầu vào
-        if (!name || !price || !stock || !category) {
+        if (!name || !parsedPrice || !parsedStock || !category) {
             return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin bắt buộc: tên, giá, tồn kho, danh mục.' });
         }
 
@@ -180,9 +185,9 @@ exports.createProduct = async (req, res) => {
             attributes,
             variants,
             images: mainImageUrls,
-            price,
-            costPrice, // Thêm giá nhập hàng
-            stock,
+            price: parsedPrice,
+            costPrice: parsedCostPrice, // Sử dụng giá trị đã parse
+            stock: parsedStock,
             isActive,
         });
 
@@ -211,6 +216,17 @@ exports.updateProduct = async (req, res) => {
             stock,
             isActive
         } = req.body;
+
+        // Parse và validate các giá trị số
+        const parsedPrice = price ? parseFloat(price) : undefined;
+        const parsedCostPrice = costPrice !== undefined && costPrice !== null && costPrice !== '' ? parseFloat(costPrice) : undefined;
+        const parsedStock = stock ? parseInt(stock) : undefined;
+
+        // Debug logging cho updateProduct
+        console.log('Update Product - Raw costPrice:', costPrice);
+        console.log('Update Product - Parsed costPrice:', parsedCostPrice);
+        console.log('Update Product - Type of costPrice:', typeof costPrice);
+        console.log('Update Product - CostPrice is valid:', !isNaN(parsedCostPrice));
 
         // Parse các trường phức tạp nếu là string (do FormData gửi lên)
         let attributes = req.body.attributes;
@@ -340,11 +356,15 @@ exports.updateProduct = async (req, res) => {
             attributes,
             variants,
             images: allMainImages,
-            price,
-            costPrice, // Thêm giá nhập hàng
-            stock,
+            price: parsedPrice,
+            costPrice: parsedCostPrice, // Sử dụng giá trị đã parse
+            stock: parsedStock,
             isActive
         };
+
+        // Debug logging updateData
+        console.log('UpdateData costPrice:', updateData.costPrice);
+        console.log('UpdateData:', JSON.stringify(updateData, null, 2));
 
         if (name === productToUpdate.name) {
             delete updateData.slug;
@@ -429,3 +449,4 @@ exports.getProfitStatistics = async (req, res) => {
         res.status(500).json({ message: 'Lỗi khi tính toán thống kê lãi' });
     }
 };
+

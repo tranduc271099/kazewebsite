@@ -5,6 +5,7 @@ const cloudinary = require('../config/cloudinary');
 const mongoose = require('mongoose');
 const UserHistory = require('../models/UserHistory');
 const Bill = require('../models/Bill/BillUser'); // Import Bill model
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifier');
 
 // Đăng ký
 exports.register = async (req, res) => {

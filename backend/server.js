@@ -35,13 +35,38 @@ app.use(express.json());
 
 // Middleware để thêm socket instance vào request
 app.use('/api/cart', (req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
 });
 
 app.use('/api/bill', (req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
+});
+
+app.use('/api/products', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/categories', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/vouchers', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/users', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/banners', (req, res, next) => {
+  req.io = io;
+  next();
 });
 
 // Cấu hình static cho thư mục uploads
@@ -288,11 +313,11 @@ setInterval(async () => {
       ngay_tao: { $lte: fiveMinutesAgo },
       orderId: { $exists: true, $ne: null }
     });
-    
+
     if (bills.length > 0) {
       console.log(`[AUTO CANCEL] Tìm thấy ${bills.length} đơn hàng VNPAY chưa thanh toán sau 5 phút (trường hợp đặc biệt)`);
     }
-    
+
     for (const bill of bills) {
       // Hoàn kho khi hủy đơn hàng
       for (const item of bill.danh_sach_san_pham) {

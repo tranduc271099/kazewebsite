@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import io from 'socket.io-client';
 // @ts-ignore
 import styles from '../../styles/ProductLayout.module.css';
 import { BiSearch } from 'react-icons/bi'; // Import icon tìm kiếm
@@ -102,6 +103,35 @@ const ListOrder = () => {
   useEffect(() => {
     fetchOrders();
   }, [paymentMethodFilter, searchTerm, startDate, endDate]); // Xóa statusFilter khỏi dependencies
+
+  // Socket.IO connection để lắng nghe real-time updates
+  useEffect(() => {
+    const socket = io('http://localhost:5000');
+
+    // Join admin room
+    socket.emit('admin_join');
+
+    // Lắng nghe event khi đơn hàng được xác nhận nhận hàng
+    socket.on('order_completed', (data) => {
+      console.log('Order completed:', data);
+      toast.success(`🎉 ${data.message}`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+
+      // Reload danh sách đơn hàng
+      fetchOrders(page);
+    });
+
+    // Cleanup khi component unmount
+    return () => {
+      socket.disconnect();
+    };
+  }, []); // Empty dependency array vì chỉ cần chạy một lần
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
@@ -498,7 +528,7 @@ const ListOrder = () => {
             <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12 }}>
               {/* Debug: Hiển thị trạng thái hiện tại và các tùy chọn */}
               <div style={{ marginRight: 'auto', fontSize: '12px', color: '#666' }}>
-                Trạng thái hiện tại: {selectedOrder.trang_thai} | 
+                Trạng thái hiện tại: {selectedOrder.trang_thai} |
                 Tùy chọn: {getNextStatusOptions(selectedOrder.trang_thai).join(', ')}
               </div>
               {getNextStatusOptions(selectedOrder.trang_thai).length > 0 &&
