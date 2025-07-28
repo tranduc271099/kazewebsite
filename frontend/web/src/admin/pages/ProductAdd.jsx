@@ -15,6 +15,7 @@ const ProductAdd = () => {
         brand: '',
         category: '',
         price: '',
+        costPrice: '', // Thêm giá nhập hàng
         stock: '',
         isActive: true,
         attributes: {
@@ -29,6 +30,7 @@ const ProductAdd = () => {
         attributes: { size: '', color: '' },
         stock: '',
         price: '',
+        costPrice: '', // Thêm giá nhập hàng cho variant
         images: []
     });
     const [editingVariantIdx, setEditingVariantIdx] = useState(null);
@@ -229,6 +231,7 @@ const ProductAdd = () => {
             attributes: { size: '', color: '' },
             stock: '',
             price: '',
+            costPrice: '', // Thêm giá nhập hàng
             images: []
         });
         setError('');
@@ -272,6 +275,7 @@ const ProductAdd = () => {
             brand: '',
             category: '',
             price: '',
+            costPrice: '', // Thêm giá nhập hàng
             stock: '',
             isActive: true,
             attributes: { sizes: [], colors: [] },
@@ -283,6 +287,7 @@ const ProductAdd = () => {
             attributes: { size: '', color: '' },
             stock: '',
             price: '',
+            costPrice: '', // Thêm giá nhập hàng
             images: []
         });
     };
@@ -294,7 +299,7 @@ const ProductAdd = () => {
 
         const formDataToSend = new FormData();
 
-        const simpleFields = ['name', 'description', 'brand', 'category', 'price', 'stock', 'isActive'];
+        const simpleFields = ['name', 'description', 'brand', 'category', 'price', 'costPrice', 'stock', 'isActive'];
         simpleFields.forEach(key => {
             if (formData[key] !== undefined && formData[key] !== null) {
                 formDataToSend.append(key, formData[key]);
@@ -413,8 +418,12 @@ const ProductAdd = () => {
                                 <input id="name" name="name" type="text" className={styles.input} value={formData.name} onChange={handleChange} />
                             </div>
                             <div className={styles.formGroup}>
-                                <label className={styles.label} htmlFor="price">Giá</label>
+                                <label className={styles.label} htmlFor="price">Giá bán</label>
                                 <input id="price" name="price" type="number" className={styles.input} value={formData.price} onChange={handleChange} />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.label} htmlFor="costPrice">Giá nhập</label>
+                                <input id="costPrice" name="costPrice" type="number" className={styles.input} value={formData.costPrice} onChange={handleChange} placeholder="Giá nhập hàng" />
                             </div>
                             <div className={styles.formGroup}>
                                 <label className={styles.label} htmlFor="stock">Tồn kho</label>
@@ -499,8 +508,12 @@ const ProductAdd = () => {
                                 <input type="number" name="stock" value={currentVariant.stock} onChange={handleVariantChange} className={styles.input} placeholder="Số lượng" />
                             </div>
                             <div className={styles.formGroup}>
-                                <label className={styles.label}>Giá</label>
-                                <input type="number" name="price" value={currentVariant.price} onChange={handleVariantChange} className={styles.input} placeholder="Giá biến thể" />
+                                <label className={styles.label}>Giá bán</label>
+                                <input type="number" name="price" value={currentVariant.price} onChange={handleVariantChange} className={styles.input} placeholder="Giá bán biến thể" />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label className={styles.label}>Giá nhập</label>
+                                <input type="number" name="costPrice" value={currentVariant.costPrice} onChange={handleVariantChange} className={styles.input} placeholder="Giá nhập biến thể" />
                             </div>
                             <div className={styles.formGroup} style={{ flexDirection: 'row', alignItems: 'center', gap: '10px' }}>
                                 <button
@@ -583,61 +596,78 @@ const ProductAdd = () => {
                                         <th>Size</th>
                                         <th>Màu</th>
                                         <th>Tồn kho</th>
-                                        <th>Giá</th>
+                                        <th>Giá bán</th>
+                                        <th>Giá nhập</th>
+                                        <th>Lãi</th>
                                         <th>Ảnh</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {formData.variants.map((v, idx) => (
-                                        <tr key={idx}>
-                                            <td>{v.attributes.size}</td>
-                                            <td>{v.attributes.color}</td>
-                                            <td>{v.stock}</td>
-                                            <td>{v.price}</td>
-                                            <td>
-                                                {v.images && v.images.length > 0 ? (
-                                                    <div className={styles.variantImages}>
-                                                        {v.images.slice(0, 2).map((img, imgIdx) => (
-                                                            <img
-                                                                key={imgIdx}
-                                                                src={getImageUrl(img)}
-                                                                alt={`Variant ${idx + 1}`}
-                                                                className={styles.variantThumbnail}
-                                                                onClick={() => {
-                                                                    setSelectedImage(getImageUrl(img));
-                                                                    setShowImageModal(true);
-                                                                }}
-                                                                style={{ cursor: 'pointer' }}
-                                                            />
-                                                        ))}
-                                                        {v.images.length > 2 && (
-                                                            <div
-                                                                className={styles.moreImages}
-                                                                onClick={() => {
-                                                                    setSelectedImage(getImageUrl(v.images[0]));
-                                                                    setShowImageModal(true);
-                                                                }}
-                                                                style={{ cursor: 'pointer' }}
-                                                            >
-                                                                +{v.images.length - 2}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <span className={styles.noImage}>Không có ảnh</span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <button type="button" onClick={() => handleEditVariant(idx)} className={`${styles.actionBtn} ${styles.editBtn}`}>
-                                                    Sửa
-                                                </button>
-                                                <button type="button" onClick={() => removeVariant(idx)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>
-                                                    Xoá
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {formData.variants.map((v, idx) => {
+                                        const profit = v.costPrice && v.price ? (v.price - v.costPrice) : null;
+                                        const profitMargin = profit && v.price ? ((profit / v.price) * 100).toFixed(1) : null;
+
+                                        return (
+                                            <tr key={idx}>
+                                                <td>{v.attributes.size}</td>
+                                                <td>{v.attributes.color}</td>
+                                                <td>{v.stock}</td>
+                                                <td>{v.price?.toLocaleString()}đ</td>
+                                                <td>{v.costPrice?.toLocaleString()}đ</td>
+                                                <td>
+                                                    {profit !== null ? (
+                                                        <span style={{ color: profit > 0 ? 'green' : 'red' }}>
+                                                            {profit.toLocaleString()}đ ({profitMargin}%)
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ color: '#999' }}>-</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    {v.images && v.images.length > 0 ? (
+                                                        <div className={styles.variantImages}>
+                                                            {v.images.slice(0, 2).map((img, imgIdx) => (
+                                                                <img
+                                                                    key={imgIdx}
+                                                                    src={getImageUrl(img)}
+                                                                    alt={`Variant ${idx + 1}`}
+                                                                    className={styles.variantThumbnail}
+                                                                    onClick={() => {
+                                                                        setSelectedImage(getImageUrl(img));
+                                                                        setShowImageModal(true);
+                                                                    }}
+                                                                    style={{ cursor: 'pointer' }}
+                                                                />
+                                                            ))}
+                                                            {v.images.length > 2 && (
+                                                                <div
+                                                                    className={styles.moreImages}
+                                                                    onClick={() => {
+                                                                        setSelectedImage(getImageUrl(v.images[0]));
+                                                                        setShowImageModal(true);
+                                                                    }}
+                                                                    style={{ cursor: 'pointer' }}
+                                                                >
+                                                                    +{v.images.length - 2}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className={styles.noImage}>Không có ảnh</span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <button type="button" onClick={() => handleEditVariant(idx)} className={`${styles.actionBtn} ${styles.editBtn}`}>
+                                                        Sửa
+                                                    </button>
+                                                    <button type="button" onClick={() => removeVariant(idx)} className={`${styles.actionBtn} ${styles.deleteBtn}`}>
+                                                        Xoá
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         )}

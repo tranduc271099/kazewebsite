@@ -180,7 +180,7 @@ const ProductList = () => {
                         <option key={cat._id} value={cat._id}>{cat.name}</option>
                     ))}
                 </select>
-                
+
                 <input
                     type="text"
                     className={styles.input}
@@ -204,6 +204,8 @@ const ProductList = () => {
                             <th>Ảnh</th>
                             <th className={styles.productNameHeader}>Tên sản phẩm</th>
                             <th>Giá bán (VND)</th>
+                            <th>Giá nhập (VND)</th>
+                            <th>Lãi (%)</th>
                             <th>Tồn kho</th>
                             <th>Ngày tạo</th>
                             <th>Ngày cập nhật</th>
@@ -214,7 +216,7 @@ const ProductList = () => {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
+                                <td colSpan="12" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
                             </tr>
                         ) : products.length > 0 ? (
                             products.map(product => (
@@ -230,6 +232,19 @@ const ProductList = () => {
                                     </td>
                                     <td className={styles.productNameCell}>{product.name}</td>
                                     <td>{product.price.toLocaleString('vi-VN')}</td>
+                                    <td>{product.costPrice ? product.costPrice.toLocaleString('vi-VN') : '-'}</td>
+                                    <td>
+                                        {product.costPrice && product.price ? (
+                                            <span style={{
+                                                color: product.price > product.costPrice ? 'green' : 'red',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {(((product.price - product.costPrice) / product.price) * 100).toFixed(1)}%
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: '#999' }}>-</span>
+                                        )}
+                                    </td>
                                     <td style={{ color: getStockColor(calculateTotalStock(product)), fontWeight: 'bold' }}>
                                         {calculateTotalStock(product)}
                                     </td>
@@ -255,7 +270,7 @@ const ProductList = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
+                                <td colSpan="12" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
                             </tr>
                         )}
                     </tbody>
