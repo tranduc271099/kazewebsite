@@ -8,6 +8,9 @@ const { upload, uploadMultiple } = require('../middleware/upload');
 // Get all products
 router.get('/', productController.getProducts);
 
+// Get profit statistics (requires auth)
+router.get('/profit/statistics', auth, productController.getProfitStatistics);
+
 // Get products by categoryId
 router.get('/category/:categoryId', productController.getProductsByCategory);
 
