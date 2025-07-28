@@ -467,49 +467,16 @@ const Vouchers = () => {
                             <div className={`${styles.formGrid} ${styles.gridCol2}`}>
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>Mã Voucher:</label>
-                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
-                                        <input
-                                            type="text"
-                                            name="code"
-                                            value={formData.code}
-                                            onChange={handleChange}
-                                            readOnly={isEditing}
-                                            required
-                                            className={styles.input}
-                                            style={{
-                                                flex: 1,
-                                                background: 'white',
-                                                color: 'black',
-                                                border: '1px solid #ccc',
-                                                padding: '8px',
-                                                borderRadius: '4px'
-                                            }}
-                                            placeholder="Mã voucher sẽ được tạo tự động"
-                                        />
-                                        {!isEditing && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const newCode = generateVoucherCode();
-                                                    setFormData(prev => ({ ...prev, code: newCode }));
-                                                }}
-                                                className={`${styles.btn} ${styles.btnSecondary}`}
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    fontSize: '12px',
-                                                    whiteSpace: 'nowrap',
-                                                    height: 'fit-content',
-                                                    background: '#007bff',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer'
-                                                }}
-                                            >
-                                                Tạo mới
-                                            </button>
-                                        )}
-                                    </div>
+                                    <input
+                                        type="text"
+                                        name="code"
+                                        value={formData.code}
+                                        onChange={handleChange}
+                                        readOnly={isEditing}
+                                        required
+                                        className={styles.input}
+                                        placeholder="Mã voucher sẽ được tạo tự động"
+                                    />
                                 </div>
 
                                 <div className={styles.formGroup}>

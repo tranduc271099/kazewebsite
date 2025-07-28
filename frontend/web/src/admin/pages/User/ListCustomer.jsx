@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { BiSearch } from 'react-icons/bi';
-import { AiOutlineEye, AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlineEye } from 'react-icons/ai';
 import { FaUserCircle } from 'react-icons/fa';
 import styles from '../../styles/ProductLayout.module.css'; // Reusing general styles
 
@@ -48,11 +48,6 @@ const ListCustomer = () => {
     const handleViewDetail = (userId) => {
         // Assuming a detail page for user exists or will be created
         navigate(`/admin/users/view/${userId}`);
-    };
-
-    const handleEditUser = (userId) => {
-        // Assuming an edit page for user exists or will be created
-        navigate(`/admin/users/edit/${userId}`);
     };
 
     const formatCurrency = (amount) => {
@@ -134,13 +129,6 @@ const ListCustomer = () => {
                                                 title="Xem chi tiết"
                                             >
                                                 <AiOutlineEye size={20} />
-                                            </button>
-                                            <button
-                                                className={`${styles.actionBtn} ${styles.iconBtn}`}
-                                                onClick={() => handleEditUser(customer._id)}
-                                                title="Chỉnh sửa"
-                                            >
-                                                <AiOutlineEdit size={20} />
                                             </button>
                                         </div>
                                     </td>

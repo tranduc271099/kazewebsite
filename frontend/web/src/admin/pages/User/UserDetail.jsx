@@ -137,8 +137,6 @@ const UserDetail = () => {
             </div>
             <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
                 <button onClick={() => navigate(-1)} className={`${styles.btn} ${styles.btnSecondary}`}>Quay lại</button>
-                {/* Add edit button if needed */}
-                <button onClick={() => navigate(`/admin/users/edit/${userId}`)} className={`${styles.btn} ${styles.btnPrimary}`}>Chỉnh sửa</button>
             </div>
         </div>
     );

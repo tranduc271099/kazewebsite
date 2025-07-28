@@ -1,4 +1,5 @@
 const Voucher = require('../models/Voucher');
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifier');
 
 exports.getAllVouchers = async (req, res) => {
   try {
@@ -88,6 +89,16 @@ exports.createVoucher = async (req, res) => {
       usedCount: 0 // Initialize usedCount to 0
     });
     await newVoucher.save();
+
+    // Notify clients about new voucher creation
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_CREATED, {
+      voucherId: newVoucher._id,
+      voucherCode: newVoucher.code,
+      voucherName: newVoucher.name,
+      discountType: newVoucher.discountType,
+      discountValue: newVoucher.discountValue
+    });
+
     res.status(201).json(newVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi tạo voucher', error: err.message });
@@ -164,6 +175,17 @@ exports.updateVoucher = async (req, res) => {
       isActive
     }, { new: true });
     if (!updatedVoucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
+
+    // Notify clients about voucher update
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_UPDATED, {
+      voucherId: updatedVoucher._id,
+      voucherCode: updatedVoucher.code,
+      voucherName: updatedVoucher.name,
+      discountType: updatedVoucher.discountType,
+      discountValue: updatedVoucher.discountValue,
+      isActive: updatedVoucher.isActive
+    });
+
     res.json(updatedVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi cập nhật voucher', error: err.message });
@@ -174,6 +196,14 @@ exports.deleteVoucher = async (req, res) => {
   try {
     const voucher = await Voucher.findByIdAndDelete(req.params.id);
     if (!voucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
+
+    // Notify clients about voucher deletion
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_DELETED, {
+      voucherId: req.params.id,
+      voucherCode: voucher.code,
+      voucherName: voucher.name
+    });
+
     res.json({ message: 'Đã xóa voucher' });
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi xóa voucher', error: err.message });

@@ -15,13 +15,13 @@ const productSchema = new mongoose.Schema({
             attributes: { type: Object, required: true },
             stock: Number,
             price: Number,
-            costPrice: Number, // Giá nhập hàng cho variant
+            costPrice: Number, // Thêm giá nhập cho variant
             images: [String]
         }
     ],
     images: [String],
     price: Number,
-    costPrice: Number, // Giá nhập hàng chính
+    costPrice: Number, // Thêm giá nhập chính
     stock: Number,
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });

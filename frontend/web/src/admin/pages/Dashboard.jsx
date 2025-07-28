@@ -14,8 +14,10 @@ const Dashboard = () => {
         overview: {
             totalOrders: 0,
             totalRevenue: 0,
+            totalProfit: 0,
             completedOrders: 0,
-            completedRevenue: 0
+            completedRevenue: 0,
+            completedProfit: 0
         },
         dailyStats: [],
         topUsers: [],
@@ -69,6 +71,21 @@ const Dashboard = () => {
             fetchLatestOrders();
         });
 
+        // Listen for order completion (customer confirmed received)
+        socket.on('order_completed', (data) => {
+            toast.success(`🎉 ${data.message}`, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
+            // Refresh dashboard data to get updated stats
+            fetchDashboardData();
+            fetchLatestOrders();
+        });
+
         // Listen for stock reduction from orders
         socket.on('stock_reduced', (data) => {
             toast(`${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`, {
@@ -107,6 +124,7 @@ const Dashboard = () => {
             socket.off('new_chat_session');
             socket.off('client_cart_update');
             socket.off('order_created');
+            socket.off('order_completed');
             socket.off('stock_reduced');
             window.removeEventListener('stockUpdated', handleStockUpdate);
         };
@@ -492,7 +510,7 @@ const Dashboard = () => {
             </Paper>
 
             {/* Thống kê tổng quan */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 20, marginBottom: 30 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 15, marginBottom: 30 }}>
                 <Paper elevation={2} style={cardStyle}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <div style={statIconStyle}>📊</div>
@@ -508,6 +526,15 @@ const Dashboard = () => {
                         <div>
                             <h3 style={statTitleStyle}>Tổng doanh thu</h3>
                             <p style={statNumberStyle}>{formatCurrency(dashboardData.overview.totalRevenue)}</p>
+                        </div>
+                    </div>
+                </Paper>
+                <Paper elevation={2} style={cardStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={statIconStyle}>💎</div>
+                        <div>
+                            <h3 style={statTitleStyle}>Tổng lãi ước tính</h3>
+                            <p style={statNumberStyle}>{formatCurrency(dashboardData.overview.totalProfit || 0)}</p>
                         </div>
                     </div>
                 </Paper>
@@ -529,6 +556,15 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </Paper>
+                <Paper elevation={2} style={cardStyle}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={statIconStyle}>💚</div>
+                        <div>
+                            <h3 style={statTitleStyle}>Lãi hoàn thành</h3>
+                            <p style={statNumberStyle}>{formatCurrency(dashboardData.overview.completedProfit || 0)}</p>
+                        </div>
+                    </div>
+                </Paper>
             </div>
 
             {/* Biểu đồ doanh thu theo ngày */}
@@ -543,40 +579,84 @@ const Dashboard = () => {
                         fontWeight: 700,
                         letterSpacing: 0.5,
                     }}>
-                        Doanh thu theo ngày
+                        Doanh thu & Lãi theo ngày
                     </h3>
+                    <div style={{
+                        display: 'flex',
+                        gap: 20,
+                        marginTop: 8,
+                        marginBottom: 10,
+                        justifyContent: 'center',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{
+                                width: 12,
+                                height: 12,
+                                background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
+                                borderRadius: 2
+                            }}></div>
+                            <span style={{ fontSize: 13, color: theme.palette.text.secondary }}>Doanh thu</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{
+                                width: 12,
+                                height: 12,
+                                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                                borderRadius: 2
+                            }}></div>
+                            <span style={{ fontSize: 13, color: theme.palette.text.secondary }}>Lãi ước tính (30%)</span>
+                        </div>
+                    </div>
                 </div>
                 <div style={{ minHeight: 250, padding: '0 16px 24px 16px' }}>
                     {dashboardData.dailyStats.length > 0 ? (
                         <div style={{
                             display: 'flex',
                             alignItems: 'flex-end',
-                            gap: 40, // tăng khoảng cách giữa các cột
+                            gap: 30, // giảm khoảng cách để có chỗ cho 2 thanh
                             height: 200,
                             width: '100%',
-                            justifyContent: 'center', // căn giữa các cột
+                            justifyContent: 'center',
                             paddingBottom: 16,
                         }}>
                             {dashboardData.dailyStats.map((day, index) => {
                                 const maxRevenue = Math.max(...dashboardData.dailyStats.map(d => d.revenue));
-                                const barHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
+                                const revenueHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
+                                const profitHeight = maxRevenue > 0 ? ((day.profit || 0) / maxRevenue) * 140 + 10 : 10;
+
                                 return (
                                     <div key={day._id} style={{
-                                        flex: '0 0 60px',
+                                        flex: '0 0 80px',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
-                                        minWidth: 60,
+                                        minWidth: 80,
                                     }}>
                                         <div style={{
-                                            width: 36,
-                                            height: barHeight,
-                                            background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
-                                            borderRadius: '8px 8px 0 0',
-                                            transition: 'all 0.3s ease',
+                                            display: 'flex',
+                                            alignItems: 'flex-end',
+                                            gap: 6,
                                             marginBottom: 8,
-                                            boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
-                                        }}></div>
+                                        }}>
+                                            {/* Thanh doanh thu */}
+                                            <div style={{
+                                                width: 24,
+                                                height: revenueHeight,
+                                                background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
+                                                borderRadius: '6px 6px 0 0',
+                                                transition: 'all 0.3s ease',
+                                                boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
+                                            }}></div>
+                                            {/* Thanh lãi */}
+                                            <div style={{
+                                                width: 24,
+                                                height: profitHeight,
+                                                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
+                                                borderRadius: '6px 6px 0 0',
+                                                transition: 'all 0.3s ease',
+                                                boxShadow: '0 2px 8px rgba(76,175,80,0.12)'
+                                            }}></div>
+                                        </div>
                                         <div style={{
                                             display: 'flex',
                                             flexDirection: 'column',
@@ -584,22 +664,33 @@ const Dashboard = () => {
                                             marginTop: 0,
                                             marginBottom: 0,
                                         }}>
-                                            <span style={{
-                                                color: theme.palette.text.primary,
-                                                fontWeight: 700,
-                                                fontSize: 15,
-                                                lineHeight: 1.2,
-                                                textAlign: 'center',
-                                                display: 'block',
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                gap: 2,
                                             }}>
-                                                {day.revenue.toLocaleString('vi-VN')}
                                                 <span style={{
-                                                    fontWeight: 400,
-                                                    fontSize: 13,
-                                                    marginLeft: 2,
                                                     color: theme.palette.text.primary,
-                                                }}>₫</span>
-                                            </span>
+                                                    fontWeight: 600,
+                                                    fontSize: 12,
+                                                    lineHeight: 1.2,
+                                                    textAlign: 'center',
+                                                    display: 'block',
+                                                }}>
+                                                    {day.revenue.toLocaleString('vi-VN')}₫
+                                                </span>
+                                                <span style={{
+                                                    color: '#4caf50',
+                                                    fontWeight: 600,
+                                                    fontSize: 11,
+                                                    lineHeight: 1.2,
+                                                    textAlign: 'center',
+                                                    display: 'block',
+                                                }}>
+                                                    {(day.profit || 0).toLocaleString('vi-VN')}₫
+                                                </span>
+                                            </div>
                                             <span style={{
                                                 marginTop: 4,
                                                 color: theme.palette.text.secondary,
@@ -657,6 +748,7 @@ const Dashboard = () => {
                                         <div style={{ display: 'flex', gap: 15, fontSize: 12, color: theme.palette.text.secondary }}>
                                             <span>{product.totalQuantity} sản phẩm</span>
                                             <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{formatCurrency(product.totalRevenue)}</span>
+                                            <span style={{ color: '#4caf50', fontWeight: 600 }}>Lãi: {formatCurrency(product.estimatedProfit || 0)}</span>
                                             <span style={{
                                                 color: product.stock > 10 ? theme.palette.success.main :
                                                     product.stock > 0 ? theme.palette.warning.main :
