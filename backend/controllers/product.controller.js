@@ -36,7 +36,7 @@ exports.getProducts = async (req, res) => {
 
         const products = await Product.find(filter)
             .populate('category', 'name')
-            .select('name brand price stock isActive images attributes variants createdAt updatedAt category')
+            .select('name brand price costPrice stock isActive images attributes variants createdAt updatedAt category')
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
@@ -77,6 +77,7 @@ exports.createProduct = async (req, res) => {
             brand,
             category,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive
         } = req.body;
@@ -180,6 +181,7 @@ exports.createProduct = async (req, res) => {
             variants,
             images: mainImageUrls,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive,
         });
@@ -205,6 +207,7 @@ exports.updateProduct = async (req, res) => {
             brand,
             category,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive
         } = req.body;
@@ -338,6 +341,7 @@ exports.updateProduct = async (req, res) => {
             variants,
             images: allMainImages,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive
         };
@@ -373,5 +377,55 @@ exports.getProductsByCategory = async (req, res) => {
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi lấy sản phẩm theo danh mục' });
+    }
+};
+
+// Tính toán lãi cho sản phẩm
+exports.calculateProfit = (sellingPrice, costPrice) => {
+    if (!costPrice || costPrice <= 0) return null;
+    const profit = sellingPrice - costPrice;
+    const profitMargin = (profit / sellingPrice) * 100;
+    return {
+        profit: profit,
+        profitMargin: Math.round(profitMargin * 100) / 100 // Làm tròn 2 chữ số thập phân
+    };
+};
+
+// Lấy thống kê lãi của tất cả sản phẩm
+exports.getProfitStatistics = async (req, res) => {
+    try {
+        const products = await Product.find({ isActive: true })
+            .populate('category', 'name')
+            .select('name price costPrice stock variants');
+
+        const profitData = products.map(product => {
+            const mainProfit = product.costPrice ? exports.calculateProfit(product.price, product.costPrice) : null;
+
+            const variantProfits = product.variants.map(variant => {
+                if (variant.costPrice) {
+                    return {
+                        attributes: variant.attributes,
+                        ...exports.calculateProfit(variant.price, variant.costPrice)
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            return {
+                _id: product._id,
+                name: product.name,
+                category: product.category,
+                mainPrice: product.price,
+                mainCostPrice: product.costPrice,
+                mainProfit: mainProfit,
+                variantProfits: variantProfits,
+                stock: product.stock
+            };
+        });
+
+        res.json(profitData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi khi tính toán thống kê lãi' });
     }
 };

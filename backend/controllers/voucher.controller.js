@@ -21,6 +21,60 @@ exports.getAvailableVouchers = async (req, res) => {
 exports.createVoucher = async (req, res) => {
   try {
     const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity } = req.body;
+
+    // Validation cơ bản
+    if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+    }
+
+    // Validation cho discountValue
+    if (discountValue < 0) {
+      return res.status(400).json({ message: 'Giá trị giảm giá không được âm' });
+    }
+
+    // Validation cho phần trăm
+    if (discountType === 'percent') {
+      if (discountValue > 100) {
+        return res.status(400).json({ message: 'Giá trị giảm phần trăm không được vượt quá 100%' });
+      }
+      if (discountValue > 95) {
+        return res.status(400).json({
+          message: 'Cảnh báo: Giảm giá trên 95% có thể dẫn đến lỗ nghiêm trọng',
+          warning: true
+        });
+      }
+    }
+
+    // Validation cho số tiền
+    if (discountType === 'amount') {
+      if (minOrder > 0 && discountValue >= minOrder) {
+        return res.status(400).json({
+          message: 'Số tiền giảm giá không được bằng hoặc vượt quá đơn hàng tối thiểu'
+        });
+      }
+      if (minOrder > 0 && discountValue > minOrder * 0.9) {
+        return res.status(400).json({
+          message: `Cảnh báo: Số tiền giảm giá chiếm ${((discountValue / minOrder) * 100).toFixed(1)}% đơn hàng tối thiểu, có thể dẫn đến lỗ`,
+          warning: true
+        });
+      }
+    }
+
+    // Validation ngày tháng
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ message: 'Ngày bắt đầu phải trước ngày kết thúc' });
+    }
+
+    // Validation số lượng
+    if (quantity && quantity <= 0) {
+      return res.status(400).json({ message: 'Số lượng voucher phải lớn hơn 0' });
+    }
+
+    // Validation đơn hàng tối thiểu
+    if (minOrder < 0) {
+      return res.status(400).json({ message: 'Đơn hàng tối thiểu không được âm' });
+    }
+
     const newVoucher = new Voucher({
       code,
       name,
@@ -43,6 +97,60 @@ exports.createVoucher = async (req, res) => {
 exports.updateVoucher = async (req, res) => {
   try {
     const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity, isActive } = req.body;
+
+    // Validation cơ bản
+    if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+    }
+
+    // Validation cho discountValue
+    if (discountValue < 0) {
+      return res.status(400).json({ message: 'Giá trị giảm giá không được âm' });
+    }
+
+    // Validation cho phần trăm
+    if (discountType === 'percent') {
+      if (discountValue > 100) {
+        return res.status(400).json({ message: 'Giá trị giảm phần trăm không được vượt quá 100%' });
+      }
+      if (discountValue > 95) {
+        return res.status(400).json({
+          message: 'Cảnh báo: Giảm giá trên 95% có thể dẫn đến lỗ nghiêm trọng',
+          warning: true
+        });
+      }
+    }
+
+    // Validation cho số tiền
+    if (discountType === 'amount') {
+      if (minOrder > 0 && discountValue >= minOrder) {
+        return res.status(400).json({
+          message: 'Số tiền giảm giá không được bằng hoặc vượt quá đơn hàng tối thiểu'
+        });
+      }
+      if (minOrder > 0 && discountValue > minOrder * 0.9) {
+        return res.status(400).json({
+          message: `Cảnh báo: Số tiền giảm giá chiếm ${((discountValue / minOrder) * 100).toFixed(1)}% đơn hàng tối thiểu, có thể dẫn đến lỗ`,
+          warning: true
+        });
+      }
+    }
+
+    // Validation ngày tháng
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ message: 'Ngày bắt đầu phải trước ngày kết thúc' });
+    }
+
+    // Validation số lượng
+    if (quantity && quantity <= 0) {
+      return res.status(400).json({ message: 'Số lượng voucher phải lớn hơn 0' });
+    }
+
+    // Validation đơn hàng tối thiểu
+    if (minOrder < 0) {
+      return res.status(400).json({ message: 'Đơn hàng tối thiểu không được âm' });
+    }
+
     const updatedVoucher = await Voucher.findByIdAndUpdate(req.params.id, {
       code,
       name,
