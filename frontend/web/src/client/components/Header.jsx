@@ -201,8 +201,24 @@ const Header = () => {
                                 className="user-button"
                                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                             >
-                                <i className="bi bi-person-circle"></i>
-                                <span>{user.name}</span>
+                                {user.avatar || user.image ? (
+                                    <img
+                                        src={user.avatar || user.image}
+                                        alt="avatar"
+                                        style={{
+                                            width: 32,
+                                            height: 32,
+                                            borderRadius: '50%',
+                                            objectFit: 'cover',
+                                            marginRight: 8,
+                                            border: '1px solid #e3e6ee',
+                                            background: '#f5f5f5',
+                                        }}
+                                    />
+                                ) : (
+                                    <i className="bi bi-person-circle" style={{ fontSize: 28, marginRight: 8 }}></i>
+                                )}
+                                <span>Xin chào, {user.name} !</span>
                             </button>
                             {isUserMenuOpen && (
                                 <div className="user-menu">
