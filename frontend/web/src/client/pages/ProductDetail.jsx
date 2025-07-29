@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { CartContext } from '../context/CartContext';
@@ -282,26 +282,6 @@ function ProductDetail() {
         }
     };
 
-    // Báo cáo bình luận
-    const handleReportComment = async (commentId) => {
-        const reason = prompt('Lý do báo cáo (spam/inappropriate/offensive/fake/other):');
-        if (!reason) return;
-        
-        const description = prompt('Mô tả chi tiết (tùy chọn):');
-        
-        try {
-            const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:5000/api/comments/${commentId}/report`, {
-                reason,
-                description
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            toast.success('Đã báo cáo bình luận thành công!');
-        } catch (err) {
-            toast.error(err.response?.data?.message || 'Lỗi khi báo cáo bình luận');
-        }
-    };
 
     if (fetchError) return <div>Không tìm thấy sản phẩm hoặc có lỗi xảy ra.</div>;
     if (!product) return <div>Đang tải...</div>;
@@ -525,7 +505,7 @@ function ProductDetail() {
                                         <button className="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">Mô tả</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
-                                        <button className="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab" aria-controls="specifications" aria-selected="false">Thông số kỹ thuật</button>
+                                        <button className="nav-link" id="related-tab" data-bs-toggle="tab" data-bs-target="#related" type="button" role="tab" aria-controls="related" aria-selected="false">Sản phẩm liên quan</button>
                                     </li>
                                     <li className="nav-item" role="presentation">
                                         <button className="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab" aria-controls="reviews" aria-selected="false">Đánh giá ({comments.length})</button>
@@ -539,25 +519,9 @@ function ProductDetail() {
                                             <p style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
                                         </div>
                                     </div>
-                                    {/* Specifications Tab */}
-                                    <div className="tab-pane fade" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
-                                        <div className="product-specifications">
-                                            <div className="specs-group">
-                                                <h4>Thông số kỹ thuật</h4>
-                                                <div className="specs-table">
-                                                    {product.specifications && Object.keys(product.specifications).length > 0 ? (
-                                                        Object.entries(product.specifications).map(([key, value]) => (
-                                                            <div key={key} className="specs-row">
-                                                                <div className="specs-label">{key.charAt(0).toUpperCase() + key.slice(1)}</div>
-                                                                <div className="specs-value">{value}</div>
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p>Không có thông số kỹ thuật cho sản phẩm này.</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
+                                    {/* Related Products Tab */}
+                                    <div className="tab-pane fade" id="related" role="tabpanel" aria-labelledby="related-tab">
+                                        <RelatedProducts categoryId={product.category?._id} currentProductId={product._id} />
                                     </div>
                                     {/* Reviews Tab */}
                                     <div className="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
@@ -649,15 +613,6 @@ function ProductDetail() {
                                                                         {new Date(c.createdAt).toLocaleString('vi-VN')}
                                                                     </div>
                                                                 </div>
-                                                                <div className="d-flex gap-1">
-                                                                    <button
-                                                                        className="btn btn-sm btn-outline-secondary"
-                                                                        onClick={() => handleReportComment(c._id)}
-                                                                        title="Báo cáo bình luận"
-                                                                    >
-                                                                        <i className="bi bi-flag"></i>
-                                                                    </button>
-                                                                </div>
                                                             </div>
                                                             
                                                             <div className="rating-display mb-2">
@@ -719,6 +674,170 @@ function ProductDetail() {
                 </div>
             </section>
         </main>
+    );
+}
+
+function RelatedProducts({ categoryId, currentProductId }) {
+    const [related, setRelated] = useState([]);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [selectedSize, setSelectedSize] = useState('');
+    const [selectedColor, setSelectedColor] = useState('');
+    const [selectedQuantity, setSelectedQuantity] = useState(1);
+    const [popoverVisible, setPopoverVisible] = useState(false);
+    const { addToCart } = useContext(CartContext);
+    const [selectedVariant, setSelectedVariant] = useState(null);
+
+    // Thêm hàm tìm variant theo thuộc tính
+    const findMatchingVariant = (product, size, color) => {
+        if (!product || !product.variants) return null;
+        return product.variants.find(
+            v => v.attributes.size === size && v.attributes.color === color
+        );
+    };
+
+    useEffect(() => {
+        if (!categoryId) return;
+        axios.get(`http://localhost:5000/api/products?category=${categoryId}&activeOnly=true`)
+            .then(res => {
+                setRelated(res.data.filter(p => p._id !== currentProductId).slice(0, 8));
+            });
+    }, [categoryId, currentProductId]);
+
+    useEffect(() => {
+        if (selectedProduct && selectedSize && selectedColor) {
+            setSelectedVariant(findMatchingVariant(selectedProduct, selectedSize, selectedColor));
+        } else {
+            setSelectedVariant(null);
+        }
+    }, [selectedProduct, selectedSize, selectedColor]);
+
+    const openPopover = (product) => {
+        setSelectedProduct(product);
+        setSelectedSize(product.attributes?.sizes?.[0] || '');
+        setSelectedColor(product.attributes?.colors?.[0] || '');
+        setSelectedQuantity(1);
+    };
+    const closePopover = () => {
+        setSelectedProduct(null);
+    };
+    const handleConfirmAddToCart = async () => {
+        if (!selectedSize || !selectedColor) {
+            toast.warning('Vui lòng chọn size và màu!');
+            return;
+        }
+        if (!selectedVariant) {
+            toast.warning('Không tìm thấy biến thể phù hợp!');
+            return;
+        }
+        if (selectedQuantity > selectedVariant.stock) {
+            toast.warning('Số lượng vượt quá tồn kho!');
+            return;
+        }
+        const cartItem = {
+            id: selectedProduct._id,
+            name: selectedProduct.name,
+            price: selectedVariant.price,
+            image: selectedVariant.images?.[0] || selectedProduct.images?.[0] || '',
+            color: selectedColor,
+            size: selectedSize,
+            quantity: selectedQuantity,
+            stock: selectedVariant.stock,
+        };
+        try {
+            await addToCart(cartItem);
+            closePopover();
+        } catch (error) {
+            toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng');
+        }
+    };
+    if (!categoryId) return <div>Không có sản phẩm liên quan.</div>;
+    if (related.length === 0) return <div>Đang tải sản phẩm liên quan...</div>;
+    return (
+        <div className="row">
+            {related.map(product => (
+                <div className="col-md-3 mb-4" key={product._id} style={{ position: 'relative' }}>
+                    <div className="card h-100">
+                        <Link to={`/product-details/${product._id}`}>
+                            <img src={product.images?.[0] || '/assets/img/no-image.png'} className="card-img-top" alt={product.name} style={{height:180,objectFit:'cover'}} />
+                        </Link>
+                        <div className="card-body">
+                            <h6 className="card-title">
+                                <Link to={`/product-details/${product._id}`}>{product.name}</Link>
+                            </h6>
+                            <p className="card-text text-primary fw-bold">
+                                {product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                            </p>
+                            <button className="btn btn-outline-primary btn-sm" onClick={() => openPopover(product)}>Thêm vào giỏ</button>
+                        </div>
+                        {selectedProduct && selectedProduct._id === product._id && (
+                            <div
+                                className={`popover-attribute-box${popoverVisible ? ' show' : ''}`}
+                                style={{
+                                    position: 'fixed',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    zIndex: 2000,
+                                    background: '#fff',
+                                    borderRadius: 16,
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+                                    padding: '22px 20px 16px 20px',
+                                    minWidth: 240,
+                                    maxWidth: '95vw',
+                                    border: '1.5px solid #e3e6ee'
+                                }}
+                            >
+                                <button
+                                    style={{ position: 'absolute', top: 8, right: 10, background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', zIndex: 2 }}
+                                    onClick={closePopover}
+                                    aria-label="Đóng"
+                                >&times;</button>
+                                <h5 className="mb-2" style={{ fontWeight: 600 }}>Chọn thuộc tính</h5>
+                                <div className="mb-2">
+                                    <span className="fw-bold text-primary" style={{ fontSize: 18 }}>
+                                        {selectedVariant
+                                            ? selectedVariant.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+                                            : selectedProduct.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                    </span>
+                                </div>
+                                <div className="mb-2">
+                                    <label className="form-label" style={{ fontWeight: 500 }}>Kích thước:</label>
+                                    <select className="form-select" value={selectedSize} onChange={e => setSelectedSize(e.target.value)}>
+                                        {selectedProduct.attributes?.sizes?.map(size => (
+                                            <option key={size} value={size}>{size}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="mb-2">
+                                    <label className="form-label" style={{ fontWeight: 500 }}>Màu sắc:</label>
+                                    <select className="form-select" value={selectedColor} onChange={e => setSelectedColor(e.target.value)}>
+                                        {selectedProduct.attributes?.colors?.map(color => (
+                                            <option key={color} value={color}>{color}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="mb-2">
+                                    <label className="form-label" style={{ fontWeight: 500 }}>Số lượng:</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        min={1}
+                                        max={selectedVariant?.stock || 1}
+                                        value={selectedQuantity}
+                                        onChange={e => setSelectedQuantity(Math.max(1, Math.min(selectedVariant?.stock || 1, Number(e.target.value))))}
+                                    />
+                                    <small className="text-muted">Còn lại: {selectedVariant?.stock || selectedProduct.stock}</small>
+                                </div>
+                                <div className="d-flex justify-content-end gap-2 mt-2">
+                                    <button className="btn btn-secondary btn-sm" onClick={closePopover}>Hủy</button>
+                                    <button className="btn btn-primary btn-sm" onClick={handleConfirmAddToCart}>Xác nhận</button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            ))}
+        </div>
     );
 }
 
