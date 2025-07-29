@@ -1,28 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, useTheme, Card, CardContent, Chip, Button, Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import { tokens } from '../theme';
-import Header from '../components/Header';
-import CloseIcon from '@mui/icons-material/Close';
+import axios from 'axios';
+import styles from '../styles/ProductLayout.module.css';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import StopCircleOutlinedIcon from '@mui/icons-material/StopCircleOutlined';
 import io from 'socket.io-client';
 import ChatDetailDialog from '../components/ChatDetailDialog';
 
 const socket = io.connect("http://localhost:5000");
 
 const ChatManagement = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
 
   // Fetch all chats from API
   const fetchChats = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/chats');
       const data = await response.json();
-      setChats(data);
+
+      // Filter chats based on search and status
+      let filteredChats = data;
+
+      if (searchTerm) {
+        filteredChats = filteredChats.filter(chat =>
+          chat.clientUsername?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          chat.adminUsername?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      if (filterStatus) {
+        filteredChats = filteredChats.filter(chat => chat.status === filterStatus);
+      }
+
+      setChats(filteredChats);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching chats:', error);
@@ -62,7 +76,7 @@ const ChatManagement = () => {
       socket.off('connect');
       socket.off('disconnect');
     };
-  }, []);
+  }, [searchTerm, filterStatus]);
 
   // Xử lý khi click vào một cuộc trò chuyện
   const handleChatClick = (chatData) => {
@@ -82,7 +96,7 @@ const ChatManagement = () => {
       });
       // Refresh danh sách sau khi cập nhật
       fetchChats();
-      
+
       // Nếu kết thúc chat, gửi sự kiện socket
       if (status === 'đã kết thúc') {
         socket.emit('end_chat', {
@@ -96,180 +110,155 @@ const ChatManagement = () => {
     }
   };
 
-  // Định nghĩa columns cho DataGrid
-  const columns = [
-    {
-      field: 'clientUsername',
-      headerName: 'Khách hàng',
-      flex: 1,
-      cellClassName: 'name-column--cell',
-    },
-    {
-      field: 'status',
-      headerName: 'Trạng thái',
-      flex: 1,
-      renderCell: ({ row: { status } }) => {
-        return (
-          <Box display="flex" justifyContent="flex-start" alignItems="center">
-            <Chip 
-              label={status}
-              color={
-                status === 'mới' ? 'error' :
-                status === 'đang diễn ra' ? 'warning' : 'success'
-              }
-              variant="filled"
-            />
-          </Box>
-        );
-      },
-    },
-    {
-      field: 'adminUsername',
-      headerName: 'Admin phụ trách',
-      flex: 1,
-      renderCell: ({ row: { adminUsername } }) => {
-        return (
-          <Typography color={colors.greenAccent[500]}>
-            {adminUsername || 'Chưa có'}
-          </Typography>
-        );
-      },
-    },
-    {
-      field: 'messageCount',
-      headerName: 'Số tin nhắn',
-      flex: 0.5,
-      renderCell: ({ row: { messages } }) => {
-        return (
-          <Typography>{messages ? messages.length : 0}</Typography>
-        );
-      },
-    },
-    {
-      field: 'createdAt',
-      headerName: 'Thời gian tạo',
-      flex: 1,
-      renderCell: ({ row: { createdAt } }) => {
-        return (
-          <Typography>
-            {new Date(createdAt).toLocaleString('vi-VN')}
-          </Typography>
-        );
-      },
-    },
-    {
-      field: 'actions',
-      headerName: 'Hành động',
-      flex: 1,
-      renderCell: ({ row }) => {
-        return (
-          <Box display="flex" gap="10px">
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => handleChatClick(row)}
-            >
-              Xem chi tiết
-            </Button>
-            {row.status !== 'đã kết thúc' && (
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                onClick={() => updateChatStatus(row.roomId, 'đã kết thúc')}
-              >
-                Kết thúc
-              </Button>
-            )}
-          </Box>
-        );
-      },
-    },
-  ];
+  // Định dạng thời gian
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN');
+  };
+
+  // Lấy màu trạng thái
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'mới':
+        return styles.statusInactive; // Đỏ
+      case 'đang diễn ra':
+        return styles.statusActive; // Xanh
+      case 'đã kết thúc':
+        return styles.status; // Mặc định
+      default:
+        return styles.status;
+    }
+  };
+
+  if (loading) return <div className={styles.container}>Đang tải...</div>;
 
   return (
-    <Box m="20px">
-      <Header title="QUẢN LÝ TIN NHẮN" subtitle="Quản lý tất cả các cuộc trò chuyện với khách hàng" />
-      
+    <div className={styles.container}>
+      <h1 className={styles.title}>Quản lý tin nhắn</h1>
+      <p style={{ marginBottom: '24px', color: 'var(--text-secondary)' }}>
+        Quản lý tất cả các cuộc trò chuyện với khách hàng
+      </p>
+
       {/* Thống kê nhanh */}
-      <Box display="grid" gridTemplateColumns="repeat(12, 1fr)" gridAutoRows="140px" gap="20px" mb="20px">
-        <Box gridColumn="span 3" backgroundColor={colors.primary[400]} display="flex" alignItems="center" justifyContent="center" borderRadius="8px">
-          <Box textAlign="center">
-            <Typography variant="h4" fontWeight="600" color={colors.grey[100]}>
-              {chats.filter(chat => chat.status === 'mới').length}
-            </Typography>
-            <Typography color={colors.greenAccent[500]}>Tin nhắn mới</Typography>
-          </Box>
-        </Box>
-        
-        <Box gridColumn="span 3" backgroundColor={colors.primary[400]} display="flex" alignItems="center" justifyContent="center" borderRadius="8px">
-          <Box textAlign="center">
-            <Typography variant="h4" fontWeight="600" color={colors.grey[100]}>
-              {chats.filter(chat => chat.status === 'đang diễn ra').length}
-            </Typography>
-            <Typography color={colors.greenAccent[500]}>Đang diễn ra</Typography>
-          </Box>
-        </Box>
-        
-        <Box gridColumn="span 3" backgroundColor={colors.primary[400]} display="flex" alignItems="center" justifyContent="center" borderRadius="8px">
-          <Box textAlign="center">
-            <Typography variant="h4" fontWeight="600" color={colors.grey[100]}>
-              {chats.filter(chat => chat.status === 'đã kết thúc').length}
-            </Typography>
-            <Typography color={colors.greenAccent[500]}>Đã kết thúc</Typography>
-          </Box>
-        </Box>
-        
-        <Box gridColumn="span 3" backgroundColor={colors.primary[400]} display="flex" alignItems="center" justifyContent="center" borderRadius="8px">
-          <Box textAlign="center">
-            <Typography variant="h4" fontWeight="600" color={colors.grey[100]}>
-              {chats.length}
-            </Typography>
-            <Typography color={colors.greenAccent[500]}>Tổng cộng</Typography>
-          </Box>
-        </Box>
-      </Box>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '20px',
+        marginBottom: '24px'
+      }}>
+        <div className={styles.card} style={{ textAlign: 'center', padding: '20px' }}>
+          <h3 style={{ fontSize: '2rem', fontWeight: '600', margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+            {chats.filter(chat => chat.status === 'mới').length}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0' }}>Tin nhắn mới</p>
+        </div>
+
+        <div className={styles.card} style={{ textAlign: 'center', padding: '20px' }}>
+          <h3 style={{ fontSize: '2rem', fontWeight: '600', margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+            {chats.filter(chat => chat.status === 'đang diễn ra').length}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0' }}>Đang diễn ra</p>
+        </div>
+
+        <div className={styles.card} style={{ textAlign: 'center', padding: '20px' }}>
+          <h3 style={{ fontSize: '2rem', fontWeight: '600', margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+            {chats.filter(chat => chat.status === 'đã kết thúc').length}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0' }}>Đã kết thúc</p>
+        </div>
+
+        <div className={styles.card} style={{ textAlign: 'center', padding: '20px' }}>
+          <h3 style={{ fontSize: '2rem', fontWeight: '600', margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
+            {chats.length}
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: '0' }}>Tổng cộng</p>
+        </div>
+      </div>
+
+      {/* Bộ lọc */}
+      <div className={styles.card}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo tên khách hàng hoặc admin..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.input}
+            style={{ flex: '1', minWidth: '300px' }}
+          />
+
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className={styles.select}
+            style={{ minWidth: '150px' }}
+          >
+            <option value="">Tất cả trạng thái</option>
+            <option value="mới">Tin nhắn mới</option>
+            <option value="đang diễn ra">Đang diễn ra</option>
+            <option value="đã kết thúc">Đã kết thúc</option>
+          </select>
+        </div>
+      </div>
 
       {/* Bảng danh sách chat */}
-      <Box
-        m="40px 0 0 0"
-        height="75vh"
-        sx={{
-          "& .MuiDataGrid-root": {
-            border: "none",
-          },
-          "& .MuiDataGrid-cell": {
-            borderBottom: "none",
-          },
-          "& .name-column--cell": {
-            color: colors.greenAccent[300],
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: colors.blueAccent[700],
-            borderBottom: "none",
-          },
-          "& .MuiDataGrid-virtualScroller": {
-            backgroundColor: colors.primary[400],
-          },
-          "& .MuiDataGrid-footerContainer": {
-            borderTop: "none",
-            backgroundColor: colors.blueAccent[700],
-          },
-          "& .MuiCheckbox-root": {
-            color: `${colors.greenAccent[200]} !important`,
-          },
-        }}
-      >
-        <DataGrid 
-          loading={loading}
-          rows={chats} 
-          columns={columns} 
-          getRowId={(row) => row._id}
-          pageSize={10}
-          rowsPerPageOptions={[10]}
-        />
-      </Box>
+      <div className={styles.card}>
+        <table className={styles.productTable}>
+          <thead>
+            <tr>
+              <th>Khách hàng</th>
+              <th>Trạng thái</th>
+              <th>Admin phụ trách</th>
+              <th>Số tin nhắn</th>
+              <th>Thời gian tạo</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {chats.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                  Không có cuộc trò chuyện nào
+                </td>
+              </tr>
+            ) : (
+              chats.map((chat) => (
+                <tr key={chat._id}>
+                  <td style={{ fontWeight: '500' }}>{chat.clientUsername || 'Không rõ'}</td>
+                  <td>
+                    <span className={`${styles.status} ${getStatusClass(chat.status)}`}>
+                      {chat.status}
+                    </span>
+                  </td>
+                  <td>{chat.adminUsername || 'Chưa có'}</td>
+                  <td style={{ textAlign: 'center' }}>{chat.messages ? chat.messages.length : 0}</td>
+                  <td style={{ fontSize: '0.9rem' }}>{formatDate(chat.createdAt)}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <button
+                        onClick={() => handleChatClick(chat)}
+                        className={`${styles.actionBtn} ${styles.iconBtn}`}
+                        title="Xem chi tiết"
+                      >
+                        <VisibilityOutlinedIcon />
+                      </button>
+                      {chat.status !== 'đã kết thúc' && (
+                        <button
+                          onClick={() => updateChatStatus(chat.roomId, 'đã kết thúc')}
+                          className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                          title="Kết thúc chat"
+                        >
+                          <StopCircleOutlinedIcon />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       {/* Dialog chi tiết chat */}
       {selectedChat && (
@@ -281,7 +270,7 @@ const ChatManagement = () => {
           socket={socket}
         />
       )}
-    </Box>
+    </div>
   );
 };
 

@@ -36,7 +36,7 @@ exports.getProducts = async (req, res) => {
 
         const products = await Product.find(filter)
             .populate('category', 'name')
-            .select('name brand price stock isActive images attributes variants createdAt updatedAt category')
+            .select('name brand price costPrice stock isActive images attributes variants createdAt updatedAt category')
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
@@ -47,7 +47,15 @@ exports.getProducts = async (req, res) => {
 // Get product by ID
 exports.getProductById = async (req, res) => {
     try {
-        const product = await Product.findById(req.params.id)
+        const { activeOnly } = req.query;
+        const filter = { _id: req.params.id };
+
+        // Nếu là client request (activeOnly=true), chỉ lấy sản phẩm đang hoạt động
+        if (activeOnly === 'true') {
+            filter.isActive = true;
+        }
+
+        const product = await Product.findOne(filter)
             .populate('category', 'name');
 
         if (!product) {
@@ -69,12 +77,18 @@ exports.createProduct = async (req, res) => {
             brand,
             category,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive
         } = req.body;
 
+        // Parse và validate các giá trị số
+        const parsedPrice = price ? parseFloat(price) : undefined;
+        const parsedCostPrice = costPrice !== undefined && costPrice !== null && costPrice !== '' ? parseFloat(costPrice) : undefined;
+        const parsedStock = stock ? parseInt(stock) : undefined;
+
         // Validate dữ liệu đầu vào
-        if (!name || !price || !stock || !category) {
+        if (!name || !parsedPrice || !parsedStock || !category) {
             return res.status(400).json({ message: 'Vui lòng nhập đầy đủ thông tin bắt buộc: tên, giá, tồn kho, danh mục.' });
         }
 
@@ -171,8 +185,9 @@ exports.createProduct = async (req, res) => {
             attributes,
             variants,
             images: mainImageUrls,
-            price,
-            stock,
+            price: parsedPrice,
+            costPrice: parsedCostPrice, // Sử dụng giá trị đã parse
+            stock: parsedStock,
             isActive,
         });
 
@@ -197,9 +212,21 @@ exports.updateProduct = async (req, res) => {
             brand,
             category,
             price,
+            costPrice, // Thêm giá nhập hàng
             stock,
             isActive
         } = req.body;
+
+        // Parse và validate các giá trị số
+        const parsedPrice = price ? parseFloat(price) : undefined;
+        const parsedCostPrice = costPrice !== undefined && costPrice !== null && costPrice !== '' ? parseFloat(costPrice) : undefined;
+        const parsedStock = stock ? parseInt(stock) : undefined;
+
+        // Debug logging cho updateProduct
+        console.log('Update Product - Raw costPrice:', costPrice);
+        console.log('Update Product - Parsed costPrice:', parsedCostPrice);
+        console.log('Update Product - Type of costPrice:', typeof costPrice);
+        console.log('Update Product - CostPrice is valid:', !isNaN(parsedCostPrice));
 
         // Parse các trường phức tạp nếu là string (do FormData gửi lên)
         let attributes = req.body.attributes;
@@ -329,10 +356,15 @@ exports.updateProduct = async (req, res) => {
             attributes,
             variants,
             images: allMainImages,
-            price,
-            stock,
+            price: parsedPrice,
+            costPrice: parsedCostPrice, // Sử dụng giá trị đã parse
+            stock: parsedStock,
             isActive
         };
+
+        // Debug logging updateData
+        console.log('UpdateData costPrice:', updateData.costPrice);
+        console.log('UpdateData:', JSON.stringify(updateData, null, 2));
 
         if (name === productToUpdate.name) {
             delete updateData.slug;
@@ -354,9 +386,67 @@ exports.updateProduct = async (req, res) => {
 exports.getProductsByCategory = async (req, res) => {
     try {
         const { categoryId } = req.params;
-        const products = await Product.find({ category: categoryId });
+        const { activeOnly } = req.query;
+
+        const filter = { category: categoryId };
+        if (activeOnly === 'true') {
+            filter.isActive = true;
+        }
+
+        const products = await Product.find(filter);
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi lấy sản phẩm theo danh mục' });
     }
 };
+
+// Tính toán lãi cho sản phẩm
+exports.calculateProfit = (sellingPrice, costPrice) => {
+    if (!costPrice || costPrice <= 0) return null;
+    const profit = sellingPrice - costPrice;
+    const profitMargin = (profit / sellingPrice) * 100;
+    return {
+        profit: profit,
+        profitMargin: Math.round(profitMargin * 100) / 100 // Làm tròn 2 chữ số thập phân
+    };
+};
+
+// Lấy thống kê lãi của tất cả sản phẩm
+exports.getProfitStatistics = async (req, res) => {
+    try {
+        const products = await Product.find({ isActive: true })
+            .populate('category', 'name')
+            .select('name price costPrice stock variants');
+
+        const profitData = products.map(product => {
+            const mainProfit = product.costPrice ? exports.calculateProfit(product.price, product.costPrice) : null;
+
+            const variantProfits = product.variants.map(variant => {
+                if (variant.costPrice) {
+                    return {
+                        attributes: variant.attributes,
+                        ...exports.calculateProfit(variant.price, variant.costPrice)
+                    };
+                }
+                return null;
+            }).filter(Boolean);
+
+            return {
+                _id: product._id,
+                name: product.name,
+                category: product.category,
+                mainPrice: product.price,
+                mainCostPrice: product.costPrice,
+                mainProfit: mainProfit,
+                variantProfits: variantProfits,
+                stock: product.stock
+            };
+        });
+
+        res.json(profitData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi khi tính toán thống kê lãi' });
+    }
+};
+

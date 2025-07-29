@@ -2,11 +2,8 @@ import { Box, IconButton, useTheme, Badge, Popover, Typography, List, ListItem, 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../theme";
-import InputBase from "@mui/material/InputBase";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import io from 'socket.io-client';
@@ -75,8 +72,8 @@ const Topbar = () => {
     });
 
     newSocket.on('new_chat_session', (data) => {
-      setNotifications(prev => [...prev, { 
-        ...data, 
+      setNotifications(prev => [...prev, {
+        ...data,
         type: 'chat',
         timestamp: new Date().toISOString()
       }]);
@@ -84,8 +81,8 @@ const Topbar = () => {
 
     // Listen for client cart updates
     newSocket.on('client_cart_update', (data) => {
-      setNotifications(prev => [...prev, { 
-        ...data, 
+      setNotifications(prev => [...prev, {
+        ...data,
         type: 'cart',
         message: `${data.username} đã ${data.action} sản phẩm: ${data.productName}`,
         timestamp: new Date().toISOString()
@@ -94,8 +91,8 @@ const Topbar = () => {
 
     // Listen for order creation
     newSocket.on('order_created', (data) => {
-      setNotifications(prev => [...prev, { 
-        ...data, 
+      setNotifications(prev => [...prev, {
+        ...data,
         type: 'order',
         message: `${data.username} đã tạo đơn hàng #${data.orderId} - ${data.productCount} sản phẩm - ${data.totalAmount.toLocaleString('vi-VN')}₫`,
         timestamp: new Date().toISOString()
@@ -104,8 +101,8 @@ const Topbar = () => {
 
     // Listen for stock reduction
     newSocket.on('stock_reduced', (data) => {
-      setNotifications(prev => [...prev, { 
-        ...data, 
+      setNotifications(prev => [...prev, {
+        ...data,
         type: 'stock',
         message: `${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`,
         timestamp: new Date().toISOString()
@@ -182,19 +179,7 @@ const Topbar = () => {
   const id = openNotification ? 'simple-popover' : undefined;
 
   return (
-    <Box display="flex" justifyContent="space-between" p={2}>
-      {/* SEARCH BAR */}
-      <Box
-        display="flex"
-        backgroundColor={colors.primary[400]}
-        borderRadius="3px"
-      >
-        <InputBase sx={{ ml: 2, flex: 1 }} placeholder="Tìm kiếm" />
-        <IconButton type="button" sx={{ p: 1 }}>
-          <SearchIcon />
-        </IconButton>
-      </Box>
-
+    <Box display="flex" justifyContent="flex-end" p={2}>
       {/* ICONS */}
       <Box display="flex">
         <IconButton onClick={handleNotificationClick}>
@@ -223,7 +208,7 @@ const Topbar = () => {
             ) : (
               <List>
                 {notifications.slice(-10).reverse().map((notif, index) => (
-                  <ListItem key={index} sx={{ 
+                  <ListItem key={index} sx={{
                     borderBottom: `1px solid ${colors.grey[700]}`,
                     flexDirection: 'column',
                     alignItems: 'flex-start',
@@ -254,17 +239,14 @@ const Topbar = () => {
             </Button>
           </Box>
         </Popover>
-        <IconButton>
-          <SettingsOutlinedIcon />
-        </IconButton>
         <IconButton onClick={handleLogout}>
           <PersonOutlinedIcon />
         </IconButton>
       </Box>
 
       {/* Dialog hiển thị tất cả thông báo trong ngày */}
-      <Dialog 
-        open={allNotificationsDialogOpen} 
+      <Dialog
+        open={allNotificationsDialogOpen}
         onClose={handleCloseAllNotificationsDialog}
         maxWidth="md"
         fullWidth
@@ -276,7 +258,7 @@ const Topbar = () => {
           }
         }}
       >
-        <DialogTitle sx={{ 
+        <DialogTitle sx={{
           borderBottom: `1px solid ${colors.grey[700]}`,
           display: 'flex',
           justifyContent: 'space-between',
@@ -284,9 +266,9 @@ const Topbar = () => {
         }}>
           <Typography variant="h6">Tất cả thông báo trong ngày</Typography>
           <Box>
-            <Button 
-              variant="outlined" 
-              size="small" 
+            <Button
+              variant="outlined"
+              size="small"
               onClick={handleClearAllNotifications}
               sx={{ mr: 1, color: colors.grey[100], borderColor: colors.grey[600] }}
             >
@@ -297,7 +279,7 @@ const Topbar = () => {
             </IconButton>
           </Box>
         </DialogTitle>
-        
+
         <DialogContent sx={{ p: 0 }}>
           {notifications.length === 0 ? (
             <Box p={3} textAlign="center">
@@ -308,9 +290,9 @@ const Topbar = () => {
           ) : (
             <List sx={{ maxHeight: '60vh', overflow: 'auto' }}>
               {notifications.map((notif, index) => (
-                <ListItem 
-                  key={index} 
-                  sx={{ 
+                <ListItem
+                  key={index}
+                  sx={{
                     borderBottom: `1px solid ${colors.grey[700]}`,
                     flexDirection: 'column',
                     alignItems: 'flex-start',
@@ -331,8 +313,8 @@ const Topbar = () => {
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <MuiIconButton 
-                        size="small" 
+                      <MuiIconButton
+                        size="small"
                         onClick={() => handleDeleteNotification(index)}
                         sx={{ color: colors.grey[400] }}
                       >

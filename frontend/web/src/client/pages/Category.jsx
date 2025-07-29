@@ -14,41 +14,17 @@ const Category = () => {
     const [itemsPerPage, setItemsPerPage] = useState(12);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // State cho price range ở sidebar
+    // State cho price range filter
     const minLimit = 0;
     const maxLimit = 10000000; // 10,000,000đ
-    const step = 50000; // 50,000đ
-    const [minPrice, setMinPrice] = useState(minLimit);
-    const [maxPrice, setMaxPrice] = useState(maxLimit);
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
     const [appliedPriceRange, setAppliedPriceRange] = useState({ min: minLimit, max: maxLimit });
 
     // State cho brand filter
     const [allBrands, setAllBrands] = useState([]);
     const [selectedBrands, setSelectedBrands] = useState([]);
     const [brandSearchTerm, setBrandSearchTerm] = useState('');
-
-    // Handler cho slider
-    const handleMinRange = (e) => {
-        const value = Math.min(Number(e.target.value), maxPrice - step);
-        setMinPrice(value);
-    };
-    const handleMaxRange = (e) => {
-        const value = Math.max(Number(e.target.value), minPrice + step);
-        setMaxPrice(value);
-    };
-    // Handler cho input
-    const handleMinInput = (e) => {
-        let value = Number(e.target.value);
-        if (value < minLimit) value = minLimit;
-        if (value > maxPrice - step) value = maxPrice - step;
-        setMinPrice(value);
-    };
-    const handleMaxInput = (e) => {
-        let value = Number(e.target.value);
-        if (value > maxLimit) value = maxLimit;
-        if (value < minPrice + step) value = minPrice + step;
-        setMaxPrice(value);
-    };
 
     // Dữ liệu động
     const [categories, setCategories] = useState([]);
@@ -60,12 +36,39 @@ const Category = () => {
 
     const { addToCart } = useContext(CartContext);
 
+    // Handlers cho price range
+    const handleMinPriceChange = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^\d*$/.test(value)) {
+            setMinPrice(value);
+        }
+    };
+
+    const handleMaxPriceChange = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^\d*$/.test(value)) {
+            setMaxPrice(value);
+        }
+    };
+
+    const applyPriceFilter = () => {
+        const min = minPrice === '' ? minLimit : Math.max(minLimit, parseInt(minPrice));
+        const max = maxPrice === '' ? maxLimit : Math.min(maxLimit, parseInt(maxPrice));
+
+        if (min > max) {
+            toast.error('Giá tối thiểu không thể lớn hơn giá tối đa');
+            return;
+        }
+
+        setAppliedPriceRange({ min, max });
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [categoriesRes, productsRes] = await Promise.all([
                     axios.get('http://localhost:5000/api/categories'),
-                    axios.get('http://localhost:5000/api/products')
+                    axios.get('http://localhost:5000/api/products?activeOnly=true')
                 ]);
                 setCategories(categoriesRes.data);
                 setProducts(productsRes.data);
@@ -83,15 +86,15 @@ const Category = () => {
         const handleStockUpdate = async (event) => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 const updatedProduct = res.data;
-                
+
                 // Cập nhật danh sách products với thông tin mới
-                setProducts(prevProducts => 
-                    prevProducts.map(p => 
+                setProducts(prevProducts =>
+                    prevProducts.map(p =>
                         p._id === event.detail.productId ? updatedProduct : p
                     )
                 );
@@ -130,7 +133,7 @@ const Category = () => {
             tempProducts = tempProducts.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
         }
 
-        // 3. Lọc theo khoảng giá từ sidebar
+        // 3. Lọc theo khoảng giá
         if (appliedPriceRange.min !== minLimit || appliedPriceRange.max !== maxLimit) {
             tempProducts = tempProducts.filter(p => p.price >= appliedPriceRange.min && p.price <= appliedPriceRange.max);
         }
@@ -212,22 +215,22 @@ const Category = () => {
             quantity: 1,
             stock: variant ? variant.stock : product.stock
         };
-        
+
         try {
             await addToCart(itemToAdd);
-            
+
             // Fetch lại thông tin sản phẩm từ API để cập nhật số lượng tồn kho
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${product._id}`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${product._id}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 const updatedProduct = res.data;
-                
+
                 // Cập nhật danh sách products với thông tin mới
-                setProducts(prevProducts => 
-                    prevProducts.map(p => 
+                setProducts(prevProducts =>
+                    prevProducts.map(p =>
                         p._id === product._id ? updatedProduct : p
                     )
                 );
@@ -294,76 +297,20 @@ const Category = () => {
                                     ))}
                                 </ul>
                             </div>
-                            {/* Pricing Range Widget */}
-                            <div className="pricing-range-widget widget-item">
-                                <h3 className="widget-title">Khoảng giá</h3>
-                                <div className="price-range-container">
-                                    <div className="current-range mb-3 d-flex justify-content-between">
-                                        <span className="min-price">{minPrice.toLocaleString('vi-VN')}đ</span>
-                                        <span className="max-price">{maxPrice.toLocaleString('vi-VN')}đ</span>
-                                    </div>
-                                    <div className="range-slider" style={{ position: 'relative', height: 32 }}>
-                                        <div
-                                            className="slider-track"
-                                            style={{
-                                                position: 'absolute',
-                                                height: 6,
-                                                borderRadius: 3,
-                                                background: '#e5e7eb',
-                                                top: 13,
-                                                left: 0,
-                                                right: 0,
-                                                zIndex: 1,
-                                            }}
-                                        ></div>
-                                        {/* Track màu xanh giữa 2 nút */}
-                                        <div
-                                            className="slider-progress"
-                                            style={{
-                                                position: 'absolute',
-                                                height: 6,
-                                                borderRadius: 3,
-                                                background: '#2563eb',
-                                                top: 13,
-                                                left: `${((Math.min(minPrice, maxPrice) - minLimit) / (maxLimit - minLimit)) * 100}%`,
-                                                width: `${(Math.abs(maxPrice - minPrice) / (maxLimit - minLimit)) * 100}%`,
-                                                zIndex: 2,
-                                            }}
-                                        ></div>
-                                        <input
-                                            type="range"
-                                            className="min-range"
-                                            min={minLimit}
-                                            max={maxLimit}
-                                            step={step}
-                                            value={minPrice}
-                                            onChange={handleMinRange}
-                                            style={{ position: 'absolute', width: '100%', pointerEvents: 'auto', zIndex: 3, background: 'none' }}
-                                        />
-                                        <input
-                                            type="range"
-                                            className="max-range"
-                                            min={minLimit}
-                                            max={maxLimit}
-                                            step={step}
-                                            value={maxPrice}
-                                            onChange={handleMaxRange}
-                                            style={{ position: 'absolute', width: '100%', pointerEvents: 'auto', zIndex: 4, background: 'none' }}
-                                        />
-                                    </div>
-                                    <div className="price-inputs mt-3">
-                                        <div className="row g-2">
+                            {/* Price Range Filter Widget */}
+                            <div className="price-filter-widget widget-item">
+                                <h3 className="widget-title">Lọc theo giá</h3>
+                                <div className="price-filter-content">
+                                    <div className="price-inputs">
+                                        <div className="row g-2 mb-3">
                                             <div className="col-6">
                                                 <div className="input-group input-group-sm">
                                                     <input
-                                                        type="number"
-                                                        className="form-control min-price-input"
-                                                        placeholder="Thấp nhất"
-                                                        min={minLimit}
-                                                        max={maxPrice - step}
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Giá tối thiểu"
                                                         value={minPrice}
-                                                        step={step}
-                                                        onChange={handleMinInput}
+                                                        onChange={handleMinPriceChange}
                                                     />
                                                     <span className="input-group-text">đ</span>
                                                 </div>
@@ -371,22 +318,23 @@ const Category = () => {
                                             <div className="col-6">
                                                 <div className="input-group input-group-sm">
                                                     <input
-                                                        type="number"
-                                                        className="form-control max-price-input"
-                                                        placeholder="Cao nhất"
-                                                        min={minPrice + step}
-                                                        max={maxLimit}
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Giá tối đa"
                                                         value={maxPrice}
-                                                        step={step}
-                                                        onChange={handleMaxInput}
+                                                        onChange={handleMaxPriceChange}
                                                     />
                                                     <span className="input-group-text">đ</span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="filter-actions mt-3">
-                                        <button type="button" className="btn btn-sm btn-primary w-100" onClick={() => setAppliedPriceRange({ min: minPrice, max: maxPrice })}>Áp dụng</button>
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-primary w-100"
+                                            onClick={applyPriceFilter}
+                                        >
+                                            Áp dụng
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -504,8 +452,8 @@ const Category = () => {
                                                             Giá: {appliedPriceRange.min.toLocaleString('vi-VN')}đ - {appliedPriceRange.max.toLocaleString('vi-VN')}đ
                                                             <button className="filter-remove" onClick={() => {
                                                                 setAppliedPriceRange({ min: minLimit, max: maxLimit });
-                                                                setMinPrice(minLimit);
-                                                                setMaxPrice(maxLimit);
+                                                                setMinPrice('');
+                                                                setMaxPrice('');
                                                             }}><i className="bi bi-x"></i></button>
                                                         </span>
                                                     )}
@@ -518,8 +466,8 @@ const Category = () => {
                                                     <button className="clear-all-btn btn btn-link ms-2" onClick={() => {
                                                         setSearchTerm('');
                                                         setAppliedPriceRange({ min: minLimit, max: maxLimit });
-                                                        setMinPrice(minLimit);
-                                                        setMaxPrice(maxLimit);
+                                                        setMinPrice('');
+                                                        setMaxPrice('');
                                                         setSelectedCategorySidebar('*');
                                                         setSelectedBrands([]);
                                                         setBrandSearchTerm('');

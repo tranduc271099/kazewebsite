@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { BiSearch } from 'react-icons/bi';
-import { AiOutlineEye, AiOutlineEdit } from 'react-icons/ai';
+import { AiOutlineEye } from 'react-icons/ai';
 import { FaUserCircle } from 'react-icons/fa';
 import styles from '../../styles/ProductLayout.module.css'; // Reusing general styles
 
@@ -52,10 +52,6 @@ const ListStaff = () => {
 
     const handleViewDetail = (userId) => {
         navigate(`/admin/users/view/${userId}`);
-    };
-
-    const handleEditUser = (userId) => {
-        navigate(`/admin/users/edit/${userId}`);
     };
 
     const formatDate = (dateString) => {
@@ -139,13 +135,6 @@ const ListStaff = () => {
                                                 title="Xem chi tiết"
                                             >
                                                 <AiOutlineEye size={20} />
-                                            </button>
-                                            <button
-                                                className={`${styles.actionBtn} ${styles.iconBtn}`}
-                                                onClick={() => handleEditUser(staff._id)}
-                                                title="Chỉnh sửa"
-                                            >
-                                                <AiOutlineEdit size={20} />
                                             </button>
                                         </div>
                                     </td>

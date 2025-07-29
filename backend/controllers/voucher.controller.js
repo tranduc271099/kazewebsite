@@ -1,4 +1,5 @@
 const Voucher = require('../models/Voucher');
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifier');
 
 exports.getAllVouchers = async (req, res) => {
   try {
@@ -21,6 +22,60 @@ exports.getAvailableVouchers = async (req, res) => {
 exports.createVoucher = async (req, res) => {
   try {
     const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity } = req.body;
+
+    // Validation cơ bản
+    if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+    }
+
+    // Validation cho discountValue
+    if (discountValue < 0) {
+      return res.status(400).json({ message: 'Giá trị giảm giá không được âm' });
+    }
+
+    // Validation cho phần trăm
+    if (discountType === 'percent') {
+      if (discountValue > 100) {
+        return res.status(400).json({ message: 'Giá trị giảm phần trăm không được vượt quá 100%' });
+      }
+      if (discountValue > 95) {
+        return res.status(400).json({
+          message: 'Cảnh báo: Giảm giá trên 95% có thể dẫn đến lỗ nghiêm trọng',
+          warning: true
+        });
+      }
+    }
+
+    // Validation cho số tiền
+    if (discountType === 'amount') {
+      if (minOrder > 0 && discountValue >= minOrder) {
+        return res.status(400).json({
+          message: 'Số tiền giảm giá không được bằng hoặc vượt quá đơn hàng tối thiểu'
+        });
+      }
+      if (minOrder > 0 && discountValue > minOrder * 0.9) {
+        return res.status(400).json({
+          message: `Cảnh báo: Số tiền giảm giá chiếm ${((discountValue / minOrder) * 100).toFixed(1)}% đơn hàng tối thiểu, có thể dẫn đến lỗ`,
+          warning: true
+        });
+      }
+    }
+
+    // Validation ngày tháng
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ message: 'Ngày bắt đầu phải trước ngày kết thúc' });
+    }
+
+    // Validation số lượng
+    if (quantity && quantity <= 0) {
+      return res.status(400).json({ message: 'Số lượng voucher phải lớn hơn 0' });
+    }
+
+    // Validation đơn hàng tối thiểu
+    if (minOrder < 0) {
+      return res.status(400).json({ message: 'Đơn hàng tối thiểu không được âm' });
+    }
+
     const newVoucher = new Voucher({
       code,
       name,
@@ -34,6 +89,16 @@ exports.createVoucher = async (req, res) => {
       usedCount: 0 // Initialize usedCount to 0
     });
     await newVoucher.save();
+
+    // Notify clients about new voucher creation
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_CREATED, {
+      voucherId: newVoucher._id,
+      voucherCode: newVoucher.code,
+      voucherName: newVoucher.name,
+      discountType: newVoucher.discountType,
+      discountValue: newVoucher.discountValue
+    });
+
     res.status(201).json(newVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi tạo voucher', error: err.message });
@@ -43,6 +108,60 @@ exports.createVoucher = async (req, res) => {
 exports.updateVoucher = async (req, res) => {
   try {
     const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity, isActive } = req.body;
+
+    // Validation cơ bản
+    if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Thiếu thông tin bắt buộc' });
+    }
+
+    // Validation cho discountValue
+    if (discountValue < 0) {
+      return res.status(400).json({ message: 'Giá trị giảm giá không được âm' });
+    }
+
+    // Validation cho phần trăm
+    if (discountType === 'percent') {
+      if (discountValue > 100) {
+        return res.status(400).json({ message: 'Giá trị giảm phần trăm không được vượt quá 100%' });
+      }
+      if (discountValue > 95) {
+        return res.status(400).json({
+          message: 'Cảnh báo: Giảm giá trên 95% có thể dẫn đến lỗ nghiêm trọng',
+          warning: true
+        });
+      }
+    }
+
+    // Validation cho số tiền
+    if (discountType === 'amount') {
+      if (minOrder > 0 && discountValue >= minOrder) {
+        return res.status(400).json({
+          message: 'Số tiền giảm giá không được bằng hoặc vượt quá đơn hàng tối thiểu'
+        });
+      }
+      if (minOrder > 0 && discountValue > minOrder * 0.9) {
+        return res.status(400).json({
+          message: `Cảnh báo: Số tiền giảm giá chiếm ${((discountValue / minOrder) * 100).toFixed(1)}% đơn hàng tối thiểu, có thể dẫn đến lỗ`,
+          warning: true
+        });
+      }
+    }
+
+    // Validation ngày tháng
+    if (new Date(startDate) >= new Date(endDate)) {
+      return res.status(400).json({ message: 'Ngày bắt đầu phải trước ngày kết thúc' });
+    }
+
+    // Validation số lượng
+    if (quantity && quantity <= 0) {
+      return res.status(400).json({ message: 'Số lượng voucher phải lớn hơn 0' });
+    }
+
+    // Validation đơn hàng tối thiểu
+    if (minOrder < 0) {
+      return res.status(400).json({ message: 'Đơn hàng tối thiểu không được âm' });
+    }
+
     const updatedVoucher = await Voucher.findByIdAndUpdate(req.params.id, {
       code,
       name,
@@ -56,6 +175,17 @@ exports.updateVoucher = async (req, res) => {
       isActive
     }, { new: true });
     if (!updatedVoucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
+
+    // Notify clients about voucher update
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_UPDATED, {
+      voucherId: updatedVoucher._id,
+      voucherCode: updatedVoucher.code,
+      voucherName: updatedVoucher.name,
+      discountType: updatedVoucher.discountType,
+      discountValue: updatedVoucher.discountValue,
+      isActive: updatedVoucher.isActive
+    });
+
     res.json(updatedVoucher);
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi cập nhật voucher', error: err.message });
@@ -66,6 +196,14 @@ exports.deleteVoucher = async (req, res) => {
   try {
     const voucher = await Voucher.findByIdAndDelete(req.params.id);
     if (!voucher) return res.status(404).json({ message: 'Không tìm thấy voucher' });
+
+    // Notify clients about voucher deletion
+    notifyClientDataUpdate(req, EVENT_TYPES.VOUCHER_DELETED, {
+      voucherId: req.params.id,
+      voucherCode: voucher.code,
+      voucherName: voucher.name
+    });
+
     res.json({ message: 'Đã xóa voucher' });
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi xóa voucher', error: err.message });

@@ -107,6 +107,22 @@ const ProductView = () => {
                             <p className={styles.productCategory}>{product.category.name}</p>
                         )}
                         <p className={styles.productPrice}>{product.price.toLocaleString('vi-VN')} VND</p>
+                        {product.costPrice && (
+                            <>
+                                <p className={styles.productCostPrice} style={{ color: '#666', fontSize: '14px', marginTop: '5px' }}>
+                                    Giá nhập: {product.costPrice.toLocaleString('vi-VN')} VND
+                                </p>
+                                <p className={styles.productProfit} style={{
+                                    color: product.price > product.costPrice ? 'green' : 'red',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    marginTop: '5px'
+                                }}>
+                                    Lãi: {(product.price - product.costPrice).toLocaleString('vi-VN')} VND
+                                    ({(((product.price - product.costPrice) / product.price) * 100).toFixed(1)}%)
+                                </p>
+                            </>
+                        )}
                         <hr className={styles.divider} />
 
                         <div className={styles.detailGroup}>
@@ -167,30 +183,32 @@ const ProductView = () => {
                                 <th>Size</th>
                                 <th>Màu</th>
                                 <th>Tồn kho</th>
-                                <th>Giá</th>
+                                <th>Giá bán</th>
                                 <th>Ảnh biến thể</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {product.variants.map((variant, index) => (
-                                <tr key={index}>
-                                    <td>{variant.attributes?.size || '---'}</td>
-                                    <td>{variant.attributes?.color || '---'}</td>
-                                    <td>{variant.stock || 0}</td>
-                                    <td>{variant.price ? variant.price.toLocaleString('vi-VN') + ' VND' : '---'}</td>
-                                    <td>
-                                        <div className={styles.variantImages}>
-                                            {variant.images && variant.images.length > 0 ? (
-                                                variant.images.map((img, imgIdx) => (
-                                                    <img key={imgIdx} src={getImageUrl(img)} alt={`Variant ${index + 1} image ${imgIdx + 1}`} className={styles.variantThumbnail} />
-                                                ))
-                                            ) : (
-                                                <span>Không có ảnh</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {product.variants.map((variant, index) => {
+                                return (
+                                    <tr key={index}>
+                                        <td>{variant.attributes?.size || '---'}</td>
+                                        <td>{variant.attributes?.color || '---'}</td>
+                                        <td>{variant.stock || 0}</td>
+                                        <td>{variant.price ? variant.price.toLocaleString('vi-VN') + ' VND' : '---'}</td>
+                                        <td>
+                                            <div className={styles.variantImages}>
+                                                {variant.images && variant.images.length > 0 ? (
+                                                    variant.images.map((img, imgIdx) => (
+                                                        <img key={imgIdx} src={getImageUrl(img)} alt={`Variant ${index + 1} image ${imgIdx + 1}`} className={styles.variantThumbnail} />
+                                                    ))
+                                                ) : (
+                                                    <span>Không có ảnh</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

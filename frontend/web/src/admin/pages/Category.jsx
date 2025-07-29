@@ -13,9 +13,12 @@ const Category = () => {
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(null);
 
     // State cho modal thêm/sửa danh mục
     const [showFormModal, setShowFormModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState(null);
 
     const [image, setImage] = useState(null);
 
@@ -95,6 +98,32 @@ const Category = () => {
         setShowFormModal(true); // Open modal for editing
     };
 
+    const handleDelete = (category) => {
+        setCategoryToDelete(category);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!categoryToDelete) return;
+        
+        setDeleteLoading(categoryToDelete._id);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:5000/api/categories/${categoryToDelete._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            setShowDeleteModal(false);
+            setCategoryToDelete(null);
+            fetchCategories();
+            setError('');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục');
+        } finally {
+            setDeleteLoading(null);
+        }
+    };
+
     // Helper function to format date
     const formatDate = (dateString) => {
         const options = { day: 'numeric', month: 'numeric', year: 'numeric' };
@@ -121,17 +150,18 @@ const Category = () => {
                     <thead>
                         <tr>
                             <th style={{ width: '5%', textAlign: 'center' }}>STT</th>
-                            <th style={{ width: '20%', textAlign: 'center' }}>Ảnh</th>
-                            <th style={{ width: '40%', textAlign: 'left' }}>Tên danh mục</th>
-                            <th style={{ width: '20%', textAlign: 'center' }}>Ngày tạo</th>
-                            <th style={{ width: '15%', textAlign: 'center' }}>Thao tác</th>
+                            <th style={{ width: '15%', textAlign: 'center' }}>Ảnh</th>
+                            <th style={{ width: '30%', textAlign: 'left' }}>Tên danh mục</th>
+                            <th style={{ width: '15%', textAlign: 'center' }}>Số sản phẩm</th>
+                            <th style={{ width: '15%', textAlign: 'center' }}>Ngày tạo</th>
+                            <th style={{ width: '20%', textAlign: 'center' }}>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px' }}>Đang tải danh mục...</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px' }}>Đang tải danh mục...</td></tr>
                         ) : categories.length === 0 ? (
-                            <tr><td colSpan="5" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>Không tìm thấy danh mục nào.</td></tr>
+                            <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: 'var(--text-secondary)' }}>Không tìm thấy danh mục nào.</td></tr>
                         ) : (
                             categories.map((category, index) => (
                                 <tr key={category._id}>
@@ -140,15 +170,42 @@ const Category = () => {
                                         {category.image && <img src={category.image} alt={category.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} />}
                                     </td>
                                     <td style={{ textAlign: 'left' }}>{category.name}</td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span style={{ 
+                                            color: category.productCount > 0 ? '#e74c3c' : '#27ae60',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {category.productCount || 0}
+                                        </span>
+                                    </td>
                                     <td style={{ textAlign: 'center' }}>{formatDate(category.createdAt)}</td>
                                     <td style={{ textAlign: 'center' }}>
-                                        <button
-                                            className={`${commonStyles.actionBtn} ${commonStyles.iconBtn}`}
-                                            onClick={() => handleEdit(category)}
-                                            title="Cập nhật"
-                                        >
-                                            Cập nhật
-                                        </button>
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                            <button
+                                                className={`${commonStyles.actionBtn} ${commonStyles.iconBtn}`}
+                                                onClick={() => handleEdit(category)}
+                                                title="Cập nhật"
+                                                style={{ padding: '6px 12px', fontSize: '12px' }}
+                                            >
+                                                Cập nhật
+                                            </button>
+                                            <button
+                                                className={`${commonStyles.actionBtn}`}
+                                                onClick={() => handleDelete(category)}
+                                                title="Xóa"
+                                                disabled={category.productCount > 0 || deleteLoading === category._id}
+                                                style={{ 
+                                                    padding: '6px 12px', 
+                                                    fontSize: '12px',
+                                                    backgroundColor: category.productCount > 0 ? '#95a5a6' : '#e74c3c',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    cursor: category.productCount > 0 ? 'not-allowed' : 'pointer'
+                                                }}
+                                            >
+                                                {deleteLoading === category._id ? 'Đang xóa...' : 'Xóa'}
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))
@@ -220,6 +277,73 @@ const Category = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal xác nhận xóa danh mục */}
+            {showDeleteModal && categoryToDelete && (
+                <div className={commonStyles.modalBackdrop}>
+                    <div className={commonStyles.modalContent} style={{ maxWidth: '400px' }}>
+                        <h2 className={commonStyles.modalTitle} style={{ color: '#e74c3c' }}>
+                            <i className="fas fa-exclamation-triangle" style={{ marginRight: '10px' }}></i>
+                            Xác nhận xóa danh mục
+                        </h2>
+                        <div style={{ marginBottom: '20px' }}>
+                            <p style={{ marginBottom: '10px' }}>
+                                Bạn có chắc chắn muốn xóa danh mục <strong>"{categoryToDelete.name}"</strong>?
+                            </p>
+                            {categoryToDelete.productCount > 0 ? (
+                                <div style={{ 
+                                    backgroundColor: '#fff3cd', 
+                                    border: '1px solid #ffeaa7', 
+                                    borderRadius: '4px', 
+                                    padding: '12px',
+                                    color: '#856404'
+                                }}>
+                                    <i className="fas fa-info-circle" style={{ marginRight: '8px' }}></i>
+                                    Không thể xóa danh mục này vì có {categoryToDelete.productCount} sản phẩm đang thuộc danh mục.
+                                </div>
+                            ) : (
+                                <div style={{ 
+                                    backgroundColor: '#d4edda', 
+                                    border: '1px solid #c3e6cb', 
+                                    borderRadius: '4px', 
+                                    padding: '12px',
+                                    color: '#155724'
+                                }}>
+                                    <i className="fas fa-check-circle" style={{ marginRight: '8px' }}></i>
+                                    Danh mục này có thể xóa an toàn vì không có sản phẩm nào.
+                                </div>
+                            )}
+                        </div>
+                        <div className={commonStyles.btnRow} style={{ justifyContent: 'flex-end' }}>
+                            <button 
+                                type="button" 
+                                className={`${commonStyles.btn} ${commonStyles.btnSecondary}`} 
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setCategoryToDelete(null);
+                                }}
+                                style={{ marginRight: '10px' }}
+                            >
+                                Hủy
+                            </button>
+                            <button 
+                                type="button" 
+                                className={`${commonStyles.btn}`}
+                                onClick={confirmDelete}
+                                disabled={categoryToDelete.productCount > 0 || deleteLoading === categoryToDelete._id}
+                                style={{ 
+                                    backgroundColor: categoryToDelete.productCount > 0 ? '#95a5a6' : '#e74c3c',
+                                    color: 'white',
+                                    border: 'none',
+                                    cursor: categoryToDelete.productCount > 0 ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                {deleteLoading === categoryToDelete._id ? 'Đang xóa...' : 'Xóa danh mục'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

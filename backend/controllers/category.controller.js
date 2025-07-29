@@ -2,6 +2,7 @@ const Category = require('../models/Category');
 const Product = require('../models/Product');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifier');
 
 // Get all categories
 exports.getCategories = async (req, res) => {
@@ -51,6 +52,14 @@ exports.createCategory = async (req, res) => {
         }
         const category = new Category({ name, image });
         await category.save();
+
+        // Notify clients about new category creation
+        notifyClientDataUpdate(req, EVENT_TYPES.CATEGORY_CREATED, {
+            categoryId: category._id,
+            categoryName: category.name,
+            categoryImage: category.image
+        });
+
         res.json(category);
     } catch (err) {
         console.error('Create Category Error:', err);
@@ -80,6 +89,15 @@ exports.updateCategory = async (req, res) => {
             }
         }
         const category = await Category.findByIdAndUpdate(req.params.id, updateData, { new: true });
+
+        // Notify clients about category update
+        notifyClientDataUpdate(req, EVENT_TYPES.CATEGORY_UPDATED, {
+            categoryId: category._id,
+            categoryName: category.name,
+            categoryImage: category.image,
+            changes: Object.keys(updateData)
+        });
+
         res.json(category);
     } catch (err) {
         console.error('Update Category Error:', err);
@@ -107,6 +125,13 @@ exports.deleteCategory = async (req, res) => {
         }
 
         await Category.findByIdAndDelete(id);
+
+        // Notify clients about category deletion
+        notifyClientDataUpdate(req, EVENT_TYPES.CATEGORY_DELETED, {
+            categoryId: id,
+            categoryName: category.name
+        });
+
         res.json({ message: 'Xóa danh mục thành công' });
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi xóa danh mục' });

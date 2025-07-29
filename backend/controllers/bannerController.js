@@ -1,4 +1,5 @@
 const Banner = require('../models/Banner');
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifier');
 
 
 const createBanner = async (req, res) => {
@@ -20,6 +21,15 @@ const createBanner = async (req, res) => {
             isActive: isActive === 'true' || isActive === true // Đảm bảo isActive là boolean
         });
         const createdBanner = await banner.save();
+
+        // Notify clients about new banner creation
+        notifyClientDataUpdate(req, EVENT_TYPES.BANNER_CREATED, {
+            bannerId: createdBanner._id,
+            bannerTitle: createdBanner.title,
+            bannerImage: createdBanner.imageUrl,
+            isActive: createdBanner.isActive
+        });
+
         res.status(201).json(createdBanner);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
@@ -75,6 +85,16 @@ const updateBanner = async (req, res) => {
             if (isActive !== undefined) banner.isActive = isActive === 'true' || isActive === true;
 
             const updatedBanner = await banner.save();
+
+            // Notify clients about banner update
+            notifyClientDataUpdate(req, EVENT_TYPES.BANNER_UPDATED, {
+                bannerId: updatedBanner._id,
+                bannerTitle: updatedBanner.title,
+                bannerImage: updatedBanner.imageUrl,
+                isActive: updatedBanner.isActive,
+                changes: Object.keys(req.body).filter(key => req.body[key] !== undefined)
+            });
+
             res.json(updatedBanner);
         } else {
             res.status(404).json({ message: 'Banner not found' });
@@ -89,7 +109,18 @@ const deleteBanner = async (req, res) => {
     try {
         const banner = await Banner.findById(req.params.id);
         if (banner) {
+            // Store banner info before deletion for notification
+            const bannerInfo = {
+                bannerId: banner._id,
+                bannerTitle: banner.title,
+                bannerImage: banner.imageUrl
+            };
+
             await banner.deleteOne(); // Đúng cú pháp Mongoose
+
+            // Notify clients about banner deletion
+            notifyClientDataUpdate(req, EVENT_TYPES.BANNER_DELETED, bannerInfo);
+
             res.json({ message: 'Banner removed' });
         } else {
             res.status(404).json({ message: 'Banner not found' });

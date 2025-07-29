@@ -266,20 +266,18 @@ const BillUserClient = () => {
                                             {bill.danh_sach_san_pham.map(item => (
                                                 <div key={item._id} className="product-item">
                                                     <img
-                                                        src={item.san_pham_id.images?.[0] || 'https://via.placeholder.com/150'}
-                                                        alt={item.san_pham_id.name}
+                                                        src={item.san_pham_id?.images?.[0] || 'https://via.placeholder.com/150'}
+                                                        alt={item.san_pham_id?.name || 'Sản phẩm'}
                                                         className="product-image"
                                                     />
                                                     <div className="product-details">
-                                                        <p className="product-name" style={{ color: '#000' }}>{item.san_pham_id.name}</p>
+                                                        <p className="product-name" style={{ color: '#000' }}>{item.san_pham_id?.name || 'Sản phẩm không tồn tại'}</p>
                                                         <p className="product-variation">Phân loại: {item.mau_sac}, {item.kich_thuoc}</p>
                                                         <p className="product-quantity">x{item.so_luong}</p>
                                                     </div>
                                                     <span className="product-price">{formatPrice(item.gia)}</span>
                                                 </div>
-                                            ))}
-
-                                            <div className="order-footer">
+                                            ))}                                            <div className="order-footer">
                                                 <div className="total-amount">
                                                     <span>Thành tiền:</span>
                                                     <span className="amount">{formatPrice((bill.tong_tien || 0) - (bill.discount || 0))}</span>
@@ -318,10 +316,10 @@ const BillUserClient = () => {
                             <div className="order-detail-left order-detail-left-border">
                                 {/* Danh sách sản phẩm */}
                                 {selectedBill.danh_sach_san_pham.map((item, idx) => (
-                                    <div className="order-detail-product-row order-detail-product-row-large" key={item.san_pham_id._id + idx}>
-                                        <img className="order-detail-product-img" src={item.san_pham_id.images?.[0] || 'https://via.placeholder.com/80'} alt={item.san_pham_id.name} />
+                                    <div className="order-detail-product-row order-detail-product-row-large" key={item.san_pham_id?._id + idx || idx}>
+                                        <img className="order-detail-product-img" src={item.san_pham_id?.images?.[0] || 'https://via.placeholder.com/80'} alt={item.san_pham_id?.name || 'Sản phẩm'} />
                                         <div className="order-detail-product-info">
-                                            <div className="order-detail-product-name">{item.san_pham_id.name}</div>
+                                            <div className="order-detail-product-name">{item.san_pham_id?.name || 'Sản phẩm không tồn tại'}</div>
                                             <div className="order-detail-product-variant">
                                                 Phân loại: {item.kich_thuoc} - {item.mau_sac} &nbsp;|&nbsp; SL: {item.so_luong}
                                             </div>

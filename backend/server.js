@@ -35,13 +35,38 @@ app.use(express.json());
 
 // Middleware để thêm socket instance vào request
 app.use('/api/cart', (req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
 });
 
 app.use('/api/bill', (req, res, next) => {
-    req.io = io;
-    next();
+  req.io = io;
+  next();
+});
+
+app.use('/api/products', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/categories', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/vouchers', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/users', (req, res, next) => {
+  req.io = io;
+  next();
+});
+
+app.use('/api/banners', (req, res, next) => {
+  req.io = io;
+  next();
 });
 
 // Cấu hình static cho thư mục uploads
@@ -273,11 +298,14 @@ const createPaymentUrl = (orderId, amount, orderInfo) => {
 
 };
 
-// --- TỰ ĐỘNG HỦY ĐƠN HÀNG VNPAY CHƯA THANH TOÁN SAU 5 PHÚT ---
+// --- TỰ ĐỘNG HỦY ĐƠN HÀNG VNPAY CHƯA THANH TOÁN SAU 5 PHÚT (CHỈ CHO TRƯỜNG HỢP ĐẶC BIỆT) ---
 const Bill = require('./models/Bill/BillUser');
+const Product = require('./models/Product');
 setInterval(async () => {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
   try {
+    // Chỉ hủy đơn hàng VNPAY chưa thanh toán và chưa bị hủy sau 5 phút
+    // (Trường hợp đặc biệt khi VNPay không trả về callback)
     const bills = await Bill.find({
       phuong_thuc_thanh_toan: 'VNPAY',
       thanh_toan: 'chưa thanh toán',
@@ -285,11 +313,64 @@ setInterval(async () => {
       ngay_tao: { $lte: fiveMinutesAgo },
       orderId: { $exists: true, $ne: null }
     });
+
+    if (bills.length > 0) {
+      console.log(`[AUTO CANCEL] Tìm thấy ${bills.length} đơn hàng VNPAY chưa thanh toán sau 5 phút (trường hợp đặc biệt)`);
+    }
+
     for (const bill of bills) {
+      // Hoàn kho khi hủy đơn hàng
+      for (const item of bill.danh_sach_san_pham) {
+        console.log(`[AUTO CANCEL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+
+        // Thử cập nhật biến thể trước
+        const updateResult = await Product.updateOne(
+          {
+            _id: item.san_pham_id,
+            "variants": {
+              $elemMatch: {
+                "attributes.color": item.mau_sac,
+                "attributes.size": item.kich_thuoc
+              }
+            }
+          },
+          {
+            $inc: { "variants.$.stock": item.so_luong }
+          }
+        );
+
+        // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
+        if (updateResult.modifiedCount === 0) {
+          console.log(`[AUTO CANCEL] Variant not found, trying to update main product stock`);
+          const fallbackUpdateResult = await Product.updateOne(
+            {
+              _id: item.san_pham_id,
+              $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+            },
+            {
+              $inc: { stock: item.so_luong }
+            }
+          );
+
+          if (fallbackUpdateResult.modifiedCount === 0) {
+            console.log(`[AUTO CANCEL] Failed to restore stock for product ${item.san_pham_id}`);
+          } else {
+            console.log(`[AUTO CANCEL] Successfully restored main product stock for ${item.san_pham_id}`);
+          }
+        } else {
+          console.log(`[AUTO CANCEL] Successfully restored variant stock for product ${item.san_pham_id}`);
+        }
+      }
+
+      // Cập nhật trạng thái đơn hàng
       bill.trang_thai = 'đã hủy';
-      bill.ly_do_huy = 'Khách không hoàn tất thanh toán VNPAY trong 5 phút';
+      bill.ly_do_huy = 'Khách không hoàn tất thanh toán VNPAY trong 5 phút (trường hợp đặc biệt)';
+      bill.nguoi_huy = {
+        id: null,
+        loai: 'Admin'
+      };
       await bill.save();
-      console.log(`[AUTO CANCEL] Đã hủy đơn hàng VNPAY ${bill.orderId} do không thanh toán sau 5 phút.`);
+      console.log(`[AUTO CANCEL] Đã hủy đơn hàng VNPAY ${bill.orderId} do không thanh toán sau 5 phút (trường hợp đặc biệt).`);
     }
   } catch (err) {
     console.error('[AUTO CANCEL] Lỗi khi kiểm tra/hủy đơn hàng VNPAY:', err);

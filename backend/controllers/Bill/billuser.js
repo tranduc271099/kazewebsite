@@ -2,31 +2,32 @@ const Bill = require('../../models/Bill/BillUser');
 const Product = require('../../models/Product');
 const Cart = require('../../models/Cart');
 const mongoose = require('mongoose');
+const { notifyClientDataUpdate, EVENT_TYPES } = require('../../utils/realTimeNotifier');
 
 // Socket function to notify admin about order creation and stock reduction
 const notifyAdminOrderCreated = (req, orderData) => {
-    if (req.io) {
-        req.io.emit('order_created', {
-            orderId: orderData.orderId,
-            totalAmount: orderData.tong_tien,
-            productCount: orderData.danh_sach_san_pham.length,
-            username: req.user.name || req.user.username || 'Khách hàng',
-            timestamp: new Date()
-        });
-        
-        // Thông báo cho từng sản phẩm đã giảm tồn kho
-        orderData.danh_sach_san_pham.forEach(item => {
-            req.io.emit('stock_reduced', {
-                productId: item.san_pham_id,
-                productName: item.ten_san_pham,
-                quantity: item.so_luong,
-                color: item.mau_sac,
-                size: item.kich_thuoc,
-                username: req.user.name || req.user.username || 'Khách hàng',
-                timestamp: new Date()
-            });
-        });
-    }
+  if (req.io) {
+    req.io.emit('order_created', {
+      orderId: orderData.orderId,
+      totalAmount: orderData.tong_tien,
+      productCount: orderData.danh_sach_san_pham.length,
+      username: req.user.name || req.user.username || 'Khách hàng',
+      timestamp: new Date()
+    });
+
+    // Thông báo cho từng sản phẩm đã giảm tồn kho
+    orderData.danh_sach_san_pham.forEach(item => {
+      req.io.emit('stock_reduced', {
+        productId: item.san_pham_id,
+        productName: item.ten_san_pham,
+        quantity: item.so_luong,
+        color: item.mau_sac,
+        size: item.kich_thuoc,
+        username: req.user.name || req.user.username || 'Khách hàng',
+        timestamp: new Date()
+      });
+    });
+  }
 };
 
 class BillController {
@@ -217,14 +218,14 @@ class BillController {
       } else {
         await Cart.findByIdAndDelete(cart._id);
       }
-      
+
       // Notify admin about order creation and stock reduction
       notifyAdminOrderCreated(req, {
         orderId: finalOrderId,
         tong_tien,
         danh_sach_san_pham
       });
-      
+
       res.status(201).json({ message: 'Tạo hóa đơn thành công', bill: newBill });
     } catch (error) {
       console.error('[ADD BILL ERROR]', error);
@@ -380,6 +381,29 @@ class BillController {
     }
   }
 
+  async getByOrderId(req, res) {
+    try {
+      const { orderId } = req.params;
+      const userId = req.user.id;
+
+      const bill = await Bill.findOne({ orderId, nguoi_dung_id: userId })
+        .populate('nguoi_dung_id', 'name email phone')
+        .populate('nguoi_huy.id', 'name')
+        .populate({
+          path: 'danh_sach_san_pham.san_pham_id',
+          select: 'name images'
+        });
+
+      if (!bill) {
+        return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+      }
+
+      res.json(bill);
+    } catch (error) {
+      res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+  }
+
   // Cập nhật trạng thái đơn hàng (admin)
   async updateStatus(req, res) {
     try {
@@ -471,6 +495,16 @@ class BillController {
 
       console.log('Bill updated successfully:', bill._id, 'New status:', bill.trang_thai);
 
+      // Notify clients about order status update
+      notifyClientDataUpdate(req, EVENT_TYPES.ORDER_STATUS_UPDATED, {
+        orderId: bill.orderId || bill._id,
+        billId: bill._id,
+        oldStatus: oldStatus,
+        newStatus: trang_thai,
+        adminUser: req.user?.name || req.user?.username || 'Admin',
+        cancelReason: ly_do_huy || null
+      });
+
       res.json({ message: 'Cập nhật trạng thái thành công', bill });
     } catch (error) {
       console.error('Error updating status:', error);
@@ -482,7 +516,12 @@ class BillController {
     try {
       const { id } = req.params;
       const userId = req.user.id;
-      const bill = await Bill.findOne({ _id: id, nguoi_dung_id: userId });
+      const bill = await Bill.findOne({ _id: id, nguoi_dung_id: userId })
+        .populate('nguoi_dung_id', 'name email')
+        .populate({
+          path: 'danh_sach_san_pham.san_pham_id',
+          select: 'name'
+        });
       if (!bill) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
       if (bill.trang_thai !== 'đã giao hàng') {
         return res.status(400).json({ message: 'Chỉ xác nhận khi đơn đã giao hàng' });
@@ -492,6 +531,21 @@ class BillController {
       bill.thanh_toan = 'đã thanh toán';
       bill.paymentStatus = 'paid';
       await bill.save();
+
+      // Emit socket event để thông báo cho admin
+      if (req.io) {
+        req.io.emit('order_completed', {
+          orderId: bill.orderId || bill._id,
+          billId: bill._id,
+          customerName: bill.nguoi_dung_id?.name || 'Khách hàng',
+          customerEmail: bill.nguoi_dung_id?.email || '',
+          totalAmount: bill.tong_tien,
+          productCount: bill.danh_sach_san_pham.length,
+          completedAt: new Date(),
+          message: `Đơn hàng ${bill.orderId || bill._id.toString().slice(-8)} đã được khách hàng xác nhận nhận hàng`
+        });
+      }
+
       res.json({ message: 'Đã xác nhận nhận hàng', bill });
     } catch (error) {
       res.status(500).json({ message: 'Lỗi server', error: error.message });

@@ -68,14 +68,14 @@ const ProductList = () => {
                     const res = await axios.get(`http://localhost:5000/api/products/${event.detail.productId}`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
-                    
+
                     // Update products with new stock info
-                    setProducts(prev => 
-                        prev.map(product => 
+                    setProducts(prev =>
+                        prev.map(product =>
                             product._id === event.detail.productId ? res.data : product
                         )
                     );
-                    
+
                     // Hiển thị thông báo tồn kho đã cập nhật
                     toast.success(`Tồn kho sản phẩm "${res.data.name}" đã được cập nhật!`);
                 } catch (error) {
@@ -180,13 +180,7 @@ const ProductList = () => {
                         <option key={cat._id} value={cat._id}>{cat.name}</option>
                     ))}
                 </select>
-                <select
-                    className={styles.select}
-                    style={{ width: '150px' }}
-                >
-                    <option value="">Chọn thương hiệu</option>
-                    {/* Thêm các option thương hiệu nếu có */}
-                </select>
+
                 <input
                     type="text"
                     className={styles.input}
@@ -208,11 +202,11 @@ const ProductList = () => {
                     <thead>
                         <tr>
                             <th>Ảnh</th>
-                            <th style={{ width: '20%', maxWidth: '20%' }}>Tên sản phẩm</th>
-                            <th>Thương hiệu</th>
+                            <th className={styles.productNameHeader}>Tên sản phẩm</th>
                             <th>Giá bán (VND)</th>
+                            <th>Giá nhập (VND)</th>
+                            <th>Lãi (%)</th>
                             <th>Tồn kho</th>
-                            <th>Chi tiết variants</th>
                             <th>Ngày tạo</th>
                             <th>Ngày cập nhật</th>
                             <th>Trạng thái</th>
@@ -222,7 +216,7 @@ const ProductList = () => {
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
+                                <td colSpan="12" style={{ textAlign: 'center', padding: '20px' }}>Đang tải sản phẩm...</td>
                             </tr>
                         ) : products.length > 0 ? (
                             products.map(product => (
@@ -236,28 +230,25 @@ const ProductList = () => {
                                             style={{ cursor: 'pointer' }}
                                         />
                                     </td>
-                                    <td style={{ width: '20%', maxWidth: '20%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</td>
-                                    <td>{product.brand || '---'}</td>
+                                    <td className={styles.productNameCell}>{product.name}</td>
                                     <td>{product.price.toLocaleString('vi-VN')}</td>
+                                    <td>{product.costPrice ? product.costPrice.toLocaleString('vi-VN') : '-'}</td>
+                                    <td>
+                                        {product.costPrice && product.price ? (
+                                            <span style={{
+                                                color: product.price > product.costPrice ? 'green' : 'red',
+                                                fontWeight: 'bold'
+                                            }}>
+                                                {(((product.price - product.costPrice) / product.price) * 100).toFixed(1)}%
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: '#999' }}>-</span>
+                                        )}
+                                    </td>
                                     <td style={{ color: getStockColor(calculateTotalStock(product)), fontWeight: 'bold' }}>
                                         {calculateTotalStock(product)}
                                     </td>
-                                    <td>
-                                        {product.variants && product.variants.length > 0 ? (
-                                            <div style={{ fontSize: '12px', maxHeight: '60px', overflowY: 'auto' }}>
-                                                {product.variants.map((variant, index) => (
-                                                    <div key={index} style={{ 
-                                                        marginBottom: '2px',
-                                                        color: getStockColor(variant.stock || 0)
-                                                    }}>
-                                                        {variant.attributes?.color || 'N/A'} - {variant.attributes?.size || 'N/A'}: {variant.stock || 0}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <span style={{ color: '#999', fontSize: '12px' }}>Không có variants</span>
-                                        )}
-                                    </td>
+
                                     <td>{formatDateTime(product.createdAt)}</td>
                                     <td>{formatDateTime(product.updatedAt)}</td>
                                     <td>
@@ -279,7 +270,7 @@ const ProductList = () => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="10" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
+                                <td colSpan="12" style={{ textAlign: 'center', padding: '20px' }}>Không tìm thấy sản phẩm nào.</td>
                             </tr>
                         )}
                     </tbody>

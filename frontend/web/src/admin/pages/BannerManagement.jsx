@@ -79,10 +79,15 @@ const BannerManagement = () => {
         }
     };
 
-    const filteredBanners = banners.filter(banner =>
-        banner.title?.toLowerCase().includes(searchText.toLowerCase()) ||
-        banner.description?.toLowerCase().includes(searchText.toLowerCase())
-    );
+    const filteredBanners = banners.filter(banner => {
+        if (!searchText.trim()) return true; // If no search text, show all banners
+        const searchLower = searchText.toLowerCase();
+        return (
+            (banner.title || '').toLowerCase().includes(searchLower) ||
+            (banner.description || '').toLowerCase().includes(searchLower) ||
+            (banner.imageUrl || '').toLowerCase().includes(searchLower)
+        );
+    });
 
     const sortedBanners = [...filteredBanners].sort((a, b) => {
         if (sortType === 'newest') {
