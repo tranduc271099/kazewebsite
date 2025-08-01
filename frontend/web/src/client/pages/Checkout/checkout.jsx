@@ -946,19 +946,7 @@ const Checkout = () => {
                               style={{ fontSize: "20px", color: "#666" }}
                             ></i>
                             <i
-                              className="bi bi-paypal"
-                              style={{ fontSize: "20px", color: "#666" }}
-                            ></i>
-                            <i
                               className="bi bi-wallet2"
-                              style={{ fontSize: "20px", color: "#666" }}
-                            ></i>
-                            <i
-                              className="bi bi-apple"
-                              style={{ fontSize: "20px", color: "#666" }}
-                            ></i>
-                            <i
-                              className="bi bi-google"
                               style={{ fontSize: "20px", color: "#666" }}
                             ></i>
                           </div>

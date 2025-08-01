@@ -1,8 +1,11 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
-// Socket function to notify admin about cart changes
+// Socket function to notify admin about cart changes - ĐÃ TẮT
 const notifyAdminCartChange = (req, action, productName) => {
+    // Function đã được tắt - không gửi thông báo admin nữa
+    return;
+    /*
     if (req.io) {
         req.io.emit('client_cart_update', {
             action: action,
@@ -11,6 +14,7 @@ const notifyAdminCartChange = (req, action, productName) => {
             timestamp: new Date()
         });
     }
+    */
 };
 
 // Get user's cart
@@ -101,7 +105,7 @@ exports.addItemToCart = async (req, res) => {
         const updatedCart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
 
         // Notify admin about cart change (không giảm tồn kho nên không cần thông báo stock update)
-        notifyAdminCartChange(req, 'thêm vào giỏ hàng', product.name);
+        // notifyAdminCartChange(req, 'thêm vào giỏ hàng', product.name); // Đã tắt thông báo admin
 
         res.status(200).json(updatedCart);
     } catch (error) {
@@ -162,7 +166,7 @@ exports.updateCartItemQuantity = async (req, res) => {
 
             // Notify admin about cart change
             const action = quantity <= 0 ? 'xóa khỏi giỏ hàng' : 'cập nhật số lượng';
-            notifyAdminCartChange(req, action, product.name);
+            // notifyAdminCartChange(req, action, product.name); // Đã tắt thông báo admin
 
             res.status(200).json(updatedCart);
         } else {
@@ -211,7 +215,7 @@ exports.removeCartItem = async (req, res) => {
         // Notify admin about cart change
         const product = await Product.findById(productId);
         if (product) {
-            notifyAdminCartChange(req, 'xóa khỏi giỏ hàng', product.name);
+            // notifyAdminCartChange(req, 'xóa khỏi giỏ hàng', product.name); // Đã tắt thông báo admin
         }
 
         res.status(200).json(updatedCart);
@@ -236,7 +240,7 @@ exports.clearCart = async (req, res) => {
         await cart.save();
 
         // Notify admin about cart change
-        notifyAdminCartChange(req, 'làm trống giỏ hàng', 'tất cả sản phẩm');
+        // notifyAdminCartChange(req, 'làm trống giỏ hàng', 'tất cả sản phẩm'); // Đã tắt thông báo admin
 
         res.status(200).json({ message: 'Giỏ hàng đã được làm trống' });
     } catch (error) {

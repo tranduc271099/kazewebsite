@@ -27,7 +27,7 @@ const BannerList = ({ banners, onEdit, onDelete }) => {
                                 <td>
                                     {banner.imageUrl && (
                                         <img
-                                            src={`http://localhost:5000${banner.imageUrl}`}
+                                            src={banner.imageUrl}
                                             alt="Banner"
                                             className={styles.productImage}
                                         />

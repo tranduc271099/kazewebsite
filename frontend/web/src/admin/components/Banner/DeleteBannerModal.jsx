@@ -1,4 +1,5 @@
 import React from 'react';
+import '../../styles/BannerManagement.css';
 
 const DeleteBannerModal = ({ onConfirm, onClose }) => {
     return (

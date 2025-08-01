@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from '../../styles/ProductLayout.module.css';
+import '../../styles/BannerManagement.css';
 
 const BannerForm = ({ banner, onSubmit, onClose }) => {
     const [image, setImage] = useState(null);
@@ -12,20 +13,39 @@ const BannerForm = ({ banner, onSubmit, onClose }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log('=== BANNER FORM SUBMIT ===');
+        console.log('Banner:', banner);
+        console.log('Title:', title);
+        console.log('Image:', image);
+        console.log('IsActive:', isActive);
+
+        // Validate required fields
+        if (!title.trim()) {
+            alert('Vui lòng nhập tiêu đề banner');
+            return;
+        }
+
+        if (!banner && !image) {
+            alert('Vui lòng chọn ảnh banner');
+            return;
+        }
+
         const formData = new FormData();
         if (image) formData.append('image', image);
         formData.append('title', title); // Append title
         formData.append('isActive', isActive);
+
+        console.log('FormData created, calling onSubmit...');
         onSubmit(formData);
     };
 
     return (
-        <div className={styles.modalBackdrop}>
-            <div className={styles.modalContent}>
+        <div className="modal-overlay">
+            <div className="modal-content">
                 <form onSubmit={handleSubmit}>
-                    <h3 className={styles.modalTitle}>{banner ? 'Chỉnh sửa Banner' : 'Thêm Banner mới'}</h3>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Tiêu đề banner *</label>
+                    <h2>{banner ? 'Chỉnh sửa Banner' : 'Thêm Banner mới'}</h2>
+                    <div className="form-group">
+                        <label>Tiêu đề banner *</label>
                         <input
                             type="text"
                             value={title}
@@ -34,12 +54,12 @@ const BannerForm = ({ banner, onSubmit, onClose }) => {
                             className={styles.input}
                         />
                     </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>Ảnh banner *</label>
+                    <div className="form-group">
+                        <label>Ảnh banner *</label>
                         <input type="file" accept="image/*" onChange={handleImageChange} required={!banner} className={styles.input} />
                     </div>
-                    <div className={styles.formGroup}>
-                        <label className={styles.label}>
+                    <div className="form-group">
+                        <label>
                             <input
                                 type="checkbox"
                                 checked={isActive}
@@ -48,9 +68,9 @@ const BannerForm = ({ banner, onSubmit, onClose }) => {
                             Đang hoạt động
                         </label>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                        <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}>Lưu</button>
-                        <button type="button" onClick={onClose} className={`${styles.btn} ${styles.btnSecondary}`}>Hủy</button>
+                    <div className="form-actions">
+                        <button type="submit" className="btn-primary">Lưu</button>
+                        <button type="button" onClick={onClose} className="btn-cancel">Hủy</button>
                     </div>
                 </form>
             </div>
