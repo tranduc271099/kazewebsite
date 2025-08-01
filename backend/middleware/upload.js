@@ -1,10 +1,5 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-
-const uploadDir = 'uploads/';
-// Đảm bảo thư mục uploads tồn tại
-fs.mkdirSync(uploadDir, { recursive: true });
 
 // Cấu hình memoryStorage để xử lý file trong bộ nhớ
 const storage = multer.memoryStorage();
@@ -30,4 +25,7 @@ const uploadMultiple = upload.fields([
     { name: 'variantImages', maxCount: 50 }
 ]);
 
-module.exports = { upload, uploadMultiple };
+// Middleware upload riêng cho banner
+const uploadBanner = upload.single('image');
+
+module.exports = { upload, uploadMultiple, uploadBanner };

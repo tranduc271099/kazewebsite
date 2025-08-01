@@ -69,9 +69,6 @@ app.use('/api/banners', (req, res, next) => {
   next();
 });
 
-// Cấu hình static cho thư mục uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
@@ -94,6 +91,7 @@ app.use('/api/vouchers', require('./routes/voucher.routes'));
 app.use('/api/payment', require('./routes/payment.routes'));
 
 app.use('/api/banners', require('./routes/bannerRoutes'));
+app.use('/api/test', require('./routes/testRoutes')); // Test route
 app.use('/api/chats', require('./routes/chat.routes.js'));
 
 const vnpayReturnController = require('./controllers/vnpayReturn.controller');

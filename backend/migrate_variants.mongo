@@ -1,7 +1,0 @@
-// Migration script để xóa costPrice từ variants
-// Chạy bằng: mongo kazewebsite < migrate_variants.js
-
-db.products.updateMany(
-    {},
-    { $unset: { "variants.$[].costPrice": "" } }
-)
