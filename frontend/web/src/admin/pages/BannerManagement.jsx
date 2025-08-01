@@ -7,6 +7,7 @@ import { BiSearch } from 'react-icons/bi';
 import { AiOutlinePlus } from 'react-icons/ai';
 // @ts-ignore
 import styles from '../styles/ProductLayout.module.css';
+import '../styles/BannerManagement.css';
 
 
 const BannerManagement = () => {
@@ -59,23 +60,34 @@ const BannerManagement = () => {
 
     const handleFormSubmit = async (formData) => {
         try {
+            console.log('=== FRONTEND BANNER SUBMIT ===');
+            console.log('FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
             if (selectedBanner) {
+                console.log('Updating banner:', selectedBanner._id);
                 await axios.put(
                     `http://localhost:5000/api/banners/${selectedBanner._id}`,
                     formData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
             } else {
-                await axios.post(
+                console.log('Creating new banner');
+                const response = await axios.post(
                     'http://localhost:5000/api/banners',
                     formData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
+                console.log('Banner creation response:', response.data);
             }
             fetchBanners();
             setIsFormOpen(false);
         } catch (error) {
             console.error('Lỗi khi lưu banner:', error);
+            console.error('Error response:', error.response?.data);
+            alert('Lỗi: ' + (error.response?.data?.message || error.message));
         }
     };
 

@@ -240,7 +240,7 @@ const BestSellersSection = () => {
                                     </div>
                                 </div>
                                 <div className="product-info">
-                                    <h3 className="product-title"><Link to={`/product/${product.slug}`}>{product.name}</Link></h3>
+                                    <h3 className="product-title"><Link to={`/product-details/${product._id}`}>{product.name}</Link></h3>
                                     <div className="product-price">
                                         <span className="current-price">{formatPrice(product.price)}</span>
                                     </div>

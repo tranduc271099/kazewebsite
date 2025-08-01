@@ -25,17 +25,7 @@ const Footer = () => (
                   <span>kazeshop@gmail.com</span>
                 </div>
               </div>
-              <div className="social-links mt-4">
-                <h5 className="mb-3">Theo dõi chúng tôi</h5>
-                <div className="social-icons d-flex justify-content-center gap-3">
-                  <a href="#" aria-label="Facebook"><i className="bi bi-facebook"></i></a>
-                  <a href="#" aria-label="Instagram"><i className="bi bi-instagram"></i></a>
-                  <a href="#" aria-label="Twitter"><i className="bi bi-twitter-x"></i></a>
-                  <a href="#" aria-label="TikTok"><i className="bi bi-tiktok"></i></a>
-                  <a href="#" aria-label="Pinterest"><i className="bi bi-pinterest"></i></a>
-                  <a href="#" aria-label="YouTube"><i className="bi bi-youtube"></i></a>
-                </div>
-              </div>
+
             </div>
           </div>
         </div>
@@ -47,7 +37,6 @@ const Footer = () => (
           <span>Chúng tôi chấp nhận:</span>
           <div className="payment-icons">
             <i className="bi bi-credit-card" aria-label="Thẻ tín dụng"></i>
-            <i className="bi bi-shop" aria-label="Shop Pay"></i>
             <i className="bi bi-cash" aria-label="Thanh toán khi nhận hàng"></i>
           </div>
         </div>
