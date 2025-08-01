@@ -1,0 +1,42 @@
+[{
+  "_id": {
+    "$oid": "688c9bd243cc5ddcd500c172"
+  },
+  "nguoi_dung_id": {
+    "$oid": "684c908e864f12fa45ad250b"
+  },
+  "dia_chi_giao_hang": "10 ngõ 27 Phạm Huy Quang Trần Lãm Thái Bình, Phường Hoàng Liệt, Quận Hoàng Mai, Thành phố Hà Nội",
+  "tong_tien": 305000,
+  "phuong_thuc_thanh_toan": "COD",
+  "ghi_chu": "",
+  "trang_thai": "chờ xác nhận",
+  "thanh_toan": "chưa thanh toán",
+  "ly_do_huy": "",
+  "danh_sach_san_pham": [
+    {
+      "san_pham_id": {
+        "$oid": "6864a695d65a1f1b0357a3f5"
+      },
+      "ten_san_pham": "Áo Hoodie Teelab Local Brand Unisex Bunny Cake Hoodie HD107",
+      "so_luong": 1,
+      "gia": 275000,
+      "mau_sac": "Kem",
+      "kich_thuoc": "M",
+      "_id": {
+        "$oid": "688c9bd243cc5ddcd500c173"
+      }
+    }
+  ],
+  "shippingFee": 30000,
+  "discount": 0,
+  "voucher": null,
+  "orderId": "1754045394309",
+  "paymentStatus": "pending",
+  "ngay_tao": {
+    "$date": "2025-08-01T10:49:54.342Z"
+  },
+  "ngay_cap_nhat": {
+    "$date": "2025-08-01T10:49:54.342Z"
+  },
+  "__v": 0
+}]

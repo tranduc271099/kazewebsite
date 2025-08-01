@@ -4,6 +4,7 @@ import styles from '../styles/CategoryLayout.module.css';
 import commonStyles from '../styles/ProductLayout.module.css'; // Import common styles
 import { useTheme } from '@mui/material/styles'; // Re-import useTheme
 import { MdAdd } from 'react-icons/md'; // For the Add button icon
+import toast from 'react-hot-toast';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);
@@ -21,6 +22,8 @@ const Category = () => {
     const [categoryToDelete, setCategoryToDelete] = useState(null);
 
     const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isDragOver, setIsDragOver] = useState(false);
 
     const fileInputRef = useRef(null);
 
@@ -45,16 +48,105 @@ const Category = () => {
     };
 
     const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
+        const file = e.target.files[0];
+        if (file) {
+            processFile(file);
+        }
+    };
+
+    const validateFile = (file) => {
+        if (!file) return false;
+
+        // Kiểm tra loại file
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Chỉ chấp nhận file ảnh (JPG, PNG, GIF)');
+            return false;
+        }
+
+        // Kiểm tra kích thước (5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            toast.error('Kích thước file không được vượt quá 5MB');
+            return false;
+        }
+
+        return true;
+    };
+
+    const processFile = (file) => {
+        if (!validateFile(file)) return;
+
+        setImage(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setImagePreview(e.target.result);
+        };
+        reader.readAsDataURL(file);
+        toast.success('Đã tải ảnh thành công!');
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            processFile(files[0]);
+        }
+    };
+
+    const handleZoneClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const removeImage = () => {
+        setImage(null);
+        setImagePreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const getImageUrl = (imgData) => {
+        if (!imgData) return null;
+
+        // Nếu là file blob từ FileReader (data: URL)
+        if (typeof imgData === 'string' && imgData.startsWith('data:')) {
+            return imgData;
+        }
+
+        if (typeof imgData === 'string') {
+            if (imgData.startsWith('http') || imgData.startsWith('blob:')) {
+                return imgData;
+            }
+            if (imgData.startsWith('/uploads/')) {
+                return `http://localhost:5000${imgData}`;
+            }
+            return `http://localhost:5000/uploads/${imgData}`;
+        }
+        return imgData;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-        console.log('handleSubmit called');
-        console.log('formData:', formData);
-        console.log('editingId:', editingId);
         try {
             const token = localStorage.getItem('token');
             const form = new FormData();
@@ -63,20 +155,17 @@ const Category = () => {
 
             let response;
             if (editingId) {
-                console.log('Sending PUT request for category update');
                 response = await axios.put(`http://localhost:5000/api/categories/${editingId}`, form, {
                     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
                 });
-                console.log('Category updated successfully:', response.data);
             } else {
-                console.log('Sending POST request for new category');
                 response = await axios.post('http://localhost:5000/api/categories', form, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                console.log('Category added successfully:', response.data);
             }
             setFormData({ name: '' });
             setImage(null);
+            setImagePreview(null);
             setEditingId(null);
             if (fileInputRef.current) fileInputRef.current.value = '';
             fetchCategories();
@@ -95,6 +184,7 @@ const Category = () => {
         });
         setEditingId(category._id);
         setImage(null); // Clear image when editing existing category
+        setImagePreview(category.image || null); // Set preview to existing image
         setShowFormModal(true); // Open modal for editing
     };
 
@@ -105,14 +195,14 @@ const Category = () => {
 
     const confirmDelete = async () => {
         if (!categoryToDelete) return;
-        
+
         setDeleteLoading(categoryToDelete._id);
         try {
             const token = localStorage.getItem('token');
             await axios.delete(`http://localhost:5000/api/categories/${categoryToDelete._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             setShowDeleteModal(false);
             setCategoryToDelete(null);
             fetchCategories();
@@ -136,7 +226,13 @@ const Category = () => {
                 <h1 className={commonStyles.title}><i className="fas fa-th-list" style={{ marginRight: '10px' }}></i>Danh sách danh mục</h1>
                 <button
                     className={`${commonStyles.btn} ${commonStyles.btnPrimary}`}
-                    onClick={() => { setEditingId(null); setFormData({ name: '' }); setImage(null); setShowFormModal(true); }}
+                    onClick={() => {
+                        setEditingId(null);
+                        setFormData({ name: '' });
+                        setImage(null);
+                        setImagePreview(null);
+                        setShowFormModal(true);
+                    }}
                     style={{ padding: '10px 20px', width: 'auto' }}
                 >
                     <MdAdd size={20} style={{ marginRight: '5px' }} />Thêm danh mục
@@ -171,7 +267,7 @@ const Category = () => {
                                     </td>
                                     <td style={{ textAlign: 'left' }}>{category.name}</td>
                                     <td style={{ textAlign: 'center' }}>
-                                        <span style={{ 
+                                        <span style={{
                                             color: category.productCount > 0 ? '#e74c3c' : '#27ae60',
                                             fontWeight: 'bold'
                                         }}>
@@ -194,8 +290,8 @@ const Category = () => {
                                                 onClick={() => handleDelete(category)}
                                                 title="Xóa"
                                                 disabled={category.productCount > 0 || deleteLoading === category._id}
-                                                style={{ 
-                                                    padding: '6px 12px', 
+                                                style={{
+                                                    padding: '6px 12px',
                                                     fontSize: '12px',
                                                     backgroundColor: category.productCount > 0 ? '#95a5a6' : '#e74c3c',
                                                     color: 'white',
@@ -234,39 +330,58 @@ const Category = () => {
                                 />
                             </div>
                             <div className={commonStyles.formGroup}>
-                                <label className={commonStyles.label} htmlFor="image">Ảnh danh mục</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <input
-                                        className={commonStyles.hiddenInput}
-                                        type="file"
-                                        id="image"
-                                        name="image"
-                                        accept="image/*"
-                                        onChange={handleImageChange}
-                                        ref={fileInputRef}
-                                    />
-                                    <button
-                                        type="button"
-                                        className={`${commonStyles.btn} ${commonStyles.btnSecondary}`}
-                                        onClick={() => fileInputRef.current.click()}
-                                        style={{ width: '120px', padding: '10px 15px' }}
-                                    >
-                                        Chọn tệp
-                                    </button>
-                                    <span style={{ color: 'var(--text-secondary)' }}>
-                                        {image ? image.name : (editingId && categories.find(cat => cat._id === editingId)?.image ? 'Đã có ảnh' : 'Không có tệp nào được chọn')}
-                                    </span>
+                                <label className={commonStyles.label}>Ảnh danh mục</label>
+
+                                {/* Drag & Drop Zone */}
+                                <div
+                                    className={`${commonStyles.dragDropZone} ${isDragOver ? commonStyles.dragOver : ''} ${imagePreview ? commonStyles.hasImages : ''}`}
+                                    onDragOver={handleDragOver}
+                                    onDragEnter={handleDragEnter}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    onClick={handleZoneClick}
+                                >
+                                    {!imagePreview ? (
+                                        <div className={commonStyles.dragDropContent}>
+                                            <div className={commonStyles.dragDropIcon}>📷</div>
+                                            <p className={commonStyles.dragDropText}>
+                                                Kéo thả ảnh vào đây hoặc <span className={commonStyles.clickText}>nhấp để chọn</span>
+                                            </p>
+                                            <p className={commonStyles.dragDropSubtext}>
+                                                Hỗ trợ: JPG, PNG, GIF (tối đa 5MB mỗi file)
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className={commonStyles.imagePreviewContainer}>
+                                            <div className={commonStyles.imagePreviewItem}>
+                                                <img
+                                                    src={getImageUrl(imagePreview)}
+                                                    alt="Preview"
+                                                    className={commonStyles.imagePreview}
+                                                    style={{ width: '120px', height: '120px', objectFit: 'cover' }}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className={commonStyles.removeImageBtn}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeImage();
+                                                    }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                {editingId && categories.find(cat => cat._id === editingId)?.image && !image && ( // Show current image if editing and no new image selected
-                                    <div style={{ marginTop: '10px' }}>
-                                        <img src={categories.find(cat => cat._id === editingId)?.image} alt="Current" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
-                                    </div>
-                                )}
-                                {image && ( // Show new image preview if selected
-                                    <div style={{ marginTop: '10px' }}>
-                                        <img src={URL.createObjectURL(image)} alt="New" style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
-                                    </div>
-                                )}
+
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className={commonStyles.hiddenInput}
+                                />
                             </div>
                             <div className={commonStyles.btnRow} style={{ justifyContent: 'flex-end', marginTop: '30px' }}>
                                 <button type="button" className={`${commonStyles.btn} ${commonStyles.btnSecondary}`} onClick={() => setShowFormModal(false)} style={{ marginRight: '10px' }}>
@@ -294,10 +409,10 @@ const Category = () => {
                                 Bạn có chắc chắn muốn xóa danh mục <strong>"{categoryToDelete.name}"</strong>?
                             </p>
                             {categoryToDelete.productCount > 0 ? (
-                                <div style={{ 
-                                    backgroundColor: '#fff3cd', 
-                                    border: '1px solid #ffeaa7', 
-                                    borderRadius: '4px', 
+                                <div style={{
+                                    backgroundColor: '#fff3cd',
+                                    border: '1px solid #ffeaa7',
+                                    borderRadius: '4px',
                                     padding: '12px',
                                     color: '#856404'
                                 }}>
@@ -305,10 +420,10 @@ const Category = () => {
                                     Không thể xóa danh mục này vì có {categoryToDelete.productCount} sản phẩm đang thuộc danh mục.
                                 </div>
                             ) : (
-                                <div style={{ 
-                                    backgroundColor: '#d4edda', 
-                                    border: '1px solid #c3e6cb', 
-                                    borderRadius: '4px', 
+                                <div style={{
+                                    backgroundColor: '#d4edda',
+                                    border: '1px solid #c3e6cb',
+                                    borderRadius: '4px',
                                     padding: '12px',
                                     color: '#155724'
                                 }}>
@@ -318,9 +433,9 @@ const Category = () => {
                             )}
                         </div>
                         <div className={commonStyles.btnRow} style={{ justifyContent: 'flex-end' }}>
-                            <button 
-                                type="button" 
-                                className={`${commonStyles.btn} ${commonStyles.btnSecondary}`} 
+                            <button
+                                type="button"
+                                className={`${commonStyles.btn} ${commonStyles.btnSecondary}`}
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setCategoryToDelete(null);
@@ -329,12 +444,12 @@ const Category = () => {
                             >
                                 Hủy
                             </button>
-                            <button 
-                                type="button" 
+                            <button
+                                type="button"
                                 className={`${commonStyles.btn}`}
                                 onClick={confirmDelete}
                                 disabled={categoryToDelete.productCount > 0 || deleteLoading === categoryToDelete._id}
-                                style={{ 
+                                style={{
                                     backgroundColor: categoryToDelete.productCount > 0 ? '#95a5a6' : '#e74c3c',
                                     color: 'white',
                                     border: 'none',

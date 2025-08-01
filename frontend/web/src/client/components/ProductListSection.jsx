@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from 'react-toastify';
@@ -15,6 +15,9 @@ const ProductListSection = () => {
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedQuantity, setSelectedQuantity] = useState(1);
     const [popoverVisible, setPopoverVisible] = useState(false);
+    const [showAll, setShowAll] = useState(false); // Trạng thái hiển thị tất cả
+    const [shuffleKey, setShuffleKey] = useState(0); // Key để trigger shuffle lại
+    const displayLimit = 8; // Cố định giới hạn 8 sản phẩm
     const backendUrl = 'http://localhost:5000';
     const { addToCart } = useContext(CartContext);
 
@@ -188,6 +191,8 @@ const ProductListSection = () => {
 
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
+        setShowAll(false); // Reset về trạng thái ban đầu khi thay đổi category
+        setShuffleKey(prev => prev + 1); // Shuffle lại khi thay đổi category
     };
 
     const openPopover = (product) => {
@@ -258,6 +263,39 @@ const ProductListSection = () => {
             product.category?.name?.toLowerCase() === selectedCategory.toLowerCase()
         );
 
+    // Hàm xáo trộn mảng (Fisher-Yates shuffle)
+    const shuffleArray = (array) => {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    };
+
+    // Memoize shuffled products để tránh shuffle lại mỗi lần re-render
+    const shuffledProducts = useMemo(() => {
+        return shuffleArray(filteredProducts);
+    }, [filteredProducts.length, selectedCategory, shuffleKey]); // Thêm shuffleKey để có thể shuffle lại
+
+    // Giới hạn số lượng sản phẩm hiển thị với sản phẩm ngẫu nhiên
+    const displayedProducts = showAll
+        ? filteredProducts
+        : shuffledProducts.slice(0, displayLimit);
+
+    const handleShowMore = () => {
+        setShowAll(true);
+    };
+
+    const handleShowLess = () => {
+        setShowAll(false);
+    };
+
+    const handleShuffle = () => {
+        setShuffleKey(prev => prev + 1); // Tăng key để trigger shuffle lại
+        setShowAll(false); // Reset về trạng thái giới hạn
+    };
+
     if (loading) return <div>Đang tải...</div>;
     if (error) return <div>{error}</div>;
 
@@ -266,32 +304,43 @@ const ProductListSection = () => {
             <div className="container isotope-layout" data-aos="fade-up" data-aos-delay="100">
                 <div className="row">
                     <div className="col-12">
-                        <div className="product-filters isotope-filters mb-5 d-flex justify-content-center product-category-filters">
-                            <ul className="d-flex flex-wrap gap-2 list-unstyled">
-                                <li
-                                    className={selectedCategory === '*' ? 'filter-active' : ''}
-                                    onClick={() => handleCategoryClick('*')}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    Tất cả
-                                </li>
-                                {categories.map(category => (
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div className="product-filters isotope-filters d-flex justify-content-center product-category-filters flex-grow-1">
+                                <ul className="d-flex flex-wrap gap-2 list-unstyled mb-0">
                                     <li
-                                        key={category._id}
-                                        className={selectedCategory === category.name.toLowerCase() ? 'filter-active' : ''}
-                                        onClick={() => handleCategoryClick(category.name.toLowerCase())}
+                                        className={selectedCategory === '*' ? 'filter-active' : ''}
+                                        onClick={() => handleCategoryClick('*')}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        {category.name}
+                                        Tất cả
                                     </li>
-                                ))}
-                            </ul>
+                                    {categories.map(category => (
+                                        <li
+                                            key={category._id}
+                                            className={selectedCategory === category.name.toLowerCase() ? 'filter-active' : ''}
+                                            onClick={() => handleCategoryClick(category.name.toLowerCase())}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            {category.name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                                <button
+                                    className="btn btn-outline-info btn-sm"
+                                    onClick={handleShuffle}
+                                    title="Làm mới sản phẩm ngẫu nhiên"
+                                >
+                                    <i className="bi bi-arrow-clockwise"></i> Làm mới
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="row product-container isotope-container" data-aos="fade-up" data-aos-delay="200">
-                    {filteredProducts.map(product => {
+                    {displayedProducts.map(product => {
                         const image1 = product.images?.[0] ? (product.images[0].startsWith('/uploads/') ? backendUrl + product.images[0] : product.images[0]) : '/assets/img/no-image.png';
                         const image2 = product.images?.[1] ? (product.images[1].startsWith('/uploads/') ? backendUrl + product.images[1] : product.images[1]) : image1;
 
@@ -397,6 +446,8 @@ const ProductListSection = () => {
                         );
                     })}
                 </div>
+
+
 
                 <div className="text-center mt-5" data-aos="fade-up">
                     <a href="./Category" className="view-all-btn">Xem tất cả sản phẩm <i className="bi bi-arrow-right"></i></a>

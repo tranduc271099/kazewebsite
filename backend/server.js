@@ -91,7 +91,6 @@ app.use('/api/vouchers', require('./routes/voucher.routes'));
 app.use('/api/payment', require('./routes/payment.routes'));
 
 app.use('/api/banners', require('./routes/bannerRoutes'));
-app.use('/api/test', require('./routes/testRoutes')); // Test route
 app.use('/api/chats', require('./routes/chat.routes.js'));
 
 const vnpayReturnController = require('./controllers/vnpayReturn.controller');

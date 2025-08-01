@@ -151,7 +151,8 @@
     color: #e2e8f0;
     border-radius: 12px;
     padding: 24px;
-    max-width: 500px;
+    max-width: 600px;
+    /* Tăng width để chứa drag & drop zone */
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
@@ -171,6 +172,10 @@
 .modal-content p {
     margin-bottom: 20px;
     line-height: 1.6;
+}
+
+.form-group {
+    margin-bottom: 20px;
 }
 
 .form-group label {
@@ -196,6 +201,42 @@
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Banner specific drag & drop styling */
+.form-group .imagePreviewItem {
+    position: relative;
+    display: inline-block;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.form-group .imagePreviewItem:hover {
+    transform: scale(1.02);
+}
+
+.form-group .removeImageBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+    line-height: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.form-group .removeImageBtn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
 }
 
 .form-group {

@@ -1,0 +1,53 @@
+[{
+  "_id": {
+    "$oid": "688c63df9b8bbda5cd430679"
+  },
+  "userId": {
+    "$oid": "684c908e864f12fa45ad250b"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "688c997543cc5ddcd500b834"
+      },
+      "quantity": 1,
+      "color": "Xanh Ngọc",
+      "size": "M",
+      "priceAtTimeOfAddition": 250000
+    },
+    {
+      "productId": {
+        "$oid": "688c9b1b43cc5ddcd500bb8b"
+      },
+      "quantity": 1,
+      "color": "Xanh Than",
+      "size": "M",
+      "priceAtTimeOfAddition": 330000
+    },
+    {
+      "productId": {
+        "$oid": "688c985043cc5ddcd500b765"
+      },
+      "quantity": 1,
+      "color": "Xanh",
+      "size": "M",
+      "priceAtTimeOfAddition": 220000
+    },
+    {
+      "productId": {
+        "$oid": "688c974b43cc5ddcd500b608"
+      },
+      "quantity": 1,
+      "color": "Kem",
+      "size": "M",
+      "priceAtTimeOfAddition": 350000
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-08-01T06:51:11.529Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:49:54.348Z"
+  },
+  "__v": 6
+}]

@@ -1,0 +1,114 @@
+[{
+  "_id": {
+    "$oid": "6880cfe6664b7abea9cd6e7c"
+  },
+  "roomId": "user_1753272294346",
+  "clientUsername": "bùi đạt",
+  "status": "đã kết thúc",
+  "messages": [
+    {
+      "author": "bùi đạt",
+      "message": "xin chào",
+      "timestamp": {
+        "$date": "2025-07-23T12:05:05.073Z"
+      },
+      "_id": {
+        "$oid": "6880cff1664b7abea9cd6e80"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-07-23T12:04:54.354Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-30T10:16:18.226Z"
+  },
+  "__v": 0,
+  "adminUsername": "Bùi Đức Đạt"
+},
+{
+  "_id": {
+    "$oid": "6883522731be0a54fe063c8e"
+  },
+  "roomId": "user_1753436711121",
+  "clientUsername": "damian",
+  "status": "đã kết thúc",
+  "messages": [
+    {
+      "author": "damian",
+      "message": "xin chao",
+      "timestamp": {
+        "$date": "2025-07-25T09:45:18.042Z"
+      },
+      "_id": {
+        "$oid": "6883522e31be0a54fe063c90"
+      }
+    },
+    {
+      "author": "Bùi Đức Đạt",
+      "message": "hi",
+      "timestamp": {
+        "$date": "2025-07-25T09:45:38.093Z"
+      },
+      "_id": {
+        "$oid": "6883524231be0a54fe063ca7"
+      }
+    },
+    {
+      "author": "Bùi Đức Đạt",
+      "message": "xin chao",
+      "timestamp": {
+        "$date": "2025-07-25T15:09:09.136Z"
+      },
+      "_id": {
+        "$oid": "68839e15b029b453530cb72e"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-07-25T09:45:11.128Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-25T15:09:11.909Z"
+  },
+  "__v": 0,
+  "adminUsername": "Bùi Đức Đạt"
+},
+{
+  "_id": {
+    "$oid": "6887899aeda0f903a3bee7fa"
+  },
+  "roomId": "user_1753713050415",
+  "clientUsername": "datbui",
+  "status": "đã kết thúc",
+  "messages": [
+    {
+      "author": "datbui",
+      "message": "hi",
+      "timestamp": {
+        "$date": "2025-07-28T14:30:55.008Z"
+      },
+      "_id": {
+        "$oid": "6887899feda0f903a3bee7fc"
+      }
+    },
+    {
+      "author": "Nguyễn Phương Nam",
+      "message": "hello",
+      "timestamp": {
+        "$date": "2025-07-28T14:31:06.854Z"
+      },
+      "_id": {
+        "$oid": "688789aaeda0f903a3bee811"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2025-07-28T14:30:50.421Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-28T14:31:25.385Z"
+  },
+  "__v": 0,
+  "adminUsername": "Nguyễn Phương Nam"
+}]
