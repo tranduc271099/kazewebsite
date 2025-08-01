@@ -1168,3 +1168,175 @@
 .iconBtn:hover {
     background-color: var(--hover-background-color);
 }
+
+/* Drag & Drop Styles */
+.dragDropZone {
+    border: 2px dashed var(--input-border);
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--input-bg);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.dragDropZone:hover {
+    border-color: #7c3aed;
+    background-color: var(--card-bg);
+}
+
+.dragDropZone.dragOver {
+    border-color: #7c3aed;
+    background-color: var(--card-bg);
+    transform: scale(1.02);
+}
+
+.dragDropZone.hasImages {
+    padding: 20px;
+    margin-bottom: 10px;
+}
+
+.dragDropContent {
+    pointer-events: none;
+}
+
+.dragDropIcon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.dragDropText {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    margin: 0 0 8px 0;
+}
+
+.clickText {
+    color: #7c3aed;
+    text-decoration: underline;
+}
+
+.dragDropSubtext {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.hiddenInput {
+    display: none !important;
+}
+
+/* Variant Drag & Drop Zone */
+.dropZone {
+    border: 2px dashed var(--input-border);
+    border-radius: 8px;
+    padding: 30px 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--input-bg);
+    margin-bottom: 15px;
+}
+
+.dropZone:hover {
+    border-color: #7c3aed;
+    background-color: var(--card-bg);
+}
+
+.dropZone.dragOver {
+    border-color: #7c3aed;
+    background-color: var(--card-bg);
+    transform: scale(1.02);
+}
+
+.dropZoneContent {
+    pointer-events: none;
+}
+
+.dropZoneContent p {
+    margin: 8px 0 4px 0;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.dropZoneContent small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Image Preview Improvements */
+.imagePreviewItem {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.imagePreviewItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.imagePreview {
+    transition: opacity 0.2s ease;
+}
+
+.imagePreviewItem:hover .imagePreview {
+    opacity: 0.8;
+}
+
+/* Loading States */
+.uploading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.uploading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #7c3aed;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .dragDropZone {
+        padding: 20px 15px;
+    }
+
+    .dragDropIcon {
+        font-size: 36px;
+    }
+
+    .dragDropText {
+        font-size: 14px;
+    }
+
+    .dropZone {
+        padding: 20px 10px;
+    }
+
+    .imagePreviewContainer {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 8px;
+    }
+}

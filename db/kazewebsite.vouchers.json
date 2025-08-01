@@ -1,0 +1,103 @@
+[{
+  "_id": {
+    "$oid": "6870b0c855ecce32b0b1c686"
+  },
+  "name": "Nguyen Van Thanh",
+  "code": "JF1YQ8CM",
+  "description": "sdfghj",
+  "minOrder": 456789,
+  "discountType": "percent",
+  "discountValue": 20,
+  "startDate": {
+    "$date": "2025-07-11T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-13T00:00:00.000Z"
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-11T06:35:52.351Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-11T06:35:52.351Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6870b23355ecce32b0b1c746"
+  },
+  "name": "XE MÁY ĐIỆN KAZUKI GOGO S",
+  "code": "RIDVF8UW",
+  "description": "xdfcsc",
+  "minOrder": 34567,
+  "discountType": "percent",
+  "discountValue": 10,
+  "startDate": {
+    "$date": "2025-07-11T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-07-13T00:00:00.000Z"
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-11T06:41:55.025Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-11T06:41:55.025Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6880c4cfcceea42177b4f056"
+  },
+  "name": "bui duc dat",
+  "code": "81Y9V13X",
+  "description": "giam 10%",
+  "minOrder": 100000,
+  "discountType": "percent",
+  "discountValue": 10,
+  "startDate": {
+    "$date": "2025-07-23T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-08-10T00:00:00.000Z"
+  },
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-23T11:17:35.606Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-28T10:46:05.519Z"
+  },
+  "__v": 0,
+  "quantity": 1
+},
+{
+  "_id": {
+    "$oid": "68875a689ccc0fb00756b9b1"
+  },
+  "name": "Bùi Đức Đạt",
+  "code": "NU0TU7E6",
+  "description": "hi",
+  "minOrder": 100000,
+  "discountType": "amount",
+  "discountValue": 10000,
+  "startDate": {
+    "$date": "2025-07-11T00:00:00.000Z"
+  },
+  "endDate": {
+    "$date": "2025-08-01T00:00:00.000Z"
+  },
+  "isActive": true,
+  "quantity": 5,
+  "usedCount": 0,
+  "createdAt": {
+    "$date": "2025-07-28T11:09:28.800Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-28T11:09:28.800Z"
+  },
+  "__v": 0
+}]

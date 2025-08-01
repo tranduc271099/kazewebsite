@@ -247,7 +247,23 @@ const ProductAdd = () => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        const newImageObjects = files.map(file => ({
+        processFiles(files);
+    };
+
+    const processFiles = (files) => {
+        const validFiles = files.filter(file => {
+            if (!file.type.startsWith('image/')) {
+                toast.error(`${file.name} không phải là file ảnh`);
+                return false;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`${file.name} quá lớn (tối đa 5MB)`);
+                return false;
+            }
+            return true;
+        });
+
+        const newImageObjects = validFiles.map(file => ({
             url: URL.createObjectURL(file),
             file: file,
             id: Date.now() + Math.random()
@@ -257,6 +273,30 @@ const ProductAdd = () => {
             ...prev,
             images: [...prev.images, ...newImageObjects]
         }));
+    };
+
+    // Drag and Drop handlers
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    };
+
+    const handleDragEnter = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.add(styles.dragOver);
+    };
+
+    const handleDragLeave = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove(styles.dragOver);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove(styles.dragOver);
+
+        const files = Array.from(e.dataTransfer.files);
+        processFiles(files);
     };
 
     const handleRemoveImage = (index) => {
@@ -351,17 +391,17 @@ const ProductAdd = () => {
 
     const handleVariantImageChange = (e) => {
         const files = Array.from(e.target.files);
+        processVariantFiles(files);
+    };
 
+    const processVariantFiles = (files) => {
         const validFiles = files.filter(file => {
-            const isValidType = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type);
-            const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-
-            if (!isValidType) {
-                setError('Chỉ hỗ trợ file ảnh: JPG, PNG, GIF, WEBP');
+            if (!file.type.startsWith('image/')) {
+                toast.error(`${file.name} không phải là file ảnh`);
                 return false;
             }
-            if (!isValidSize) {
-                setError('Kích thước file không được vượt quá 5MB');
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error(`${file.name} quá lớn (tối đa 5MB)`);
                 return false;
             }
             return true;
@@ -390,12 +430,24 @@ const ProductAdd = () => {
 
     const handleVariantDrop = (e) => {
         e.preventDefault();
+        e.currentTarget.classList.remove(styles.dragOver);
         const files = Array.from(e.dataTransfer.files);
-        handleVariantImageChange({ target: { files } });
+        processVariantFiles(files);
     };
 
     const handleVariantDragOver = (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    };
+
+    const handleVariantDragEnter = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.add(styles.dragOver);
+    };
+
+    const handleVariantDragLeave = (e) => {
+        e.preventDefault();
+        e.currentTarget.classList.remove(styles.dragOver);
     };
 
     return (
@@ -436,7 +488,37 @@ const ProductAdd = () => {
                     {/* Image Upload Card */}
                     <div className={styles.card}>
                         <h2 className={styles.cardTitle}>Hình ảnh</h2>
-                        <input type="file" multiple onChange={handleImageChange} className={styles.input} />
+
+                        {/* Drag & Drop Zone */}
+                        <div
+                            className={`${styles.dragDropZone} ${formData.images.length > 0 ? styles.hasImages : ''}`}
+                            onDragOver={handleDragOver}
+                            onDragEnter={handleDragEnter}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                            onClick={() => document.getElementById('imageInput').click()}
+                        >
+                            <div className={styles.dragDropContent}>
+                                <div className={styles.dragDropIcon}>📁</div>
+                                <p className={styles.dragDropText}>
+                                    Kéo thả ảnh vào đây hoặc <span className={styles.clickText}>nhấp để chọn</span>
+                                </p>
+                                <p className={styles.dragDropSubtext}>
+                                    Hỗ trợ: JPG, PNG, GIF (tối đa 5MB mỗi file)
+                                </p>
+                            </div>
+                        </div>
+
+                        <input
+                            id="imageInput"
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className={styles.hiddenInput}
+                            style={{ display: 'none' }}
+                        />
+
                         <div className={styles.imagePreviewContainer} style={{ marginTop: '20px' }}>
                             {formData.images.map((img, index) => (
                                 <div key={img.id || index}
@@ -528,11 +610,18 @@ const ProductAdd = () => {
                         {/* Variant Image Upload with Preview */}
                         <div className={styles.formGroup}>
                             <label className={styles.label}>Ảnh biến thể</label>
-                            <div className={styles.dropZone} onDrop={handleVariantDrop} onDragOver={handleVariantDragOver} onClick={() => document.getElementById('variant-image-input').click()}>
+                            <div
+                                className={styles.dropZone}
+                                onDrop={handleVariantDrop}
+                                onDragOver={handleVariantDragOver}
+                                onDragEnter={handleVariantDragEnter}
+                                onDragLeave={handleVariantDragLeave}
+                                onClick={() => document.getElementById('variant-image-input').click()}
+                            >
                                 <div className={styles.dropZoneContent}>
                                     <i className="bi bi-cloud-upload" style={{ fontSize: '2rem', color: '#666' }}></i>
-                                    <p>Kéo thả ảnh vào đây hoặc click để chọn</p>
-                                    <small>Có thể chọn nhiều ảnh. Hỗ trợ: JPG, PNG, GIF</small>
+                                    <p>Kéo thả ảnh vào đây hoặc <span className={styles.clickText}>click để chọn</span></p>
+                                    <small>Có thể chọn nhiều ảnh. Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)</small>
                                 </div>
                                 <input
                                     type="file"

@@ -1,0 +1,2145 @@
+[{
+  "_id": {
+    "$oid": "686241ee59149485ea8a908f"
+  },
+  "name": "Áo Thun Local Brand Unisex Teelab Polka Đốm TS332",
+  "slug": "ao-thun-local-brand-unisex-teelab-polka-djom-ts332",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Cotton\r\n- Form: Oversize\r\n- Màu sắc: Đen/Kem\r\n- Thiết kế: in lụa.",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Đen",
+      "Kem"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751269869/q8mkzaqqdytzfcfiesnv.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751269869/vomd4w3b8zrlwcbfu9d8.webp"
+      ],
+      "_id": {
+        "$oid": "686241ee59149485ea8a9090"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034435/bu6cabgw9cxzco8fdc9n.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034436/jk7k0nh9qf9j73p4kica.webp"
+      ],
+      "_id": {
+        "$oid": "688c70f99b8bbda5cd430d3b"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/fwscgtsfaq9d9qyayfup.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/rlovcyfw63ijkmnzrbyo.webp"
+      ],
+      "_id": {
+        "$oid": "688c70f99b8bbda5cd430d3c"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034436/mgyuiwutnozf9iwtxwuo.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/cracjjggs4twjxpfsczh.webp"
+      ],
+      "_id": {
+        "$oid": "688c70f99b8bbda5cd430d3d"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034436/axkmkaumuxh1g6qzeewr.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/kaclh3fzvyjboptad4sj.jpg"
+      ],
+      "_id": {
+        "$oid": "688c70f99b8bbda5cd430d3e"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/c9kcihsdw0ilwwgh5qrh.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034437/htkllxnxegyldl1wwsv0.jpg"
+      ],
+      "_id": {
+        "$oid": "688c70f99b8bbda5cd430d3f"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751269868/atu6qyvcos7r7bh1iwty.webp",
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751269868/kbgjomwrskkg51dxlvrn.jpg"
+  ],
+  "price": 280000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-06-30T07:51:10.689Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:47:05.839Z"
+  },
+  "__v": 0,
+  "costPrice": 252000
+},
+{
+  "_id": {
+    "$oid": "6864a695d65a1f1b0357a3f5"
+  },
+  "name": "Áo Hoodie Teelab Local Brand Unisex Bunny Cake Hoodie HD107",
+  "slug": "ao-hoodie-teelab-local-brand-unisex-bunny-cake-hoodie-hd107",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Nỉ\r\n- Form: Oversize\r\n- Màu sắc: Kem/Xám Tiêu\r\n- Thiết kế: In lụa",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "XL"
+    ],
+    "colors": [
+      "Kem",
+      "Xám Tiêu"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Kem"
+      },
+      "stock": 49,
+      "price": 275000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751426708/lx3znrr6q70ecv0gehza.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751426710/br8ioksbvrzkqnaxuoge.webp"
+      ],
+      "_id": {
+        "$oid": "6864a695d65a1f1b0357a3f6"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 275000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033618/udwvsimh1ak8paxqa0z7.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033618/c0jpzfgstrdcdysb1mtt.jpg"
+      ],
+      "_id": {
+        "$oid": "688c6dc89b8bbda5cd430c36"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 275000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033619/ngymyimahvcrqphbwdqe.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033619/ev58fvqayeobuex7sob3.jpg"
+      ],
+      "_id": {
+        "$oid": "688c6dc89b8bbda5cd430c37"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 275000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033619/kixnq9fjidavl8gb3t9n.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033618/so5uzv2emlfyozjm35io.jpg"
+      ],
+      "_id": {
+        "$oid": "688c6dc89b8bbda5cd430c38"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751426707/xgunfgwb2502jpdjusci.webp"
+  ],
+  "price": 275000,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-02T03:25:09.873Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:49:54.329Z"
+  },
+  "__v": 0,
+  "costPrice": 245000
+},
+{
+  "_id": {
+    "$oid": "6864adcad91b09eaa88c1e79"
+  },
+  "name": "Quần Kaki Xếp Ly Local Brand Unisex Teelab PS111",
+  "slug": "quan-kaki-xep-ly-local-brand-unisex-teelab-ps111",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Vải Kaki\r\n- Form: Oversize\r\n- Màu sắc: Đen/Be\r\n- Thiết kế: Thêu.",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc8"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Đen",
+      "Be"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Be"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751428552/ngjgqgzekrvkbteucrjr.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751428554/so9ushkqc1qege7w4nbq.jpg"
+      ],
+      "_id": {
+        "$oid": "6864adcad91b09eaa88c1e7a"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033260/rew9hz89syygdqniem9r.png"
+      ],
+      "_id": {
+        "$oid": "688c6c629b8bbda5cd430baa"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Be"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033260/peh5ycg4qewm4a7athp3.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033260/kn9box2klojxtjdrbvl2.jpg"
+      ],
+      "_id": {
+        "$oid": "688c6c629b8bbda5cd430bab"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033261/cvucoeotxkynouocxile.png"
+      ],
+      "_id": {
+        "$oid": "688c6c629b8bbda5cd430bac"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Be"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033261/xp8xf7j9ai35swdcw0qg.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033262/qqearkmida4idwac7qmo.jpg"
+      ],
+      "_id": {
+        "$oid": "688c6c629b8bbda5cd430bad"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754033261/ixkbkzqculj9aj5fxbjm.png"
+      ],
+      "_id": {
+        "$oid": "688c6c629b8bbda5cd430bae"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751428551/k05y1mxuntlje6gkreol.webp"
+  ],
+  "price": 280000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-02T03:55:54.761Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:27:30.722Z"
+  },
+  "__v": 0,
+  "costPrice": 252000
+},
+{
+  "_id": {
+    "$oid": "6864bc0920825d90a5e05ad0"
+  },
+  "name": "Áo Polo Local Brand Unisex Teelab Pine Forests Polo AP069",
+  "slug": "ao-polo-local-brand-unisex-teelab-pine-forests-polo-ap069",
+  "description": "Thông tin sản phẩm:\r\n\r\n- Chất liệu: Cotton\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Đen\r\n\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751432199/xgifhz2hugdfbiv8zdub.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751432201/m4onpsrzuifxzbljdg0o.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751432201/pco2v0qqfu8yn4tonxbz.jpg"
+      ],
+      "_id": {
+        "$oid": "6864bc0920825d90a5e05ad1"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029064/hubuak5jziawnqqvxw5s.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029064/apmlnho90vlywwhyo5zu.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029064/rsgdnwk2hnbrhdlbxkc3.webp"
+      ],
+      "_id": {
+        "$oid": "688c5bfe9b8bbda5cd4300d2"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029066/iemtiic4jedqwuj8eabi.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029065/zbu761cm19pg1ogmcmqf.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754029065/dedieovrspvqi1wj6smz.webp"
+      ],
+      "_id": {
+        "$oid": "688c5bfe9b8bbda5cd4300d3"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751432252/nncfdldslo0vmpqexeuf.jpg"
+  ],
+  "price": 280000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-02T04:56:41.214Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T06:17:34.851Z"
+  },
+  "__v": 0,
+  "costPrice": 252000
+},
+{
+  "_id": {
+    "$oid": "6864fbaa3e347707d5d38189"
+  },
+  "name": "Áo Jersey Local Brand Unisex Teelab Striped Shirt SS080",
+  "slug": "ao-jersey-local-brand-unisex-teelab-striped-shirt-ss080",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Vải Teelab\r\n- Form: Oversize\r\n- Màu sắc: Đen/đỏ\r\n- Thiết kế: Kẻ Sọc",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Đỏ",
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751448489/qewor6tlqyf04wxmogxj.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751448492/z2jwsodtbzm4pbebxubt.jpg"
+      ],
+      "_id": {
+        "$oid": "6864fbaa3e347707d5d3818a"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032375/prkd3kkieetqysot2gff.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032376/vpkyyymdgpgs9ixyyjzw.jpg"
+      ],
+      "_id": {
+        "$oid": "688c68ee9b8bbda5cd430ab6"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032376/tiha5h43ohyi87wi19e0.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/caksasuj68wi5pkpf3b2.jpg"
+      ],
+      "_id": {
+        "$oid": "688c68ee9b8bbda5cd430ab7"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/ztoqob23tubnhjbbhsjv.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/wjz1x5vztkntsw3ygf3t.jpg"
+      ],
+      "_id": {
+        "$oid": "688c68ee9b8bbda5cd430ab8"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/m9wz8tfnsdjfxwtuu1gk.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/rt1gs4yi84yfzj5acnis.jpg"
+      ],
+      "_id": {
+        "$oid": "688c68ee9b8bbda5cd430ab9"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 400000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/kwobcsrlb1dgm7stl3wk.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754032377/qz6ica6zdryrfvpissse.jpg"
+      ],
+      "_id": {
+        "$oid": "688c68ee9b8bbda5cd430aba"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751448488/jtysbqf7nnazztnuf9uq.jpg"
+  ],
+  "price": 400000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-02T09:28:10.897Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:12:46.101Z"
+  },
+  "__v": 0,
+  "costPrice": 380000
+},
+{
+  "_id": {
+    "$oid": "6889f421f039837a46021694"
+  },
+  "name": "Áo Babytee Polo Teelab Local Brand Unisex Studio Track Baby BT012",
+  "slug": "ao-babytee-polo-teelab-local-brand-unisex-studio-track-baby-bt012",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Cotton\r\n- Form: Oversize\r\n- Màu sắc: Đen/Trắng\r\n- Thiết kế: In lụa",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68621eb659149485ea8a8aa4"
+  },
+  "attributes": {
+    "sizes": [
+      "S",
+      "M"
+    ],
+    "colors": [
+      "Đen",
+      "Trắng"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "S",
+        "color": "Đen"
+      },
+      "stock": 25,
+      "price": 450000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871389/tvxpmzcvtukomnfrfoqv.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871390/wgzggioyzn9ixhnkaaeh.jpg"
+      ],
+      "_id": {
+        "$oid": "6889f421f039837a46021695"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 25,
+      "price": 450000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871395/i6ovzqbt53be3xmbivor.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871395/v4vzzrttoocbppgaayxs.jpg"
+      ],
+      "_id": {
+        "$oid": "6889f421f039837a46021696"
+      }
+    },
+    {
+      "attributes": {
+        "size": "S",
+        "color": "Trắng"
+      },
+      "stock": 25,
+      "price": 450000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871393/kla3nlj7c8k6lzrabup1.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871386/em0lqzkkfpg44b6p4uon.jpg"
+      ],
+      "_id": {
+        "$oid": "6889f421f039837a46021697"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Trắng"
+      },
+      "stock": 25,
+      "price": 450000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871387/ss5kzoxgps8vmuu0vj1f.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871378/bc9ynqo6l2cwnjkm2a8x.jpg"
+      ],
+      "_id": {
+        "$oid": "6889f421f039837a46021698"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753871367/loxkoqxhiolrj3n6eu3q.png"
+  ],
+  "price": 450000,
+  "costPrice": 400000,
+  "stock": 100,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-30T10:29:53.071Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-30T10:29:53.071Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c21909b8bbda5cd42fd27"
+  },
+  "name": "Áo Polo Local Brand Unisex Teelab Summer Dolphin Polo AP070",
+  "slug": "ao-polo-local-brand-unisex-teelab-summer-dolphin-polo-ap070",
+  "description": "- Chất liệu: Cotton\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Đen/Xanh Navy/Đỏ\r\n\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Xanh Navy",
+      "Đỏ",
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xanh Navy"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014106/bpy0altxyoiatp830fkx.webp"
+      ],
+      "_id": {
+        "$oid": "688c21909b8bbda5cd42fd28"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014106/sohmjepptikpgvtihhw7.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014107/neydajckchlmdx8u37lf.webp"
+      ],
+      "_id": {
+        "$oid": "688c21909b8bbda5cd42fd29"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014107/m1r9mz9swnwz87ib7hv2.jpg"
+      ],
+      "_id": {
+        "$oid": "688c21909b8bbda5cd42fd2a"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xanh Navy"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014107/wlamwg2z9xr4hulkozna.webp"
+      ],
+      "_id": {
+        "$oid": "688c21909b8bbda5cd42fd2b"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017678/vjwx2lq5r0slv3onezxu.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017677/iqrb2hhckxw0p3l9ucvl.webp"
+      ],
+      "_id": {
+        "$oid": "688c2f839b8bbda5cd42ff11"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017678/djydrxcqmamns4etvn6f.jpg"
+      ],
+      "_id": {
+        "$oid": "688c2f839b8bbda5cd42ff12"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xanh Navy"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017677/t43udemfem68fhxd6qs3.webp"
+      ],
+      "_id": {
+        "$oid": "688c2f839b8bbda5cd42ff13"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đỏ"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017678/pbwgccoqsxhduatqwejy.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017677/qoi94e70ugy1x3kk1gwh.webp"
+      ],
+      "_id": {
+        "$oid": "688c2f839b8bbda5cd42ff14"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 260000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754017677/ijsjckeqtljp5bx0s7qf.jpg"
+      ],
+      "_id": {
+        "$oid": "688c2f839b8bbda5cd42ff15"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014104/ucmejrtdkdz6cffsvzrm.webp",
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754014105/almkvpyattev2s7ekvfz.jpg"
+  ],
+  "price": 260000,
+  "costPrice": 234000,
+  "stock": 450,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T02:08:16.898Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T03:07:47.015Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c621a9b8bbda5cd4303d6"
+  },
+  "name": "Áo Polo Local Brand Unisex Teelab College Condensed Polo AP068",
+  "slug": "ao-polo-local-brand-unisex-teelab-college-condensed-polo-ap068",
+  "description": "Thông tin sản phẩm:\r\n\r\n- Chất liệu: TC Cá sấu\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Đen/Xám Melane\r\n\r\n- Thiết kế: In lụa",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Đen",
+      "Xám Melane"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030627/rpddiyb4imos4uq6yq3i.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030629/onnarhstwiesnwstkuwc.jpg"
+      ],
+      "_id": {
+        "$oid": "688c621a9b8bbda5cd4303d7"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030629/e3buzrcgm7rb4vpsoytv.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030629/it19ngyghxl61g6sewln.jpg"
+      ],
+      "_id": {
+        "$oid": "688c621a9b8bbda5cd4303d8"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xám Melane"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030629/snko3vwbke1lixuwqdyk.jpg"
+      ],
+      "_id": {
+        "$oid": "688c621a9b8bbda5cd4303d9"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xám Melane"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030628/g6magmjnogrq9g7au4oc.jpg"
+      ],
+      "_id": {
+        "$oid": "688c621a9b8bbda5cd4303da"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030626/bdrdimesmuf4ykdx7rfx.jpg"
+  ],
+  "price": 250000,
+  "costPrice": 225000,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T06:43:38.415Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T06:43:38.415Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c631e9b8bbda5cd430450"
+  },
+  "name": "Áo Polo Teelab Local Brand Unisex Flame AP055",
+  "slug": "ao-polo-teelab-local-brand-unisex-flame-ap055",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Cotton\r\n- Form: Oversize\r\n- Màu sắc: Đen\r\n- Thiết kế: In lụa",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 195000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030888/jedtwl2ixlyfa09zcuyp.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030888/iagotlrkyjqnf3ahvwri.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030889/sgw9h7sbbrzccisad71u.webp"
+      ],
+      "_id": {
+        "$oid": "688c631e9b8bbda5cd430451"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 195000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030890/umoawxgnruacmpmmaqaf.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030890/s98ovoncnpth0ahkktf8.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030889/lueiyploapxbdnqertie.webp"
+      ],
+      "_id": {
+        "$oid": "688c631e9b8bbda5cd430452"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030886/d2qng6iil6x3siqutzys.jpg",
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754030887/ksqgnll4zbdvyoualeek.webp"
+  ],
+  "price": 195000,
+  "costPrice": 175500,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T06:47:58.385Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T06:47:58.385Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c66a09b8bbda5cd430923"
+  },
+  "name": "Áo Polo Teelab Local Brand Unisex Football Vintage Polo Shirt AP053",
+  "slug": "ao-polo-teelab-local-brand-unisex-football-vintage-polo-shirt-ap053",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Vải thể thao\r\n- Form: Oversize\r\n- Màu sắc: Đen/Hồng\r\n- Thiết kế: In lụa\r\n",
+  "brand": "Teelab",
+  "category": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "attributes": {
+    "sizes": [
+      "M"
+    ],
+    "colors": [
+      "Đen",
+      "Hồng"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 100,
+      "price": 175000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754031785/bjw8a6r4ojnoz0ieg9vq.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754031788/iyhql4dx875v4qhzrnh9.jpg"
+      ],
+      "_id": {
+        "$oid": "688c66a09b8bbda5cd430924"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Hồng"
+      },
+      "stock": 100,
+      "price": 175000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754031787/x7psrbrbmmmycnwgmfrs.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754031787/ggwve7py02bojtp3nnaa.jpg"
+      ],
+      "_id": {
+        "$oid": "688c66a09b8bbda5cd430925"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754031784/sebwyda5jodeozhk0lxo.png"
+  ],
+  "price": 175000,
+  "costPrice": 157000,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T07:02:56.445Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:02:56.445Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c72449b8bbda5cd430dd0"
+  },
+  "name": "Áo Thun Local Brand Unisex Teelab Star Tshirt TS326",
+  "slug": "ao-thun-local-brand-unisex-teelab-star-tshirt-ts326",
+  "description": "Thông tin sản phẩm:\r\n\r\n- Chất liệu: Cotton\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Đen\r\n\r\n- Thiết kế: In cao thành\r\n",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Trắng",
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Trắng"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034765/dfupz9mcji0t4wgwfwmg.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/ycp2alzwmjg7tnm8rziw.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd1"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Trắng"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/yibgr3hij98kakge5wy6.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034767/ospggkdn1yipnjfce45a.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd2"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Trắng"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/iox0pwujfcwodtogttk0.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/htien91xpjge2gahqp8s.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd3"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034767/l3zw5m1pxjffhgrwsrqg.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/gh94dhdwoehen0nmg0nh.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd4"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/ln42rrorlufx72m1roi8.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034767/dc0yag2l3vberdkxo7e5.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd5"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/cg5rt1nm7uc0aqzx3q5p.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034766/xv0w3xrmiyjduma8nj6f.jpg"
+      ],
+      "_id": {
+        "$oid": "688c72449b8bbda5cd430dd6"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754034764/myzksxtivshckxhy3knd.webp"
+  ],
+  "price": 220000,
+  "costPrice": 198000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T07:52:36.153Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:52:36.153Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c73479b8bbda5cd430e88"
+  },
+  "name": "Áo Thun Local Brand Unisex Teelab Striped Xanh Lá Tshirt TS339",
+  "slug": "ao-thun-local-brand-unisex-teelab-striped-xanh-la-tshirt-ts339",
+  "description": "close\r\nThông tin sản phẩm:\r\n- Chất liệu: Cotton\r\n- Form: Oversize\r\n- Màu sắc: Kẻ Xanh\r\n- Thiết kế: Thêu",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Kẻ Xanh"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Kẻ Xanh"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035025/ieh2t8nmrhfhanulggmi.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035027/pomksbzlqljug71tuqhu.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73479b8bbda5cd430e89"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Kẻ Xanh"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035027/x1lqjib4vfabgh4b1dkc.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035027/kcpuqvq6xfvujcjpeiir.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73479b8bbda5cd430e8a"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Kẻ Xanh"
+      },
+      "stock": 100,
+      "price": 280000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035027/rkfpabxhhdrdx85f4ikr.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035027/gvr2gzuua621051rcuxp.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73479b8bbda5cd430e8b"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035024/vfvg1xb8rkzwtqrvukty.jpg"
+  ],
+  "price": 280000,
+  "costPrice": 252000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T07:56:55.956Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:56:55.956Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c73ff9b8bbda5cd430f42"
+  },
+  "name": "Áo Thun Teelab Local Brand Unisex Struck by Cupid Tshirt TS273",
+  "slug": "ao-thun-teelab-local-brand-unisex-struck-by-cupid-tshirt-ts273",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Cotton\r\n- Form: Oversize\r\n- Màu sắc: Wash\r\n- Thiết kế: in lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Wash"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Wash"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035208/bvckkgfftjpvscy1j0md.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035210/dlickkfl3ypnajkmpwg8.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035210/vhqrgxrrpdmloxubasew.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73ff9b8bbda5cd430f43"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Wash"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035211/muo9g80q6xwrcaptgpse.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035210/veqrb2tamwbulzrfbbuc.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035210/ywq0djycqvg0zxrldwwi.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73ff9b8bbda5cd430f44"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Wash"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035211/p6bmhv86amgoflhvecop.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035210/oafj9ywfai3p2nu8k5b1.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035211/hl9pj3bbocxe51yo3sis.jpg"
+      ],
+      "_id": {
+        "$oid": "688c73ff9b8bbda5cd430f45"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754035207/lu2l1nbkfqwgmlb8qdts.jpg"
+  ],
+  "price": 220000,
+  "costPrice": 198000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T07:59:59.640Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T07:59:59.640Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c88d29b8bbda5cd431306"
+  },
+  "name": "Áo Thun Teelab Local Brand Unisex Dreamland TS142",
+  "slug": "ao-thun-teelab-local-brand-unisex-dreamland-ts142",
+  "description": "Áo Thun Teelab Local Brand Unisex Dreamland TS142\r\n175.500đ\r\nMàu Kem\r\n\r\nKích thước\r\nM\r\nL\r\nXL\r\n \r\nProduct Details\r\nclose\r\nVới tông màu kem trending và thiết kế thêu minimal trước ngựa, Dreamland là một trong những mẫu best-seller của dòng t-shirt\r\n\r\nThông tin sản phẩm: \r\n\r\n- Chất liệu: Cotton\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Kem\r\n\r\n- Thiết kế: Thêu phía trước",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Kem"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Kem"
+      },
+      "stock": 100,
+      "price": 195000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040540/hkbpsywuwxdirgvaxuhy.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040542/swxb0jvgkqbtmw5nvda2.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/sag8zjyzff7pukswuijv.webp"
+      ],
+      "_id": {
+        "$oid": "688c88d29b8bbda5cd431307"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Kem"
+      },
+      "stock": 100,
+      "price": 195000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/mdhkathrsb76wtudkrm1.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040542/ftkymlmqwj6j4ecs2qmj.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/iovaoqoqakc7cjqq7xk4.webp"
+      ],
+      "_id": {
+        "$oid": "688c88d29b8bbda5cd431308"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Kem"
+      },
+      "stock": 100,
+      "price": 195000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/kaqhv6lvxn2be9zmp0ql.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/lgehojacbu3ygzoqvphk.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040543/ocplumazgvtqgncbnxet.webp"
+      ],
+      "_id": {
+        "$oid": "688c88d29b8bbda5cd431309"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754040539/hyrrw8xbyhhl9vbuwd3m.jpg"
+  ],
+  "price": 195000,
+  "costPrice": 175000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T09:28:50.759Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T09:28:50.759Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c93ec43cc5ddcd500b242"
+  },
+  "name": "Áo Hoodie Teelab Local Brand Unisex PREMIUM Basic 8 Màu Thêu Logo Basic HD074",
+  "slug": "ao-hoodie-teelab-local-brand-unisex-premium-basic-8-mau-theu-logo-basic-hd074",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Nỉ bông\r\n- Form: Oversize\r\n- Thiết kế: Thêu",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "attributes": {
+    "sizes": [
+      "XL"
+    ],
+    "colors": [
+      "Tím"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Tím"
+      },
+      "stock": 100,
+      "price": 275000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043384/onickzroymhttdeqaadm.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043386/kfvi2riutzxeg0pyahwf.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043385/giefeawlfvwoilxqs5hu.jpg"
+      ],
+      "_id": {
+        "$oid": "688c93ec43cc5ddcd500b243"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043383/ykapgje5m6e4dg08eq7x.jpg"
+  ],
+  "price": 275000,
+  "costPrice": 247500,
+  "stock": 100,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:16:12.997Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:16:12.997Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c94dc43cc5ddcd500b2ee"
+  },
+  "name": "Áo Hoodie Local Brand Unisex Zipup Teelab Classic Zipper Hoodie HD119",
+  "slug": "ao-hoodie-local-brand-unisex-zipup-teelab-classic-zipper-hoodie-hd119",
+  "description": "Áo Hoodie Local Brand Unisex Zipup Teelab Classic Zipper Hoodie HD119\r\n269.100đ\r\nMàu sắc Đen\r\n\r\n\r\nKích thước\r\nM\r\nL\r\nXLxl\r\n \r\nProduct Details\r\nclose\r\nThông tin sản phẩm:\r\n\r\n- Chất liệu: Nỉ bông\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Đen/Xám Tiêu\r\n\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Đen",
+      "Xám Tiêu"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 299000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043623/q6wmfwumwvftxi92tzjo.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/xulcsefyfcs7gdje5bec.jpg"
+      ],
+      "_id": {
+        "$oid": "688c94dc43cc5ddcd500b2ef"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 299000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/i1ewtc1tcrsydttyochf.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043624/ms70zxomvj0fa00lubru.jpg"
+      ],
+      "_id": {
+        "$oid": "688c94dc43cc5ddcd500b2f0"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 299000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/f5rzisk0thu1jqhtgpgn.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/z6xnuwrglxvfdaildduu.jpg"
+      ],
+      "_id": {
+        "$oid": "688c94dc43cc5ddcd500b2f1"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 299000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/jxauzoq4ao60amuluhgs.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043625/klvzbycbbhknjkjla9bu.jpg"
+      ],
+      "_id": {
+        "$oid": "688c94dc43cc5ddcd500b2f2"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043622/kbmmbl2dhzjuy6my4dov.jpg"
+  ],
+  "price": 299000,
+  "costPrice": 269100,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:20:12.478Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:20:12.478Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c95a343cc5ddcd500b3ba"
+  },
+  "name": "Áo Sweatshirt Local Brand Unisex Teelab \" Love is in the air \" Sweatshirt HD109",
+  "slug": "ao-sweatshirt-local-brand-unisex-teelab-\"-love-is-in-the-air-\"-sweatshirt-hd109",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Nỉ\r\n- Form: Oversize\r\n- Màu sắc: Kem/Xám Tiêu\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "attributes": {
+    "sizes": [
+      "XL"
+    ],
+    "colors": [
+      "Kem",
+      "Xám Tiêu"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Kem"
+      },
+      "stock": 100,
+      "price": 269000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043821/uhdu6dfgimclrhv6lr8d.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043823/txfmnvjdxvbx53gzrlaq.jpg"
+      ],
+      "_id": {
+        "$oid": "688c95a343cc5ddcd500b3bb"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xám Tiêu"
+      },
+      "stock": 100,
+      "price": 269000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043823/w8yjpq0lfbkrke7sif9f.webp",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043824/eylohkahpseuzezmn5ud.jpg"
+      ],
+      "_id": {
+        "$oid": "688c95a343cc5ddcd500b3bc"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754043820/tvtf8jrl0lpbxqnfhoob.webp"
+  ],
+  "price": 269000,
+  "costPrice": 242100,
+  "stock": 200,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:23:31.135Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:23:53.222Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c974b43cc5ddcd500b608"
+  },
+  "name": "Áo Hoodie Local Brand Unisex Teelab Tulipvalley Hoodie HD105",
+  "slug": "ao-hoodie-local-brand-unisex-teelab-tulipvalley-hoodie-hd105",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Nỉ\r\n- Form: Oversize\r\n- Màu sắc: Đen/Kem/Xám Tiêu\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L"
+    ],
+    "colors": [
+      "Kem",
+      "Xám Tiêu",
+      "Đen"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044245/g5ywkjgugunwwqqzohud.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/gmjdahmh7vupd6bfcszf.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044247/nrbi7ntyrexuzlsfcnrv.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b609"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Kem"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044247/zp5t1kgdqokexqq4gfot.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/tctllozjdsuancassr4x.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/g9iqmx5otyuc8bxvha9k.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b60a"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/p1gfrknuddgofljegbz6.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/z77pzumw50wxo0fy0fq9.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/cak2fik0xzkwqtsnvpps.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b60b"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/uxmasff1hiaanf9z8ces.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/c7erwvuhjnfvkrfsytc1.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/nldblr9c8x0mpouha8u4.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b60c"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/ccnqvi6fy3q7qainao5l.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/q5daymkktbrturjdtkpf.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b60d"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Đen"
+      },
+      "stock": 50,
+      "price": 350000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/cg8jvrh3nbbz2rjhuqu2.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044248/jnjyxx8xekn45kmmybat.jpg"
+      ],
+      "_id": {
+        "$oid": "688c974b43cc5ddcd500b60e"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044244/lvghbhrcscugovrhojzv.webp"
+  ],
+  "price": 350000,
+  "costPrice": 315000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:30:35.384Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:30:35.384Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c985043cc5ddcd500b765"
+  },
+  "name": "Áo Sơ Mi Ngắn Tay Teelab Graffiti Oversize Shirt SS049",
+  "slug": "ao-so-mi-ngan-tay-teelab-graffiti-oversize-shirt-ss049",
+  "description": "Áo Sơ Mi Ngắn Tay Teelab Graffiti Oversize Shirt SS049\r\n198.000đ\r\nMàu sắc Xanh\r\n\r\nKích thước\r\nM\r\nL\r\nXL\r\n \r\nProduct Details\r\nclose\r\nThông tin sản phẩm:\r\n\r\n- Chất liệu: Vải Oxford\r\n\r\n- Form: Oversize\r\n\r\n- Màu sắc: Xanh\r\n\r\n- Thiết kế: In lụa",
+  "brand": "",
+  "category": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Xanh"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xanh"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044506/dz4xqjgquhpk9yo2tak6.png",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044509/xgoqpjyjmhkak2bqxzlr.webp"
+      ],
+      "_id": {
+        "$oid": "688c985043cc5ddcd500b766"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xanh"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044509/ozchdtzrl7gtwumybmt7.png",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044508/qxuapsus3vfd20mivhmk.webp"
+      ],
+      "_id": {
+        "$oid": "688c985043cc5ddcd500b767"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xanh"
+      },
+      "stock": 100,
+      "price": 220000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044509/tmtd5tjsngtm9f5n0vyi.png",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044508/xj1cbqhicjznwufzsfmt.webp"
+      ],
+      "_id": {
+        "$oid": "688c985043cc5ddcd500b768"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044505/zogukmc027bvjau0uogt.png"
+  ],
+  "price": 220000,
+  "costPrice": 198000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:34:56.355Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:34:56.355Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c997543cc5ddcd500b834"
+  },
+  "name": "Áo Sơ Mi Cộc Tay Local Brand Unisex Teelab Stars Shirt SS081",
+  "slug": "ao-so-mi-coc-tay-local-brand-unisex-teelab-stars-shirt-ss081",
+  "description": "Thông tin sản phẩm:\r\n- Chất liệu: Vải Oxford\r\n- Form: Oversize\r\n- Màu sắc: Xanh Ngọc/Xanh Dương/Vàng\r\n- Thiết kế: Kẻ sọc",
+  "brand": "",
+  "category": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Xanh Ngọc",
+      "Xanh Dương"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xanh Ngọc"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044799/ivao65ie1ntcorrlmesh.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/koowcn801g85jmh0v2np.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b835"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xanh Ngọc"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/smrj7jf6ydjxfkebsbe5.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044802/fvarplowkb5qq6hsinyb.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b836"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xanh Ngọc"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/wyetwtuujbsaizoigthh.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044802/vimofc9jktuiydvnvarj.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b837"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xanh Dương"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/mddhwgc65or1qqglcvu5.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044802/dmxyw7m9qi6jafishgqo.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b838"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xanh Dương"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/ulvrphmbrckymcz7rqjc.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044802/n344qqhsoy2vgzsa03qh.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b839"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xanh Dương"
+      },
+      "stock": 50,
+      "price": 250000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044801/wnuhcmvxppulibk9wc6r.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044802/fkzjhlx6mkzvmlbw9mtb.jpg"
+      ],
+      "_id": {
+        "$oid": "688c997543cc5ddcd500b83a"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754044798/ebtkc2nzmdys9ii0yagu.png"
+  ],
+  "price": 250000,
+  "costPrice": 225000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:39:49.121Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:39:49.121Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688c9b1b43cc5ddcd500bb8b"
+  },
+  "name": "Áo khoác Local Brand Unisex Teelab Preppy Varsity Jacket AK122",
+  "slug": "ao-khoac-local-brand-unisex-teelab-preppy-varsity-jacket-ak122",
+  "description": "Áo khoác Local Brand Unisex Teelab Preppy Varsity Jacket AK122\r\n297.000đ\r\nMàu sắc Xanh Than\r\n\r\n\r\nKích thước\r\nM\r\nL\r\nXL\r\n \r\nProduct Details\r\nclose\r\nThông tin sản phẩm:\r\n- Chất liệu: Dạ\r\n- Form: Oversize\r\n- Màu sắc: Xám Tiêu/Xanh Than\r\n- Thiết kế: Thêu",
+  "brand": "",
+  "category": {
+    "$oid": "6862202d59149485ea8a8b1e"
+  },
+  "attributes": {
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "colors": [
+      "Xanh Than",
+      "Xám Tiêu"
+    ]
+  },
+  "variants": [
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xanh Than"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045221/y25obdkhbwuotyltibjp.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/dfxcmjisiosetqqhvvfa.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb8c"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xanh Than"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/olzqnmocmduiniw4qdql.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045223/htmwlzgckz6sgqc92mjt.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb8d"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xanh Than"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/sagbzbbghlu7ecgajdtc.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045223/ubzly9foyahzgkvmfanx.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb8e"
+      }
+    },
+    {
+      "attributes": {
+        "size": "M",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/ph9pr2pgwhdoc9hesblg.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/ycyfkkuhqdjxu8i7ohix.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb8f"
+      }
+    },
+    {
+      "attributes": {
+        "size": "L",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/thtvykdstzht7kckrsbe.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/sslufowiwefwykg86kwj.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb90"
+      }
+    },
+    {
+      "attributes": {
+        "size": "XL",
+        "color": "Xám Tiêu"
+      },
+      "stock": 50,
+      "price": 330000,
+      "images": [
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/euayuzlrh7g3b5a07gf4.jpg",
+        "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045224/fnjccxtijistnw22ixg3.webp"
+      ],
+      "_id": {
+        "$oid": "688c9b1b43cc5ddcd500bb91"
+      }
+    }
+  ],
+  "images": [
+    "https://res.cloudinary.com/dnmdoecyq/image/upload/v1754045220/shwhp9depouqrllb5fup.jpg"
+  ],
+  "price": 330000,
+  "costPrice": 297000,
+  "stock": 300,
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-08-01T10:46:51.308Z"
+  },
+  "updatedAt": {
+    "$date": "2025-08-01T10:46:51.308Z"
+  },
+  "__v": 0
+}]

@@ -1,0 +1,123 @@
+[{
+  "_id": {
+    "$oid": "684c908e864f12fa45ad250b"
+  },
+  "name": "Bùi Đức Đạt",
+  "email": "datbui180504@gmail.com",
+  "password": "$2b$10$kVkueZL/fKsZ16IdJz1xxe9VNmXKFLYIPmX2ttce67MTIKGyd7rU6",
+  "phone": "0845260515",
+  "role": "admin",
+  "address": "10 ngõ 27 Phạm Huy Quang Trần Lãm Thái Bình",
+  "vouchers": [],
+  "createdAt": {
+    "$date": "2025-06-13T20:56:46.391Z"
+  },
+  "updatedAt": {
+    "$date": "2025-06-30T05:50:38.519Z"
+  },
+  "__v": 0,
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751262638/avatars/jkc3tkatnpwwcjxkuafc.jpg",
+  "isLocked": false,
+  "isActive": true
+},
+{
+  "_id": {
+    "$oid": "684ce5422bae2e250ea20786"
+  },
+  "name": "Nguyễn Phương Nam",
+  "email": "datbdph45586@fpt.edu.vn",
+  "password": "$2b$10$mSlBroUIYWz9MIqBOhbE3OAI8rpjy7G3Wut0QP0uJvJDgE9OMw.6q",
+  "phone": "+84 845 260 515",
+  "role": "user",
+  "address": "!9 402 Đình Thôn Mĩ Đình",
+  "vouchers": [],
+  "createdAt": {
+    "$date": "2025-06-14T02:58:10.009Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-15T08:43:28.991Z"
+  },
+  "__v": 0,
+  "isLocked": false
+},
+{
+  "_id": {
+    "$oid": "684d335cf276a85c456ec96d"
+  },
+  "name": "damian wayne",
+  "email": "damianwayne185@gmail.com",
+  "password": "kpz1w61c",
+  "phone": "0845260515",
+  "role": "user",
+  "address": "",
+  "vouchers": [],
+  "createdAt": {
+    "$date": "2025-06-14T08:31:24.891Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-06T09:59:09.564Z"
+  },
+  "__v": 0,
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751795951/avatars/arxfysqliojbmbfte1mb.jpg",
+  "isLocked": false
+},
+{
+  "_id": {
+    "$oid": "684ed6566d686059c18e3e67"
+  },
+  "name": "dat",
+  "email": "dat462995@gmail.com",
+  "password": "fb6jndy8",
+  "phone": "",
+  "role": "user",
+  "address": "",
+  "vouchers": [],
+  "createdAt": {
+    "$date": "2025-06-15T14:19:02.640Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-02T03:53:35.965Z"
+  },
+  "__v": 0,
+  "isLocked": false
+},
+{
+  "_id": {
+    "$oid": "6864fbf93e347707d5d38212"
+  },
+  "name": "loserboiz",
+  "email": "ken936643@gmail.com",
+  "password": "rit8wyv9",
+  "phone": "0912695728",
+  "role": "user",
+  "address": "",
+  "vouchers": [],
+  "isLocked": false,
+  "createdAt": {
+    "$date": "2025-07-02T09:29:29.659Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-02T09:32:52.194Z"
+  },
+  "__v": 0,
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751448596/avatars/ien8et0krk7an3wtl7t4.png"
+},
+{
+  "_id": {
+    "$oid": "688788d6eda0f903a3bee578"
+  },
+  "name": "Nguyễn Phương Nam",
+  "email": "datbdph455861@fpt.edu.vn",
+  "password": "$2b$10$iBUpexzwkwj/GTaTgzp89O5iloEA2aXBYnvo5hrk0M7kkInMVlXFi",
+  "role": "user",
+  "image": "",
+  "vouchers": [],
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-28T14:27:34.832Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-28T14:27:34.832Z"
+  },
+  "__v": 0
+}]

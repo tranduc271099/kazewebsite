@@ -1,0 +1,85 @@
+[{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdc8"
+  },
+  "name": "Quần",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2024-06-11T10:05:00.000Z"
+  },
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751296507/categories/kms8wzfpfsg9sftzbfw8.jpg"
+},
+{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdc9"
+  },
+  "name": "Hoodie",
+  "parentId": {
+    "$oid": "665f1a2b3c4d5e6f7a8b9c10"
+  },
+  "createdAt": {
+    "$date": "2024-06-11T10:10:00.000Z"
+  },
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751296486/categories/t2rn6fkzglklcxbjr5zi.jpg"
+},
+{
+  "_id": {
+    "$oid": "68498ea1a294011e87effdca"
+  },
+  "name": "Áo Thun",
+  "parentId": {
+    "$oid": "665f1a2b3c4d5e6f7a8b9c11"
+  },
+  "createdAt": {
+    "$date": "2024-06-11T10:15:00.000Z"
+  },
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751283193/zed8idqepfiopkgdoe2u.jpg"
+},
+{
+  "_id": {
+    "$oid": "684e2490ec47a1aba7c19796"
+  },
+  "name": "Áo sơ mi",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2025-06-15T01:40:32.131Z"
+  },
+  "__v": 0,
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751296462/categories/phy7rrcokgl9d14nljbj.jpg"
+},
+{
+  "_id": {
+    "$oid": "68621bf159149485ea8a89da"
+  },
+  "name": "Áo Polo",
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751296436/categories/bejdh1wqew7h21lbqfwt.jpg",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2025-06-30T05:09:05.356Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "68621eb659149485ea8a8aa4"
+  },
+  "name": "Baby Tee",
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751296400/categories/n0liimfba7yofs203bxm.jpg",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2025-06-30T05:20:54.318Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6862202d59149485ea8a8b1e"
+  },
+  "name": "Áo khoác",
+  "image": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1751294381/categories/qnysjt5jvvmvncksfcyn.jpg",
+  "parentId": null,
+  "createdAt": {
+    "$date": "2025-06-30T05:27:09.248Z"
+  },
+  "__v": 0
+}]

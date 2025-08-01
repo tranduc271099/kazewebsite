@@ -1,0 +1,30 @@
+[{
+  "_id": {
+    "$oid": "6889fe4d295670719477a13a"
+  },
+  "title": "banner 1",
+  "imageUrl": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753874000/banners/y2lkithwmvowljawkwqh.png",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-30T11:13:17.859Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-30T11:13:17.859Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "688a02e6af1e46f742bbfd8b"
+  },
+  "title": "banner 2",
+  "imageUrl": "https://res.cloudinary.com/dnmdoecyq/image/upload/v1753875278/banners/lvpkfcjwkikriwaqxkxh.png",
+  "isActive": true,
+  "createdAt": {
+    "$date": "2025-07-30T11:32:54.476Z"
+  },
+  "updatedAt": {
+    "$date": "2025-07-30T11:34:35.156Z"
+  },
+  "__v": 0
+}]
