@@ -1,5 +1,6 @@
 const Comment = require('../../models/Comment/CommentUser');
 const Bill = require('../../models/Bill/BillUser'); // Model đơn hàng
+const { calculateProductRating } = require('../../utils/calculateRating');
 
 const CommentController = {
   // Lấy tất cả bình luận của 1 sản phẩm
@@ -20,13 +21,13 @@ const CommentController = {
     try {
       const { status, search, page = 1, limit = 10 } = req.query;
       const skip = (page - 1) * limit;
-      
+
       let query = { isDeleted: false };
-      
+
       if (status && status !== 'all') {
         query.status = status;
       }
-      
+
       if (search) {
         query.$or = [
           { content: { $regex: search, $options: 'i' } },
@@ -90,7 +91,7 @@ const CommentController = {
     try {
       const { id } = req.params;
       const { status } = req.body;
-      
+
       if (!['pending', 'approved', 'rejected'].includes(status)) {
         return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
       }
@@ -103,6 +104,15 @@ const CommentController = {
 
       if (!comment) {
         return res.status(404).json({ message: 'Không tìm thấy bình luận' });
+      }
+
+      // Cập nhật rating sản phẩm khi trạng thái comment thay đổi
+      if (comment.productId) {
+        try {
+          await calculateProductRating(comment.productId);
+        } catch (error) {
+          console.error('Lỗi khi cập nhật rating sản phẩm:', error);
+        }
       }
 
       res.json(comment);
@@ -134,7 +144,7 @@ const CommentController = {
         },
         { new: true }
       ).populate('userId', 'name email')
-       .populate('adminReply.adminId', 'name');
+        .populate('adminReply.adminId', 'name');
 
       if (!comment) {
         return res.status(404).json({ message: 'Không tìm thấy bình luận' });
@@ -163,7 +173,7 @@ const CommentController = {
       }
 
       // Kiểm tra xem user đã báo cáo chưa
-      const alreadyReported = comment.reports.find(report => 
+      const alreadyReported = comment.reports.find(report =>
         report.userId.toString() === userId
       );
 
