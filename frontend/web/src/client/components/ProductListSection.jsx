@@ -24,6 +24,7 @@ const ProductListSection = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log('🔄 Fetching data...');
                 const token = localStorage.getItem('token');
                 const headers = { Authorization: `Bearer ${token}` };
 
@@ -32,11 +33,15 @@ const ProductListSection = () => {
                     axios.get('http://localhost:5000/api/products?activeOnly=true', { headers })
                 ]);
 
+                console.log('✅ Categories:', categoriesRes.data.length);
+                console.log('✅ Products:', productsRes.data.length);
+                console.log('📊 Sample product:', productsRes.data[0]);
+
                 setCategories(categoriesRes.data);
                 setProducts(productsRes.data);
             } catch (err) {
+                console.error('❌ Error fetching data:', err);
                 setError('Không thể tải dữ liệu');
-                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -263,6 +268,8 @@ const ProductListSection = () => {
             product.category?.name?.toLowerCase() === selectedCategory.toLowerCase()
         );
 
+    console.log('🔍 Filtered products:', filteredProducts.length, 'Category:', selectedCategory);
+
     // Hàm xáo trộn mảng (Fisher-Yates shuffle)
     const shuffleArray = (array) => {
         const shuffled = [...array];
@@ -275,13 +282,17 @@ const ProductListSection = () => {
 
     // Memoize shuffled products để tránh shuffle lại mỗi lần re-render
     const shuffledProducts = useMemo(() => {
-        return shuffleArray(filteredProducts);
+        const result = shuffleArray(filteredProducts);
+        console.log('🎲 Shuffled products:', result.length);
+        return result;
     }, [filteredProducts.length, selectedCategory, shuffleKey]); // Thêm shuffleKey để có thể shuffle lại
 
     // Giới hạn số lượng sản phẩm hiển thị với sản phẩm ngẫu nhiên
     const displayedProducts = showAll
         ? filteredProducts
         : shuffledProducts.slice(0, displayLimit);
+
+    console.log('📺 Displayed products:', displayedProducts.length, 'Show all:', showAll);
 
     const handleShowMore = () => {
         setShowAll(true);
@@ -297,7 +308,9 @@ const ProductListSection = () => {
     };
 
     if (loading) return <div>Đang tải...</div>;
-    if (error) return <div>{error}</div>;
+    if (error) return <div>Lỗi: {error}</div>;
+
+    console.log('🎨 About to render', displayedProducts.length, 'products');
 
     return (
         <section id="product-list" className="product-list section">
@@ -370,18 +383,33 @@ const ProductListSection = () => {
                                             <span className="current-price">{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                             {product.oldPrice && <span className="old-price">{product.oldPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>}
                                         </div>
-                                        <div className="product-rating">
-                                            {[...Array(5)].map((_, i) => (
-                                                <i
-                                                    key={i}
-                                                    className={`bi bi-star${i < Math.floor(product.rating || 0)
-                                                        ? '-fill'
-                                                        : i < Math.ceil(product.rating || 0)
-                                                            ? '-half'
-                                                            : ''}`}
-                                                ></i>
-                                            ))}
-                                            <span>({product.reviews?.length || 0} đánh giá)</span>
+                                        <div className="product-rating" style={{ marginTop: '8px' }}>
+                                            <div className="stars" style={{ display: 'flex', gap: '2px', marginBottom: '4px' }}>
+                                                {[...Array(5)].map((_, i) => {
+                                                    const rating = product.rating || 0;
+                                                    let starClass = 'bi bi-star';
+
+                                                    if (i < Math.floor(rating)) {
+                                                        starClass = 'bi bi-star-fill text-warning';
+                                                    } else if (i < Math.ceil(rating) && rating % 1 !== 0) {
+                                                        starClass = 'bi bi-star-half text-warning';
+                                                    } else {
+                                                        starClass = 'bi bi-star text-muted';
+                                                    }
+
+                                                    return (
+                                                        <i key={i} className={starClass} style={{ fontSize: '14px' }}></i>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div className="rating-info" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}>
+                                                <span className="rating-value" style={{ fontWeight: '600', color: '#212529' }}>
+                                                    {(product.rating || 0).toFixed(1)}
+                                                </span>
+                                                <span className="review-count" style={{ color: '#6c757d' }}>
+                                                    ({product.reviewCount || 0} đánh giá)
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                     {selectedProduct && selectedProduct._id === product._id && (

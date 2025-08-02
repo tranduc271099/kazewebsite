@@ -36,7 +36,7 @@ exports.getProducts = async (req, res) => {
 
         const products = await Product.find(filter)
             .populate('category', 'name')
-            .select('name brand price costPrice stock isActive images attributes variants createdAt updatedAt category')
+            .select('name brand price costPrice stock isActive images attributes variants createdAt updatedAt category rating reviewCount reviews')
             .sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
@@ -447,6 +447,30 @@ exports.getProfitStatistics = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Lỗi khi tính toán thống kê lãi' });
+    }
+};
+
+// Temporary function to add sample ratings for testing
+exports.addSampleRatings = async (req, res) => {
+    try {
+        const products = await Product.find({}).limit(8);
+
+        for (let i = 0; i < products.length; i++) {
+            const product = products[i];
+            const rating = Math.round((3.0 + Math.random() * 2.0) * 10) / 10;
+            const reviewCount = Math.floor(Math.random() * 50) + 1;
+
+            await Product.findByIdAndUpdate(product._id, {
+                rating: rating,
+                reviewCount: reviewCount,
+                reviews: []
+            });
+        }
+
+        res.json({ message: 'Added sample ratings successfully', count: products.length });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error adding sample ratings' });
     }
 };
 

@@ -11,6 +11,9 @@ router.get('/', productController.getProducts);
 // Get profit statistics (requires auth)
 router.get('/profit/statistics', auth, productController.getProfitStatistics);
 
+// Temporary route to add sample ratings for testing
+router.post('/test/add-sample-ratings', productController.addSampleRatings);
+
 // Get products by categoryId
 router.get('/category/:categoryId', productController.getProductsByCategory);
 

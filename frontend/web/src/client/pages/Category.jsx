@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import '../../admin/styles/Category.css';
+import '../styles/Category.css';
 import { CartContext } from '../context/CartContext';
 
 const Category = () => {
@@ -517,17 +518,28 @@ const Category = () => {
                                                             {product.oldPrice && <span className="old-price">{product.oldPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>}
                                                         </div>
                                                         <div className="product-rating">
-                                                            {[...Array(5)].map((_, i) => (
-                                                                <i
-                                                                    key={i}
-                                                                    className={`bi bi-star${i < Math.floor(product.rating || 0)
-                                                                        ? '-fill'
-                                                                        : i < Math.ceil(product.rating || 0)
-                                                                            ? '-half'
-                                                                            : ''}`}
-                                                                ></i>
-                                                            ))}
-                                                            <span>({product.reviews?.length || 0} đánh giá)</span>
+                                                            <div className="stars">
+                                                                {[...Array(5)].map((_, i) => {
+                                                                    const rating = product.rating || 0;
+                                                                    let starClass = 'bi bi-star';
+
+                                                                    if (i < Math.floor(rating)) {
+                                                                        starClass = 'bi bi-star-fill text-warning';
+                                                                    } else if (i < Math.ceil(rating) && rating % 1 !== 0) {
+                                                                        starClass = 'bi bi-star-half text-warning';
+                                                                    } else {
+                                                                        starClass = 'bi bi-star text-muted';
+                                                                    }
+
+                                                                    return (
+                                                                        <i key={i} className={starClass}></i>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                            <div className="rating-info">
+                                                                <span className="rating-value">{(product.rating || 0).toFixed(1)}</span>
+                                                                <span className="review-count">({product.reviewCount || 0} đánh giá)</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
