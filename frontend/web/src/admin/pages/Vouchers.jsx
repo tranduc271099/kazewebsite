@@ -19,6 +19,7 @@ const initialFormState = {
     startDate: '',
     endDate: '',
     quantity: '',
+    isActive: true,
 };
 
 function generateVoucherCode(length = 8) {
@@ -90,7 +91,8 @@ const Vouchers = () => {
             discountValue: voucher.discountValue?.toString() || '',
             startDate: formattedStartDate,
             endDate: formattedEndDate,
-            quantity: voucher.quantity?.toString() || ''
+            quantity: voucher.quantity?.toString() || '',
+            isActive: voucher.isActive !== undefined ? voucher.isActive : true
         });
         setIsModalOpen(true);
     };
@@ -198,6 +200,7 @@ const Vouchers = () => {
             quantity: Number(formData.quantity),
             startDate: formData.startDate,
             endDate: formData.endDate,
+            isActive: formData.isActive,
         };
 
         // Validation comprehensive trước khi submit
@@ -328,8 +331,8 @@ const Vouchers = () => {
         });
     };
 
-    const getStatusColor = (isExpired, isOutOfStock) => {
-        if (isExpired || isOutOfStock) return '#ef4444'; // red
+    const getStatusColor = (isExpired, isOutOfStock, isInactive) => {
+        if (isExpired || isOutOfStock || isInactive) return '#ef4444'; // red
         return '#10b981'; // green
     };
 
@@ -413,8 +416,9 @@ const Vouchers = () => {
                             {sortedVouchers.map((v, index) => {
                                 const isExpired = new Date(v.endDate) < new Date();
                                 const isOutOfStock = v.quantity - v.usedCount <= 0;
-                                const statusText = isExpired || isOutOfStock ? 'Dừng áp dụng' : 'Đang áp dụng';
-                                const statusColor = getStatusColor(isExpired, isOutOfStock);
+                                const isInactive = !v.isActive;
+                                const statusText = isExpired || isOutOfStock || isInactive ? 'Dừng áp dụng' : 'Đang áp dụng';
+                                const statusColor = getStatusColor(isExpired, isOutOfStock, isInactive);
 
                                 return (
                                     <tr key={v._id}>
@@ -617,6 +621,31 @@ const Vouchers = () => {
                                         required
                                         className={styles.input}
                                     />
+                                </div>
+
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Trạng thái:</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id="isActive"
+                                            name="isActive"
+                                            checked={formData.isActive}
+                                            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                            style={{ width: '16px', height: '16px' }}
+                                        />
+                                        <label htmlFor="isActive" style={{ margin: 0, cursor: 'pointer' }}>
+                                            Kích hoạt voucher
+                                        </label>
+                                    </div>
+                                    <small style={{
+                                        color: '#666',
+                                        fontSize: '12px',
+                                        marginTop: '4px',
+                                        display: 'block'
+                                    }}>
+                                        Bỏ chọn để vô hiệu hóa voucher này
+                                    </small>
                                 </div>
                             </div>
 

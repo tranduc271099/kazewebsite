@@ -7,6 +7,7 @@ const auth = require('../middleware/auth');
 router.use(auth);
 
 router.get('/', voucherController.getAllVouchers);
+router.get('/code/:code', voucherController.getVoucherByCode);
 router.post('/', voucherController.createVoucher);
 router.post('/apply', voucherController.applyVoucher);
 router.put('/:id', voucherController.updateVoucher);

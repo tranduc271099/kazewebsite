@@ -81,7 +81,11 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
       setSuccess(`Áp dụng thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`);
       if (onDiscountApplied) onDiscountApplied(discountAmount, voucher);
     } catch (err) {
-      setError('Không tìm thấy hoặc không áp dụng được voucher này!');
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Không tìm thấy hoặc không áp dụng được voucher này!');
+      }
     }
   };
 

@@ -12,9 +12,37 @@ exports.getAllVouchers = async (req, res) => {
 
 exports.getAvailableVouchers = async (req, res) => {
   try {
-    const vouchers = await Voucher.find();
+    const now = new Date();
+    console.log('Ngày hiện tại:', now.toISOString());
+    
+    // Lấy tất cả voucher active trước
+    const allVouchers = await Voucher.find({ isActive: true });
+    console.log('Tất cả voucher active:', allVouchers.length);
+    
+    // Lọc theo logic
+    const vouchers = allVouchers.filter(voucher => {
+      const startDate = new Date(voucher.startDate);
+      const endDate = new Date(voucher.endDate);
+      const isInDateRange = now >= startDate && now <= endDate;
+      const hasQuantity = (voucher.usedCount || 0) < (voucher.quantity || 1);
+      
+      console.log(`Voucher ${voucher.code}:`, {
+        name: voucher.name,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        isInDateRange,
+        usedCount: voucher.usedCount || 0,
+        quantity: voucher.quantity || 1,
+        hasQuantity
+      });
+      
+      return isInDateRange && hasQuantity;
+    });
+    
+    console.log('Voucher khả dụng:', vouchers.length);
     res.json(vouchers);
   } catch (err) {
+    console.error('Lỗi getAvailableVouchers:', err);
     res.status(500).json({ message: 'Lỗi khi lấy danh sách voucher khả dụng' });
   }
 };
@@ -207,6 +235,41 @@ exports.deleteVoucher = async (req, res) => {
     res.json({ message: 'Đã xóa voucher' });
   } catch (err) {
     res.status(400).json({ message: 'Lỗi khi xóa voucher', error: err.message });
+  }
+};
+
+exports.getVoucherByCode = async (req, res) => {
+  try {
+    const { code } = req.params;
+    const voucher = await Voucher.findOne({ code });
+
+    if (!voucher) {
+      return res.status(404).json({ message: 'Mã giảm giá không tồn tại' });
+    }
+
+    // Kiểm tra trạng thái active
+    if (!voucher.isActive) {
+      return res.status(400).json({ message: 'Mã giảm giá đã bị vô hiệu hóa' });
+    }
+
+    // Kiểm tra thời gian hiệu lực
+    const now = new Date();
+    if (now < voucher.startDate) {
+      return res.status(400).json({ message: 'Mã giảm giá chưa có hiệu lực' });
+    }
+
+    if (now > voucher.endDate) {
+      return res.status(400).json({ message: 'Mã giảm giá đã hết hạn' });
+    }
+
+    // Kiểm tra số lượng còn lại
+    if (voucher.usedCount >= voucher.quantity) {
+      return res.status(400).json({ message: 'Mã giảm giá đã hết số lượng sử dụng' });
+    }
+
+    res.json(voucher);
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy thông tin voucher' });
   }
 };
 
