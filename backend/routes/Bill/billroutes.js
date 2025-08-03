@@ -18,6 +18,8 @@ billRouter.get('/all', auth, isAdmin, (req, res) => billControl.getAll(req, res)
 billRouter.get('/:id', auth, isAdmin, (req, res) => billControl.getById(req, res));
 billRouter.put('/:id/status', auth, isAdmin, (req, res) => billControl.updateStatus(req, res));
 billRouter.put('/:id/confirm-received', auth, (req, res) => billControl.confirmReceived(req, res));
+billRouter.post('/:id/return-request', auth, (req, res) => billControl.createReturnRequest(req, res));
+billRouter.put('/:id/return-request/status', auth, isAdmin, (req, res) => billControl.updateReturnRequestStatus(req, res));
 billRouter.get('/order/:orderId', auth, (req, res) => billControl.getByOrderId(req, res));
 
 module.exports = billRouter;

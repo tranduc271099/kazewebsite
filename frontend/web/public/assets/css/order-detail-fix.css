@@ -1,0 +1,43 @@
+/* Fix styles for order detail modal */
+.bill-detail-modal .order-detail-header {
+    font-size: 18px !important;
+    color: #333 !important;
+    font-weight: 600 !important;
+}
+
+.bill-detail-modal .order-detail-header b {
+    font-weight: 700 !important;
+    color: #000 !important;
+}
+
+.bill-detail-modal .order-detail-product-row {
+    padding: 12px 0;
+}
+
+.bill-detail-modal .order-detail-product-name {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #000 !important;
+    max-width: 100%;
+    overflow: visible;
+}
+
+.bill-detail-modal .order-detail-product-variant {
+    font-size: 14px !important;
+    color: #333 !important;
+}
+
+.bill-detail-modal .order-detail-product-variant-price,
+.bill-detail-modal .order-detail-product-variant-total {
+    font-weight: 500 !important;
+}
+
+.bill-detail-modal .order-detail-summary-row {
+    font-weight: 500;
+    color: #333;
+}
+
+.bill-detail-modal .order-detail-summary-total {
+    font-weight: 700 !important;
+    color: #000 !important;
+}

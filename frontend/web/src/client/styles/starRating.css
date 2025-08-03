@@ -1,0 +1,23 @@
+.product-rating i {
+    color: #ffc107 !important;
+    font-size: 16px;
+    margin-right: 2px;
+}
+
+.product-rating i.bi-star-fill {
+    color: #ffc107 !important;
+}
+
+.product-rating i.bi-star-half {
+    color: #ffc107 !important;
+}
+
+.product-rating i.bi-star {
+    color: #e2e2e2 !important;
+}
+
+.rating-count {
+    margin-left: 5px;
+    font-size: 14px;
+    color: #666;
+}

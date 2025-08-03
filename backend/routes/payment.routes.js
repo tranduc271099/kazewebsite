@@ -1,42 +1,78 @@
 const express = require('express');
 const router = express.Router();
 const vnpayController = require('../controllers/vnpay.controller');
-const vnpayReturnController = require('../controllers/vnpayReturn.controller'); // Import the return controller
+const vnpayReturnController = require('../controllers/vnpayReturn.controller');
+const auth = require('../middleware/auth'); // Import auth middleware
 
-router.post('/vnpay', vnpayController.createPaymentUrl);
+// Tối ưu endpoint VNPay với auth middleware
+router.post('/vnpay', auth, vnpayController.createPaymentUrl);
 
-// Add GET route for VNPAY return URL
+// GET route cho VNPAY return URL (không cần auth vì VNPAY gọi trực tiếp)
 router.get('/vnpay_return', async (req, res) => {
-  try {
-    // VNPAY sends parameters in the query string for GET requests
-    const result = await vnpayReturnController.handleVnpayReturn(req.query);
-
-    // Redirect based on the payment result
-    if (result.status === 200) {
-      // Payment successful, redirect to a success page on frontend
-      res.redirect('http://localhost:3000/payment-success?orderId=' + encodeURIComponent(result.data.orderId || '') + '&transactionNo=' + encodeURIComponent(result.data.transactionNo || ''));
-    } else {
-      // Payment failed, redirect to a failure page on frontend
-      res.redirect('http://localhost:3000/payment-failure?orderId=' + encodeURIComponent(result.data.orderId || '') + '&responseCode=' + encodeURIComponent(result.data.responseCode || '') + '&message=' + encodeURIComponent(result.data.message || ''));
+  // Set timeout thực sự cho response
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      console.error('VNPAY return timeout - redirecting to failure');
+      res.redirect('http://localhost:3000/checkout?status=error&message=Timeout processing payment');
     }
+  }, 8000); // 8 giây timeout
+
+  try {
+    console.log('--- VNPAY RETURN RECEIVED ---');
+    console.log('Query params:', req.query);
+    console.log('Processing time:', new Date().toISOString());
+
+    // Controller sẽ tự redirect, không cần xử lý result
+    await Promise.race([
+      vnpayReturnController.handleVnpayReturn(req, res),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('VNPay processing timeout')), 6000)
+      )
+    ]);
+
+    clearTimeout(timeout);
+
   } catch (error) {
+    clearTimeout(timeout);
     console.error('Error handling VNPAY return:', error);
-    // Redirect to a generic error page on frontend
-    res.redirect('http://localhost:3000/payment-failure?message=Internal%20server%20error');
+
+    if (!res.headersSent) {
+      res.redirect('http://localhost:3000/checkout?status=error&message=Processing error');
+    }
   }
 });
 
-// Bổ sung route POST cho VNPAY callback
+// POST route cho VNPAY callback (nếu cần)
 router.post('/vnpay_return', async (req, res) => {
-  try {
-    const result = await vnpayReturnController.handleVnpayReturn(req.body);
-    if (result.status === 200) {
-      res.redirect('http://localhost:3000/payment-success?orderId=' + encodeURIComponent(result.data.orderId || '') + '&transactionNo=' + encodeURIComponent(result.data.transactionNo || ''));
-    } else {
-      res.redirect('http://localhost:3000/payment-failure?orderId=' + encodeURIComponent(result.data.orderId || '') + '&responseCode=' + encodeURIComponent(result.data.responseCode || '') + '&message=' + encodeURIComponent(result.data.message || ''));
+  // Set timeout thực sự cho response
+  const timeout = setTimeout(() => {
+    if (!res.headersSent) {
+      console.error('VNPAY POST callback timeout - redirecting to failure');
+      res.redirect('http://localhost:3000/checkout?status=error&message=Timeout processing payment');
     }
+  }, 8000); // 8 giây timeout
+
+  try {
+    console.log('--- VNPAY POST CALLBACK RECEIVED ---');
+    console.log('Body params:', req.body);
+
+    // Controller sẽ tự redirect, không cần xử lý result
+    await Promise.race([
+      vnpayReturnController.handleVnpayReturn(req, res),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('VNPay POST processing timeout')), 6000)
+      )
+    ]);
+
+    clearTimeout(timeout);
+
   } catch (error) {
-    res.redirect('http://localhost:3000/payment-failure?message=Internal%20server%20error');
+    clearTimeout(timeout);
+    console.error('VNPAY callback error:', error);
+
+    if (!res.headersSent) {
+      res.redirect('http://localhost:3000/checkout?status=error&message=Processing error');
+    }
   }
 });
 

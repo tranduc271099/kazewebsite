@@ -16,7 +16,7 @@ const billSchema = new mongoose.Schema({
   },
   phuong_thuc_thanh_toan: {
     type: String,
-    enum: ['COD', 'MOMO', 'BANKING', 'VNPAY'], 
+    enum: ['COD', 'MOMO', 'BANKING', 'VNPAY'],
     default: 'COD'
   },
   ghi_chu: {
@@ -32,7 +32,10 @@ const billSchema = new mongoose.Schema({
       'đã giao hàng',
       'đã nhận hàng',
       'hoàn thành',
-      'đã hủy'
+      'đã hủy',
+      'yêu cầu trả hàng',
+      'đang xử lý trả hàng',
+      'đã hoàn tiền'
     ],
     default: 'chờ xác nhận'
   },
@@ -99,6 +102,31 @@ const billSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'paid', 'failed'],
     default: 'pending'
+  },
+  returnRequest: {
+    reason: {
+      type: String,
+      default: ''
+    },
+    images: [String],
+    bankInfo: {
+      bankName: String,
+      accountNumber: String,
+      accountName: String
+    },
+    requestDate: {
+      type: Date
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'processing', 'approved', 'rejected'],
+      default: 'pending'
+    },
+    adminNotes: {
+      type: String,
+      default: ''
+    },
+    adminImages: [String]
   }
 });
 

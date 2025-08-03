@@ -1,169 +1,242 @@
-const Order = require("../models/Bill/BillUser.js");
-const Product = require("../models/Product.js");
-const Cart = require("../models/Cart.js");
-const crypto = require("crypto");
-const dotenv = require("dotenv");
-const qs = require("qs");
-const vnpayConfig = require("../config/vnpay.js");
+const crypto = require('crypto');
+const BillUser = require('../models/Bill/BillUser');
+const Product = require('../models/Product');
 
-dotenv.config();
+const handleVnpayReturn = async (req, res) => {
+  console.log('=== VNPay Return Processing Started ===');
+  console.log('Timestamp:', new Date().toISOString());
+  const startTime = Date.now();
 
-const { VNPAY_HASH_SECRET } = process.env;
-const secretKey = vnpayConfig.vnp_HashSecret;
+  try {
+    const vnpayParams = req.query;
+    console.log('VNPay params received:', JSON.stringify(vnpayParams, null, 2));
 
-const handleVnpayReturn = async (vnpParams) => {
-  // Tách vnp_SecureHash ra để kiểm tra
-  const secureHash = vnpParams.vnp_SecureHash;
-  delete vnpParams.vnp_SecureHash;
-  delete vnpParams.vnp_SecureHashType;
-
-  // Sắp xếp các tham số theo thứ tự alphabet
-  const sortedParams = Object.keys(vnpParams)
-    .sort()
-    .reduce((result, key) => {
-      result[key] = vnpParams[key];
-      return result;
-    }, {});
-
-  // Tạo chuỗi ký để kiểm tra (mã hóa lại key và value trước khi nối chuỗi)
-  let hashData = '';
-  let i = 0;
-  for (const key in sortedParams) {
-    if (Object.hasOwnProperty.call(sortedParams, key)) {
-      const value = sortedParams[key];
-      if (i === 1) {
-        hashData = hashData + '&' + encodeURIComponent(key) + '=' + encodeURIComponent(value); // Mã hóa lại key và value
-      } else {
-        hashData = hashData + encodeURIComponent(key) + '=' + encodeURIComponent(value); // Mã hóa lại key và value
-        i = 1;
-      }
+    // Validate required parameters
+    if (!vnpayParams.vnp_SecureHash) {
+      console.log('❌ Missing vnp_SecureHash');
+      return res.redirect('http://localhost:3000/payment-status.html?status=error&message=Missing security hash&code=INVALID_HASH');
     }
-  }
 
-  const hmac = crypto.createHmac("sha512", secretKey);
-  const calculatedHash = hmac.update(Buffer.from(hashData, 'utf-8')).digest("hex");
+    if (!vnpayParams.vnp_TxnRef) {
+      console.log('❌ Missing vnp_TxnRef');
+      return res.redirect('http://localhost:3000/payment-status.html?status=error&message=Missing transaction reference&code=INVALID_TXN');
+    }
 
-  // Log debug chi tiết
-  console.log('--- VNPay RETURN/IPN DEBUG ---');
-  console.log('Received vnpParams:', vnpParams); // Log raw received params
-  console.log('Sorted params (after removing hash):', sortedParams); // Log sorted params
-  console.log('signData (for verification):', hashData); // Log hashData string
-  console.log('vnp_SecureHash (from VNPay):', secureHash);
-  console.log('calculatedHash (your server):', calculatedHash);
-  console.log('--------------------------------');
+    // Lấy secure hash và xóa khỏi params để verify
+    const secureHash = vnpayParams['vnp_SecureHash'];
+    delete vnpayParams['vnp_SecureHash'];
+    delete vnpayParams['vnp_SecureHashType'];
 
-  // Kiểm tra tính toàn vẹn của dữ liệu
-  if (calculatedHash !== secureHash) {
-    return {
-      status: 400,
-      data: { message: "Dữ liệu không hợp lệ, chữ ký không khớp" },
-    };
-  }
+    // Sắp xếp params theo alphabet
+    const sortedParams = {};
+    Object.keys(vnpayParams).sort().forEach(key => {
+      sortedParams[key] = vnpayParams[key];
+    });
 
-  // Lấy mã đơn hàng từ vnp_TxnRef
-  const orderId = vnpParams.vnp_TxnRef;
+    // Tạo query string để verify hash (không encode cho VNPay)
+    const queryString = Object.keys(sortedParams)
+      .map(key => `${key}=${sortedParams[key]}`)
+      .join('&');
 
-  // Tìm đơn hàng trong database bằng orderId (không phải _id)
-  const order = await Order.findOne({ orderId });
-  if (!order) {
-    return {
-      status: 404,
-      data: { message: "Không tìm thấy đơn hàng" },
-    };
-  }
+    // Verify hash với secret key
+    const vnpaySecretKey = process.env.VNPAY_SECRET_KEY || 'LUFYH26JEP2XVNOQBASL3B42NEPARQP9';
+    const calculatedHash = crypto
+      .createHmac('sha512', vnpaySecretKey)
+      .update(queryString)
+      .digest('hex');
 
-  // Kiểm tra trạng thái giao dịch từ VNPAY
-  const transactionStatus = vnpParams.vnp_TransactionStatus;
+    console.log('Hash verification:', {
+      received: secureHash,
+      calculated: calculatedHash,
+      isValid: secureHash === calculatedHash
+    });
 
-  if (transactionStatus === "00") {
-    // Thanh toán thành công
-    order.thanh_toan = "đã thanh toán";
-    order.paymentStatus = "paid"; // <--- Thêm dòng này để cập nhật trạng thái cho admin
-    order.trang_thai = "chờ xác nhận"; // hoặc trạng thái phù hợp
+    // Kiểm tra hash có hợp lệ không
+    if (secureHash !== calculatedHash) {
+      console.log('❌ Invalid VNPay hash signature');
+      return res.redirect('http://localhost:3000/payment-status.html?status=error&message=Invalid signature&code=INVALID_SIGNATURE');
+    }
 
-    // Bước 1: Trừ số lượng tồn kho (nếu cần)
-    // (Có thể bỏ qua nếu đã trừ khi tạo đơn hàng)
+    // Extract payment info
+    const responseCode = vnpayParams.vnp_ResponseCode;
+    const transactionNo = vnpayParams.vnp_TransactionNo;
+    const orderInfo = vnpayParams.vnp_OrderInfo;
+    const amount = vnpayParams.vnp_Amount;
+    const bankCode = vnpayParams.vnp_BankCode;
+    const payDate = vnpayParams.vnp_PayDate;
 
-    // Bước 2: Xóa giỏ hàng của user (nếu cần)
-    // (Có thể bỏ qua nếu đã xóa khi tạo đơn hàng)
+    console.log('Payment info:', {
+      responseCode,
+      transactionNo,
+      orderInfo,
+      amount,
+      bankCode,
+      payDate
+    });
 
-    await order.save();
+    if (responseCode === '00') {
+      console.log('✅ Payment successful, processing order update');
 
-    return {
-      status: 200,
-      data: {
-        message: "Thanh toán thành công",
-        orderId: order.orderId,
-        transactionNo: vnpParams.vnp_TransactionNo,
-      },
-    };
-  } else {
-    // Thanh toán thất bại hoặc bị hủy
-    order.thanh_toan = "chưa thanh toán";
-    
-    // Tự động hủy đơn hàng ngay lập tức khi thanh toán thất bại
-    order.trang_thai = "đã hủy";
-    order.ly_do_huy = "Khách hủy thanh toán VNPay";
-    order.nguoi_huy = {
-      id: order.nguoi_dung_id,
-      loai: "User"
-    };
-    
-    // Hoàn kho khi hủy đơn hàng
-    const Product = require("../models/Product.js");
-    for (const item of order.danh_sach_san_pham) {
-      console.log(`[VNPAY CANCEL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+      // Tìm order từ vnp_TxnRef (orderId)
+      const orderId = vnpayParams.vnp_TxnRef;
+      console.log('Searching for bill with orderId:', orderId);
 
-      // Thử cập nhật biến thể trước
-      const updateResult = await Product.updateOne(
+      // Tìm bill trong database với timeout - chỉ tìm theo orderId string
+      const findBillPromise = BillUser.findOne({
+        orderId: orderId.toString()
+      }).populate('danh_sach_san_pham.san_pham_id');
+
+      const bill = await Promise.race([
+        findBillPromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Database query timeout')), 5000)
+        )
+      ]);
+
+      if (!bill) {
+        console.log('❌ Bill not found for orderId:', orderId);
+        console.log('Trying to find all bills with similar orderId...');
+
+        // Thử tìm tất cả bills để debug
+        const allBills = await BillUser.find({}).select('orderId _id').limit(10);
+        console.log('Recent bills in database:', allBills.map(b => ({ id: b._id, orderId: b.orderId })));
+
+        return res.redirect('http://localhost:3000/payment-status.html?status=error&message=Order not found&code=ORDER_NOT_FOUND');
+      }
+
+      console.log('✅ Bill found:', bill._id);
+
+      // Cập nhật trạng thái thanh toán
+      const updateBillPromise = BillUser.findByIdAndUpdate(
+        bill._id,
         {
-          _id: item.san_pham_id,
-          "variants": {
-            $elemMatch: {
-              "attributes.color": item.mau_sac,
-              "attributes.size": item.kich_thuoc
-            }
-          }
+          thanh_toan: 'đã thanh toán',
+          vnpay_transaction_no: transactionNo,
+          vnpay_response_code: responseCode,
+          vnpay_bank_code: bankCode,
+          vnpay_pay_date: payDate
         },
-        {
-          $inc: { "variants.$.stock": item.so_luong }
-        }
+        { new: true }
       );
 
-      // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
-      if (updateResult.modifiedCount === 0) {
-        console.log(`[VNPAY CANCEL] Variant not found, trying to update main product stock`);
-        const fallbackUpdateResult = await Product.updateOne(
-          {
-            _id: item.san_pham_id,
-            $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
-          },
-          {
-            $inc: { stock: item.so_luong }
+      const updatedBill = await Promise.race([
+        updateBillPromise,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Update bill timeout')), 3000)
+        )
+      ]);
+
+      console.log('✅ Bill updated successfully');
+
+      // Cập nhật stock song song (không chờ)
+      if (bill.danh_sach_san_pham && bill.danh_sach_san_pham.length > 0) {
+        console.log('📦 Starting stock updates...');
+
+        const stockUpdatePromises = bill.danh_sach_san_pham.map(async (item) => {
+          try {
+            const product = await Product.findById(item.san_pham_id._id || item.san_pham_id);
+            if (product) {
+              // Tìm variant phù hợp
+              if (product.variants && product.variants.length > 0) {
+                const variant = product.variants.find(v =>
+                  v.attributes.size === item.kich_thuoc && v.attributes.color === item.mau_sac
+                );
+
+                if (variant && variant.stock >= item.so_luong) {
+                  variant.stock -= item.so_luong;
+                  await product.save();
+                  console.log(`✅ Stock updated for ${product.name} - ${item.kich_thuoc} ${item.mau_sac}`);
+                } else {
+                  console.log(`⚠️ Variant not found or insufficient stock for ${product.name}`);
+                }
+              } else {
+                // Fallback to main product stock if no variants
+                if (product.stock >= item.so_luong) {
+                  product.stock -= item.so_luong;
+                  await product.save();
+                  console.log(`✅ Main stock updated for ${product.name}`);
+                }
+              }
+            }
+          } catch (error) {
+            console.log(`❌ Stock update failed for item:`, error.message);
           }
-        );
+        });
 
-        if (fallbackUpdateResult.modifiedCount === 0) {
-          console.log(`[VNPAY CANCEL] Failed to restore stock for product ${item.san_pham_id}`);
-        } else {
-          console.log(`[VNPAY CANCEL] Successfully restored main product stock for ${item.san_pham_id}`);
-        }
-      } else {
-        console.log(`[VNPAY CANCEL] Successfully restored variant stock for product ${item.san_pham_id}`);
+        // Chạy song song với timeout 2s
+        Promise.race([
+          Promise.all(stockUpdatePromises),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Stock update timeout')), 2000)
+          )
+        ]).then(() => {
+          console.log('✅ All stock updates completed');
+        }).catch(error => {
+          console.log('⚠️ Stock update timeout, but payment processed:', error.message);
+        });
       }
-    }
-    
-    await order.save();
 
-    return {
-      status: 400,
-      data: {
-        message: "Thanh toán thất bại - Đơn hàng đã được hủy",
-        orderId: order.orderId,
-        responseCode: vnpParams.vnp_ResponseCode,
-      },
-    };
+      const endTime = Date.now();
+      console.log(`=== VNPay Return Processing Completed in ${endTime - startTime}ms ===`);
+
+      // Redirect đến trang trạng thái thanh toán thành công
+      const redirectUrl = `http://localhost:3000/payment-status.html?status=success&orderId=${bill.orderId}&paymentMethod=VNPAY&transactionNo=${transactionNo}&amount=${amount}`;
+      console.log('Redirecting to payment status page:', redirectUrl);
+      return res.redirect(redirectUrl);
+
+    } else {
+      console.log('❌ Payment failed with response code:', responseCode);
+
+      // Các mã lỗi phổ biến từ VNPay
+      let errorMessage = 'Payment failed';
+      switch (responseCode) {
+        case '24':
+          errorMessage = 'Customer cancelled transaction';
+          break;
+        case '09':
+          errorMessage = 'Transaction not found';
+          break;
+        case '10':
+          errorMessage = 'Invalid card information';
+          break;
+        case '11':
+          errorMessage = 'Card expired';
+          break;
+        case '12':
+          errorMessage = 'Card blocked';
+          break;
+        case '13':
+          errorMessage = 'Wrong OTP';
+          break;
+        case '51':
+          errorMessage = 'Insufficient balance';
+          break;
+        default:
+          errorMessage = `Payment failed with code: ${responseCode}`;
+      }
+
+      console.log('Payment failure details:', {
+        responseCode,
+        transactionNo,
+        orderId: vnpayParams.vnp_TxnRef,
+        errorMessage
+      });
+
+      // Redirect đến trang trạng thái thanh toán thất bại
+      const redirectUrl = `http://localhost:3000/payment-status.html?status=error&message=${encodeURIComponent(errorMessage)}&code=${responseCode}&orderId=${vnpayParams.vnp_TxnRef}`;
+      console.log('Redirecting to payment status page (error):', redirectUrl);
+      return res.redirect(redirectUrl);
+    }
+
+  } catch (error) {
+    const endTime = Date.now();
+    console.log(`❌ VNPay Return Error after ${endTime - startTime}ms:`, error.message);
+    console.error('Full error:', error);
+
+    return res.redirect('http://localhost:3000/payment-status.html?status=error&message=Processing error&code=SYSTEM_ERROR');
   }
 };
 
-module.exports = { handleVnpayReturn };
+module.exports = {
+  handleVnpayReturn
+};

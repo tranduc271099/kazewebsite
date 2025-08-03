@@ -34,11 +34,40 @@ exports.getProducts = async (req, res) => {
             filter.category = category;
         }
 
+        // Tìm sản phẩm với thông tin cơ bản
         const products = await Product.find(filter)
             .populate('category', 'name')
             .select('name brand price costPrice stock isActive images attributes variants createdAt updatedAt category rating reviewCount reviews')
+
             .sort({ createdAt: -1 });
-        res.json(products);
+
+        // Tính số lượng đã bán cho mỗi sản phẩm
+        const Bill = require('../models/Bill/BillUser');
+        const soldProducts = await Bill.aggregate([
+            { $match: { trang_thai: { $in: ['đã giao hàng', 'đã nhận hàng', 'hoàn thành'] } } },
+            { $unwind: '$danh_sach_san_pham' },
+            {
+                $group: {
+                    _id: '$danh_sach_san_pham.san_pham_id',
+                    soldQuantity: { $sum: '$danh_sach_san_pham.so_luong' }
+                }
+            }
+        ]);
+
+        // Tạo map để lưu số lượng bán theo ID sản phẩm
+        const soldMap = {};
+        soldProducts.forEach(item => {
+            soldMap[item._id.toString()] = item.soldQuantity;
+        });
+
+        // Bổ sung thông tin số lượng bán vào sản phẩm
+        const productsWithSoldCount = products.map(product => {
+            const productObj = product.toObject();
+            productObj.soldQuantity = soldMap[product._id.toString()] || 0;
+            return productObj;
+        });
+
+        res.json(productsWithSoldCount);
     } catch (error) {
         res.status(500).json({ message: 'Lỗi khi lấy danh sách sản phẩm' });
     }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from '../styles/ProductLayout.module.css';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const ProductAdd = () => {

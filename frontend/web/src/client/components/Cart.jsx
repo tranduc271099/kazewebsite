@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 import { CartContext } from '../context/CartContext';
 import ApplyVoucher from '../pages/ApplyVoucher';
 import '../styles/Cart.css';
@@ -13,7 +14,8 @@ function Cart() {
         updateQuantity,
         clearCart,
         updateCartItemAttributes,
-        refreshCart
+        refreshCart,
+        refreshStockOnly
     } = useContext(CartContext);
     const navigate = useNavigate();
 
@@ -115,25 +117,126 @@ function Cart() {
         await updateCartItemAttributes(productId, oldColor, oldSize, newColor, newSize);
     };
 
-    const handleCheckout = () => {
+    const handleCheckout = async () => {
+        console.log("🚀 handleCheckout được gọi");
         const selectedCartItems = cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]);
-
-        // Kiểm tra xem có sản phẩm nào bị ẩn hoặc hết hàng trong selection không
-        const invalidItems = selectedCartItems.filter(item =>
-            item.isActive === false || item.stock <= 0
-        );
-
-        if (invalidItems.length > 0) {
-            toast.error('Vui lòng xóa các sản phẩm bị ẩn hoặc hết hàng khỏi giỏ hàng trước khi thanh toán!');
-            return;
-        }
+        console.log("📦 Selected cart items:", selectedCartItems);
 
         if (selectedCartItems.length === 0) {
             toast.warning('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!');
             return;
         }
 
-        navigate('/checkout', { state: { selectedCartItems, discount, voucher: selectedVoucher } });
+        // Kiểm tra xem có sản phẩm nào bị ẩn hoặc hết hàng trong selection không
+        const invalidItems = selectedCartItems.filter(item =>
+            item.isActive === false || item.stock <= 0
+        );
+        console.log("❌ Invalid items (isActive=false hoặc stock<=0):", invalidItems);
+
+        if (invalidItems.length > 0) {
+            // Refresh stock trước khi báo lỗi để đảm bảo thông tin mới nhất
+            await refreshStockOnly();
+            
+            // Kiểm tra lại sau khi refresh
+            const updatedSelectedItems = cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]);
+            const stillInvalidItems = updatedSelectedItems.filter(item =>
+                item.isActive === false || item.stock <= 0
+            );
+            
+            if (stillInvalidItems.length > 0) {
+                const errorMessages = stillInvalidItems.map(item => {
+                    if (item.isActive === false) {
+                        return `"${item.name}" (${item.color} - ${item.size}) đã bị ẩn khỏi cửa hàng`;
+                    } else {
+                        return `"${item.name}" (${item.color} - ${item.size}) đã hết hàng (tồn kho: ${item.stock})`;
+                    }
+                });
+                
+                toast.error(`❌ ${errorMessages.join('\n')}`, { 
+                    autoClose: 8000,
+                    style: { whiteSpace: 'pre-line' }
+                });
+                return;
+            }
+        }
+
+        // Kiểm tra tồn kho từ server trước khi chuyển đến trang thanh toán
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                toast.error("Vui lòng đăng nhập để tiếp tục!");
+                navigate("/login");
+                return;
+            }
+
+            console.log("🔍 Bắt đầu kiểm tra tồn kho...");
+            toast.info("Đang kiểm tra tồn kho...", { autoClose: 2000 });
+
+            const stockCheckItems = selectedCartItems.map((item) => ({
+                id: item.id,
+                color: item.color,
+                size: item.size,
+                quantity: item.quantity,
+            }));
+            console.log("📋 Stock check items:", stockCheckItems);
+
+            const stockCheckResponse = await axios.post(
+                "http://localhost:5000/api/stock/check-stock",
+                { items: stockCheckItems },
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: 10000
+                }
+            );
+            console.log("✅ Stock check response:", stockCheckResponse.data);
+            
+            if (!stockCheckResponse.data.success) {
+                // Có sản phẩm hết hàng hoặc không khả dụng
+                console.log("❌ Stock issues found:", stockCheckResponse.data.stockIssues);
+                const errorMessages = stockCheckResponse.data.stockIssues.map(issue => issue.message);
+                toast.error(`❌ ${errorMessages.join('\n')}`, { 
+                    autoClose: 8000,
+                    style: { whiteSpace: 'pre-line' }
+                });
+                
+                // Refresh cart để cập nhật tồn kho mới nhất
+                refreshStockOnly();
+                return;
+            }
+            
+            console.log("✅ Tất cả sản phẩm có đủ hàng, chuyển đến checkout");
+            toast.success("✅ Tất cả sản phẩm có đủ hàng!", { autoClose: 1500 });
+            
+            // Chuyển đến trang thanh toán sau khi kiểm tra thành công
+            navigate('/checkout', { state: { selectedCartItems, discount, voucher: selectedVoucher } });
+            
+        } catch (stockError) {
+            console.error("❌ Lỗi khi kiểm tra tồn kho:", stockError);
+            if (stockError.response?.status === 400) {
+                const errorData = stockError.response.data;
+                console.log("❌ Stock error data:", errorData);
+                if (errorData.stockIssues && errorData.stockIssues.length > 0) {
+                    const errorMessages = errorData.stockIssues.map(issue => issue.message);
+                    toast.error(`❌ ${errorMessages.join('\n')}`, { 
+                        autoClose: 8000,
+                        style: { whiteSpace: 'pre-line' }
+                    });
+                } else {
+                    toast.error(errorData.message || "Có sản phẩm không đủ hàng");
+                }
+                
+                // Refresh cart để cập nhật tồn kho mới nhất
+                refreshStockOnly();
+            } else if (stockError.response?.status === 401) {
+                toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+                navigate("/login");
+            } else if (stockError.response?.status === 404) {
+                console.error("❌ API endpoint không tồn tại - có thể server chưa restart");
+                toast.error("Lỗi hệ thống: API kiểm tra tồn kho không khả dụng. Vui lòng thử lại sau!");
+            } else {
+                toast.error("Lỗi khi kiểm tra tồn kho, vui lòng thử lại");
+            }
+        }
     };
 
     return (
@@ -196,14 +299,24 @@ function Cart() {
                                     <div className="card-body p-4">
                                         <div className="d-flex justify-content-between align-items-center mb-4">
                                             <h4 className="mb-0" style={{ fontWeight: 600 }}>GIỎ HÀNG</h4>
-                                            <button
-                                                className="btn btn-outline-primary btn-sm btn-refresh"
-                                                onClick={refreshCart}
-                                                title="Làm mới giỏ hàng"
-                                            >
-                                                <i className="bi bi-arrow-clockwise me-1"></i>
-                                                Làm mới
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    className="btn btn-outline-success btn-sm"
+                                                    onClick={refreshStockOnly}
+                                                    title="Cập nhật tồn kho"
+                                                >
+                                                    <i className="bi bi-arrow-repeat me-1"></i>
+                                                    Cập nhật tồn kho
+                                                </button>
+                                                <button
+                                                    className="btn btn-outline-primary btn-sm btn-refresh"
+                                                    onClick={refreshCart}
+                                                    title="Làm mới giỏ hàng"
+                                                >
+                                                    <i className="bi bi-arrow-clockwise me-1"></i>
+                                                    Làm mới
+                                                </button>
+                                            </div>
                                         </div>
                                         {cartItems.map((item) => {
                                             const itemId = `${item.id}-${item.color}-${item.size}`;

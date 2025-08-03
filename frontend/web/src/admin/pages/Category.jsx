@@ -4,7 +4,7 @@ import styles from '../styles/CategoryLayout.module.css';
 import commonStyles from '../styles/ProductLayout.module.css'; // Import common styles
 import { useTheme } from '@mui/material/styles'; // Re-import useTheme
 import { MdAdd } from 'react-icons/md'; // For the Add button icon
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const Category = () => {
     const [categories, setCategories] = useState([]);

@@ -36,6 +36,7 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(discountFromState);
   const [availableDistricts, setAvailableDistricts] = useState({});
   const [availableWards, setAvailableWards] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false); // Thêm state loading
   const [errors, setErrors] = useState({
     fullName: "",
     email: "",
@@ -208,10 +209,69 @@ const Checkout = () => {
       return;
     }
 
+    // Ngăn double-click
+    if (isSubmitting) {
+      toast.warn("Đang xử lý, vui lòng đợi...");
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem("token");
 
-      // Cập nhật thông tin người dùng trước khi đặt hàng
+      // BƯỚC 1: Kiểm tra tồn kho trước khi làm gì khác
+      toast.info("Đang kiểm tra tồn kho...", { autoClose: 2000 });
+      
+      const stockCheckItems = itemsToCheckout.map((item) => ({
+        id: item.id,
+        color: item.color,
+        size: item.size,
+        quantity: item.quantity,
+      }));
+
+      try {
+        const stockCheckResponse = await axios.post(
+          "http://localhost:5000/api/stock/check-stock",
+          { items: stockCheckItems },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
+          }
+        );
+        
+        if (!stockCheckResponse.data.success) {
+          // Có sản phẩm hết hàng hoặc không khả dụng
+          const errorMessages = stockCheckResponse.data.stockIssues.map(issue => issue.message);
+          toast.error(`❌ ${errorMessages.join('\n')}`, { 
+            autoClose: 8000,
+            style: { whiteSpace: 'pre-line' }
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        toast.success("✅ Tất cả sản phẩm có đủ hàng!", { autoClose: 1500 });
+      } catch (stockError) {
+        console.error("Lỗi khi kiểm tra tồn kho:", stockError);
+        if (stockError.response?.status === 400) {
+          const errorData = stockError.response.data;
+          if (errorData.stockIssues && errorData.stockIssues.length > 0) {
+            const errorMessages = errorData.stockIssues.map(issue => issue.message);
+            toast.error(`❌ ${errorMessages.join('\n')}`, { 
+              autoClose: 8000,
+              style: { whiteSpace: 'pre-line' }
+            });
+          } else {
+            toast.error(errorData.message || "Có sản phẩm không đủ hàng");
+          }
+        } else {
+          toast.error("Lỗi khi kiểm tra tồn kho, vui lòng thử lại");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // BƯỚC 2: Cập nhật thông tin người dùng sau khi kiểm tra tồn kho thành công
       await axios.put(
         "http://localhost:5000/api/users/me",
         {
@@ -221,6 +281,7 @@ const Checkout = () => {
         },
         {
           headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000 // 10 giây timeout
         }
       );
 
@@ -274,41 +335,74 @@ const Checkout = () => {
         // Handle momo payment
       } else if (paymentMethod === "vnpay") {
         try {
-          // 1. Tạo orderId duy nhất
-          const orderId = Date.now().toString();
-          // 2. Tạo đơn hàng trước (Bill)
-          const billRes = await axios.post("http://localhost:5000/api/bill", {
-            ...billData,
-            orderId
-          }, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!billRes.data || !billRes.data.bill) {
-            toast.error("Không tạo được đơn hàng cho VNPay");
-            return;
-          }
-          // 3. Gọi backend tạo URL thanh toán VNPay với orderId vừa tạo
+          setIsSubmitting(true);
+          toast.info("Đang tạo thanh toán VNPay...", { autoClose: 3000 });
+
+          // Gọi API VNPay tích hợp sẵn tạo bill và payment URL
           const vnpayRes = await axios.post("http://localhost:5000/api/payment/vnpay", {
+            ...billData, // Truyền toàn bộ thông tin bill
             amount: total,
             orderInfo: `Thanh toan don hang cho ${formData.fullName}`,
-            orderType: "other",
-            orderId // truyền orderId này làm vnp_TxnRef
+            orderType: "other"
+          }, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 20000 // 20 giây timeout
           });
+
+          console.log('VNPay response:', vnpayRes.data);
+
           if (vnpayRes.data && vnpayRes.data.paymentUrl) {
-            window.location.href = vnpayRes.data.paymentUrl;
+            console.log('Redirecting to VNPay URL:', vnpayRes.data.paymentUrl);
+            toast.success("Đang chuyển hướng đến VNPay...", { autoClose: 1000 });
+
+            // Xóa giỏ hàng sau khi tạo bill thành công
+            removeItemsFromCart(itemsToCheckout).catch((e) => {
+              console.error("Lỗi khi xóa sản phẩm khỏi giỏ hàng:", e);
+            });
+
+            // Delay nhỏ trước khi redirect
+            setTimeout(() => {
+              window.location.href = vnpayRes.data.paymentUrl;
+            }, 1000);
             return;
           } else {
+            console.error('Invalid VNPay response:', vnpayRes.data);
             toast.error("Không tạo được link thanh toán VNPay");
+            setIsSubmitting(false);
             return;
           }
         } catch (err) {
-          toast.error("Lỗi khi kết nối VNPay");
+          console.error("VNPay error:", err);
+          setIsSubmitting(false);
+
+          if (err.code === 'ECONNABORTED') {
+            toast.error("Kết nối VNPay quá chậm, vui lòng thử lại");
+          } else if (err.response?.status === 404) {
+            toast.error("Không tìm thấy API thanh toán VNPay");
+          } else if (err.response?.status >= 500) {
+            toast.error("Lỗi server VNPay, vui lòng thử lại sau");
+          } else {
+            toast.error(`Lỗi VNPay: ${err.response?.data?.message || err.message}`);
+          }
           return;
         }
       }
     } catch (error) {
       console.error("Lỗi khi đặt hàng:", error);
-      toast.error("Có lỗi xảy ra, vui lòng thử lại.");
+      setIsSubmitting(false);
+
+      if (error.code === 'ECONNABORTED') {
+        toast.error("Kết nối quá chậm, vui lòng thử lại");
+      } else if (error.response?.status === 401) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        navigate("/login");
+      } else if (error.response?.status >= 500) {
+        toast.error("Lỗi server, vui lòng thử lại sau");
+      } else {
+        toast.error(error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -922,11 +1016,20 @@ const Checkout = () => {
                             fontWeight: 600,
                             fontSize: "16px",
                             padding: "12px",
+                            opacity: isSubmitting ? 0.7 : 1,
+                            cursor: isSubmitting ? 'not-allowed' : 'pointer'
                           }}
                           onClick={handleSubmit}
-                          disabled={itemsToCheckout.length === 0}
+                          disabled={itemsToCheckout.length === 0 || isSubmitting}
                         >
-                          Đặt hàng ngay
+                          {isSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              {paymentMethod === 'vnpay' ? 'Đang tạo thanh toán...' : 'Đang xử lý...'}
+                            </>
+                          ) : (
+                            'Đặt hàng ngay'
+                          )}
                         </button>
 
                         <Link to="/cart" className="btn btn-link w-100">

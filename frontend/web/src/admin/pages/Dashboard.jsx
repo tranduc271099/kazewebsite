@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 import io from 'socket.io-client';
 import '../styles/Dashboard.css';
 
@@ -694,13 +694,14 @@ const Dashboard = () => {
                 </div>
             </Paper>
 
-            {/* Top products - Chỉ hiển thị top sản phẩm, ẩn top users */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 20, marginBottom: 30, maxWidth: '800px', margin: '0 auto 30px auto' }}>
+            {/* Top products & Top Users */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 30, maxWidth: '1600px', margin: '0 auto 30px auto' }}>
+                {/* Top Products */}
                 <Paper elevation={2} style={cardStyle}>
                     <h3 style={sectionTitleStyle}>Top 3 sản phẩm bán chạy nhất</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {dashboardData.topProducts.length > 0 ? (
-                            dashboardData.topProducts.map((product, index) => (
+                            dashboardData.topProducts.slice(0, 3).map((product, index) => (
                                 <div key={product.productId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
                                     <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
                                     <div style={{ flex: 1 }}>
@@ -723,6 +724,33 @@ const Dashboard = () => {
                             ))
                         ) : (
                             <p style={{ color: theme.palette.text.secondary }}>Không có dữ liệu sản phẩm</p>
+                        )}
+                    </div>
+                </Paper>
+
+                {/* Top Users */}
+                <Paper elevation={2} style={cardStyle}>
+                    <h3 style={sectionTitleStyle}>Top 3 khách hàng mua nhiều nhất</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+                        {dashboardData.topUsers.length > 0 ? (
+                            dashboardData.topUsers.slice(0, 3).map((user, index) => (
+                                <div key={user.userId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
+                                    <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: 5 }}>{user.userName || user.userEmail || 'Khách hàng'}</div>
+                                        <div style={{ display: 'flex', gap: 15, fontSize: 12, color: theme.palette.text.secondary }}>
+                                            <span>{user.orderCount} đơn hàng</span>
+                                            <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{formatCurrency(user.totalSpent)}</span>
+                                            <span>Giá trị TB: {formatCurrency(user.averageOrderValue)}</span>
+                                            <span style={{ color: '#ff9800', fontWeight: 600 }}>
+                                                SĐT: {user.userPhone || 'Không có'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p style={{ color: theme.palette.text.secondary }}>Không có dữ liệu khách hàng</p>
                         )}
                     </div>
                 </Paper>

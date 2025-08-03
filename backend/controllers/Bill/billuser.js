@@ -375,6 +375,7 @@ class BillController {
           select: 'name images'
         });
       if (!bill) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+
       res.json(bill);
     } catch (error) {
       res.status(500).json({ message: 'Lỗi server', error: error.message });
@@ -548,6 +549,169 @@ class BillController {
 
       res.json({ message: 'Đã xác nhận nhận hàng', bill });
     } catch (error) {
+      res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+  }
+
+  async createReturnRequest(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { reason, images, bankInfo } = req.body;
+
+      if (!reason) {
+        return res.status(400).json({ message: 'Vui lòng cung cấp lý do trả hàng' });
+      }
+
+      if (!bankInfo || !bankInfo.bankName || !bankInfo.accountNumber || !bankInfo.accountName) {
+        return res.status(400).json({ message: 'Vui lòng cung cấp đầy đủ thông tin tài khoản ngân hàng' });
+      }
+
+      const bill = await Bill.findOne({ _id: id, nguoi_dung_id: userId });
+      if (!bill) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+
+      if (bill.trang_thai !== 'đã giao hàng') {
+        return res.status(400).json({ message: 'Chỉ có thể yêu cầu trả hàng khi đơn đã giao hàng' });
+      }
+
+      // Cập nhật trạng thái và thông tin yêu cầu trả hàng
+      bill.trang_thai = 'yêu cầu trả hàng';
+      bill.returnRequest = {
+        reason,
+        images: images || [],
+        bankInfo,
+        requestDate: new Date(),
+        status: 'pending'
+      };
+
+      await bill.save();
+
+      // Thông báo cho admin về yêu cầu trả hàng
+      if (req.io) {
+        req.io.emit('return_request_created', {
+          orderId: bill.orderId || bill._id,
+          billId: bill._id,
+          customerName: req.user.name || 'Khách hàng',
+          reason: reason,
+          requestDate: new Date(),
+          message: `Đơn hàng ${bill.orderId || bill._id.toString().slice(-8)} có yêu cầu trả hàng`
+        });
+      }
+
+      // Notify clients about order status update
+      notifyClientDataUpdate(req, EVENT_TYPES.ORDER_STATUS_UPDATED, {
+        orderId: bill.orderId || bill._id,
+        billId: bill._id,
+        oldStatus: 'đã giao hàng',
+        newStatus: 'yêu cầu trả hàng',
+        customerName: req.user.name || 'Khách hàng'
+      });
+
+      res.json({ message: 'Đã gửi yêu cầu trả hàng', bill });
+    } catch (error) {
+      console.error('Error creating return request:', error);
+      res.status(500).json({ message: 'Lỗi server', error: error.message });
+    }
+  }
+
+  async updateReturnRequestStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status, adminNotes, adminImages } = req.body;
+
+      if (!status || !['processing', 'approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+      }
+
+      const bill = await Bill.findById(id);
+      if (!bill) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+
+      if (bill.trang_thai !== 'yêu cầu trả hàng' && bill.trang_thai !== 'đang xử lý trả hàng') {
+        return res.status(400).json({ message: 'Đơn hàng không có yêu cầu trả hàng' });
+      }
+
+      // Cập nhật trạng thái yêu cầu trả hàng
+      bill.returnRequest.status = status;
+      if (adminNotes) {
+        bill.returnRequest.adminNotes = adminNotes;
+      }
+      if (adminImages && adminImages.length > 0) {
+        bill.returnRequest.adminImages = adminImages;
+      }
+
+      // Cập nhật trạng thái đơn hàng dựa trên trạng thái yêu cầu
+      if (status === 'processing') {
+        bill.trang_thai = 'đang xử lý trả hàng';
+      } else if (status === 'approved') {
+        bill.trang_thai = 'đã hoàn tiền';
+
+        // --- BẮT ĐẦU: HOÀN KHO KHI HOÀN TIỀN (Atomic) ---
+        for (const item of bill.danh_sach_san_pham) {
+          console.log(`[RETURN REQUEST] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
+
+          // Thử cập nhật biến thể trước
+          const updateResult = await Product.updateOne(
+            {
+              _id: item.san_pham_id,
+              "variants": {
+                $elemMatch: {
+                  "attributes.color": item.mau_sac,
+                  "attributes.size": item.kich_thuoc
+                }
+              }
+            },
+            {
+              $inc: { "variants.$.stock": item.so_luong }
+            }
+          );
+
+          // Nếu không cập nhật được biến thể, thử cập nhật sản phẩm gốc
+          if (updateResult.modifiedCount === 0) {
+            console.log(`[RETURN REQUEST] Variant not found, trying to update main product stock`);
+            const fallbackUpdateResult = await Product.updateOne(
+              {
+                _id: item.san_pham_id,
+                $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+              },
+              {
+                $inc: { stock: item.so_luong }
+              }
+            );
+
+            if (fallbackUpdateResult.modifiedCount === 0) {
+              console.log(`[RETURN REQUEST] Failed to restore stock for product ${item.san_pham_id}`);
+            } else {
+              console.log(`[RETURN REQUEST] Successfully restored main product stock for ${item.san_pham_id}`);
+            }
+          } else {
+            console.log(`[RETURN REQUEST] Successfully restored variant stock for product ${item.san_pham_id}`);
+          }
+        }
+        // --- KẾT THÚC: HOÀN KHO KHI HOÀN TIỀN ---
+      } else if (status === 'rejected') {
+        // Nếu từ chối, đơn hàng trở về trạng thái đã giao hàng
+        bill.trang_thai = 'đã giao hàng';
+      }
+
+      await bill.save();
+
+      // Thông báo cho khách hàng về cập nhật trạng thái yêu cầu
+      notifyClientDataUpdate(req, EVENT_TYPES.ORDER_STATUS_UPDATED, {
+        orderId: bill.orderId || bill._id,
+        billId: bill._id,
+        oldStatus: bill.trang_thai,
+        newStatus: bill.trang_thai,
+        returnRequestStatus: status,
+        adminNotes: adminNotes || '',
+        adminUser: req.user?.name || req.user?.username || 'Admin'
+      });
+
+      res.json({
+        message: `Cập nhật trạng thái yêu cầu trả hàng thành ${status}`,
+        bill
+      });
+    } catch (error) {
+      console.error('Error updating return request status:', error);
       res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
   }

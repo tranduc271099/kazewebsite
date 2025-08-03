@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạng thái thanh toán</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .payment-status-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem;
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-icon.success {
+            color: #28a745;
+        }
+
+        .status-icon.error {
+            color: #dc3545;
+        }
+
+        .status-icon.processing {
+            color: #ffc107;
+        }
+
+        .countdown {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .order-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+
+        .spinner-border {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="payment-status-container">
+        <div class="status-card">
+            <!-- Loading state -->
+            <div id="loading-state">
+                <div class="status-icon processing">
+                    <div class="spinner-border" role="status"></div>
+                </div>
+                <h2>Đang xử lý thanh toán...</h2>
+                <p class="text-muted">Vui lòng đợi trong giây lát</p>
+            </div>
+
+            <!-- Success state -->
+            <div id="success-state" style="display: none;">
+                <div class="status-icon success">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h2 class="text-success">Thanh toán thành công!</h2>
+                <p class="text-muted">Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi</p>
+
+                <div class="order-info">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Mã đơn hàng:</strong>
+                        </div>
+                        <div class="col-6" id="order-id">
+                            #Loading...
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <strong>Phương thức:</strong>
+                        </div>
+                        <div class="col-6" id="payment-method">
+                            VNPay
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <strong>Số tiền:</strong>
+                        </div>
+                        <div class="col-6" id="amount">
+                            Loading...
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <strong>Mã giao dịch:</strong>
+                        </div>
+                        <div class="col-6" id="transaction-no">
+                            Loading...
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-6">
+                            <strong>Trạng thái:</strong>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-success">Đã thanh toán</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="countdown">
+                    Tự động chuyển về trang đơn mua trong <span id="countdown-timer">5</span> giây
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-success btn-custom" onclick="goToOrders()">
+                        <i class="bi bi-bag-check"></i> Xem đơn hàng ngay
+                    </button>
+                    <button class="btn btn-outline-primary btn-custom" onclick="goToHome()">
+                        <i class="bi bi-house"></i> Về trang chủ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Error state -->
+            <div id="error-state" style="display: none;">
+                <div class="status-icon error">
+                    <i class="bi bi-x-circle-fill"></i>
+                </div>
+                <h2 class="text-danger">Thanh toán thất bại!</h2>
+                <p class="text-muted" id="error-message">Đã có lỗi xảy ra trong quá trình thanh toán</p>
+
+                <div class="order-info">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Mã lỗi:</strong>
+                        </div>
+                        <div class="col-6" id="error-code">
+                            N/A
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-primary btn-custom" onclick="retryPayment()">
+                        <i class="bi bi-arrow-clockwise"></i> Thử lại
+                    </button>
+                    <button class="btn btn-outline-secondary btn-custom" onclick="goToHome()">
+                        <i class="bi bi-house"></i> Về trang chủ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get URL parameters
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Initialize page based on URL parameters
+        function initializePage() {
+            const status = getUrlParameter('status');
+            const orderId = getUrlParameter('orderId');
+            const paymentMethod = getUrlParameter('paymentMethod');
+            const message = getUrlParameter('message');
+            const errorCode = getUrlParameter('code');
+            const amount = getUrlParameter('amount');
+            const transactionNo = getUrlParameter('transactionNo');
+
+            // Hide loading state
+            document.getElementById('loading-state').style.display = 'none';
+
+            if (status === 'success') {
+                // Play success sound (if supported)
+                try {
+                    // Create a simple success tone
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+
+                // Show success state
+                document.getElementById('success-state').style.display = 'block';
+                document.getElementById('order-id').textContent = '#' + (orderId || 'N/A');
+                document.getElementById('payment-method').textContent = paymentMethod || 'VNPay';
+
+                // Format amount
+                if (amount) {
+                    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(parseInt(amount) / 100); // VNPay amount is in cents
+                    document.getElementById('amount').textContent = formattedAmount;
+                } else {
+                    document.getElementById('amount').textContent = 'N/A';
+                }
+
+                document.getElementById('transaction-no').textContent = transactionNo || 'N/A';
+
+                // Start countdown
+                startCountdown();
+            } else {
+                // Show error state
+                document.getElementById('error-state').style.display = 'block';
+                document.getElementById('error-message').textContent = message || 'Đã có lỗi xảy ra trong quá trình thanh toán';
+                document.getElementById('error-code').textContent = errorCode || 'N/A';
+            }
+        }
+
+        // Countdown timer
+        function startCountdown() {
+            let timeLeft = 5;
+            const timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('countdown-timer').textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    goToOrders();
+                }
+            }, 1000);
+        }
+
+        // Navigation functions
+        function goToOrders() {
+            window.location.href = '/account.html'; // Chuyển đến trang tài khoản để xem đơn hàng
+        }
+
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        function retryPayment() {
+            window.location.href = '/checkout.html';
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initializePage);
+
+        // Prevent accidental page refresh
+        window.addEventListener('beforeunload', function (e) {
+            if (getUrlParameter('status') === 'success') {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+
+</html>

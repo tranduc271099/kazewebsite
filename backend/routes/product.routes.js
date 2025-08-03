@@ -17,6 +17,9 @@ router.post('/test/add-sample-ratings', productController.addSampleRatings);
 // Get products by categoryId
 router.get('/category/:categoryId', productController.getProductsByCategory);
 
+// Get top selling products
+router.get('/best-sellers', require('../controllers/bestSeller.controller').getTopSellingProducts);
+
 // Get product by ID
 router.get('/:id', productController.getProductById);
 

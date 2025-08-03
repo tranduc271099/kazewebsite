@@ -259,7 +259,7 @@ exports.getTopUsers = async (req, res) => {
                 }
             },
             { $sort: { totalSpent: -1 } },
-            { $limit: parseInt(limit) },
+            { $limit: 3 }, // Luôn lấy top 3 người dùng
             {
                 $lookup: {
                     from: 'users',
@@ -274,6 +274,7 @@ exports.getTopUsers = async (req, res) => {
                     userId: '$_id',
                     userName: '$userInfo.name',
                     userEmail: '$userInfo.email',
+                    userPhone: '$userInfo.phone',
                     totalSpent: 1,
                     orderCount: 1,
                     averageOrderValue: 1
@@ -388,7 +389,7 @@ exports.getTopProducts = async (req, res) => {
                 }
             },
             { $sort: { totalQuantity: -1 } },
-            { $limit: parseInt(limit) },
+            { $limit: 3 }, // Luôn lấy top 3 sản phẩm
             {
                 $project: {
                     productId: '$_id',

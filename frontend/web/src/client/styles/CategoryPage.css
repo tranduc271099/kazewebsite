@@ -181,11 +181,40 @@
 .product-info .product-rating {
     font-size: 0.8rem;
     color: #ffc107;
+    margin-bottom: 0.5rem;
 }
 
-.product-info .product-rating span {
-    color: #999;
+.product-info .product-rating i {
+    color: #ffc107 !important;
+}
+
+.product-info .product-rating i.bi-star-fill {
+    color: #ffc107 !important;
+}
+
+.product-info .product-rating i.bi-star-half {
+    color: #ffc107 !important;
+}
+
+.product-info .product-rating i.bi-star {
+    color: #e2e2e2 !important;
+}
+
+.product-info .product-rating .rating-count {
+    color: #666;
     margin-left: 5px;
+    font-size: 0.85rem;
+}
+
+.product-info .product-sold {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.product-info .product-sold span {
+    color: #ff6a00;
+    font-weight: 500;
 }
 
 /* Sidebar Styles */

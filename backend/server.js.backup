@@ -26,22 +26,6 @@ app.use(cors({
   credentials: true
 }));
 
-// Security headers - CSP for VNPay
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vnpayment.vn sandbox.vnpayment.vn; " +
-    "style-src 'self' 'unsafe-inline' fonts.googleapis.com cdn.jsdelivr.net; " +
-    "font-src 'self' fonts.gstatic.com cdn.jsdelivr.net; " +
-    "img-src 'self' data: blob: *; " +
-    "connect-src 'self' *.vnpayment.vn sandbox.vnpayment.vn; " +
-    "frame-src 'self' *.vnpayment.vn sandbox.vnpayment.vn; " +
-    "form-action 'self' *.vnpayment.vn sandbox.vnpayment.vn;"
-  );
-  next();
-});
-
 // Routes that need multipart/form-data should come before express.json()
 app.use('/api/categories', require('./routes/category.routes'));
 app.use('/api/products', require('./routes/product.routes'));
@@ -106,60 +90,13 @@ app.use('/api/vouchers', require('./routes/voucher.routes'));
 // Thêm route payment
 app.use('/api/payment', require('./routes/payment.routes'));
 
-// Thêm route kiểm tra tồn kho
-app.use('/api/stock', require('./routes/stockCheck.routes'));
-
 app.use('/api/banners', require('./routes/bannerRoutes'));
 app.use('/api/chats', require('./routes/chat.routes.js'));
 app.use('/api/upload', require('./routes/upload.routes'));
 
-// Test routes for development
-if (process.env.NODE_ENV !== 'production') {
-  app.use('/api/test', require('./routes/test.routes'));
-}
-
-// Import vnpayReturn controller để xử lý callback trực tiếp
-const vnpayReturnController = require('./controllers/vnpayReturn.controller');
-
-// VNPay return URL handler - route trực tiếp
-app.get('/vnpay_return', (req, res, next) => {
-  console.log('=== VNPAY RETURN REQUEST RECEIVED ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Query params:', JSON.stringify(req.query, null, 2));
-  console.log('Headers:', JSON.stringify(req.headers, null, 2));
-  console.log('IP:', req.ip || req.connection.remoteAddress);
-  next();
-}, async (req, res) => {
-  // Set response timeout
-  res.setTimeout(10000, () => {
-    if (!res.headersSent) {
-      console.error('VNPay return timeout');
-      res.redirect('http://localhost:3000/payment-status.html?status=error&message=Request timeout&code=TIMEOUT');
-    }
-  });
-
-  try {
-    console.log('=== DIRECT VNPAY RETURN HANDLER ===');
-    console.log('Query params:', req.query);
-
-    // Controller sẽ tự redirect
-    await vnpayReturnController.handleVnpayReturn(req, res);
-  } catch (error) {
-    console.error('Direct VNPay return error:', error);
-    if (!res.headersSent) {
-      res.redirect('http://localhost:3000/payment-status.html?status=error&message=Processing error&code=SYSTEM_ERROR');
-    }
-  }
-});
-
 // Add a basic route for the root URL
 app.get('/', (req, res) => {
   res.send('Backend server is running!');
-});
-
-// Serve payment status page
-app.get('/payment-status.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/web/public/payment-status.html'));
 });
 
 // Logic xử lý chat thời gian thực đã nâng cấp

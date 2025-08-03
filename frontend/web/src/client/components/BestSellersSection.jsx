@@ -17,11 +17,12 @@ const BestSellersSection = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/products?activeOnly=true&limit=4&sort=latest');
-                setProducts(response.data.slice(0, 4));
+                // Sử dụng API mới lấy top sản phẩm bán chạy
+                const response = await axios.get('http://localhost:5000/api/products/best-sellers?limit=4');
+                setProducts(response.data);
                 setLoading(false);
             } catch (err) {
-                setError('Không thể tải sản phẩm. Vui lòng thử lại sau.');
+                setError('Không thể tải sản phẩm bán chạy. Vui lòng thử lại sau.');
                 setLoading(false);
                 console.error(err);
             }
@@ -44,12 +45,12 @@ const BestSellersSection = () => {
                 // Cập nhật danh sách products với thông tin mới
                 setProducts(prevProducts =>
                     prevProducts.map(p =>
-                        p._id === event.detail.productId ? updatedProduct : p
+                        (p.id || p._id) === event.detail.productId ? updatedProduct : p
                     )
                 );
 
                 // Cập nhật selectedProduct nếu đang được chọn
-                if (selectedProduct && selectedProduct._id === event.detail.productId) {
+                if (selectedProduct && (selectedProduct.id || selectedProduct._id) === event.detail.productId) {
                     setSelectedProduct(updatedProduct);
                 }
             } catch (error) {
@@ -71,6 +72,40 @@ const BestSellersSection = () => {
                 top: 0; left: 0; right: 0; bottom: 0;
                 background: rgba(0,0,0,0.4);
                 z-index: 1040;
+            }
+            .product-sold {
+                font-size: 0.85rem;
+                color: #666;
+                margin-top: 4px;
+            }
+            .product-sold span {
+                color: #ff6a00;
+                font-weight: 500;
+            }
+            .rating-count {
+                margin-left: 5px;
+                font-size: 0.85rem;
+                color: #666;
+            }
+            .product-rating i {
+                color: #ffc107 !important;
+                font-weight: bold !important;
+            }
+            .product-rating i.bi-star-fill {
+                color: #ffc107 !important;
+                font-weight: bold !important;
+            }
+            .product-rating i.bi-star-half {
+                color: #ffc107 !important;
+                font-weight: bold !important;
+            }
+            .product-rating i.bi-star {
+                color: #e2e2e2 !important;
+                font-weight: bold !important;
+            }
+            .product-sold span {
+                color: #ff6a00;
+                font-weight: 500;
             }
             .popover-attribute-box {
                 position: fixed;
@@ -123,7 +158,7 @@ const BestSellersSection = () => {
         );
         const price = variant ? variant.price : selectedProduct.price;
         const cartItem = {
-            id: selectedProduct._id,
+            id: selectedProduct.id || selectedProduct._id,
             name: selectedProduct.name,
             price,
             image: selectedProduct.images?.[0] || '',
@@ -140,7 +175,7 @@ const BestSellersSection = () => {
             // Fetch lại thông tin sản phẩm từ API để cập nhật số lượng tồn kho
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`http://localhost:5000/api/products/${selectedProduct._id}?activeOnly=true`, {
+                const res = await axios.get(`http://localhost:5000/api/products/${selectedProduct.id || selectedProduct._id}?activeOnly=true`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -152,7 +187,7 @@ const BestSellersSection = () => {
                 // Cập nhật danh sách products với thông tin mới
                 setProducts(prevProducts =>
                     prevProducts.map(p =>
-                        p._id === selectedProduct._id ? updatedProduct : p
+                        (p.id || p._id) === (selectedProduct.id || selectedProduct._id) ? updatedProduct : p
                     )
                 );
             } catch (fetchError) {
@@ -212,7 +247,7 @@ const BestSellersSection = () => {
             <div className="container" data-aos="fade-up" data-aos-delay="100">
                 <div className="row gy-4">
                     {products.map((product, index) => (
-                        <div key={product._id} className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay={100 + (index * 50)}>
+                        <div key={product.id || product._id} className="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay={100 + (index * 50)}>
                             <div className="product-card">
                                 <div className="product-image">
                                     <img
@@ -234,23 +269,36 @@ const BestSellersSection = () => {
                                         <button className="btn-wishlist" type="button" aria-label="Thêm vào danh sách yêu thích">
                                             <i className="bi bi-heart"></i>
                                         </button>
-                                        <Link to={`/product-details/${product._id}`} className="btn-quickview" aria-label="Xem nhanh">
+                                        <Link to={`/product-details/${product.id || product._id}`} className="btn-quickview" aria-label="Xem nhanh">
                                             <i className="bi bi-eye"></i>
                                         </Link>
                                     </div>
                                 </div>
                                 <div className="product-info">
-                                    <h3 className="product-title"><Link to={`/product-details/${product._id}`}>{product.name}</Link></h3>
+                                    <h3 className="product-title"><Link to={`/product-details/${product.id || product._id}`}>{product.name}</Link></h3>
                                     <div className="product-price">
                                         <span className="current-price">{formatPrice(product.price)}</span>
                                     </div>
-                                    <div className="product-rating">
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-half"></i>
-                                        <span className="rating-count">(0 đánh giá)</span>
+                                    <div className="product-rating star-rating-fix">
+                                        {/* Dynamic star rating based on product.rating or default to 0 */}
+                                        {[1, 2, 3, 4, 5].map((star) => {
+                                            const rating = product.rating || 0;
+                                            return (
+                                                <i key={star}
+                                                    className={`bi ${star <= Math.floor(rating)
+                                                            ? "bi-star-fill"
+                                                            : star - 0.5 <= rating
+                                                                ? "bi-star-half"
+                                                                : "bi-star"
+                                                        }`}
+                                                    style={{ color: '#ffc107', fontSize: '18px', marginRight: '3px', fontWeight: 'bold' }}
+                                                ></i>
+                                            );
+                                        })}
+                                        <span className="rating-count" style={{ color: '#666', fontSize: '14px', marginLeft: '5px' }}>({product.ratingCount || 0} đánh giá)</span>
+                                    </div>
+                                    <div className="product-sold">
+                                        <span>Đã bán: <span style={{ color: '#ff6a00', fontWeight: '500' }}>{product.soldQuantity || 0}</span></span>
                                     </div>
                                     <button className="btn btn-add-to-cart" onClick={() => openPopover(product)} disabled={!product.variants || product.variants.length === 0}>
                                         <i className="bi bi-bag-plus me-2"></i>

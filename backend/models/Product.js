@@ -23,11 +23,13 @@ const productSchema = new mongoose.Schema({
     price: Number,
     costPrice: Number, // Thêm giá nhập chính
     stock: Number,
+
     isActive: { type: Boolean, default: true },
     // Rating và reviews
     rating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0 },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CommentUser' }]
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

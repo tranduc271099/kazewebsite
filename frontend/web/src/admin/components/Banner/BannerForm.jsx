@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import styles from '../../styles/ProductLayout.module.css';
 import '../../styles/BannerManagement.css';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const BannerForm = ({ banner, onSubmit, onClose }) => {
     const [image, setImage] = useState(null);

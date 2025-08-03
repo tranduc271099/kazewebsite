@@ -374,13 +374,24 @@ function ProductDetail() {
                             <div className="product-info">
                                 <div className="product-meta mb-2">
                                     <span className="product-category">{product.category?.name || 'Chưa phân loại'}</span>
-                                    <div className="product-rating">
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-fill"></i>
-                                        <i className="bi bi-star-half"></i>
-                                        <span className="rating-count">({product.reviews?.length || 0} đánh giá)</span>
+                                    <div className="product-rating star-rating-fix">
+                                        {[...Array(5)].map((_, i) => {
+                                            const star = i + 1;
+                                            const rating = product.rating || 0;
+                                            return (
+                                                <i
+                                                    key={i}
+                                                    className={`bi ${star <= Math.floor(rating)
+                                                            ? 'bi-star-fill'
+                                                            : star - 0.5 <= rating
+                                                                ? 'bi-star-half'
+                                                                : 'bi-star'
+                                                        }`}
+                                                    style={{ color: '#ffc107', fontSize: '18px', marginRight: '3px', fontWeight: 'bold' }}
+                                                ></i>
+                                            );
+                                        })}
+                                        <span className="rating-count" style={{ color: '#666', fontSize: '14px', marginLeft: '5px' }}>({product.reviews?.length || 0} đánh giá)</span>
                                     </div>
                                 </div>
                                 <h1 className="product-title">{product.name}</h1>
@@ -759,7 +770,7 @@ function RelatedProducts({ categoryId, currentProductId }) {
                 <div className="col-md-3 mb-4" key={product._id} style={{ position: 'relative' }}>
                     <div className="card h-100">
                         <Link to={`/product-details/${product._id}`}>
-                            <img src={product.images?.[0] || '/assets/img/no-image.png'} className="card-img-top" alt={product.name} style={{height:180,objectFit:'cover'}} />
+                            <img src={product.images?.[0] || '/assets/img/no-image.png'} className="card-img-top" alt={product.name} style={{ height: 180, objectFit: 'cover' }} />
                         </Link>
                         <div className="card-body">
                             <h6 className="card-title">

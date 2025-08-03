@@ -80,6 +80,20 @@ const CommentController = {
       // 3. Tạo bình luận
       const comment = new Comment({ productId, userId, content, rating, orderId });
       await comment.save();
+
+      // 4. Cập nhật rating và ratingCount trong Product
+      const Product = require('../../models/Product');
+      const allComments = await Comment.find({ productId, isDeleted: false });
+      const ratingCount = allComments.length;
+      const totalRating = allComments.reduce((sum, comment) => sum + comment.rating, 0);
+      const averageRating = ratingCount > 0 ? totalRating / ratingCount : 0;
+
+      await Product.findByIdAndUpdate(productId, {
+        rating: averageRating,
+        ratingCount: ratingCount,
+        $push: { reviews: comment._id }
+      });
+
       res.status(201).json(comment);
     } catch (err) {
       res.status(500).json({ message: 'Lỗi server', error: err.message });

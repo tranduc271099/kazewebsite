@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../styles/ProductLayout.module.css';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 const ProductView = () => {
     const { productId } = useParams();

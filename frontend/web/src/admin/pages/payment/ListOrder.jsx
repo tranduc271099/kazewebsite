@@ -16,6 +16,9 @@ const statusOptions = [
   'đã giao hàng',
   'đã nhận hàng',
   'hoàn thành',
+  'yêu cầu trả hàng',
+  'đang xử lý trả hàng',
+  'đã hoàn tiền',
   'đã hủy',
 ];
 
@@ -50,6 +53,17 @@ const ListOrder = () => {
     return saved !== null ? Number(saved) : 4990;
   });
 
+  // Return request states
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [returnRequestData, setReturnRequestData] = useState({
+    adminNotes: '',
+    images: [],
+    status: ''
+  });
+  const [returnImages, setReturnImages] = useState([]);
+  const [imagePreview, setImagePreview] = useState([]);
+  const [imageUploading, setImageUploading] = useState(false);
+
   const getStatusDisplay = (status) => {
     switch (status) {
       case 'chờ xác nhận': return 'Chờ xác nhận';
@@ -71,6 +85,9 @@ const ListOrder = () => {
       case 'đã giao hàng': return 'Đã giao';
       case 'đã nhận hàng': return 'Đã nhận';
       case 'hoàn thành': return 'Hoàn thành';
+      case 'yêu cầu trả hàng': return 'Yêu cầu trả hàng';
+      case 'đang xử lý trả hàng': return 'Đang xử lý trả hàng';
+      case 'đã hoàn tiền': return 'Đã hoàn tiền';
       case 'đã hủy': return 'Hủy';
       default: return status;
     }
@@ -189,6 +206,156 @@ const ListOrder = () => {
     }
   };
 
+  // Handle return request
+  const handleReturnRequest = (order) => {
+    setSelectedOrder(order);
+    setReturnRequestData({
+      adminNotes: '',
+      images: [],
+      status: 'processing'
+    });
+    setReturnImages([]);
+    setImagePreview([]);
+    setShowReturnModal(true);
+  };
+
+  const handleReturnImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageUploading(true);
+
+    const newImagePreviews = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+
+    setImagePreview([...imagePreview, ...newImagePreviews]);
+    setImageUploading(false);
+  };
+
+  const uploadReturnImages = async (files) => {
+    console.log('Starting upload for', files.length, 'files');
+
+    const uploadPromises = files.map(async (file, index) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        console.log(`Uploading file ${index + 1}/${files.length}:`, file.name);
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await axios.post(
+          'http://localhost:5000/api/upload/image',
+          formData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            },
+            timeout: 30000 // 30 second timeout
+          }
+        );
+
+        console.log(`File ${index + 1} uploaded successfully:`, response.data.url);
+        return response.data.url;
+      } catch (error) {
+        console.error(`Error uploading file ${index + 1}:`, error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+        }
+        throw new Error(`Failed to upload ${file.name}: ${error.response?.data?.message || error.message}`);
+      }
+    });
+
+    try {
+      const results = await Promise.all(uploadPromises);
+      console.log('All uploads completed successfully:', results);
+      return results;
+    } catch (error) {
+      console.error('Upload batch failed:', error);
+      throw error;
+    }
+  };
+
+  const submitReturnUpdate = async () => {
+    if (!selectedOrder || !returnRequestData.status) {
+      toast.error('Vui lòng chọn trạng thái xử lý!');
+      return;
+    }
+
+    // Additional validation
+    if (returnRequestData.status === 'approved' && !returnRequestData.adminNotes.trim()) {
+      toast.error('Vui lòng nhập ghi chú khi chấp nhận yêu cầu trả hàng!');
+      return;
+    }
+
+    try {
+      setImageUploading(true);
+      let imageUrls = [];
+
+      // Upload images if any
+      if (imagePreview.length > 0) {
+        try {
+          console.log('Uploading images:', imagePreview.length);
+          const files = imagePreview.map(item => item.file);
+          imageUrls = await uploadReturnImages(files);
+          console.log('Upload successful, URLs:', imageUrls);
+        } catch (uploadError) {
+          console.error('Image upload error:', uploadError);
+          toast.error(`Có lỗi khi tải lên hình ảnh: ${uploadError.response?.data?.message || uploadError.message}`);
+          return;
+        }
+      }
+
+      console.log('Submitting return update:', {
+        orderId: selectedOrder._id,
+        status: returnRequestData.status,
+        adminNotes: returnRequestData.adminNotes.trim(),
+        adminImages: imageUrls
+      });
+
+      const token = localStorage.getItem('token');
+      const response = await axios.put(
+        `http://localhost:5000/api/bill/${selectedOrder._id}/return-request/status`,
+        {
+          status: returnRequestData.status,
+          adminNotes: returnRequestData.adminNotes.trim(),
+          adminImages: imageUrls
+        },
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+
+      console.log('Return update response:', response.data);
+
+      if (response.status === 200) {
+        toast.success('Đã cập nhật yêu cầu trả hàng!');
+        fetchOrders(page);
+        setShowReturnModal(false);
+        setShowModal(false);
+
+        // Reset form
+        setReturnRequestData({
+          status: '',
+          adminNotes: ''
+        });
+        setImagePreview([]);
+      }
+    } catch (error) {
+      console.error('Submit return update error:', error);
+      const errorMessage = error.response?.data?.message ||
+        error.response?.statusText ||
+        error.message ||
+        'Có lỗi không xác định khi cập nhật yêu cầu trả hàng!';
+      toast.error(`Lỗi: ${errorMessage}`);
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   // Filter and sort logic moved to fetchOrders or handled by backend
   // const filteredOrders = orders.filter(...) - REMOVED
   // const sortedOrders = [...filteredOrders].sort(...) - REMOVED
@@ -239,6 +406,9 @@ const ListOrder = () => {
       case 'đã giao hàng': return '#10b981';
       case 'đã nhận hàng': return '#3b82f6';
       case 'hoàn thành': return '#10b981';
+      case 'yêu cầu trả hàng': return '#9333ea';
+      case 'đang xử lý trả hàng': return '#9333ea';
+      case 'đã hoàn tiền': return '#0284c7';
       case 'đã hủy': return '#ef4444';
       default: return '#6b7280';
     }
@@ -266,6 +436,12 @@ const ListOrder = () => {
         return ['đang giao hàng', 'đã hủy'];
       case 'đang giao hàng':
         return ['đã giao hàng'];
+      case 'yêu cầu trả hàng':
+        return []; // Admin sẽ xử lý qua modal riêng
+      case 'đang xử lý trả hàng':
+        return [];
+      case 'đã hoàn tiền':
+        return [];
       // Không cho phép admin chuyển sang 'hoàn thành' hoặc 'đã nhận hàng'
       default:
         return [];
@@ -520,6 +696,164 @@ const ListOrder = () => {
                   <div style={{ color: '#7c3aed', marginLeft: 20, fontSize: '1.1rem', fontWeight: 600 }}>{((item.gia || 0) * (item.so_luong || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</div>
                 </div>
               ))}
+
+              {/* Return Request Information */}
+              {(selectedOrder.trang_thai === 'yêu cầu trả hàng' || selectedOrder.trang_thai === 'đang xử lý trả hàng' || selectedOrder.trang_thai === 'đã hoàn tiền') && selectedOrder.returnRequest && (
+                <div style={{ marginTop: 20, padding: 15, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e9ecef' }}>
+                  <h4 style={{ marginBottom: 12, fontSize: '1.1rem', color: '#495057', fontWeight: 600 }}>THÔNG TIN YÊU CẦU TRẢ HÀNG</h4>
+
+                  <div style={{ marginBottom: 8 }}>
+                    <strong style={{ color: '#6c757d' }}>Trạng thái:</strong>
+                    <span style={{
+                      marginLeft: 8,
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      background: selectedOrder.returnRequest.status === 'pending' ? '#fff3cd' :
+                        selectedOrder.returnRequest.status === 'processing' ? '#cce5ff' :
+                          selectedOrder.returnRequest.status === 'approved' ? '#d4edda' :
+                            selectedOrder.returnRequest.status === 'rejected' ? '#f8d7da' : '#f8f9fa',
+                      color: selectedOrder.returnRequest.status === 'pending' ? '#856404' :
+                        selectedOrder.returnRequest.status === 'processing' ? '#004085' :
+                          selectedOrder.returnRequest.status === 'approved' ? '#155724' :
+                            selectedOrder.returnRequest.status === 'rejected' ? '#721c24' : '#6c757d'
+                    }}>
+                      {selectedOrder.returnRequest.status === 'pending' ? 'Chờ xử lý' :
+                        selectedOrder.returnRequest.status === 'processing' ? 'Đang xử lý' :
+                          selectedOrder.returnRequest.status === 'approved' ? 'Đã chấp nhận' :
+                            selectedOrder.returnRequest.status === 'rejected' ? 'Đã từ chối' : '---'}
+                    </span>
+                  </div>
+
+                  <div style={{ marginBottom: 8 }}>
+                    <strong style={{ color: '#6c757d' }}>Ngày yêu cầu:</strong>
+                    <span style={{ marginLeft: 8, color: '#495057' }}>
+                      {selectedOrder.returnRequest.requestDate ? formatDateTime(selectedOrder.returnRequest.requestDate) : '---'}
+                    </span>
+                  </div>
+
+                  <div style={{ marginBottom: 8 }}>
+                    <strong style={{ color: '#6c757d' }}>Lý do:</strong>
+                    <div style={{
+                      marginTop: 4,
+                      padding: '8px',
+                      background: '#fff',
+                      borderRadius: 4,
+                      border: '1px solid #dee2e6',
+                      fontSize: '0.9rem',
+                      color: '#495057',
+                      maxHeight: '60px',
+                      overflow: 'auto'
+                    }}>
+                      {selectedOrder.returnRequest.reason || '---'}
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 8 }}>
+                    <strong style={{ color: '#6c757d' }}>Thông tin hoàn tiền:</strong>
+                    {selectedOrder.returnRequest.bankInfo ? (
+                      <div style={{ marginTop: 4, padding: '8px', background: '#fff', borderRadius: 4, border: '1px solid #dee2e6', fontSize: '0.85rem' }}>
+                        <div style={{ marginBottom: 4 }}>
+                          <strong style={{ color: '#495057' }}>Ngân hàng:</strong>
+                          <span style={{ marginLeft: 8, color: '#007bff', fontWeight: '500' }}>
+                            {selectedOrder.returnRequest.bankInfo.bankName || '---'}
+                          </span>
+                        </div>
+                        <div style={{ marginBottom: 4 }}>
+                          <strong style={{ color: '#495057' }}>Số tài khoản:</strong>
+                          <span style={{ marginLeft: 8, color: '#28a745', fontWeight: '600', fontFamily: 'monospace' }}>
+                            {selectedOrder.returnRequest.bankInfo.accountNumber || '---'}
+                          </span>
+                        </div>
+                        <div>
+                          <strong style={{ color: '#495057' }}>Tên chủ tài khoản:</strong>
+                          <span style={{ marginLeft: 8, color: '#6c757d', fontWeight: '500' }}>
+                            {selectedOrder.returnRequest.bankInfo.accountName || '---'}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{
+                        marginTop: 4,
+                        padding: '8px',
+                        background: '#f8f9fa',
+                        borderRadius: 4,
+                        border: '1px solid #dee2e6',
+                        fontSize: '0.85rem',
+                        color: '#6c757d',
+                        fontStyle: 'italic'
+                      }}>
+                        Khách hàng chưa cung cấp thông tin hoàn tiền
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedOrder.returnRequest.images && selectedOrder.returnRequest.images.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <strong style={{ color: '#6c757d' }}>Hình ảnh từ khách hàng:</strong>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                        {selectedOrder.returnRequest.images.map((img, idx) => (
+                          <a href={img} target="_blank" rel="noopener noreferrer" key={idx}>
+                            <img
+                              src={img}
+                              alt={`Return image ${idx}`}
+                              style={{
+                                width: 60,
+                                height: 60,
+                                objectFit: 'cover',
+                                borderRadius: 4,
+                                border: '1px solid #dee2e6'
+                              }}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedOrder.returnRequest.adminNotes && (
+                    <div style={{ marginBottom: 8 }}>
+                      <strong style={{ color: '#6c757d' }}>Ghi chú từ admin:</strong>
+                      <div style={{
+                        marginTop: 4,
+                        padding: '8px',
+                        background: '#fff3cd',
+                        borderRadius: 4,
+                        border: '1px solid #ffeaa7',
+                        fontSize: '0.9rem',
+                        color: '#495057'
+                      }}>
+                        {selectedOrder.returnRequest.adminNotes}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedOrder.returnRequest.adminImages && selectedOrder.returnRequest.adminImages.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <strong style={{ color: '#6c757d' }}>Hình ảnh từ admin:</strong>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                        {selectedOrder.returnRequest.adminImages.map((img, idx) => (
+                          <a href={img} target="_blank" rel="noopener noreferrer" key={idx}>
+                            <img
+                              src={img}
+                              alt={`Admin image ${idx}`}
+                              style={{
+                                width: 60,
+                                height: 60,
+                                objectFit: 'cover',
+                                borderRadius: 4,
+                                border: '1px solid #dee2e6'
+                              }}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ marginTop: 20, paddingTop: 15, borderTop: '1px solid var(--card-border)', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 15, fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                 Tổng cộng: {((selectedOrder.tong_tien || 0) - (selectedOrder.discount || 0)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
               </div>
@@ -560,7 +894,27 @@ const ListOrder = () => {
                   ))}
                 </>
               }
-              <button onClick={() => setShowModal(false)} className={`${styles.btn} ${styles.btnSecondary}`} style={{ padding: '8px 20px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 ? 'initial' : 'auto' }}>
+
+              {/* Return Request Button */}
+              {selectedOrder.trang_thai === 'yêu cầu trả hàng' && (
+                <button
+                  onClick={() => handleReturnRequest(selectedOrder)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: 6,
+                    background: '#9333ea',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  Xử lý trả hàng
+                </button>
+              )}
+
+              <button onClick={() => setShowModal(false)} className={`${styles.btn} ${styles.btnSecondary}`} style={{ padding: '8px 20px', marginLeft: getNextStatusOptions(selectedOrder.trang_thai).length > 0 || selectedOrder.trang_thai === 'yêu cầu trả hàng' ? 'initial' : 'auto' }}>
                 Đóng
               </button>
             </div>
@@ -584,6 +938,208 @@ const ListOrder = () => {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
               <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={() => { setShowCancelModal(false); setCancelReason(''); }}>Huỷ</button>
               <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={confirmAdminCancelOrder} style={{ background: '#ef4444' }}>Xác nhận huỷ</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Return Request Processing Modal */}
+      {showReturnModal && selectedOrder && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div className={styles.card} style={{
+            background: 'var(--card-bg)',
+            borderRadius: 12,
+            padding: 24,
+            minWidth: 500,
+            maxWidth: 600,
+            maxHeight: '90vh',
+            overflow: 'auto',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            color: 'var(--text-primary)'
+          }}>
+            <h4 style={{ fontSize: '1.5rem', marginBottom: 20, color: 'var(--text-primary)' }}>
+              Xử lý yêu cầu trả hàng - #{selectedOrder.orderId || selectedOrder._id.slice(-8).toUpperCase()}
+            </h4>
+
+            {/* Customer Return Info */}
+            <div style={{ marginBottom: 20, padding: 15, background: '#f8f9fa', borderRadius: 8 }}>
+              <h5 style={{ marginBottom: 10, color: '#495057' }}>Thông tin từ khách hàng:</h5>
+
+              <div style={{ marginBottom: 8 }}>
+                <strong>Lý do:</strong>
+                <div style={{ marginTop: 4, padding: 8, background: '#fff', borderRadius: 4, fontSize: '0.9rem' }}>
+                  {selectedOrder.returnRequest?.reason || '---'}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 8 }}>
+                <strong>Thông tin hoàn tiền:</strong>
+                {selectedOrder.returnRequest?.bankInfo ? (
+                  <div style={{ marginTop: 4, padding: 8, background: '#fff', borderRadius: 4, fontSize: '0.85rem', border: '1px solid #dee2e6' }}>
+                    <div style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}>
+                      <span style={{ minWidth: '80px', color: '#495057', fontWeight: '500' }}>Ngân hàng:</span>
+                      <span style={{ color: '#007bff', fontWeight: '600', marginLeft: 8 }}>
+                        {selectedOrder.returnRequest.bankInfo.bankName || '---'}
+                      </span>
+                    </div>
+                    <div style={{ marginBottom: 4, display: 'flex', alignItems: 'center' }}>
+                      <span style={{ minWidth: '80px', color: '#495057', fontWeight: '500' }}>STK:</span>
+                      <span style={{ color: '#28a745', fontWeight: '600', fontFamily: 'monospace', marginLeft: 8 }}>
+                        {selectedOrder.returnRequest.bankInfo.accountNumber || '---'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ minWidth: '80px', color: '#495057', fontWeight: '500' }}>Chủ TK:</span>
+                      <span style={{ color: '#6c757d', fontWeight: '500', marginLeft: 8 }}>
+                        {selectedOrder.returnRequest.bankInfo.accountName || '---'}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{
+                    marginTop: 4,
+                    padding: 8,
+                    background: '#f8f9fa',
+                    borderRadius: 4,
+                    fontSize: '0.85rem',
+                    color: '#6c757d',
+                    fontStyle: 'italic',
+                    border: '1px solid #dee2e6'
+                  }}>
+                    Khách hàng chưa cung cấp thông tin hoàn tiền
+                  </div>
+                )}
+              </div>
+
+              {selectedOrder.returnRequest?.images && selectedOrder.returnRequest.images.length > 0 && (
+                <div>
+                  <strong>Hình ảnh:</strong>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                    {selectedOrder.returnRequest.images.map((img, idx) => (
+                      <a href={img} target="_blank" rel="noopener noreferrer" key={idx}>
+                        <img src={img} alt={`Return ${idx}`} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Admin Response Form */}
+            <div style={{ marginBottom: 20 }}>
+              <h5 style={{ marginBottom: 15, color: '#495057' }}>Phản hồi của admin:</h5>
+
+              <div style={{ marginBottom: 15 }}>
+                <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Trạng thái xử lý *</label>
+                <select
+                  value={returnRequestData.status}
+                  onChange={e => setReturnRequestData({ ...returnRequestData, status: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: 8,
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px'
+                  }}
+                >
+                  <option value="processing">Đang xử lý</option>
+                  <option value="approved">Chấp nhận - Hoàn tiền</option>
+                  <option value="rejected">Từ chối</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: 15 }}>
+                <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Ghi chú cho khách hàng</label>
+                <textarea
+                  value={returnRequestData.adminNotes}
+                  onChange={e => setReturnRequestData({ ...returnRequestData, adminNotes: e.target.value })}
+                  placeholder="Nhập ghi chú, hướng dẫn cho khách hàng..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: 8,
+                    border: '1px solid #ddd',
+                    borderRadius: 4,
+                    fontSize: '14px',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: 15 }}>
+                <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Hình ảnh đính kèm (không bắt buộc)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleReturnImageChange}
+                  style={{ marginBottom: 10 }}
+                />
+
+                {imagePreview.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {imagePreview.map((img, idx) => (
+                      <div key={idx} style={{ position: 'relative' }}>
+                        <img
+                          src={img.preview}
+                          alt={`Preview ${idx}`}
+                          style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 4 }}
+                        />
+                        <button
+                          onClick={() => {
+                            const newPreview = [...imagePreview];
+                            newPreview.splice(idx, 1);
+                            setImagePreview(newPreview);
+                          }}
+                          style={{
+                            position: 'absolute',
+                            top: 2,
+                            right: 2,
+                            background: 'rgba(255,0,0,0.7)',
+                            color: 'white',
+                            border: 'none',
+                            width: 20,
+                            height: 20,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            fontSize: 12
+                          }}
+                        >×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                onClick={() => {
+                  setShowReturnModal(false);
+                  setReturnRequestData({ adminNotes: '', images: [], status: 'processing' });
+                  setImagePreview([]);
+                }}
+                disabled={imageUploading}
+              >
+                Hủy
+              </button>
+              <button
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                onClick={submitReturnUpdate}
+                disabled={imageUploading || !returnRequestData.status}
+                style={{
+                  background: returnRequestData.status === 'approved' ? '#10b981' :
+                    returnRequestData.status === 'rejected' ? '#ef4444' : '#3b82f6'
+                }}
+              >
+                {imageUploading ? 'Đang xử lý...' :
+                  returnRequestData.status === 'approved' ? 'Chấp nhận & Hoàn tiền' :
+                    returnRequestData.status === 'rejected' ? 'Từ chối yêu cầu' : 'Cập nhật'}
+              </button>
             </div>
           </div>
         </div>

@@ -516,7 +516,7 @@ const Category = () => {
                                                         <div className="product-price">
                                                             <span className="current-price">{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                                             {product.oldPrice && <span className="old-price">{product.oldPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>}
-                                                        </div>
+                                                      </div>
                                                         <div className="product-rating">
                                                             <div className="stars">
                                                                 {[...Array(5)].map((_, i) => {
@@ -540,6 +540,7 @@ const Category = () => {
                                                                 <span className="rating-value">{(product.rating || 0).toFixed(1)}</span>
                                                                 <span className="review-count">({product.reviewCount || 0} đánh giá)</span>
                                                             </div>
+
                                                         </div>
                                                     </div>
                                                 </div>

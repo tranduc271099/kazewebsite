@@ -1,0 +1,27 @@
+.star-rating-fix .bi-star-fill,
+.star-rating-fix .bi-star-half,
+.star-rating-fix .bi-star {
+    color: #ffc107 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    margin-right: 3px !important;
+}
+
+.star-rating-fix .bi-star-half {
+    color: #ffc107 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    margin-right: 3px !important;
+    display: inline-block !important;
+}
+
+.star-rating-fix .bi-star {
+    color: #e2e2e2 !important;
+}
+
+.product-rating i.bi-star-fill,
+.product-rating i.bi-star-half {
+    color: #ffc107 !important;
+    font-weight: bold !important;
+    font-size: 18px !important;
+}

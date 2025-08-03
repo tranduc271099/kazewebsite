@@ -93,6 +93,32 @@ const ProductListSection = () => {
                 z-index: 1000;
                 pointer-events: none;
             }
+            .product-sold {
+                font-size: 0.85rem;
+                color: #666;
+                margin-top: 4px;
+            }
+            .product-sold span {
+                color: #ff6a00;
+                font-weight: 500;
+            }
+            .rating-count {
+                margin-left: 5px;
+                font-size: 0.85rem;
+                color: #666;
+            }
+            .product-rating i {
+                color: #ffc107 !important;
+            }
+            .product-rating i.bi-star-fill {
+                color: #ffc107 !important;
+            }
+            .product-rating i.bi-star-half {
+                color: #ffc107 !important;
+            }
+            .product-rating i.bi-star {
+                color: #e2e2e2 !important;
+            }
             .custom-modal-dialog {
                 position: fixed;
                 top: 50%; left: 50%;
@@ -410,6 +436,7 @@ const ProductListSection = () => {
                                                     ({product.reviewCount || 0} đánh giá)
                                                 </span>
                                             </div>
+
                                         </div>
                                     </div>
                                     {selectedProduct && selectedProduct._id === product._id && (

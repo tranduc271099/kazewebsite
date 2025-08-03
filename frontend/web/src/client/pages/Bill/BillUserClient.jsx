@@ -22,13 +22,57 @@ const BillUserClient = () => {
     const [cancelingBillId, setCancelingBillId] = useState(null);
     const [sortType, setSortType] = useState('newest');
     const [dateFilter, setDateFilter] = useState('');
+    // Return request state
+    const [showReturnModal, setShowReturnModal] = useState(false);
+    const [returnReason, setReturnReason] = useState('');
+    const [returnImages, setReturnImages] = useState([]);
+    const [bankInfo, setBankInfo] = useState({ bankName: '', accountNumber: '', accountName: '' });
+    const [returnBillId, setReturnBillId] = useState(null);
+    const [imagePreview, setImagePreview] = useState([]);
+    const [imageUploading, setImageUploading] = useState(false);
+
+    // Danh sách ngân hàng Việt Nam
+    const bankList = [
+        'Vietcombank - Ngân hàng TMCP Ngoại thương Việt Nam',
+        'VietinBank - Ngân hàng TMCP Công thương Việt Nam',
+        'BIDV - Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
+        'Agribank - Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam',
+        'Techcombank - Ngân hàng TMCP Kỹ thương Việt Nam',
+        'MBBank - Ngân hàng TMCP Quân đội',
+        'ACB - Ngân hàng TMCP Á Châu',
+        'VPBank - Ngân hàng TMCP Việt Nam Thịnh vượng',
+        'TPBank - Ngân hàng TMCP Tiên Phong',
+        'Sacombank - Ngân hàng TMCP Sài Gòn Thương tín',
+        'HDBank - Ngân hàng TMCP Phát triển Thành phố Hồ Chí Minh',
+        'SHB - Ngân hàng TMCP Sài Gòn - Hà Nội',
+        'VIB - Ngân hàng TMCP Quốc tế Việt Nam',
+        'MSB - Ngân hàng TMCP Hàng Hải',
+        'OCB - Ngân hàng TMCP Phương Đông',
+        'SeABank - Ngân hàng TMCP Đông Nam Á',
+        'LienVietPostBank - Ngân hàng TMCP Bưu điện Liên Việt',
+        'VietCapitalBank - Ngân hàng TMCP Bản Việt',
+        'SCB - Ngân hàng TMCP Sài Gòn',
+        'NCB - Ngân hàng TMCP Quốc Dân',
+        'OceanBank - Ngân hàng Thương mại TNHH MTV Đại Dương',
+        'GPBank - Ngân hàng TMCP Dầu khí Toàn Cầu',
+        'VietABank - Ngân hàng TMCP Việt Á',
+        'NamABank - Ngân hàng TMCP Nam Á',
+        'PGBank - Ngân hàng TMCP Xăng dầu Petrolimex',
+        'KienLongBank - Ngân hàng TMCP Kiên Long',
+        'BacABank - Ngân hàng TMCP Bắc Á',
+        'PVcomBank - Ngân hàng TMCP Đại Chúng Việt Nam',
+        'Eximbank - Ngân hàng TMCP Xuất Nhập khẩu Việt Nam',
+        'ABBANK - Ngân hàng TMCP An Bình'
+    ];
 
     const statusTabs = [
         { key: 'all', name: 'Tất cả' },
         { key: 'chờ xác nhận', name: 'Chờ xác nhận' },
-        { key: 'đã xác nhận', name: 'Chờ lấy hàng' },
+        { key: 'đã xác nhận', name: 'Đã xác nhận' },
         { key: 'đang giao hàng', name: 'Đang giao' },
         { key: 'đã giao hàng', name: 'Hoàn thành' },
+        { key: 'yêu cầu trả hàng', name: 'Trả hàng' },
+        { key: 'đã hoàn tiền', name: 'Đã hoàn tiền' },
         { key: 'đã hủy', name: 'Đã hủy' },
     ];
 
@@ -122,6 +166,225 @@ const BillUserClient = () => {
         }
     };
 
+    // Xử lý tiếp tục thanh toán VNPay
+    const handleContinuePayment = async (bill) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                navigate('/login');
+                return;
+            }
+
+            toast.info('Đang tạo link thanh toán...', { autoClose: 3000 });
+
+            // Đảm bảo orderId có giá trị hợp lệ
+            const orderIdToUse = bill.orderId || bill._id || Date.now().toString();
+            console.log('Continue payment - bill.orderId:', bill.orderId);
+            console.log('Continue payment - bill._id:', bill._id);
+            console.log('Continue payment - orderIdToUse:', orderIdToUse);
+
+            // Gọi API tạo lại URL thanh toán VNPay với orderId hiện tại và timeout
+            const vnpayRes = await axios.post("http://localhost:5000/api/payment/vnpay", {
+                amount: (bill.tong_tien || 0) - (bill.discount || 0),
+                orderInfo: `Tiep tuc thanh toan don hang ${bill.orderId || bill._id.slice(-8).toUpperCase()}`,
+                orderType: "other",
+                orderId: orderIdToUse // đảm bảo có giá trị
+            }, {
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 15000 // 15 giây timeout
+            });
+
+            console.log('VNPay continue payment response:', vnpayRes.data);
+
+            if (vnpayRes.data && vnpayRes.data.paymentUrl) {
+                console.log('Redirecting to VNPay URL:', vnpayRes.data.paymentUrl);
+                toast.success("Đang chuyển hướng đến VNPay...", { autoClose: 1000 });
+
+                // Delay nhỏ trước khi redirect
+                setTimeout(() => {
+                    window.location.href = vnpayRes.data.paymentUrl;
+                }, 500);
+            } else {
+                console.error('Invalid VNPay response:', vnpayRes.data);
+                toast.error("Không tạo được link thanh toán VNPay");
+            }
+        } catch (err) {
+            console.error("VNPay continue payment error:", err);
+
+            if (err.code === 'ECONNABORTED') {
+                toast.error("Kết nối VNPay quá chậm, vui lòng thử lại");
+            } else if (err.response?.status === 404) {
+                toast.error("Không tìm thấy API thanh toán VNPay");
+            } else if (err.response?.status >= 500) {
+                toast.error("Lỗi server VNPay, vui lòng thử lại sau");
+            } else if (err.response?.status === 401) {
+                toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+                navigate('/login');
+            } else {
+                toast.error(`Lỗi VNPay: ${err.response?.data?.message || err.message}`);
+            }
+        }
+    };
+
+    // Xử lý yêu cầu trả hàng
+    const handleReturnRequest = (billId) => {
+        setReturnBillId(billId);
+        setReturnReason('');
+        setReturnImages([]);
+        setBankInfo({ bankName: '', accountNumber: '', accountName: '' });
+        setImagePreview([]);
+        setShowReturnModal(true);
+    };
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        setImageUploading(true);
+
+        const newImagePreviews = files.map(file => ({
+            file,
+            preview: URL.createObjectURL(file)
+        }));
+
+        setImagePreview([...imagePreview, ...newImagePreviews]);
+        setImageUploading(false);
+    };
+
+    const uploadImages = async (files) => {
+        const uploadPromises = files.map(async (file) => {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.post(
+                    'http://localhost:5000/api/upload/image',
+                    formData,
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                );
+                return response.data.url;
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                throw error;
+            }
+        });
+
+        return Promise.all(uploadPromises);
+    };
+
+    const submitReturnRequest = async () => {
+        // Validation
+        if (!returnReason.trim()) {
+            toast.error('Vui lòng nhập lý do trả hàng!');
+            return;
+        }
+
+        if (!bankInfo.bankName || !bankInfo.accountNumber.trim() || !bankInfo.accountName.trim()) {
+            toast.error('Vui lòng nhập đầy đủ thông tin tài khoản ngân hàng!');
+            return;
+        }
+
+        // Validate account number (chỉ cho phép số)
+        if (!/^\d+$/.test(bankInfo.accountNumber.trim())) {
+            toast.error('Số tài khoản chỉ được chứa số!');
+            return;
+        }
+
+        try {
+            setImageUploading(true);
+            let imageUrls = [];
+
+            // Upload images if any
+            if (imagePreview.length > 0) {
+                try {
+                    const files = imagePreview.map(item => item.file);
+                    imageUrls = await uploadImages(files);
+                } catch (uploadError) {
+                    console.error('Image upload error:', uploadError);
+                    toast.error('Có lỗi khi tải lên hình ảnh. Vui lòng thử lại!');
+                    return;
+                }
+            }
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+                return;
+            }
+
+            const response = await axios.post(
+                `http://localhost:5000/api/bill/${returnBillId}/return-request`,
+                {
+                    reason: returnReason.trim(),
+                    images: imageUrls,
+                    bankInfo: {
+                        bankName: bankInfo.bankName,
+                        accountNumber: bankInfo.accountNumber.trim(),
+                        accountName: bankInfo.accountName.trim()
+                    }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                toast.success('Đã gửi yêu cầu trả hàng thành công!');
+
+                // Update bills state
+                setBills(bills.map(bill =>
+                    bill._id === returnBillId
+                        ? {
+                            ...bill,
+                            trang_thai: 'yêu cầu trả hàng',
+                            returnRequest: {
+                                reason: returnReason.trim(),
+                                images: imageUrls,
+                                bankInfo: {
+                                    bankName: bankInfo.bankName,
+                                    accountNumber: bankInfo.accountNumber.trim(),
+                                    accountName: bankInfo.accountName.trim()
+                                },
+                                requestDate: new Date(),
+                                status: 'pending'
+                            }
+                        }
+                        : bill
+                ));
+
+                // Reset form and close modal
+                setReturnReason('');
+                setBankInfo({ bankName: '', accountNumber: '', accountName: '' });
+                setImagePreview([]);
+                setReturnImages([]);
+                setReturnBillId(null);
+                setShowReturnModal(false);
+            }
+        } catch (error) {
+            console.error('Submit return request error:', error);
+
+            if (error.response?.status === 401) {
+                toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
+            } else if (error.response?.status === 404) {
+                toast.error('Không tìm thấy đơn hàng!');
+            } else if (error.response?.status === 400) {
+                toast.error(error.response?.data?.message || 'Dữ liệu không hợp lệ!');
+            } else {
+                toast.error(error.response?.data?.message || 'Có lỗi khi gửi yêu cầu trả hàng. Vui lòng thử lại!');
+            }
+        } finally {
+            setImageUploading(false);
+        }
+    };
+
     const showBillDetail = (bill) => {
         setSelectedBill(bill);
         setShowDetailModal(true);
@@ -131,8 +394,13 @@ const BillUserClient = () => {
         switch (status) {
             case 'chờ xác nhận': return '#f59e0b';
             case 'đã xác nhận': return '#3b82f6';
-            case 'đang giao': return '#8b5cf6';
+            case 'đang giao hàng': return '#8b5cf6';
             case 'đã giao hàng': return '#10b981';
+            case 'hoàn thành': return '#16a34a';
+            case 'đã nhận hàng': return '#16a34a';
+            case 'yêu cầu trả hàng': return '#9333ea';
+            case 'đang xử lý trả hàng': return '#9333ea';
+            case 'đã hoàn tiền': return '#0284c7';
             case 'đã hủy': return '#ef4444';
             default: return '#6b7280';
         }
@@ -145,6 +413,10 @@ const BillUserClient = () => {
             'đang giao hàng': 'ĐANG VẬN CHUYỂN',
             'đã giao hàng': 'GIAO HÀNG THÀNH CÔNG',
             'hoàn thành': 'ĐÃ HOÀN THÀNH',
+            'đã nhận hàng': 'ĐÃ NHẬN HÀNG',
+            'yêu cầu trả hàng': 'YÊU CẦU TRẢ HÀNG',
+            'đang xử lý trả hàng': 'ĐANG XỬ LÝ TRẢ HÀNG',
+            'đã hoàn tiền': 'ĐÃ HOÀN TIỀN',
             'đã hủy': 'ĐƠN HÀNG ĐÃ HỦY',
         };
         return statusMap[status] || status.toUpperCase();
@@ -277,7 +549,9 @@ const BillUserClient = () => {
                                                     </div>
                                                     <span className="product-price">{formatPrice(item.gia)}</span>
                                                 </div>
-                                            ))}                                            <div className="order-footer">
+                                            ))}
+
+                                            <div className="order-footer">
                                                 <div className="total-amount">
                                                     <span>Thành tiền:</span>
                                                     <span className="amount">{formatPrice((bill.tong_tien || 0) - (bill.discount || 0))}</span>
@@ -287,8 +561,19 @@ const BillUserClient = () => {
                                                     {bill.trang_thai === 'chờ xác nhận' && (
                                                         <button className="shopee-btn shopee-btn-primary" onClick={() => handleCancelOrder(bill._id)}>Hủy Đơn</button>
                                                     )}
+                                                    {/* Nút tiếp tục thanh toán chỉ cho VNPay chưa thanh toán và chưa bị hủy */}
+                                                    {(bill.thanh_toan === 'chưa thanh toán' &&
+                                                        (bill.phuong_thuc_thanh_toan === 'vnpay' || bill.phuong_thuc_thanh_toan === 'VNPAY') &&
+                                                        bill.trang_thai !== 'đã hủy') && (
+                                                            <button className="shopee-btn shopee-btn-success" onClick={() => handleContinuePayment(bill)}>
+                                                                Tiếp Tục Thanh Toán
+                                                            </button>
+                                                        )}
                                                     {bill.trang_thai === 'đã giao hàng' && (
-                                                        <button className="shopee-btn shopee-btn-primary" onClick={() => handleConfirmReceived(bill._id)}>Đã Nhận Hàng</button>
+                                                        <>
+                                                            <button className="shopee-btn shopee-btn-primary" onClick={() => handleConfirmReceived(bill._id)}>Đã Nhận Hàng</button>
+                                                            <button className="shopee-btn shopee-btn-danger" onClick={() => handleReturnRequest(bill._id)}>Yêu Cầu Trả Hàng</button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
@@ -305,8 +590,8 @@ const BillUserClient = () => {
                     <div className="modal-content order-detail-modern" onClick={e => e.stopPropagation()} style={{ maxWidth: 1050, minWidth: 800 }}>
                         {/* Header */}
                         <div className="order-detail-header">
-                            <span>Chi tiết đơn hàng <b>#{selectedBill.orderId || selectedBill._id.slice(-8).toUpperCase()}</b></span>
-                            <span style={{ fontSize: '1rem', color: '#888', fontWeight: 400, marginLeft: 'auto', marginRight: 24 }}>
+                            <span style={{ fontSize: '18px', fontWeight: '700', color: '#000' }}>Chi tiết đơn hàng <b style={{ color: '#000', fontWeight: '800' }}>#{selectedBill.orderId || selectedBill._id.slice(-8).toUpperCase()}</b></span>
+                            <span style={{ fontSize: '1rem', color: '#555', fontWeight: 500, marginLeft: 'auto', marginRight: 24 }}>
                                 Ngày đặt hàng: {formatDate(selectedBill.ngay_tao)}
                             </span>
                             <button className="close-btn" onClick={() => setShowDetailModal(false)}>&times;</button>
@@ -319,14 +604,14 @@ const BillUserClient = () => {
                                     <div className="order-detail-product-row order-detail-product-row-large" key={item.san_pham_id?._id + idx || idx}>
                                         <img className="order-detail-product-img" src={item.san_pham_id?.images?.[0] || 'https://via.placeholder.com/80'} alt={item.san_pham_id?.name || 'Sản phẩm'} />
                                         <div className="order-detail-product-info">
-                                            <div className="order-detail-product-name">{item.san_pham_id?.name || 'Sản phẩm không tồn tại'}</div>
-                                            <div className="order-detail-product-variant">
+                                            <div className="order-detail-product-name" style={{ color: '#000', fontWeight: '600', fontSize: '16px' }}>{item.san_pham_id?.name || 'Sản phẩm không tồn tại'}</div>
+                                            <div className="order-detail-product-variant" style={{ color: '#333', fontSize: '14px', fontWeight: '500' }}>
                                                 Phân loại: {item.kich_thuoc} - {item.mau_sac} &nbsp;|&nbsp; SL: {item.so_luong}
                                             </div>
-                                            <div className="order-detail-product-variant-price" style={{ fontSize: 14, color: '#2563eb', marginTop: 2 }}>
+                                            <div className="order-detail-product-variant-price" style={{ fontSize: 14, color: '#2563eb', marginTop: 2, fontWeight: '600' }}>
                                                 Giá biến thể: {formatPrice(item.gia)}
                                             </div>
-                                            <div className="order-detail-product-variant-total" style={{ fontSize: 13, color: '#666', marginTop: 2 }}>
+                                            <div className="order-detail-product-variant-total" style={{ fontSize: 13, color: '#333', marginTop: 2, fontWeight: '600' }}>
                                                 Tổng: {formatPrice(item.gia * item.so_luong)}
                                             </div>
                                         </div>
@@ -335,19 +620,19 @@ const BillUserClient = () => {
                                 ))}
                                 <hr className="order-detail-hr order-detail-hr-bold" />
                                 {/* Bảng tạm tính, phí ship, tổng cộng */}
-                                <div className="order-detail-summary-row" style={{ marginTop: 24 }}>
+                                <div className="order-detail-summary-row" style={{ marginTop: 24, color: '#333', fontWeight: '500' }}>
                                     <span>Tạm tính</span>
                                     <span>{formatPrice(selectedBill.danh_sach_san_pham.reduce((sum, item) => sum + (item.gia * item.so_luong), 0))}</span>
                                 </div>
-                                <div className="order-detail-summary-row">
+                                <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Phí vận chuyển</span>
                                     <span>{formatPrice(selectedBill.shippingFee || 0)}</span>
                                 </div>
-                                <div className="order-detail-summary-row">
+                                <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Giảm giá</span>
-                                    <span style={{ color: '#10b981' }}>-{formatPrice(selectedBill.discount || 0)}</span>
+                                    <span style={{ color: '#10b981', fontWeight: '600' }}>-{formatPrice(selectedBill.discount || 0)}</span>
                                 </div>
-                                <div className="order-detail-summary-row order-detail-summary-total">
+                                <div className="order-detail-summary-row order-detail-summary-total" style={{ color: '#000', fontWeight: '700' }}>
                                     <span>Tổng cộng</span>
                                     <span>{formatPrice((selectedBill.tong_tien || 0) - (selectedBill.discount || 0))}</span>
                                 </div>
@@ -376,11 +661,158 @@ const BillUserClient = () => {
                                     <div style={{ color: '#000' }}>Trạng thái thanh toán: <span style={{ color: selectedBill.thanh_toan === 'đã thanh toán' ? '#10b981' : selectedBill.thanh_toan === 'chưa thanh toán' ? '#f59e0b' : '#000', fontWeight: 600 }}>{selectedBill.thanh_toan || '---'}</span></div>
                                     <div style={{ color: '#000' }}>Trạng thái đơn hàng: <span style={{ color: selectedBill.trang_thai === 'đã hoàn thành' || selectedBill.trang_thai === 'hoàn thành' ? '#10b981' : selectedBill.trang_thai === 'đã hủy' ? '#ef4444' : selectedBill.trang_thai === 'chờ xác nhận' ? '#2563eb' : '#000' }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 </div>
+
+                                {(selectedBill.trang_thai === 'yêu cầu trả hàng' || selectedBill.trang_thai === 'đang xử lý trả hàng' || selectedBill.trang_thai === 'đã hoàn tiền') && (
+                                    <div className="order-detail-section">
+                                        <div className="order-detail-section-title" style={{ color: '#000', marginBottom: 8 }}>THÔNG TIN TRẢ HÀNG</div>
+
+                                        {/* Trạng thái và ngày yêu cầu */}
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            marginBottom: 6,
+                                            padding: '4px 8px',
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: '4px',
+                                            fontSize: '13px'
+                                        }}>
+                                            <span style={{ color: '#666' }}>Trạng thái:</span>
+                                            <span style={{
+                                                color: selectedBill.returnRequest?.status === 'pending' ? '#f59e0b' :
+                                                    selectedBill.returnRequest?.status === 'processing' ? '#3b82f6' :
+                                                        selectedBill.returnRequest?.status === 'approved' ? '#10b981' :
+                                                            selectedBill.returnRequest?.status === 'rejected' ? '#ef4444' : '#000',
+                                                fontWeight: '600'
+                                            }}>
+                                                {selectedBill.returnRequest?.status === 'pending' ? 'Chờ xử lý' :
+                                                    selectedBill.returnRequest?.status === 'processing' ? 'Đang xử lý' :
+                                                        selectedBill.returnRequest?.status === 'approved' ? 'Đã chấp nhận' :
+                                                            selectedBill.returnRequest?.status === 'rejected' ? 'Đã từ chối' : '---'}
+                                            </span>
+                                        </div>
+
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            marginBottom: 8,
+                                            fontSize: '13px',
+                                            color: '#666'
+                                        }}>
+                                            <span>Ngày yêu cầu:</span>
+                                            <span style={{ color: '#000' }}>
+                                                {selectedBill.returnRequest?.requestDate ? formatDate(selectedBill.returnRequest.requestDate) : '---'}
+                                            </span>
+                                        </div>
+
+                                        {/* Lý do trả hàng - rút gọn */}
+                                        <div style={{ marginBottom: 8 }}>
+                                            <div style={{ fontSize: '13px', color: '#666', marginBottom: 2 }}>Lý do:</div>
+                                            <div style={{
+                                                fontSize: '13px',
+                                                color: '#000',
+                                                backgroundColor: '#f8f9fa',
+                                                padding: '4px 8px',
+                                                borderRadius: '4px',
+                                                maxHeight: '40px',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical'
+                                            }}>
+                                                {selectedBill.returnRequest?.reason || '---'}
+                                            </div>
+                                        </div>
+
+                                        {/* Thông tin ngân hàng - gọn hơn */}
+                                        {selectedBill.returnRequest?.bankInfo && (
+                                            <div style={{ marginBottom: 8 }}>
+                                                <div style={{ fontSize: '13px', color: '#666', marginBottom: 4 }}>Thông tin hoàn tiền:</div>
+                                                <div style={{
+                                                    backgroundColor: '#f8f9fa',
+                                                    padding: '6px 8px',
+                                                    borderRadius: '4px',
+                                                    fontSize: '12px'
+                                                }}>
+                                                    <div style={{ color: '#000', marginBottom: 2 }}>
+                                                        <b>{selectedBill.returnRequest.bankInfo.bankName.split(' - ')[0]}</b>
+                                                    </div>
+                                                    <div style={{ color: '#666', marginBottom: 1 }}>
+                                                        STK: {selectedBill.returnRequest.bankInfo.accountNumber}
+                                                    </div>
+                                                    <div style={{ color: '#666' }}>
+                                                        CTK: {selectedBill.returnRequest.bankInfo.accountName}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Ghi chú admin */}
+                                        {selectedBill.returnRequest?.adminNotes && (
+                                            <div style={{ marginBottom: 8 }}>
+                                                <div style={{ fontSize: '13px', color: '#666', marginBottom: 2 }}>Ghi chú admin:</div>
+                                                <div style={{
+                                                    fontSize: '12px',
+                                                    color: '#000',
+                                                    backgroundColor: '#fff3cd',
+                                                    padding: '4px 8px',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #ffeaa7'
+                                                }}>
+                                                    {selectedBill.returnRequest.adminNotes}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Hình ảnh - thu gọn */}
+                                        {selectedBill.returnRequest?.images && selectedBill.returnRequest.images.length > 0 && (
+                                            <div>
+                                                <div style={{ fontSize: '13px', color: '#666', marginBottom: 4 }}>
+                                                    Hình ảnh ({selectedBill.returnRequest.images.length}):
+                                                </div>
+                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                                                    {selectedBill.returnRequest.images.slice(0, 3).map((img, idx) => (
+                                                        <a href={img} target="_blank" rel="noopener noreferrer" key={idx}>
+                                                            <img
+                                                                src={img}
+                                                                alt={`Return image ${idx}`}
+                                                                style={{
+                                                                    width: 50,
+                                                                    height: 50,
+                                                                    objectFit: 'cover',
+                                                                    borderRadius: '4px',
+                                                                    border: '1px solid #ddd'
+                                                                }}
+                                                            />
+                                                        </a>
+                                                    ))}
+                                                    {selectedBill.returnRequest.images.length > 3 && (
+                                                        <div style={{
+                                                            width: 50,
+                                                            height: 50,
+                                                            backgroundColor: '#f8f9fa',
+                                                            border: '1px solid #ddd',
+                                                            borderRadius: '4px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '11px',
+                                                            color: '#666'
+                                                        }}>
+                                                            +{selectedBill.returnRequest.images.length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
             )}
+
             {showCancelModal && (
                 <div className="cancel-modal">
                     <div className="cancel-modal-content">
@@ -389,6 +821,162 @@ const BillUserClient = () => {
                         <div className="cancel-modal-actions">
                             <button className="shopee-btn shopee-btn-secondary" onClick={() => setShowCancelModal(false)}>Đóng</button>
                             <button className="shopee-btn shopee-btn-primary" onClick={confirmCancelOrder}>Xác nhận</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showReturnModal && (
+                <div className="cancel-modal">
+                    <div className="cancel-modal-content" style={{ maxWidth: 500, width: '100%' }}>
+                        <h4 style={{ fontWeight: 600, marginBottom: 15 }}>Yêu cầu trả hàng hoàn tiền</h4>
+                        <div className="form-group" style={{ marginBottom: 15 }}>
+                            <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Lý do trả hàng *</label>
+                            <textarea
+                                value={returnReason}
+                                onChange={e => setReturnReason(e.target.value)}
+                                placeholder="Vui lòng mô tả lý do trả hàng..."
+                                rows={4}
+                                style={{
+                                    width: '100%',
+                                    padding: 8,
+                                    border: '1px solid #ddd',
+                                    borderRadius: '4px',
+                                    fontSize: '14px',
+                                    resize: 'vertical'
+                                }}
+                                required
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: 15 }}>
+                            <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Thông tin hoàn tiền *</label>
+                            <div style={{ marginBottom: 10 }}>
+                                <label style={{ display: 'block', marginBottom: 3, fontSize: 14 }}>Tên ngân hàng</label>
+                                <select
+                                    value={bankInfo.bankName}
+                                    onChange={e => setBankInfo({ ...bankInfo, bankName: e.target.value })}
+                                    style={{
+                                        width: '100%',
+                                        padding: 8,
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        fontSize: '14px'
+                                    }}
+                                    required
+                                >
+                                    <option value="">-- Chọn ngân hàng --</option>
+                                    {bankList.map((bank, index) => (
+                                        <option key={index} value={bank}>
+                                            {bank}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div style={{ marginBottom: 10 }}>
+                                <label style={{ display: 'block', marginBottom: 3, fontSize: 14 }}>Số tài khoản</label>
+                                <input
+                                    type="text"
+                                    value={bankInfo.accountNumber}
+                                    onChange={e => {
+                                        // Chỉ cho phép nhập số
+                                        const value = e.target.value.replace(/\D/g, '');
+                                        setBankInfo({ ...bankInfo, accountNumber: value });
+                                    }}
+                                    placeholder="Nhập số tài khoản..."
+                                    style={{
+                                        width: '100%',
+                                        padding: 8,
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        fontSize: '14px'
+                                    }}
+                                    maxLength="20"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: 3, fontSize: 14 }}>Tên chủ tài khoản</label>
+                                <input
+                                    type="text"
+                                    value={bankInfo.accountName}
+                                    onChange={e => setBankInfo({ ...bankInfo, accountName: e.target.value })}
+                                    placeholder="Nhập tên chủ tài khoản..."
+                                    style={{
+                                        width: '100%',
+                                        padding: 8,
+                                        border: '1px solid #ddd',
+                                        borderRadius: '4px',
+                                        fontSize: '14px'
+                                    }}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: 15 }}>
+                            <label style={{ display: 'block', marginBottom: 5, fontWeight: 500 }}>Hình ảnh sản phẩm (không bắt buộc)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleImageChange}
+                                style={{ marginBottom: 10 }}
+                            />
+
+                            {imagePreview.length > 0 && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                    {imagePreview.map((img, idx) => (
+                                        <div key={idx} style={{ position: 'relative' }}>
+                                            <img
+                                                src={img.preview}
+                                                alt={`Preview ${idx}`}
+                                                style={{ width: 80, height: 80, objectFit: 'cover' }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const newPreview = [...imagePreview];
+                                                    newPreview.splice(idx, 1);
+                                                    setImagePreview(newPreview);
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    right: 0,
+                                                    background: 'rgba(255,0,0,0.7)',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: '50%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    cursor: 'pointer',
+                                                    fontSize: 12
+                                                }}
+                                            >×</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="cancel-modal-actions">
+                            <button
+                                className="shopee-btn shopee-btn-secondary"
+                                onClick={() => setShowReturnModal(false)}
+                                disabled={imageUploading}
+                            >
+                                Đóng
+                            </button>
+                            <button
+                                className="shopee-btn shopee-btn-primary"
+                                onClick={submitReturnRequest}
+                                disabled={imageUploading}
+                            >
+                                {imageUploading ? 'Đang xử lý...' : 'Gửi yêu cầu'}
+                            </button>
                         </div>
                     </div>
                 </div>

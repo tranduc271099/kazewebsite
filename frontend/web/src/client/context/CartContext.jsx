@@ -77,6 +77,58 @@ export const CartProvider = ({ children }) => {
         }
     };
 
+    // Refresh stock only (silent, no toast)
+    const refreshStockOnly = async () => {
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const response = await axios.post(`${API_URL}/cart/refresh-stock`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.data.success) {
+                const formattedItems = response.data.cart.items
+                    .filter(item => item.productId)
+                    .map(item => {
+                        const variantInProduct = item.productId && Array.isArray(item.productId.variants)
+                            ? item.productId.variants.find(
+                                v => v.attributes.color === item.color && v.attributes.size === item.size
+                            )
+                            : null;
+
+                        return {
+                            id: item.productId?._id,
+                            name: item.productId?.name,
+                            price: variantInProduct ? variantInProduct.price : item.productId?.price,
+                            image: item.productId?.images?.[0] || '',
+                            color: item.color,
+                            size: item.size,
+                            quantity: item.quantity,
+                            stock: item.stock, // Use updated stock from response
+                            availableColors: item.productId?.attributes?.colors || [],
+                            availableSizes: item.productId?.attributes?.sizes || [],
+                            variants: item.productId?.variants || [],
+                            isActive: item.isActive, // Use updated isActive from response  
+                        };
+                    });
+                
+                console.log('🔄 Stock refreshed silently:', formattedItems.map(item => ({
+                    name: item.name,
+                    isActive: item.isActive,
+                    stock: item.stock
+                })));
+                
+                setCartItems(formattedItems);
+                checkCartNotifications(formattedItems);
+            }
+        } catch (error) {
+            console.error('Error refreshing stock:', error);
+        }
+    };
+
     // Hàm thông báo khi tồn kho thay đổi
     const notifyStockUpdate = (productId) => {
         const event = new CustomEvent('stockUpdated', {
@@ -209,11 +261,24 @@ export const CartProvider = ({ children }) => {
         }
 
         try {
+            // Chuẩn hóa giá trị
+            const normalizedColor = (item.color || '').trim();
+            const normalizedSize = (item.size || '').trim();
+            const quantity = parseInt(item.quantity || 1);
+
+            // Log để debug
+            console.log('Adding to cart:', {
+                id: item.id,
+                quantity: quantity,
+                color: normalizedColor,
+                size: normalizedSize
+            });
+
             const response = await axios.post(`${API_URL}/cart`, {
                 productId: item.id,
-                quantity: item.quantity || 1, // Default quantity to 1 if not provided
-                color: item.color || '',
-                size: item.size || '',
+                quantity: quantity, // Đảm bảo là số
+                color: normalizedColor, // Đảm bảo không có khoảng trắng thừa
+                size: normalizedSize, // Đảm bảo không có khoảng trắng thừa
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -224,27 +289,48 @@ export const CartProvider = ({ children }) => {
             const formattedItems = response.data.items
                 .filter(item => item.productId) // Bỏ item không có productId
                 .map(item => {
-                    // Find the specific variant to get its stock
-                    const variantInProduct = item.productId && Array.isArray(item.productId.variants)
-                        ? item.productId.variants.find(
-                            v => v.attributes.color === item.color && v.attributes.size === item.size
-                        )
-                        : null;
+                    try {
+                        // Find the specific variant to get its stock
+                        const variantInProduct = item.productId && Array.isArray(item.productId.variants)
+                            ? item.productId.variants.find(
+                                v => v.attributes && v.attributes.color === item.color && v.attributes.size === item.size
+                            )
+                            : null;
 
-                    return {
-                        id: item.productId._id,
-                        name: item.productId.name,
-                        price: variantInProduct ? variantInProduct.price : item.productId.price,
-                        image: item.productId.images?.[0] || '',
-                        color: item.color,
-                        size: item.size,
-                        quantity: item.quantity,
-                        stock: variantInProduct ? variantInProduct.stock : item.productId.stock, // Use variant stock if found
-                        availableColors: item.productId.attributes?.colors || [],
-                        availableSizes: item.productId.attributes?.sizes || [],
-                        variants: item.productId.variants || [],
-                        isActive: item.productId?.isActive, // Add isActive status
-                    };
+                        return {
+                            id: item.productId._id,
+                            name: item.productId.name || 'Sản phẩm',
+                            // Ưu tiên sử dụng giá đã lưu trong giỏ hàng (priceAtTimeOfAddition)
+                            price: item.priceAtTimeOfAddition !== undefined ? item.priceAtTimeOfAddition :
+                                (variantInProduct ? variantInProduct.price : (item.productId.price || 0)),
+                            image: (item.productId.images && item.productId.images.length > 0) ? item.productId.images[0] : '',
+                            color: item.color || '',
+                            size: item.size || '',
+                            quantity: item.quantity || 1,
+                            stock: variantInProduct ? variantInProduct.stock : (item.productId.stock || 0), // Use variant stock if found
+                            availableColors: (item.productId.attributes && item.productId.attributes.colors) ? item.productId.attributes.colors : [],
+                            availableSizes: (item.productId.attributes && item.productId.attributes.sizes) ? item.productId.attributes.sizes : [],
+                            variants: Array.isArray(item.productId.variants) ? item.productId.variants : [],
+                            isActive: item.productId.isActive !== undefined ? item.productId.isActive : true, // Add isActive status with default
+                        };
+                    } catch (err) {
+                        console.error('Lỗi khi xử lý sản phẩm:', err, item);
+                        // Return a default object for items that couldn't be processed
+                        return {
+                            id: item.productId ? item.productId._id : 'unknown',
+                            name: item.productId ? item.productId.name : 'Sản phẩm không xác định',
+                            price: 0,
+                            image: '',
+                            color: item.color || '',
+                            size: item.size || '',
+                            quantity: item.quantity || 1,
+                            stock: 0,
+                            availableColors: [],
+                            availableSizes: [],
+                            variants: [],
+                            isActive: false
+                        };
+                    }
                 });
             setCartItems(formattedItems);
             checkCartNotifications(formattedItems);
@@ -528,6 +614,7 @@ export const CartProvider = ({ children }) => {
                 notifyStockUpdate, // Add notifyStockUpdate to context
                 checkCartNotifications, // Add checkCartNotifications to context
                 refreshCart, // Add refreshCart to context
+                refreshStockOnly, // Add silent stock refresh to context
             }}
         >
             {children}
