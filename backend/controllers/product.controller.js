@@ -503,3 +503,197 @@ exports.addSampleRatings = async (req, res) => {
     }
 };
 
+// Delete product with order check
+exports.deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Kiểm tra sản phẩm có tồn tại không
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+        }
+
+        // Debug: Hiển thị thông tin sản phẩm
+        console.log(`🗑️ Attempting to delete product: ${product.name} (ID: ${id})`);
+
+        // Kiểm tra sản phẩm có trong đơn hàng nào không
+        const Bill = require('../models/Bill/BillUser');
+        
+        // Debug: Hiển thị query được sử dụng
+        console.log(`🔍 Searching for orders with query: { 'danh_sach_san_pham.san_pham_id': '${id}' }`);
+        
+        const hasOrders = await Bill.findOne({
+            'danh_sach_san_pham.san_pham_id': id
+        });
+
+        console.log(`🔍 Checking product ${id} in orders:`, hasOrders ? 'FOUND' : 'NOT FOUND');
+        
+        if (hasOrders) {
+            console.log(`❌ Found order for product:`, hasOrders.orderId);
+            console.log(`❌ Cannot delete product ${id} - has orders`);
+            return res.status(400).json({ 
+                message: 'Không thể xóa sản phẩm này vì đã có đơn hàng được đặt',
+                canDelete: false,
+                hasOrders: true,
+                orderExample: hasOrders.orderId
+            });
+        }
+
+        console.log(`✅ No orders found for product ${id}, proceeding with deletion`);
+
+        // Xóa hình ảnh từ Cloudinary
+        if (product.images && product.images.length > 0) {
+            for (const imageUrl of product.images) {
+                const publicId = getPublicIdFromUrl(imageUrl);
+                if (publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(publicId);
+                    } catch (err) {
+                        console.error('Lỗi khi xóa hình ảnh:', err);
+                    }
+                }
+            }
+        }
+
+        // Xóa hình ảnh biến thể từ Cloudinary
+        if (product.variants && product.variants.length > 0) {
+            for (const variant of product.variants) {
+                if (variant.images && variant.images.length > 0) {
+                    for (const imageUrl of variant.images) {
+                        const publicId = getPublicIdFromUrl(imageUrl);
+                        if (publicId) {
+                            try {
+                                await cloudinary.uploader.destroy(publicId);
+                            } catch (err) {
+                                console.error('Lỗi khi xóa hình ảnh biến thể:', err);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Xóa sản phẩm
+        await Product.findByIdAndDelete(id);
+        console.log(`✅ Successfully deleted product ${id}`);
+
+        res.json({ 
+            message: 'Xóa sản phẩm thành công', 
+            canDelete: true,
+            deleted: true 
+        });
+    } catch (error) {
+        console.error('Lỗi khi xóa sản phẩm:', error);
+        res.status(500).json({ message: 'Lỗi server khi xóa sản phẩm' });
+    }
+};
+
+// Delete product variant - always allow but keep order data
+exports.deleteVariant = async (req, res) => {
+    try {
+        const { productId, variantId } = req.params;
+        
+        // Kiểm tra sản phẩm có tồn tại không
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ message: 'Sản phẩm không tồn tại' });
+        }
+
+        // Tìm biến thể cần xóa
+        const variantIndex = product.variants.findIndex(v => v._id.toString() === variantId);
+        if (variantIndex === -1) {
+            return res.status(404).json({ message: 'Biến thể không tồn tại' });
+        }
+
+        const variant = product.variants[variantIndex];
+
+        // Kiểm tra biến thể có trong đơn hàng nào không và đếm số lượng đơn hàng
+        const Bill = require('../models/Bill/BillUser');
+        const orders = await Bill.find({
+            'danh_sach_san_pham.san_pham_id': productId,
+            'danh_sach_san_pham.mau_sac': variant.attributes.color,
+            'danh_sach_san_pham.kich_thuoc': variant.attributes.size
+        });
+
+        const hasOrders = orders.length > 0;
+        console.log(`🔍 Checking variant ${variant.attributes.color}-${variant.attributes.size} in orders:`, hasOrders ? `FOUND (${orders.length} orders)` : 'NOT FOUND');
+
+        // Lưu thông tin biến thể vào collection DeletedVariant để tham chiếu sau này
+        if (hasOrders) {
+            const DeletedVariant = require('../models/DeletedVariant');
+            await DeletedVariant.create({
+                originalProductId: productId,
+                originalVariantId: variantId,
+                variantData: {
+                    attributes: variant.attributes,
+                    price: variant.price,
+                    stock: variant.stock,
+                    images: variant.images,
+                    sku: variant.sku
+                },
+                productName: product.name,
+                hadOrders: true,
+                orderCount: orders.length
+            });
+            
+            console.log(`🗂️ Biến thể đã có ${orders.length} đơn hàng được lưu vào DeletedVariant collection: ${variant.attributes.color} - ${variant.attributes.size}`);
+        }
+
+        // Xóa hình ảnh biến thể từ Cloudinary
+        if (variant.images && variant.images.length > 0) {
+            for (const imageUrl of variant.images) {
+                const publicId = getPublicIdFromUrl(imageUrl);
+                if (publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(publicId);
+                    } catch (err) {
+                        console.error('Lỗi khi xóa hình ảnh biến thể:', err);
+                    }
+                }
+            }
+        }
+
+        // Xóa biến thể khỏi mảng (luôn cho phép xóa)
+        product.variants.splice(variantIndex, 1);
+        await product.save();
+
+        const message = hasOrders 
+            ? `Xóa biến thể thành công. Dữ liệu ${orders.length} đơn hàng cũ được giữ lại và lưu trữ an toàn.`
+            : 'Xóa biến thể thành công';
+
+        res.json({ message, hadOrders: hasOrders, orderCount: orders.length });
+    } catch (error) {
+        console.error('Lỗi khi xóa biến thể:', error);
+        res.status(500).json({ message: 'Lỗi server khi xóa biến thể' });
+    }
+};
+
+// Debug API to check orders for a product
+exports.debugProductOrders = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const Bill = require('../models/Bill/BillUser');
+        
+        // Tìm tất cả đơn hàng có chứa sản phẩm này
+        const orders = await Bill.find({
+            'danh_sach_san_pham.san_pham_id': id
+        }).select('orderId danh_sach_san_pham trang_thai ngay_tao');
+        
+        console.log(`📊 Found ${orders.length} orders for product ${id}`);
+        
+        res.json({
+            productId: id,
+            orderCount: orders.length,
+            orders: orders.map(order => ({
+                orderId: order.orderId,
+                status: order.trang_thai,
+                createdAt: order.ngay_tao,
+                products: order.danh_sach_san_pham.filter(p => p.san_pham_id.toString() === id)
+            }))
+        });
+    } catch (error) {
+        console.error('Debug error:', error);
+        res.status(500).json({ message: 'Lỗi debug', error: error.message });
+    }
+};

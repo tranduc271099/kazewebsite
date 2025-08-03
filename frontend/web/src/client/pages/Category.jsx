@@ -516,7 +516,7 @@ const Category = () => {
                                                         <div className="product-price">
                                                             <span className="current-price">{product.price?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>
                                                             {product.oldPrice && <span className="old-price">{product.oldPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</span>}
-                                                      </div>
+                                                        </div>
                                                         <div className="product-rating">
                                                             <div className="stars">
                                                                 {[...Array(5)].map((_, i) => {

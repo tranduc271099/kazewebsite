@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
@@ -139,6 +140,37 @@ const ProductList = () => {
         navigate(`/admin/products/view/${productId}`);
     };
 
+    const handleDeleteClick = async (productId, productName) => {
+        if (window.confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${productName}" không?\n\nLưu ý: Chỉ có thể xóa sản phẩm chưa từng có đơn hàng nào được đặt.`)) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.delete(`http://localhost:5000/api/products/${productId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (response.data.canDelete !== false) {
+                    toast.success('✅ Xóa sản phẩm thành công');
+                    fetchProducts(); // Refresh danh sách
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                console.error('Error response:', error.response?.data);
+                
+                const errorMessage = error.response?.data?.message || 'Lỗi khi xóa sản phẩm';
+                
+                if (error.response?.status === 400 && error.response?.data?.canDelete === false) {
+                    // Sản phẩm đã có đơn hàng - không thể xóa
+                    alert(`❌ ${errorMessage}`);
+                } else {
+                    // Lỗi khác
+                    toast.error(`⚠️ ${errorMessage}`, {
+                        duration: 3000
+                    });
+                }
+            }
+        }
+    };
+
     const formatDateTime = (dateString) => {
         if (!dateString) return '---';
         const date = new Date(dateString);
@@ -263,6 +295,14 @@ const ProductList = () => {
                                             </button>
                                             <button onClick={() => handleEditClick(product._id)} className={`${styles.actionBtn} ${styles.iconBtn}`} title="Chỉnh sửa">
                                                 <EditOutlinedIcon />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteClick(product._id, product.name)} 
+                                                className={`${styles.actionBtn} ${styles.iconBtn} ${styles.deleteBtn}`} 
+                                                title="Xóa sản phẩm"
+                                                style={{ color: '#dc3545' }}
+                                            >
+                                                <DeleteOutlinedIcon />
                                             </button>
                                         </div>
                                     </td>

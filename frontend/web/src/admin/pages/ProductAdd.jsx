@@ -236,13 +236,21 @@ const ProductAdd = () => {
     };
 
     const removeVariant = (index) => {
-        if (editingVariantIdx === index) {
-            cancelEditVariant();
+        // Lấy thông tin variant để hiển thị trong confirm
+        const variant = formData.variants[index];
+        const variantInfo = variant?.color && variant?.size ? 
+            `"${variant.color} - ${variant.size}"` : 
+            `biến thể thứ ${index + 1}`;
+        
+        if (window.confirm(`Bạn có chắc chắn muốn xóa biến thể ${variantInfo} không?`)) {
+            if (editingVariantIdx === index) {
+                cancelEditVariant();
+            }
+            setFormData(prev => ({
+                ...prev,
+                variants: prev.variants.filter((_, i) => i !== index)
+            }));
         }
-        setFormData(prev => ({
-            ...prev,
-            variants: prev.variants.filter((_, i) => i !== index)
-        }));
     };
 
     const handleImageChange = (e) => {

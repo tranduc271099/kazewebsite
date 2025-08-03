@@ -108,6 +108,7 @@ app.use('/api/payment', require('./routes/payment.routes'));
 
 // Thêm route kiểm tra tồn kho
 app.use('/api/stock', require('./routes/stockCheck.routes'));
+app.use('/api/deleted-variants', require('./routes/deletedVariant.routes'));
 
 app.use('/api/banners', require('./routes/bannerRoutes'));
 app.use('/api/chats', require('./routes/chat.routes.js'));

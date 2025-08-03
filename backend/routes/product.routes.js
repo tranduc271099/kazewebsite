@@ -31,4 +31,13 @@ router.post('/', auth, uploadMultiple, productController.createProduct);
 // Update a product (requires auth)
 router.put('/:id', auth, uploadMultiple, productController.updateProduct);
 
+// Delete a product (requires auth)
+router.delete('/:id', auth, productController.deleteProduct);
+
+// Delete a product variant (requires auth)
+router.delete('/:productId/variants/:variantId', auth, productController.deleteVariant);
+
+// Debug route to check orders for a product
+router.get('/:id/debug/orders', auth, productController.debugProductOrders);
+
 module.exports = router; 

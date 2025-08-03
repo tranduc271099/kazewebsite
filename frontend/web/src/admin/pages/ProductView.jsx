@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import styles from '../styles/ProductLayout.module.css';
 import { toast } from 'react-hot-toast';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 const ProductView = () => {
     const { productId } = useParams();
@@ -57,6 +58,36 @@ const ProductView = () => {
         } catch (error) {
             toast.error(error.response?.data?.message || 'Lỗi khi tải bình luận');
             setComments([]);
+        }
+    };
+
+    const handleDeleteVariant = async (variantId, variantInfo) => {
+        const confirmMessage = `Bạn có chắc chắn muốn xóa biến thể "${variantInfo.color} - ${variantInfo.size}" không?`;
+        
+        if (window.confirm(confirmMessage)) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await axios.delete(`http://localhost:5000/api/products/${productId}/variants/${variantId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                
+                if (response.data.hadOrders) {
+                    const orderCount = response.data.orderCount || 1;
+                    toast.success(`Xóa biến thể thành công. Dữ liệu ${orderCount} đơn hàng cũ được giữ lại và lưu trữ an toàn.`);
+                } else {
+                    toast.success('Xóa biến thể thành công');
+                }
+                fetchProductDetails(); // Refresh product details
+            } catch (error) {
+                const errorMessage = error.response?.data?.message || 'Lỗi khi xóa biến thể';
+                
+                // Kiểm tra nếu là lỗi không thể xóa do có đơn hàng
+                if (error.response?.status === 400 && errorMessage.includes('đơn hàng')) {
+                    alert(`❌ ${errorMessage}`);
+                } else {
+                    toast.error(errorMessage);
+                }
+            }
         }
     };
 
@@ -185,6 +216,7 @@ const ProductView = () => {
                                 <th>Tồn kho</th>
                                 <th>Giá bán</th>
                                 <th>Ảnh biến thể</th>
+                                <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -205,6 +237,16 @@ const ProductView = () => {
                                                     <span>Không có ảnh</span>
                                                 )}
                                             </div>
+                                        </td>
+                                        <td>
+                                            <button 
+                                                onClick={() => handleDeleteVariant(variant._id, variant.attributes)} 
+                                                className={`${styles.actionBtn} ${styles.iconBtn}`}
+                                                title="Xóa biến thể"
+                                                style={{ color: '#dc3545' }}
+                                            >
+                                                <DeleteOutlinedIcon />
+                                            </button>
                                         </td>
                                     </tr>
                                 );
