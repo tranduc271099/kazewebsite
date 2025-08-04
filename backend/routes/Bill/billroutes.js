@@ -14,6 +14,7 @@ const isAdmin = (req, res, next) => {
 billRouter.get('/', auth, (req, res) => billControl.getList(req, res));
 billRouter.post('/', auth, (req, res) => billControl.addBill(req, res));
 billRouter.put('/:id/cancel', auth, (req, res) => billControl.cancelBill(req, res));
+billRouter.put('/:id/admin-cancel', auth, isAdmin, (req, res) => billControl.cancelBill(req, res));
 billRouter.get('/all', auth, isAdmin, (req, res) => billControl.getAll(req, res));
 billRouter.get('/:id', auth, isAdmin, (req, res) => billControl.getById(req, res));
 billRouter.put('/:id/status', auth, isAdmin, (req, res) => billControl.updateStatus(req, res));

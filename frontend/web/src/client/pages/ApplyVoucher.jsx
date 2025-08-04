@@ -41,8 +41,14 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
     let discountAmount = 0;
     if (voucher.discountType === 'amount') {
       discountAmount = voucher.discountValue;
+      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+        discountAmount = voucher.maxDiscount;
+      }
     } else if (voucher.discountType === 'percent') {
       discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
+      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+        discountAmount = voucher.maxDiscount;
+      }
     }
     setDiscount(discountAmount);
     setSuccess(`Áp dụng thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`);
@@ -74,8 +80,14 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
       let discountAmount = 0;
       if (voucher.discountType === 'amount') {
         discountAmount = voucher.discountValue;
+        if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+          discountAmount = voucher.maxDiscount;
+        }
       } else if (voucher.discountType === 'percent') {
         discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
+        if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+          discountAmount = voucher.maxDiscount;
+        }
       }
       setDiscount(discountAmount);
       setSuccess(`Áp dụng thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`);
@@ -87,6 +99,14 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
         setError('Không tìm thấy hoặc không áp dụng được voucher này!');
       }
     }
+  };
+  // Hàm clear toàn bộ trạng thái voucher khi hủy
+  const clearVoucherState = () => {
+    setDiscount(0);
+    setSuccess('');
+    setError('');
+    setVoucherCode('');
+    setSelectedVoucher(null);
   };
 
   return (
@@ -115,8 +135,15 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
       {error && <div className="voucher-error">{error}</div>}
       {success && <div className="voucher-success">{success}</div>}
       {discount > 0 && (
-        <div className="discount-amount">
-          Đã giảm: {discount.toLocaleString('vi-VN')}đ
+        <div className="discount-amount" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span>Đã giảm: {discount.toLocaleString('vi-VN')}đ</span>
+          <button
+            className="btn btn-warning btn-sm"
+            style={{ fontWeight: 500, padding: '2px 10px', marginLeft: 8 }}
+            onClick={clearVoucherState}
+          >
+            Hủy áp dụng voucher
+          </button>
         </div>
       )}
 

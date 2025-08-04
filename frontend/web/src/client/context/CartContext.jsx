@@ -114,13 +114,13 @@ export const CartProvider = ({ children }) => {
                             isActive: item.isActive, // Use updated isActive from response  
                         };
                     });
-                
+
                 console.log('🔄 Stock refreshed silently:', formattedItems.map(item => ({
                     name: item.name,
                     isActive: item.isActive,
                     stock: item.stock
                 })));
-                
+
                 setCartItems(formattedItems);
                 checkCartNotifications(formattedItems);
             }

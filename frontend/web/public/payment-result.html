@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả thanh toán</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .result-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #f44336;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+
+        .loading-icon {
+            width: 80px;
+            height: 80px;
+            background: #2196F3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 28px;
+        }
+
+        .message {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-row:last-child {
+            margin-bottom: 0;
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .value {
+            color: #666;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            margin: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #718096;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="result-container">
+        <div id="loading-state">
+            <div class="loading-icon">⏳</div>
+            <h1>Đang xử lý...</h1>
+            <p class="message">Vui lòng đợi trong giây lát</p>
+        </div>
+
+        <div id="success-state" style="display: none;">
+            <div class="success-icon">✓</div>
+            <h1>Thanh toán thành công!</h1>
+            <p class="message">Cảm ơn bạn đã thanh toán. Đơn hàng của bạn đã được xử lý thành công.</p>
+
+            <div class="details" id="success-details">
+                <!-- Chi tiết sẽ được điền bằng JavaScript -->
+            </div>
+
+            <div>
+                <a href="/" class="btn">Về trang chủ</a>
+                <a href="/bill" class="btn btn-secondary">Xem đơn hàng</a>
+            </div>
+
+            <p class="countdown" id="redirect-countdown"></p>
+        </div>
+
+        <div id="error-state" style="display: none;">
+            <div class="error-icon">✗</div>
+            <h1>Thanh toán thất bại</h1>
+            <p class="message" id="error-message">Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.</p>
+
+            <div class="details" id="error-details" style="display: none;">
+                <!-- Chi tiết lỗi sẽ được điền bằng JavaScript -->
+            </div>
+
+            <div>
+                <a href="/checkout" class="btn">Thử lại</a>
+                <a href="/" class="btn btn-secondary">Về trang chủ</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lấy parameters từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        const orderId = urlParams.get('orderId');
+        const transactionNo = urlParams.get('transactionNo');
+        const amount = urlParams.get('amount');
+        const message = urlParams.get('message');
+        const code = urlParams.get('code');
+
+        // Ẩn loading state
+        setTimeout(() => {
+            document.getElementById('loading-state').style.display = 'none';
+
+            if (status === 'success') {
+                showSuccessState();
+            } else {
+                showErrorState();
+            }
+        }, 1500);
+
+        function showSuccessState() {
+            document.getElementById('success-state').style.display = 'block';
+
+            const detailsContainer = document.getElementById('success-details');
+            detailsContainer.innerHTML = `
+                ${orderId ? `<div class="detail-row"><span class="label">Mã đơn hàng:</span><span class="value">${orderId}</span></div>` : ''}
+                ${transactionNo ? `<div class="detail-row"><span class="label">Mã giao dịch:</span><span class="value">${transactionNo}</span></div>` : ''}
+                ${amount ? `<div class="detail-row"><span class="label">Số tiền:</span><span class="value">${formatCurrency(amount / 100)} VND</span></div>` : ''}
+                <div class="detail-row"><span class="label">Thời gian:</span><span class="value">${new Date().toLocaleString('vi-VN')}</span></div>
+                <div class="detail-row"><span class="label">Phương thức:</span><span class="value">VNPay</span></div>
+            `;
+
+            // Auto redirect sau 10 giây
+            let countdown = 10;
+            const countdownElement = document.getElementById('redirect-countdown');
+
+            const updateCountdown = () => {
+                countdownElement.textContent = `Tự động chuyển về trang đơn hàng sau ${countdown} giây...`;
+                countdown--;
+
+                if (countdown < 0) {
+                    window.location.replace(window.location.origin + '/bill');
+                }
+            };
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        function showErrorState() {
+            document.getElementById('error-state').style.display = 'block';
+
+            if (message) {
+                document.getElementById('error-message').textContent = decodeURIComponent(message);
+            }
+
+            if (orderId || code) {
+                const errorDetailsContainer = document.getElementById('error-details');
+                errorDetailsContainer.style.display = 'block';
+                errorDetailsContainer.innerHTML = `
+                    ${orderId ? `<div class="detail-row"><span class="label">Mã đơn hàng:</span><span class="value">${orderId}</span></div>` : ''}
+                    ${code ? `<div class="detail-row"><span class="label">Mã lỗi:</span><span class="value">${code}</span></div>` : ''}
+                    <div class="detail-row"><span class="label">Thời gian:</span><span class="value">${new Date().toLocaleString('vi-VN')}</span></div>
+                `;
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount);
+        }
+
+        // Xử lý back button
+        window.addEventListener('popstate', function (event) {
+            window.location.replace(window.location.origin + '/');
+        });
+
+        // Push state để xử lý back button
+        history.replaceState(null, null, window.location.href);
+    </script>
+</body>
+
+</html>

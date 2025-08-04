@@ -14,11 +14,10 @@ const Dashboard = () => {
         overview: {
             totalOrders: 0,
             totalRevenue: 0,
-            totalProfit: 0,
             completedOrders: 0,
             completedRevenue: 0,
-            completedProfit: 0
         },
+        totalUsers: 0, // Thêm state để lưu tổng số user
         dailyStats: [],
         topUsers: [],
         topProducts: [],
@@ -351,8 +350,8 @@ const Dashboard = () => {
 
     // Style helpers
     const cardStyle = {
-        background: theme.palette.background.paper,
-        color: theme.palette.text.primary,
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: '#ffffff',
         boxShadow: theme.shadows[2],
         borderRadius: 10,
         padding: 25,
@@ -367,24 +366,24 @@ const Dashboard = () => {
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: '50%',
-        background: 'linear-gradient(135deg, #232526 0%, #414345 100%)',
+        background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
         color: '#fff',
         marginRight: 20,
     };
     const statNumberStyle = {
         fontSize: 24,
         fontWeight: 700,
-        color: theme.palette.text.primary,
+        color: '#ffffff',
         margin: 0,
     };
     const statTitleStyle = {
         margin: 0,
         fontSize: 14,
-        color: theme.palette.text.secondary,
+        color: '#e2e8f0',
         fontWeight: 500,
     };
     const sectionTitleStyle = {
-        color: theme.palette.text.primary,
+        color: '#ffffff',
         fontSize: 18,
         fontWeight: 600,
         margin: '0 0 20px 0',
@@ -392,23 +391,23 @@ const Dashboard = () => {
     const tableStyle = {
         width: '100%',
         borderCollapse: 'collapse',
-        color: theme.palette.text.primary,
-        background: theme.palette.background.paper,
+        color: '#ffffff',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
     };
     const thStyle = {
-        background: theme.palette.background.default,
-        color: theme.palette.text.primary,
+        background: 'rgba(255, 255, 255, 0.1)',
+        color: '#ffffff',
         padding: '12px 8px',
         textAlign: 'left',
         fontWeight: 600,
-        borderBottom: `2px solid ${theme.palette.divider}`,
+        borderBottom: `2px solid rgba(255, 255, 255, 0.2)`,
         fontSize: '14px',
         verticalAlign: 'middle'
     };
     const tdStyle = {
         padding: '12px 8px',
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        color: theme.palette.text.primary,
+        borderBottom: `1px solid rgba(255, 255, 255, 0.1)`,
+        color: '#ffffff',
         fontSize: '14px',
         verticalAlign: 'middle'
     };
@@ -442,13 +441,13 @@ const Dashboard = () => {
         <div style={{ padding: 20, background: theme.palette.background.default, minHeight: '100vh', transition: 'background 0.2s' }}>
             {/* Header với filter ngày */}
             <Paper elevation={2} style={{ ...cardStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30, flexWrap: 'wrap', gap: 20 }}>
-                <h2 style={{ color: theme.palette.text.primary, margin: 0 }}>Bảng điều khiển</h2>
+                <h2 style={{ color: '#ffffff', margin: 0 }}>Bảng điều khiển</h2>
                 <form
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: 16,
-                        background: '#232526',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                         padding: '10px 18px',
                         borderRadius: 8,
                         boxShadow: '0 1px 4px rgba(0,0,0,0.12)',
@@ -456,7 +455,7 @@ const Dashboard = () => {
                     onSubmit={e => e.preventDefault()}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
-                        <label style={{ fontSize: 13, color: theme.palette.text.secondary, fontWeight: 500, marginBottom: 2 }}>Từ ngày</label>
+                        <label style={{ fontSize: 13, color: '#ffffff', fontWeight: 500, marginBottom: 2 }}>Từ ngày</label>
                         <input
                             type="date"
                             value={dateRange.startDate}
@@ -472,9 +471,9 @@ const Dashboard = () => {
                             }}
                         />
                     </div>
-                    <span style={{ color: theme.palette.text.secondary, fontWeight: 600, fontSize: 16, margin: '0 4px' }}>–</span>
+                    <span style={{ color: '#ffffff', fontWeight: 600, fontSize: 16, margin: '0 4px' }}>–</span>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
-                        <label style={{ fontSize: 13, color: theme.palette.text.secondary, fontWeight: 500, marginBottom: 2 }}>Đến ngày</label>
+                        <label style={{ fontSize: 13, color: '#ffffff', fontWeight: 500, marginBottom: 2 }}>Đến ngày</label>
                         <input
                             type="date"
                             value={dateRange.endDate}
@@ -531,19 +530,19 @@ const Dashboard = () => {
                 </Paper>
                 <Paper elevation={2} style={cardStyle}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={statIconStyle}>💎</div>
+                        <div style={statIconStyle}>✅</div>
                         <div>
-                            <h3 style={statTitleStyle}>Tổng lãi ước tính</h3>
-                            <p style={statNumberStyle}>{formatCurrency(dashboardData.overview.totalProfit || 0)}</p>
+                            <h3 style={statTitleStyle}>Đơn hoàn thành</h3>
+                            <p style={statNumberStyle}>{dashboardData.overview.completedOrders}</p>
                         </div>
                     </div>
                 </Paper>
                 <Paper elevation={2} style={cardStyle}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <div style={statIconStyle}>✅</div>
+                        <div style={statIconStyle}>👥</div>
                         <div>
-                            <h3 style={statTitleStyle}>Đơn hoàn thành</h3>
-                            <p style={statNumberStyle}>{dashboardData.overview.completedOrders}</p>
+                            <h3 style={statTitleStyle}>Tổng tài khoản</h3>
+                            <p style={statNumberStyle}>{dashboardData.totalUsers || 0}</p>
                         </div>
                     </div>
                 </Paper>
@@ -561,41 +560,16 @@ const Dashboard = () => {
                         fontWeight: 700,
                         letterSpacing: 0.5,
                     }}>
-                        Doanh thu & Lãi theo ngày
+                        Doanh thu theo ngày
                     </h3>
-                    <div style={{
-                        display: 'flex',
-                        gap: 20,
-                        marginTop: 8,
-                        marginBottom: 10,
-                        justifyContent: 'center',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{
-                                width: 12,
-                                height: 12,
-                                background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
-                                borderRadius: 2
-                            }}></div>
-                            <span style={{ fontSize: 13, color: theme.palette.text.secondary }}>Doanh thu</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{
-                                width: 12,
-                                height: 12,
-                                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                                borderRadius: 2
-                            }}></div>
-                            <span style={{ fontSize: 13, color: theme.palette.text.secondary }}>Lãi thực tế</span>
-                        </div>
-                    </div>
                 </div>
                 <div style={{ minHeight: 250, padding: '0 16px 24px 16px' }}>
                     {dashboardData.dailyStats.length > 0 ? (
+                        <>
                         <div style={{
                             display: 'flex',
                             alignItems: 'flex-end',
-                            gap: 30, // giảm khoảng cách để có chỗ cho 2 thanh
+                            gap: 30,
                             height: 200,
                             width: '100%',
                             justifyContent: 'center',
@@ -604,7 +578,6 @@ const Dashboard = () => {
                             {dashboardData.dailyStats.map((day, index) => {
                                 const maxRevenue = Math.max(...dashboardData.dailyStats.map(d => d.revenue));
                                 const revenueHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
-                                const profitHeight = maxRevenue > 0 ? ((day.profit || 0) / maxRevenue) * 140 + 10 : 10;
 
                                 return (
                                     <div key={day._id} style={{
@@ -622,21 +595,12 @@ const Dashboard = () => {
                                         }}>
                                             {/* Thanh doanh thu */}
                                             <div style={{
-                                                width: 24,
+                                                width: 48,
                                                 height: revenueHeight,
-                                                background: 'linear-gradient(135deg, #42a5f5 0%, #7e57c2 100%)',
+                                                background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
                                                 borderRadius: '6px 6px 0 0',
                                                 transition: 'all 0.3s ease',
                                                 boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
-                                            }}></div>
-                                            {/* Thanh lãi */}
-                                            <div style={{
-                                                width: 24,
-                                                height: profitHeight,
-                                                background: 'linear-gradient(135deg, #66bb6a 0%, #4caf50 100%)',
-                                                borderRadius: '6px 6px 0 0',
-                                                transition: 'all 0.3s ease',
-                                                boxShadow: '0 2px 8px rgba(76,175,80,0.12)'
                                             }}></div>
                                         </div>
                                         <div style={{
@@ -662,16 +626,6 @@ const Dashboard = () => {
                                                 }}>
                                                     {day.revenue.toLocaleString('vi-VN')}₫
                                                 </span>
-                                                <span style={{
-                                                    color: '#4caf50',
-                                                    fontWeight: 600,
-                                                    fontSize: 11,
-                                                    lineHeight: 1.2,
-                                                    textAlign: 'center',
-                                                    display: 'block',
-                                                }}>
-                                                    {(day.profit || 0).toLocaleString('vi-VN')}₫
-                                                </span>
                                             </div>
                                             <span style={{
                                                 marginTop: 4,
@@ -688,6 +642,23 @@ const Dashboard = () => {
                                 );
                             })}
                         </div>
+                        {/* Legend xuống dưới */}
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            marginTop: 16,
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <div style={{
+                                    width: 12,
+                                    height: 12,
+                                    background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+                                    borderRadius: 2
+                                }}></div>
+                                <span style={{ fontSize: 13, color: '#ffffff' }}>Doanh thu</span>
+                            </div>
+                        </div>
+                        </>
                     ) : (
                         <p style={{ color: theme.palette.text.secondary }}>Không có dữ liệu doanh thu</p>
                     )}
@@ -702,18 +673,17 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {dashboardData.topProducts.length > 0 ? (
                             dashboardData.topProducts.slice(0, 3).map((product, index) => (
-                                <div key={product.productId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
+                                <div key={product.productId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)', borderRadius: 8 }}>
                                     <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: 5 }}>{product.productName}</div>
-                                        <div style={{ display: 'flex', gap: 15, fontSize: 12, color: theme.palette.text.secondary }}>
+                                        <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 5 }}>{product.productName}</div>
+                                        <div style={{ display: 'flex', gap: 15, fontSize: 12, color: '#e2e8f0' }}>
                                             <span>{product.totalQuantity} sản phẩm</span>
-                                            <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{formatCurrency(product.totalRevenue)}</span>
-                                            <span style={{ color: '#4caf50', fontWeight: 600 }}>Lãi: {formatCurrency(product.estimatedProfit || 0)}</span>
+                                            <span style={{ color: '#90cdf4', fontWeight: 600 }}>{formatCurrency(product.totalRevenue)}</span>
                                             <span style={{
-                                                color: product.stock > 10 ? theme.palette.success.main :
-                                                    product.stock > 0 ? theme.palette.warning.main :
-                                                        theme.palette.error.main,
+                                                color: product.stock > 10 ? '#68d391' :
+                                                    product.stock > 0 ? '#f6e05e' :
+                                                        '#fc8181',
                                                 fontWeight: 600
                                             }}>
                                                 Tồn kho: {product.stock || 0}
@@ -734,15 +704,15 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                         {dashboardData.topUsers.length > 0 ? (
                             dashboardData.topUsers.slice(0, 3).map((user, index) => (
-                                <div key={user.userId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#232526', borderRadius: 8 }}>
+                                <div key={user.userId} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)', borderRadius: 8 }}>
                                     <div style={{ ...statIconStyle, width: 30, height: 30, fontSize: 16, marginRight: 10 }}>#{index + 1}</div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontWeight: 600, color: theme.palette.text.primary, marginBottom: 5 }}>{user.userName || user.userEmail || 'Khách hàng'}</div>
-                                        <div style={{ display: 'flex', gap: 15, fontSize: 12, color: theme.palette.text.secondary }}>
+                                        <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 5 }}>{user.userName || user.userEmail || 'Khách hàng'}</div>
+                                        <div style={{ display: 'flex', gap: 15, fontSize: 12, color: '#e2e8f0' }}>
                                             <span>{user.orderCount} đơn hàng</span>
-                                            <span style={{ color: theme.palette.success.main, fontWeight: 600 }}>{formatCurrency(user.totalSpent)}</span>
+                                            <span style={{ color: '#90cdf4', fontWeight: 600 }}>{formatCurrency(user.totalSpent)}</span>
                                             <span>Giá trị TB: {formatCurrency(user.averageOrderValue)}</span>
-                                            <span style={{ color: '#ff9800', fontWeight: 600 }}>
+                                            <span style={{ color: '#f6e05e', fontWeight: 600 }}>
                                                 SĐT: {user.userPhone || 'Không có'}
                                             </span>
                                         </div>
@@ -869,7 +839,7 @@ const Dashboard = () => {
                                         </td>
                                         <td style={{
                                             ...tdStyle,
-                                            color: '#2563eb',
+                                            color: '#ffffff',
                                             fontWeight: 600,
                                             textAlign: 'right'
                                         }}>

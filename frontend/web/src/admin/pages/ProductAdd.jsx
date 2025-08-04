@@ -238,10 +238,10 @@ const ProductAdd = () => {
     const removeVariant = (index) => {
         // Lấy thông tin variant để hiển thị trong confirm
         const variant = formData.variants[index];
-        const variantInfo = variant?.color && variant?.size ? 
-            `"${variant.color} - ${variant.size}"` : 
+        const variantInfo = variant?.color && variant?.size ?
+            `"${variant.color} - ${variant.size}"` :
             `biến thể thứ ${index + 1}`;
-        
+
         if (window.confirm(`Bạn có chắc chắn muốn xóa biến thể ${variantInfo} không?`)) {
             if (editingVariantIdx === index) {
                 cancelEditVariant();

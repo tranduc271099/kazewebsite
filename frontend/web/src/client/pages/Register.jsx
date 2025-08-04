@@ -57,6 +57,7 @@ const Register = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Nhập họ và tên"
+                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
                                 />
                             </div>
                             <div className="form-group form-col-2">
@@ -69,6 +70,7 @@ const Register = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Nhập email của bạn"
+                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
                                 />
                             </div>
                         </div>
@@ -83,6 +85,7 @@ const Register = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Tạo mật khẩu mới"
+                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
                                 />
                             </div>
                             <div className="form-group form-col-2">
@@ -95,6 +98,7 @@ const Register = () => {
                                     onChange={handleChange}
                                     required
                                     placeholder="Nhập số điện thoại"
+                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
                                 />
                             </div>
                         </div>
@@ -109,6 +113,7 @@ const Register = () => {
                                     required
                                     placeholder="Nhập địa chỉ"
                                     rows="3"
+                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
                                 />
                             </div>
                         </div>

@@ -138,6 +138,12 @@ const Login = () => {
                             />
                         </div>
 
+                        <div className="forgot-password-link">
+                            <Link to="/forgot-password" className="auth-link">
+                                Quên mật khẩu?
+                            </Link>
+                        </div>
+
                         <div className="auth-actions">
                             <button type="submit" className="btn-primary" disabled={loading}>
                                 {loading ? 'Đang xử lý...' : 'Đăng nhập'}

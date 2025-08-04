@@ -16,6 +16,7 @@ const initialFormState = {
     minOrder: '',  // Keep as string for form input consistency
     discountType: 'percent',
     discountValue: '',
+    maxDiscount: '',
     startDate: '',
     endDate: '',
     quantity: '',
@@ -89,6 +90,7 @@ const Vouchers = () => {
             minOrder: voucher.minOrder?.toString() || '',
             discountType: voucher.discountType || 'percent',
             discountValue: voucher.discountValue?.toString() || '',
+            maxDiscount: voucher.maxDiscount?.toString() || '',
             startDate: formattedStartDate,
             endDate: formattedEndDate,
             quantity: voucher.quantity?.toString() || '',
@@ -196,12 +198,33 @@ const Vouchers = () => {
             description: formData.description,
             discountType: formData.discountType,
             discountValue: Number(formData.discountValue),
+            maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : null,
             minOrder: Number(formData.minOrder),
             quantity: Number(formData.quantity),
             startDate: formData.startDate,
             endDate: formData.endDate,
             isActive: formData.isActive,
         };
+        {/* Giảm giá tối đa */ }
+        {
+            formData.discountType === 'percent' && (
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Giảm giá tối đa (VND):</label>
+                    <input
+                        type="number"
+                        name="maxDiscount"
+                        value={formData.maxDiscount}
+                        onChange={handleChange}
+                        min="0"
+                        className={styles.input}
+                        placeholder="Nhập số tiền giảm tối đa (nếu có)"
+                    />
+                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                        Nếu để trống, không giới hạn số tiền giảm tối đa.
+                    </small>
+                </div>
+            )
+        }
 
         // Validation comprehensive trước khi submit
 
@@ -404,6 +427,7 @@ const Vouchers = () => {
                                 <th style={{ textAlign: 'center' }}>Loại phiếu giảm giá</th>
                                 <th style={{ textAlign: 'center' }}>Đơn Tối Thiểu</th>
                                 <th style={{ textAlign: 'right' }}>Giá trị giảm</th>
+                                <th style={{ textAlign: 'right' }}>Giảm tối đa</th>
                                 <th style={{ textAlign: 'center' }}>Ngày áp dụng</th>
                                 <th style={{ textAlign: 'center' }}>Ngày kết thúc</th>
                                 <th style={{ textAlign: 'center' }}>Số lượng còn lại</th>
@@ -428,6 +452,9 @@ const Vouchers = () => {
                                         <td style={{ textAlign: 'center' }}>{v.discountType === 'amount' ? 'Số tiền cố định' : 'Phần trăm'}</td>
                                         <td style={{ textAlign: 'center' }}>{v.minOrder.toLocaleString('vi-VN')}₫</td>
                                         <td style={{ textAlign: 'right' }}>{v.discountType === 'amount' ? `${v.discountValue} ₫` : `${v.discountValue}%`}</td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            {v.discountType === 'percent' && v.maxDiscount ? `${v.maxDiscount.toLocaleString('vi-VN')}₫` : '--'}
+                                        </td>
                                         <td style={{ textAlign: 'center' }}>{new Date(v.startDate).toLocaleDateString('vi-VN')}</td>
                                         <td style={{ textAlign: 'center' }}>{new Date(v.endDate).toLocaleDateString('vi-VN')}</td>
                                         <td style={{ textAlign: 'center' }}>{(v.quantity - v.usedCount) > 0 ? (v.quantity - v.usedCount) : 0}</td>
@@ -565,6 +592,25 @@ const Vouchers = () => {
                                     </small>
                                 </div>
 
+                                {/* Giảm giá tối đa */}
+                                {formData.discountType === 'percent' && (
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Giảm giá tối đa (VND):</label>
+                                        <input
+                                            type="number"
+                                            name="maxDiscount"
+                                            value={formData.maxDiscount}
+                                            onChange={handleChange}
+                                            min="0"
+                                            className={styles.input}
+                                            placeholder="Nhập số tiền giảm tối đa (nếu có)"
+                                        />
+                                        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                                            Nếu để trống, không giới hạn số tiền giảm tối đa.
+                                        </small>
+                                    </div>
+                                )}
+
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>Đơn Hàng Tối Thiểu:</label>
                                     <input
@@ -631,7 +677,7 @@ const Vouchers = () => {
                                             id="isActive"
                                             name="isActive"
                                             checked={formData.isActive}
-                                            onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
                                             style={{ width: '16px', height: '16px' }}
                                         />
                                         <label htmlFor="isActive" style={{ margin: 0, cursor: 'pointer' }}>
@@ -663,4 +709,4 @@ const Vouchers = () => {
     );
 };
 
-export default Vouchers; 
+export default Vouchers;

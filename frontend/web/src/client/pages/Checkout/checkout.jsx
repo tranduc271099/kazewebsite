@@ -221,7 +221,7 @@ const Checkout = () => {
 
       // BƯỚC 1: Kiểm tra tồn kho trước khi làm gì khác
       toast.info("Đang kiểm tra tồn kho...", { autoClose: 2000 });
-      
+
       const stockCheckItems = itemsToCheckout.map((item) => ({
         id: item.id,
         color: item.color,
@@ -238,18 +238,18 @@ const Checkout = () => {
             timeout: 10000
           }
         );
-        
+
         if (!stockCheckResponse.data.success) {
           // Có sản phẩm hết hàng hoặc không khả dụng
           const errorMessages = stockCheckResponse.data.stockIssues.map(issue => issue.message);
-          toast.error(`❌ ${errorMessages.join('\n')}`, { 
+          toast.error(`❌ ${errorMessages.join('\n')}`, {
             autoClose: 8000,
             style: { whiteSpace: 'pre-line' }
           });
           setIsSubmitting(false);
           return;
         }
-        
+
         toast.success("✅ Tất cả sản phẩm có đủ hàng!", { autoClose: 1500 });
       } catch (stockError) {
         console.error("Lỗi khi kiểm tra tồn kho:", stockError);
@@ -257,7 +257,7 @@ const Checkout = () => {
           const errorData = stockError.response.data;
           if (errorData.stockIssues && errorData.stockIssues.length > 0) {
             const errorMessages = errorData.stockIssues.map(issue => issue.message);
-            toast.error(`❌ ${errorMessages.join('\n')}`, { 
+            toast.error(`❌ ${errorMessages.join('\n')}`, {
               autoClose: 8000,
               style: { whiteSpace: 'pre-line' }
             });

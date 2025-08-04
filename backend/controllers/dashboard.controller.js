@@ -10,10 +10,14 @@ exports.getRevenueStats = async (req, res) => {
 
         let dateFilter = {};
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
+            
             dateFilter = {
                 ngay_tao: {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: start,
+                    $lte: end
                 }
             };
         }
@@ -240,10 +244,14 @@ exports.getTopUsers = async (req, res) => {
 
         let dateFilter = {};
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
+            
             dateFilter = {
                 ngay_tao: {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: start,
+                    $lte: end
                 }
             };
         }
@@ -268,13 +276,13 @@ exports.getTopUsers = async (req, res) => {
                     as: 'userInfo'
                 }
             },
-            { $unwind: '$userInfo' },
+            { $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true } },
             {
                 $project: {
                     userId: '$_id',
-                    userName: '$userInfo.name',
-                    userEmail: '$userInfo.email',
-                    userPhone: '$userInfo.phone',
+                    userName: { $ifNull: ['$userInfo.name', 'Ẩn danh'] },
+                    userEmail: { $ifNull: ['$userInfo.email', 'Không có email'] },
+                    userPhone: { $ifNull: ['$userInfo.phone', 'Không có SĐT'] },
                     totalSpent: 1,
                     orderCount: 1,
                     averageOrderValue: 1
@@ -296,10 +304,14 @@ exports.getTopProducts = async (req, res) => {
 
         let dateFilter = {};
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
+            
             dateFilter = {
                 ngay_tao: {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: start,
+                    $lte: end
                 }
             };
         }
@@ -419,17 +431,21 @@ exports.getTopProducts = async (req, res) => {
     }
 };
 
-// Top order mới nhất
+// Lấy đơn hàng mới nhất
 exports.getLatestOrders = async (req, res) => {
     try {
         const { startDate, endDate, limit = 5 } = req.query;
 
         let dateFilter = {};
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
+            
             dateFilter = {
                 ngay_tao: {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: start,
+                    $lte: end
                 }
             };
         }
@@ -476,13 +492,20 @@ exports.getDashboardStats = async (req, res) => {
 
         let dateFilter = {};
         if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
+            
             dateFilter = {
                 ngay_tao: {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: start,
+                    $lte: end
                 }
             };
         }
+
+        // Đếm tổng số tài khoản
+        const totalUsers = await User.countDocuments();
 
         // Thống kê tổng quan với lãi thực tế
         const overviewStats = await Bill.aggregate([
@@ -750,10 +773,11 @@ exports.getDashboardStats = async (req, res) => {
                     as: 'userInfo'
                 }
             },
-            { $unwind: '$userInfo' },
+            { $unwind: { path: '$userInfo', preserveNullAndEmptyArrays: true } },
             {
                 $project: {
-                    userName: '$userInfo.name',
+                    userName: { $ifNull: ['$userInfo.name', 'Ẩn danh'] },
+                    userPhone: { $ifNull: ['$userInfo.phone', 'Không có SĐT'] },
                     totalSpent: 1,
                     orderCount: 1
                 }
@@ -919,6 +943,7 @@ exports.getDashboardStats = async (req, res) => {
                 completedRevenue: 0,
                 completedProfit: 0
             },
+            totalUsers, // Thêm totalUsers vào response
             dailyStats,
             topUsers,
             topProducts,
@@ -928,4 +953,4 @@ exports.getDashboardStats = async (req, res) => {
         console.error('Lỗi thống kê dashboard:', error);
         res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
-}; 
+};

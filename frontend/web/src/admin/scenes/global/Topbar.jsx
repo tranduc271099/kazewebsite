@@ -1,9 +1,10 @@
-import { Box, IconButton, useTheme, Badge, Popover, Typography, List, ListItem, ListItemText, Button, Dialog, DialogTitle, DialogContent, IconButton as MuiIconButton } from "@mui/material";
+import { Box, IconButton, useTheme, Badge, Popover, Typography, List, ListItem, ListItemText, Button, Dialog, DialogTitle, DialogContent, IconButton as MuiIconButton, MenuList, MenuItem, ClickAwayListener } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { tokens } from "../../theme";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import io from 'socket.io-client';
@@ -30,6 +31,8 @@ const Topbar = () => {
     return [];
   });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [userAnchorEl, setUserAnchorEl] = useState(null);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [socket, setSocket] = useState(null);
   const [allNotificationsDialogOpen, setAllNotificationsDialogOpen] = useState(false);
   const navigate = useNavigate();
@@ -154,6 +157,21 @@ const Topbar = () => {
     window.location.href = "/login";
   };
 
+  const handleUserIconClick = (event) => {
+    setUserAnchorEl(event.currentTarget);
+    setUserDropdownOpen(!userDropdownOpen);
+  };
+
+  const handleUserDropdownClose = () => {
+    setUserDropdownOpen(false);
+    setUserAnchorEl(null);
+  };
+
+  const handleUserLogout = () => {
+    handleUserDropdownClose();
+    handleLogout();
+  };
+
   const handleNotificationClickNavigate = (type, data) => {
     let path = '';
     switch (type) {
@@ -239,9 +257,57 @@ const Topbar = () => {
             </Button>
           </Box>
         </Popover>
-        <IconButton onClick={handleLogout}>
+        
+        <IconButton onClick={handleUserIconClick}>
           <PersonOutlinedIcon />
         </IconButton>
+        
+        {/* User Dropdown Menu */}
+        <Popover
+          open={userDropdownOpen}
+          anchorEl={userAnchorEl}
+          onClose={handleUserDropdownClose}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          PaperProps={{
+            sx: {
+              bgcolor: colors.primary[400],
+              color: colors.grey[100],
+              minWidth: 150,
+              border: `1px solid ${colors.grey[700]}`,
+              borderRadius: 2,
+              mt: 1
+            }
+          }}
+        >
+          <ClickAwayListener onClickAway={handleUserDropdownClose}>
+            <MenuList sx={{ py: 1 }}>
+              <MenuItem 
+                onClick={handleUserLogout}
+                sx={{
+                  color: colors.grey[100],
+                  '&:hover': {
+                    bgcolor: colors.primary[500]
+                  },
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 2,
+                  py: 1
+                }}
+              >
+                <LogoutIcon fontSize="small" />
+                Đăng xuất
+              </MenuItem>
+            </MenuList>
+          </ClickAwayListener>
+        </Popover>
       </Box>
 
       {/* Dialog hiển thị tất cả thông báo trong ngày */}

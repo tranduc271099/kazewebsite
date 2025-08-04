@@ -13,6 +13,8 @@ import ProductDetail from './client/pages/ProductDetail';
 import Cart from './client/components/Cart';
 import Login from './client/pages/Login';
 import Register from './client/pages/Register';
+import ForgotPassword from './client/pages/ForgotPassword';
+import ResetPassword from './client/pages/ResetPassword';
 import About from './client/pages/About';
 import ClientCategory from './client/pages/Category';
 import Profile from './client/pages/Profile';
@@ -68,6 +70,8 @@ function App() {
                 <Route element={<AuthLayout />}>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                 </Route>
 
                 {/* Protected Routes */}

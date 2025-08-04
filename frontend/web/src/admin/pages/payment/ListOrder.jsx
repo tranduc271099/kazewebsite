@@ -433,7 +433,7 @@ const ListOrder = () => {
       case 'chờ xác nhận':
         return ['đã xác nhận', 'đã hủy'];
       case 'đã xác nhận':
-        return ['đang giao hàng', 'đã hủy'];
+        return ['đang giao hàng', 'đã hủy']; // Cho phép hủy đơn hàng đã xác nhận
       case 'đang giao hàng':
         return ['đã giao hàng'];
       case 'yêu cầu trả hàng':

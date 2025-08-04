@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Box, IconButton, Typography, useTheme, Badge } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, IconButton, Typography, useTheme, Badge, Popper, Paper, ClickAwayListener, MenuList, MenuItem as MUIMenuItem } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -20,6 +20,8 @@ import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import PhotoLibraryOutlinedIcon from "@mui/icons-material/PhotoLibraryOutlined";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
+import EditIcon from "@mui/icons-material/Edit";
 import io from 'socket.io-client';
 
 const socket = io('http://localhost:5000');
@@ -53,9 +55,12 @@ const Item = ({ title, to, icon, selected, setSelected, badgeContent }) => {
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
   const [chatNotifications, setChatNotifications] = useState(0);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [open, setOpen] = useState(false);
   let user = null;
   try {
     user = JSON.parse(localStorage.getItem("user"));
@@ -78,14 +83,47 @@ const Sidebar = () => {
       setChatNotifications(prev => prev + 1);
     });
 
+    // Lắng nghe sự kiện cập nhật profile
+    const handleProfileUpdate = (event) => {
+      const { name: newName, avatar: newAvatar } = event.detail;
+      // Reload user data from localStorage
+      const updatedUser = JSON.parse(localStorage.getItem('user') || '{}');
+      // Force re-render by updating the component key or trigger state update
+      window.location.reload();
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+
     return () => {
       socket.off('new_chat_session');
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
     };
   }, []);
 
   const handleChatClick = () => {
     setChatNotifications(0);
     setSelected("Quản lý Tin nhắn");
+  };
+
+  const handleAvatarClick = (event) => {
+    setAnchorEl(event.currentTarget);
+    setOpen(!open);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/admin/login');
+    setOpen(false);
+  };
+
+  const handleEditProfile = () => {
+    navigate('/admin/profile');
+    setOpen(false);
   };
 
   return (
@@ -145,6 +183,7 @@ const Sidebar = () => {
                   height="100px"
                   src={avatar}
                   style={{ cursor: "pointer", borderRadius: "50%", objectFit: "cover" }}
+                  onClick={handleAvatarClick}
                 />
               </Box>
               <Box textAlign="center">
@@ -160,6 +199,31 @@ const Sidebar = () => {
                   {role}
                 </Typography>
               </Box>
+              
+              <Popper open={open} anchorEl={anchorEl} placement="bottom-start" style={{ zIndex: 1300 }}>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <Paper 
+                    elevation={8} 
+                    style={{ 
+                      background: colors.primary[400], 
+                      border: `1px solid ${colors.grey[700]}`,
+                      borderRadius: 8,
+                      marginTop: 8
+                    }}
+                  >
+                    <MenuList>
+                      <MUIMenuItem onClick={handleEditProfile} style={{ color: colors.grey[100], padding: '12px 16px' }}>
+                        <EditIcon style={{ marginRight: 8, fontSize: 20 }} />
+                        <Typography>Chỉnh sửa thông tin</Typography>
+                      </MUIMenuItem>
+                      <MUIMenuItem onClick={handleLogout} style={{ color: colors.grey[100], padding: '12px 16px' }}>
+                        <LogoutIcon style={{ marginRight: 8, fontSize: 20 }} />
+                        <Typography>Đăng xuất</Typography>
+                      </MUIMenuItem>
+                    </MenuList>
+                  </Paper>
+                </ClickAwayListener>
+              </Popper>
             </Box>
           )}
 

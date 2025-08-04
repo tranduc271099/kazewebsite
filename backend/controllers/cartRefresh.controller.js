@@ -5,17 +5,17 @@ const Product = require('../models/Product');
 exports.refreshCartStock = async (req, res) => {
     try {
         const userId = req.user.id;
-        
+
         // Lấy giỏ hàng hiện tại
         let cart = await Cart.findOne({ userId }).populate('items.productId', 'name price images attributes variants stock isActive');
-        
+
         if (!cart) {
             return res.status(404).json({ message: 'Giỏ hàng không tồn tại' });
         }
 
         // Cập nhật thông tin tồn kho cho từng item
         const updatedItems = [];
-        
+
         for (let item of cart.items) {
             if (!item.productId) {
                 continue; // Skip invalid items
@@ -28,13 +28,13 @@ exports.refreshCartStock = async (req, res) => {
 
             // Tìm variant tương ứng để lấy tồn kho mới nhất
             let currentStock = product.stock; // Default to main product stock
-            
+
             if (product.hasVariants && product.variants && product.variants.length > 0) {
-                const variant = product.variants.find(v => 
-                    v.attributes.color === item.color && 
+                const variant = product.variants.find(v =>
+                    v.attributes.color === item.color &&
                     v.attributes.size === item.size
                 );
-                
+
                 if (variant) {
                     currentStock = variant.stock;
                 }

@@ -46,6 +46,39 @@
     text-align: center;
 }
 
+.auth-success {
+    background-color: #f0f9ff;
+    color: #059669;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+    border: 1px solid #bbf7d0;
+}
+
+.success-content {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.success-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.success-message {
+    font-size: 16px;
+    font-weight: 600;
+    color: #059669;
+    margin-bottom: 12px;
+}
+
+.success-note {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 0;
+}
+
 .auth-form {
     display: flex;
     flex-direction: column;
@@ -71,7 +104,8 @@
     border: 1.5px solid #e0e0e0;
     border-radius: 8px;
     font-size: 1rem;
-    background: #fafbfc;
+    background: #fafbfc !important;
+    color: #222 !important;
     transition: border 0.2s, box-shadow 0.2s;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
     resize: none;
@@ -80,13 +114,46 @@
 .form-group input:focus,
 .form-group textarea:focus {
     border: 1.5px solid #1976d2;
-    background: #fff;
+    background: #fff !important;
     outline: none;
     box-shadow: 0 0 0 2px #e3f0fd;
+    color: #222 !important;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #888 !important;
+}
+
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #222 !important;
+    -webkit-box-shadow: 0 0 0px 1000px #fafbfc inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    background: #fafbfc !important;
 }
 
 .auth-actions {
     margin-top: 10px;
+}
+
+.forgot-password-link {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.forgot-password-link .auth-link {
+    font-size: 14px;
+    color: #1976d2;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.forgot-password-link .auth-link:hover {
+    color: #125ea7;
+    text-decoration: underline;
 }
 
 .btn-primary {
@@ -224,4 +291,23 @@
     .form-col-1 {
         width: 100%;
     }
+}
+
+/* Đảm bảo background input không bị override */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+textarea {
+    background-color: #fafbfc !important;
+    color: #222 !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="tel"]:focus,
+textarea:focus {
+    background-color: #fff !important;
+    color: #222 !important;
 }

@@ -24,6 +24,12 @@ function Cart() {
     const [selectedItems, setSelectedItems] = useState({});
     const [selectedVoucher, setSelectedVoucher] = useState(null);
 
+    // Hủy áp dụng voucher
+    const handleRemoveVoucher = () => {
+        setDiscount(0);
+        setSelectedVoucher(null);
+    };
+
     // Helper to find matching variant (similar to ProductDetail)
     const findMatchingVariant = useCallback((productId, newColor, newSize) => {
         const productItem = cartItems.find(cartItem => cartItem.id === productId);
@@ -136,13 +142,13 @@ function Cart() {
         if (invalidItems.length > 0) {
             // Refresh stock trước khi báo lỗi để đảm bảo thông tin mới nhất
             await refreshStockOnly();
-            
+
             // Kiểm tra lại sau khi refresh
             const updatedSelectedItems = cartItems.filter(item => selectedItems[`${item.id}-${item.color}-${item.size}`]);
             const stillInvalidItems = updatedSelectedItems.filter(item =>
                 item.isActive === false || item.stock <= 0
             );
-            
+
             if (stillInvalidItems.length > 0) {
                 const errorMessages = stillInvalidItems.map(item => {
                     if (item.isActive === false) {
@@ -151,8 +157,8 @@ function Cart() {
                         return `"${item.name}" (${item.color} - ${item.size}) đã hết hàng (tồn kho: ${item.stock})`;
                     }
                 });
-                
-                toast.error(`❌ ${errorMessages.join('\n')}`, { 
+
+                toast.error(`❌ ${errorMessages.join('\n')}`, {
                     autoClose: 8000,
                     style: { whiteSpace: 'pre-line' }
                 });
@@ -189,27 +195,27 @@ function Cart() {
                 }
             );
             console.log("✅ Stock check response:", stockCheckResponse.data);
-            
+
             if (!stockCheckResponse.data.success) {
                 // Có sản phẩm hết hàng hoặc không khả dụng
                 console.log("❌ Stock issues found:", stockCheckResponse.data.stockIssues);
                 const errorMessages = stockCheckResponse.data.stockIssues.map(issue => issue.message);
-                toast.error(`❌ ${errorMessages.join('\n')}`, { 
+                toast.error(`❌ ${errorMessages.join('\n')}`, {
                     autoClose: 8000,
                     style: { whiteSpace: 'pre-line' }
                 });
-                
+
                 // Refresh cart để cập nhật tồn kho mới nhất
                 refreshStockOnly();
                 return;
             }
-            
+
             console.log("✅ Tất cả sản phẩm có đủ hàng, chuyển đến checkout");
             toast.success("✅ Tất cả sản phẩm có đủ hàng!", { autoClose: 1500 });
-            
+
             // Chuyển đến trang thanh toán sau khi kiểm tra thành công
             navigate('/checkout', { state: { selectedCartItems, discount, voucher: selectedVoucher } });
-            
+
         } catch (stockError) {
             console.error("❌ Lỗi khi kiểm tra tồn kho:", stockError);
             if (stockError.response?.status === 400) {
@@ -217,14 +223,14 @@ function Cart() {
                 console.log("❌ Stock error data:", errorData);
                 if (errorData.stockIssues && errorData.stockIssues.length > 0) {
                     const errorMessages = errorData.stockIssues.map(issue => issue.message);
-                    toast.error(`❌ ${errorMessages.join('\n')}`, { 
+                    toast.error(`❌ ${errorMessages.join('\n')}`, {
                         autoClose: 8000,
                         style: { whiteSpace: 'pre-line' }
                     });
                 } else {
                     toast.error(errorData.message || "Có sản phẩm không đủ hàng");
                 }
-                
+
                 // Refresh cart để cập nhật tồn kho mới nhất
                 refreshStockOnly();
             } else if (stockError.response?.status === 401) {

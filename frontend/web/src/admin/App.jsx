@@ -26,6 +26,7 @@ import ListStaff from "./pages/User/ListStaff.jsx";       // Import ListStaff
 // import UserEdit from "./pages/User/UserEdit.jsx";       // Placeholder for user edit page
 import UserDetail from "./pages/User/UserDetail.jsx"; // Placeholder for user detail page
 import ListComment from "./pages/Comment/ListComment.jsx"; // Import ListComment
+import ProfileScene from "./scenes/profile"; // Import ProfileScene
 
 function App() {
   const [theme] = useMode();
@@ -50,6 +51,7 @@ function App() {
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<ProfileScene />} />
               <Route path="/user" element={<User />} />
               <Route path="/category" element={<Category />} />
               <Route path="/products" element={<ProductList />} />

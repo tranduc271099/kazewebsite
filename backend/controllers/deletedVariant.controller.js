@@ -1,14 +1,14 @@
 const DeletedVariant = require('../models/DeletedVariant');
 
 // Get deleted variants for a product
-exports.getDeletedVariantsForProduct = async (req, res) => {
+const getDeletedVariantsForProduct = async (req, res) => {
     try {
         const { productId } = req.params;
-        
+
         const deletedVariants = await DeletedVariant.find({
             originalProductId: productId
         }).sort({ deletedAt: -1 });
-        
+
         res.json({
             success: true,
             count: deletedVariants.length,
@@ -16,20 +16,20 @@ exports.getDeletedVariantsForProduct = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching deleted variants:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            message: 'Lỗi khi tải thông tin biến thể đã xóa' 
+            message: 'Lỗi khi tải thông tin biến thể đã xóa'
         });
     }
 };
 
 // Get all deleted variants (for admin)
-exports.getAllDeletedVariants = async (req, res) => {
+const getAllDeletedVariants = async (req, res) => {
     try {
         const deletedVariants = await DeletedVariant.find()
             .populate('originalProductId', 'name')
             .sort({ deletedAt: -1 });
-        
+
         res.json({
             success: true,
             count: deletedVariants.length,
@@ -37,31 +37,31 @@ exports.getAllDeletedVariants = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching all deleted variants:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            message: 'Lỗi khi tải danh sách biến thể đã xóa' 
+            message: 'Lỗi khi tải danh sách biến thể đã xóa'
         });
     }
 };
 
 // Get deleted variant info for order display
-exports.getDeletedVariantInfo = async (req, res) => {
+const getDeletedVariantInfo = async (req, res) => {
     try {
         const { productId, color, size } = req.params;
-        
+
         const deletedVariant = await DeletedVariant.findOne({
             originalProductId: productId,
             'variantData.attributes.color': color,
             'variantData.attributes.size': size
         });
-        
+
         if (!deletedVariant) {
             return res.status(404).json({
                 success: false,
                 message: 'Không tìm thấy thông tin biến thể đã xóa'
             });
         }
-        
+
         res.json({
             success: true,
             variantInfo: {
@@ -75,9 +75,9 @@ exports.getDeletedVariantInfo = async (req, res) => {
         });
     } catch (error) {
         console.error('Error fetching deleted variant info:', error);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            message: 'Lỗi khi tải thông tin biến thể đã xóa' 
+            message: 'Lỗi khi tải thông tin biến thể đã xóa'
         });
     }
 };

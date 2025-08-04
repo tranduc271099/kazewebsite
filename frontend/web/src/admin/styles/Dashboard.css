@@ -1,6 +1,6 @@
 .dashboard-container {
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: #f7fafc;
     min-height: 100vh;
 }
 
@@ -17,7 +17,7 @@
 
 .dashboard-header h2 {
     margin: 0;
-    color: #333;
+    color: #4a5568;
     font-size: 24px;
     font-weight: 600;
 }
@@ -79,7 +79,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
     border-radius: 50%;
     color: white;
 }
@@ -95,7 +95,7 @@
     margin: 0;
     font-size: 24px;
     font-weight: 700;
-    color: #333;
+    color: #4a5568;
 }
 
 /* Tổng doanh thu */
@@ -129,7 +129,7 @@
 
 .chart-section h3 {
     margin: 0 0 20px 0;
-    color: #333;
+    color: #4a5568;
     font-size: 18px;
     font-weight: 600;
 }
@@ -156,7 +156,7 @@
 
 .bar {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
     border-radius: 5px 5px 0 0;
     min-height: 10px;
     transition: all 0.3s ease;
@@ -177,7 +177,7 @@
 }
 
 .bar-label .amount {
-    color: #333;
+    color: #4a5568;
     font-weight: 600;
 }
 
@@ -200,7 +200,7 @@
 .top-users h3,
 .top-products h3 {
     margin: 0 0 20px 0;
-    color: #333;
+    color: #4a5568;
     font-size: 18px;
     font-weight: 600;
 }
@@ -216,19 +216,19 @@
     align-items: center;
     gap: 15px;
     padding: 15px;
-    background: #f8f9fa;
+    background: #f7fafc;
     border-radius: 8px;
     transition: background-color 0.2s ease;
 }
 
 .top-item:hover {
-    background: #e9ecef;
+    background: #edf2f7;
 }
 
 .rank {
     width: 30px;
     height: 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -246,7 +246,7 @@
 .user-name,
 .product-name {
     font-weight: 600;
-    color: #333;
+    color: #4a5568;
     margin-bottom: 5px;
 }
 
@@ -273,7 +273,7 @@
 
 .latest-orders h3 {
     margin: 0 0 20px 0;
-    color: #333;
+    color: #4a5568;
     font-size: 18px;
     font-weight: 600;
 }
@@ -288,18 +288,18 @@
     padding: 12px;
     text-align: left;
     font-weight: 600;
-    color: #333;
+    color: #4a5568;
     border-bottom: 2px solid #dee2e6;
 }
 
 .table td {
     padding: 12px;
     border-bottom: 1px solid #dee2e6;
-    color: #333;
+    color: #4a5568;
 }
 
 .table tbody tr:hover {
-    background: #f8f9fa;
+    background: #f7fafc;
 }
 
 /* Badges */

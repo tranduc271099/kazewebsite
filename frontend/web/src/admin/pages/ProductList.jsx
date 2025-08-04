@@ -147,7 +147,7 @@ const ProductList = () => {
                 const response = await axios.delete(`http://localhost:5000/api/products/${productId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
+
                 if (response.data.canDelete !== false) {
                     toast.success('✅ Xóa sản phẩm thành công');
                     fetchProducts(); // Refresh danh sách
@@ -155,9 +155,9 @@ const ProductList = () => {
             } catch (error) {
                 console.error('Delete error:', error);
                 console.error('Error response:', error.response?.data);
-                
+
                 const errorMessage = error.response?.data?.message || 'Lỗi khi xóa sản phẩm';
-                
+
                 if (error.response?.status === 400 && error.response?.data?.canDelete === false) {
                     // Sản phẩm đã có đơn hàng - không thể xóa
                     alert(`❌ ${errorMessage}`);
@@ -296,9 +296,9 @@ const ProductList = () => {
                                             <button onClick={() => handleEditClick(product._id)} className={`${styles.actionBtn} ${styles.iconBtn}`} title="Chỉnh sửa">
                                                 <EditOutlinedIcon />
                                             </button>
-                                            <button 
-                                                onClick={() => handleDeleteClick(product._id, product.name)} 
-                                                className={`${styles.actionBtn} ${styles.iconBtn} ${styles.deleteBtn}`} 
+                                            <button
+                                                onClick={() => handleDeleteClick(product._id, product.name)}
+                                                className={`${styles.actionBtn} ${styles.iconBtn} ${styles.deleteBtn}`}
                                                 title="Xóa sản phẩm"
                                                 style={{ color: '#dc3545' }}
                                             >

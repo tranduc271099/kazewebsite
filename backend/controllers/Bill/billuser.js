@@ -1,8 +1,10 @@
 const Bill = require('../../models/Bill/BillUser');
 const Product = require('../../models/Product');
 const Cart = require('../../models/Cart');
+const User = require('../../models/User');
 const mongoose = require('mongoose');
-const { notifyClientDataUpdate, EVENT_TYPES } = require('../../utils/realTimeNotifier');
+const { notifyClientData, notifyClientDataUpdate, EVENT_TYPES } = require('../../utils/realTimeNotifier');
+const emailService = require('../../services/emailService');
 
 // Socket function to notify admin about order creation and stock reduction
 const notifyAdminOrderCreated = (req, orderData) => {
@@ -137,9 +139,26 @@ class BillController {
       if (danh_sach_san_pham.length === 0) {
         return res.status(400).json({ message: 'Không có sản phẩm hợp lệ để tạo đơn hàng.' });
       }
+      // Áp dụng voucher nếu có
+      let voucherDoc = null;
+      let discountAmount = 0;
+      if (voucher && voucher.code) {
+        const Voucher = require('../../models/Voucher');
+        voucherDoc = await Voucher.findOne({ code: voucher.code, isActive: true });
+        if (voucherDoc) {
+          if (voucherDoc.discountType === 'percent') {
+            discountAmount = Math.round(subtotal * voucherDoc.discountValue / 100);
+            if (voucherDoc.maxDiscount && discountAmount > voucherDoc.maxDiscount) {
+              discountAmount = voucherDoc.maxDiscount;
+            }
+          } else if (voucherDoc.discountType === 'amount') {
+            discountAmount = voucherDoc.discountValue;
+          }
+        }
+      }
       // Tính phí vận chuyển luôn là 30,000 cho mỗi đơn hàng
       let shippingFee = 30000;
-      const tong_tien = subtotal + shippingFee;
+      const tong_tien = subtotal + shippingFee - discountAmount;
 
       // --- BẮT ĐẦU: TRỪ KHO (Atomic) ---
       for (const item of danh_sach_san_pham) {
@@ -200,8 +219,8 @@ class BillController {
         ghi_chu,
         danh_sach_san_pham,
         shippingFee, // Lưu shippingFee đã tính
-        discount,
-        voucher,
+        discount: discountAmount,
+        voucher: voucherDoc,
         orderId: finalOrderId
       });
       await newBill.save();
@@ -226,6 +245,38 @@ class BillController {
         danh_sach_san_pham
       });
 
+      // Gửi email xác nhận đơn hàng
+      try {
+        const user = await User.findById(nguoi_dung_id);
+        if (!user) {
+          throw new Error('Không tìm thấy người dùng để gửi email.');
+        }
+
+        const orderEmailData = {
+          customerName: user.name || user.username || 'Khách hàng',
+          customerEmail: user.email,
+          orderId: finalOrderId,
+          orderDate: new Date(),
+          shippingAddress: dia_chi_giao_hang,
+          paymentMethod: phuong_thuc_thanh_toan === 'cod' ? 'Thanh toán khi nhận hàng' : 'VNPay',
+          products: danh_sach_san_pham.map(p => ({
+            ...p,
+            gia: p.gia_ban // Đảm bảo giá đúng được gửi đi
+          })),
+          subtotal: subtotal,
+          shippingFee: shippingFee,
+          discount: discountAmount,
+          totalAmount: tong_tien,
+          voucher: voucherDoc
+        };
+
+        await emailService.sendOrderConfirmation(orderEmailData);
+        console.log(`Email xác nhận đơn hàng đã được gửi tới: ${user.email}`);
+      } catch (emailError) {
+        console.error('Lỗi khi gửi email xác nhận đơn hàng:', emailError);
+        // Không throw error để không ảnh hưởng đến việc tạo đơn hàng
+      }
+
       res.status(201).json({ message: 'Tạo hóa đơn thành công', bill: newBill });
     } catch (error) {
       console.error('[ADD BILL ERROR]', error);
@@ -242,8 +293,8 @@ class BillController {
       if (!bill) {
         return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
       }
-      if (bill.trang_thai !== 'chờ xác nhận') {
-        return res.status(400).json({ message: 'Chỉ có thể hủy đơn hàng đang chờ xác nhận' });
+      if (bill.trang_thai !== 'chờ xác nhận' && bill.trang_thai !== 'đã xác nhận') {
+        return res.status(400).json({ message: 'Chỉ có thể hủy đơn hàng đang chờ xác nhận hoặc đã xác nhận' });
       }
 
       bill.trang_thai = 'đã hủy';
@@ -428,6 +479,9 @@ class BillController {
 
       const oldStatus = bill.trang_thai; // Lưu lại trạng thái cũ
 
+      // --- KHÔNG CẦN TRỪ KHO KHI XÁC NHẬN VÌ ĐÃ TRỪ KHI TẠO ĐƠN HÀNG ---
+      // Stock đã được trừ ngay khi khách hàng đặt hàng để tránh overselling
+
       // Nếu huỷ đơn và trước đó đơn hàng chưa bị huỷ
       if (trang_thai === 'đã hủy' && oldStatus !== 'đã hủy') {
         bill.ly_do_huy = ly_do_huy || '';
@@ -436,10 +490,8 @@ class BillController {
           loai: req.user.role === 'admin' ? 'Admin' : 'User'
         };
 
-        // --- BẮT ĐẦU: HOÀN KHO KHI ADMIN HUỶ (Atomic) ---
+        // --- BẮT ĐẦU: HOÀN KHO KHI ADMIN HUỶ ---
         for (const item of bill.danh_sach_san_pham) {
-          console.log(`[ADMIN CANCEL BILL] Restoring stock for product ${item.san_pham_id}, color: ${item.mau_sac}, size: ${item.kich_thuoc}, quantity: ${item.so_luong}`);
-
           // Thử cập nhật biến thể trước
           const updateResult = await Product.updateOne(
             {
@@ -505,6 +557,26 @@ class BillController {
         adminUser: req.user?.name || req.user?.username || 'Admin',
         cancelReason: ly_do_huy || null
       });
+
+      // Gửi email thông báo thay đổi trạng thái
+      try {
+        const populatedBill = await Bill.findById(bill._id).populate('nguoi_dung_id', 'name email');
+        if (populatedBill && populatedBill.nguoi_dung_id && populatedBill.nguoi_dung_id.email) {
+          const emailData = {
+            customerName: populatedBill.nguoi_dung_id.name || 'Khách hàng',
+            customerEmail: populatedBill.nguoi_dung_id.email,
+            orderId: bill.orderId || bill._id.toString().slice(-8),
+            oldStatus: oldStatus,
+            newStatus: trang_thai
+          };
+
+          await emailService.sendOrderStatusUpdate(emailData);
+          console.log(`Email thông báo trạng thái đã được gửi tới: ${populatedBill.nguoi_dung_id.email}`);
+        }
+      } catch (emailError) {
+        console.error('Lỗi khi gửi email thông báo trạng thái:', emailError);
+        // Không throw error để không ảnh hưởng đến việc cập nhật trạng thái
+      }
 
       res.json({ message: 'Cập nhật trạng thái thành công', bill });
     } catch (error) {

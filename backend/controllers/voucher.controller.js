@@ -14,18 +14,18 @@ exports.getAvailableVouchers = async (req, res) => {
   try {
     const now = new Date();
     console.log('Ngày hiện tại:', now.toISOString());
-    
+
     // Lấy tất cả voucher active trước
     const allVouchers = await Voucher.find({ isActive: true });
     console.log('Tất cả voucher active:', allVouchers.length);
-    
+
     // Lọc theo logic
     const vouchers = allVouchers.filter(voucher => {
       const startDate = new Date(voucher.startDate);
       const endDate = new Date(voucher.endDate);
       const isInDateRange = now >= startDate && now <= endDate;
       const hasQuantity = (voucher.usedCount || 0) < (voucher.quantity || 1);
-      
+
       console.log(`Voucher ${voucher.code}:`, {
         name: voucher.name,
         startDate: startDate.toISOString(),
@@ -35,10 +35,10 @@ exports.getAvailableVouchers = async (req, res) => {
         quantity: voucher.quantity || 1,
         hasQuantity
       });
-      
+
       return isInDateRange && hasQuantity;
     });
-    
+
     console.log('Voucher khả dụng:', vouchers.length);
     res.json(vouchers);
   } catch (err) {
@@ -49,7 +49,7 @@ exports.getAvailableVouchers = async (req, res) => {
 
 exports.createVoucher = async (req, res) => {
   try {
-    const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity } = req.body;
+    const { code, name, description, minOrder, discountType, discountValue, maxDiscount, startDate, endDate, quantity } = req.body;
 
     // Validation cơ bản
     if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
@@ -111,6 +111,7 @@ exports.createVoucher = async (req, res) => {
       minOrder,
       discountType,
       discountValue,
+      maxDiscount: maxDiscount || null,
       startDate,
       endDate,
       quantity: quantity || 1, // Set default to 1 if not provided
@@ -135,7 +136,7 @@ exports.createVoucher = async (req, res) => {
 
 exports.updateVoucher = async (req, res) => {
   try {
-    const { code, name, description, minOrder, discountType, discountValue, startDate, endDate, quantity, isActive } = req.body;
+    const { code, name, description, minOrder, discountType, discountValue, maxDiscount, startDate, endDate, quantity, isActive } = req.body;
 
     // Validation cơ bản
     if (!code || !name || !discountType || !discountValue || !startDate || !endDate) {
@@ -197,6 +198,7 @@ exports.updateVoucher = async (req, res) => {
       minOrder,
       discountType,
       discountValue,
+      maxDiscount: maxDiscount || null,
       startDate,
       endDate,
       quantity,
@@ -297,11 +299,20 @@ exports.applyVoucher = async (req, res) => {
       });
     }
 
+
     let discountAmount = 0;
     if (voucher.discountType === 'amount') {
       discountAmount = voucher.discountValue;
+      // Nếu có maxDiscount và discountAmount vượt quá thì giới hạn lại
+      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+        discountAmount = voucher.maxDiscount;
+      }
     } else if (voucher.discountType === 'percent') {
       discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
+      // Nếu có maxDiscount và discountAmount vượt quá thì giới hạn lại
+      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
+        discountAmount = voucher.maxDiscount;
+      }
     }
 
     res.json({

@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 exports.checkStockAvailability = async (req, res) => {
     try {
         const { items } = req.body; // items: [{ id, color, size, quantity }]
-        
+
         if (!items || !Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'Danh sách sản phẩm không hợp lệ' });
         }
@@ -14,7 +14,7 @@ exports.checkStockAvailability = async (req, res) => {
         for (const item of items) {
             console.log(`🔍 Checking item:`, item);
             const product = await Product.findById(item.id);
-            
+
             if (!product) {
                 console.log(`❌ Product not found: ${item.id}`);
                 stockIssues.push({
@@ -41,9 +41,9 @@ exports.checkStockAvailability = async (req, res) => {
             // Kiểm tra biến thể (không phụ thuộc vào hasVariants field)
             if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
                 console.log(`🔍 Checking variants for product ${product.name}`);
-                const variant = product.variants.find(v => 
-                    v.attributes && 
-                    v.attributes.color === item.color && 
+                const variant = product.variants.find(v =>
+                    v.attributes &&
+                    v.attributes.color === item.color &&
                     v.attributes.size === item.size
                 );
 

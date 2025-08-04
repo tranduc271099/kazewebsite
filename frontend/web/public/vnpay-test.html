@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test VNPay Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">🏦 Test Thanh Toán VNPay</h4>
+                        <small>Môi trường Sandbox - Terminal ID: 16EMRWXG</small>
+                    </div>
+                    <div class="card-body">
+                        <!-- Thông tin thẻ test -->
+                        <div class="alert alert-info">
+                            <h6><strong>🏦 Thông tin thẻ test VNPay:</strong></h6>
+                            <ul class="mb-0">
+                                <li><strong>Ngân hàng:</strong> NCB</li>
+                                <li><strong>Số thẻ:</strong> 9704198526191432198</li>
+                                <li><strong>Tên chủ thẻ:</strong> NGUYEN VAN A</li>
+                                <li><strong>Ngày phát hành:</strong> 07/15</li>
+                                <li><strong>Mật khẩu OTP:</strong> 123456</li>
+                            </ul>
+                        </div>
+
+                        <form id="vnpayForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="amount" class="form-label">Số tiền (VND) *</label>
+                                        <input type="number" class="form-control" id="amount" value="100000" min="5000"
+                                            required>
+                                        <div class="form-text">Tối thiểu 5,000 VND</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="orderInfo" class="form-label">Thông tin đơn hàng</label>
+                                        <input type="text" class="form-control" id="orderInfo"
+                                            value="Test thanh toan VNPay">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="customerName" class="form-label">Họ tên khách hàng *</label>
+                                        <input type="text" class="form-control" id="customerName" value="Nguyễn Văn A"
+                                            required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="customerPhone" class="form-label">Số điện thoại *</label>
+                                        <input type="tel" class="form-control" id="customerPhone" value="0123456789"
+                                            required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="customerEmail" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="customerEmail" value="test@example.com"
+                                    required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Địa chỉ giao hàng *</label>
+                                <textarea class="form-control" id="address" rows="2"
+                                    required>123 Đường Test, Phường Test, Quận Test, TP.HCM</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="token" class="form-label">Token xác thực</label>
+                                <input type="text" class="form-control" id="token" readonly
+                                    placeholder="Sẽ lấy từ localStorage">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="payButton">
+                                💳 Thanh toán VNPay
+                            </button>
+                        </form>
+
+                        <div id="result" class="mt-4"></div>
+                    </div>
+                </div>
+
+                <!-- Debug Log -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5>📝 Debug Log</h5>
+                        <button class="btn btn-sm btn-outline-secondary float-end" onclick="clearLog()">Xóa log</button>
+                    </div>
+                    <div class="card-body">
+                        <pre id="debugLog"
+                            style="max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 5px; font-size: 12px;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Debug logging function
+        function log(message, type = 'info') {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+            debugLog.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(`${icon} ${message}`);
+        }
+
+        function clearLog() {
+            document.getElementById('debugLog').textContent = '';
+        }
+
+        // Load token from localStorage
+        document.addEventListener('DOMContentLoaded', function () {
+            const token = localStorage.getItem('token');
+            document.getElementById('token').value = token || '';
+
+            if (token) {
+                log('Token tìm thấy trong localStorage', 'success');
+            } else {
+                log('Không tìm thấy token - Bạn cần đăng nhập trước', 'warning');
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('vnpayForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const token = localStorage.getItem('token');
+            const amount = parseInt(document.getElementById('amount').value);
+            const orderInfo = document.getElementById('orderInfo').value;
+            const customerName = document.getElementById('customerName').value;
+            const customerPhone = document.getElementById('customerPhone').value;
+            const customerEmail = document.getElementById('customerEmail').value;
+            const address = document.getElementById('address').value;
+
+            const payButton = document.getElementById('payButton');
+            const resultDiv = document.getElementById('result');
+
+            // Validation
+            if (!token) {
+                resultDiv.innerHTML = '<div class="alert alert-danger">❌ Bạn cần đăng nhập trước! Token không tồn tại.</div>';
+                log('Không có token xác thực', 'error');
+                return;
+            }
+
+            if (amount < 5000) {
+                resultDiv.innerHTML = '<div class="alert alert-danger">❌ Số tiền phải tối thiểu 5,000 VND</div>';
+                log('Số tiền không hợp lệ: ' + amount, 'error');
+                return;
+            }
+
+            if (!customerName || !customerPhone || !customerEmail || !address) {
+                resultDiv.innerHTML = '<div class="alert alert-danger">❌ Vui lòng điền đầy đủ thông tin</div>';
+                log('Thiếu thông tin bắt buộc', 'error');
+                return;
+            }
+
+            // Disable button and show loading
+            payButton.disabled = true;
+            payButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            resultDiv.innerHTML = '<div class="alert alert-info">🔄 Đang tạo thanh toán VNPay...</div>';
+
+            log(`Bắt đầu tạo thanh toán VNPay`);
+            log(`Số tiền: ${amount.toLocaleString()} VND`);
+            log(`Thông tin: ${orderInfo}`);
+
+            try {
+                const requestData = {
+                    amount: amount,
+                    orderInfo: orderInfo,
+                    orderType: 'other',
+                    // Thông tin đơn hàng giả lập
+                    dia_chi_giao_hang: address,
+                    phuong_thuc_thanh_toan: 'VNPAY',
+                    ghi_chu: 'Test payment',
+                    shippingFee: 30000,
+                    danh_sach_san_pham: [{
+                        id: '507f1f77bcf86cd799439011', // ObjectId giả
+                        size: 'M',
+                        color: 'Đỏ',
+                        quantity: 1
+                    }],
+                    discount: 0,
+                    voucher: null
+                };
+
+                log(`Gửi request đến API: ${JSON.stringify(requestData, null, 2)}`);
+
+                const response = await fetch('http://localhost:5000/api/payment/vnpay', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                log(`Response status: ${response.status} ${response.statusText}`);
+
+                const data = await response.json();
+                log(`Response data: ${JSON.stringify(data, null, 2)}`);
+
+                if (response.ok && data.success && data.paymentUrl) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ Tạo thanh toán thành công!<br>
+                            <strong>Order ID:</strong> ${data.orderId}<br>
+                            <strong>Amount:</strong> ${data.amount.toLocaleString()} VND<br>
+                            <strong>Bill ID:</strong> ${data.billId}<br>
+                            <div class="mt-3">
+                                <a href="${data.paymentUrl}" target="_blank" class="btn btn-success">
+                                    🚀 Đi đến trang thanh toán VNPay
+                                </a>
+                                <button class="btn btn-info ms-2" onclick="copyToClipboard('${data.paymentUrl}')">
+                                    📋 Copy URL
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    log(`Payment URL tạo thành công: ${data.paymentUrl}`, 'success');
+                    log(`Order ID: ${data.orderId}`, 'success');
+
+                    // Auto redirect sau 3 giây
+                    setTimeout(() => {
+                        log('Tự động chuyển hướng đến VNPay...', 'info');
+                        window.open(data.paymentUrl, '_blank');
+                    }, 3000);
+
+                } else {
+                    throw new Error(data.message || 'Không tạo được payment URL');
+                }
+
+            } catch (error) {
+                log(`Lỗi: ${error.message}`, 'error');
+
+                let errorMessage = error.message;
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = 'Không thể kết nối đến server. Kiểm tra server có đang chạy không?';
+                }
+
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        ❌ <strong>Lỗi:</strong> ${errorMessage}
+                        <br><small class="text-muted">Kiểm tra console để xem chi tiết</small>
+                    </div>
+                `;
+            } finally {
+                // Re-enable button
+                payButton.disabled = false;
+                payButton.innerHTML = '💳 Thanh toán VNPay';
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                log('Đã copy URL vào clipboard', 'success');
+            }).catch(() => {
+                log('Không thể copy URL', 'error');
+            });
+        }
+
+        // Log initial state
+        log('Test VNPay form loaded successfully');
+        log('Terminal ID: 16EMRWXG (Sandbox)');
+        log('Sẵn sàng test thanh toán');
+    </script>
+</body>
+
+</html>

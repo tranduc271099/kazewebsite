@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hướng dẫn xác thực thanh toán VNPay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .guide-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 800px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-vnpay {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="guide-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-credit-card-2-front" style="font-size: 3rem; color: #28a745;"></i>
+                <h1 class="mt-3">Hướng dẫn xác thực thanh toán VNPay</h1>
+                <p class="text-muted">Giải quyết lỗi 504 Gateway Timeout</p>
+            </div>
+
+            <div class="alert alert-vnpay">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <strong>Vấn đề:</strong> VNPay không thể kết nối về localhost nên xảy ra lỗi 504 Gateway Timeout
+            </div>
+
+            <h3><i class="bi bi-list-ol me-2"></i>Các bước thực hiện:</h3>
+
+            <div class="step">
+                <h5><i class="bi bi-1-circle-fill me-2 text-primary"></i>Thực hiện thanh toán</h5>
+                <p>Tiến hành thanh toán VNPay như bình thường trên website của bạn</p>
+            </div>
+
+            <div class="step">
+                <h5><i class="bi bi-2-circle-fill me-2 text-primary"></i>Hoàn tất thanh toán trên VNPay</h5>
+                <p>Thực hiện thanh toán trên trang VNPay cho đến khi nhận được thông báo <strong>"Giao dịch thành
+                        công"</strong></p>
+            </div>
+
+            <div class="step">
+                <h5><i class="bi bi-3-circle-fill me-2 text-primary"></i>Bỏ qua lỗi timeout</h5>
+                <p>Khi VNPay redirect về và gặp lỗi 504, đừng lo lắng. Hãy mở tab mới trong trình duyệt</p>
+            </div>
+
+            <div class="step">
+                <h5><i class="bi bi-4-circle-fill me-2 text-primary"></i>Truy cập trang xác thực</h5>
+                <p>Vào địa chỉ sau (thay <code>MÃ_ĐƠN_HÀNG</code> bằng mã đơn hàng thực tế):</p>
+                <div class="bg-light p-3 rounded mt-2">
+                    <code>http://localhost:3000/payment-status.html?orderId=MÃ_ĐƠN_HÀNG</code>
+                </div>
+                <small class="text-muted">Ví dụ: http://localhost:3000/payment-status.html?orderId=1738568123456</small>
+            </div>
+
+            <div class="step">
+                <h5><i class="bi bi-5-circle-fill me-2 text-primary"></i>Xác thực thanh toán</h5>
+                <p>Trang sẽ tự động kiểm tra trạng thái. Nếu không tự động cập nhật, nhấn nút <strong>"Tôi đã thanh toán
+                        thành công"</strong></p>
+            </div>
+
+            <hr class="my-4">
+
+            <h4><i class="bi bi-tools me-2"></i>Test nhanh với form bên dưới:</h4>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="orderIdInput" placeholder="Nhập mã đơn hàng..."
+                            value="">
+                        <button class="btn btn-primary" onclick="checkPaymentStatus()">
+                            <i class="bi bi-search"></i> Kiểm tra
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-success w-100" onclick="goToPaymentStatus()">
+                        <i class="bi bi-arrow-right"></i> Đi đến trang xác thực
+                    </button>
+                </div>
+            </div>
+
+            <div id="statusResult" class="mt-3"></div>
+
+            <div class="alert alert-warning mt-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Lưu ý:</strong> Chỉ nhấn "Tôi đã thanh toán thành công" nếu bạn thực sự đã hoàn tất thanh toán
+                trên VNPay
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPaymentStatus() {
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            if (!orderId) {
+                alert('Vui lòng nhập mã đơn hàng');
+                return;
+            }
+
+            document.getElementById('statusResult').innerHTML = '<div class="alert alert-info"><i class="bi bi-hourglass-split"></i> Đang kiểm tra...</div>';
+
+            fetch(`http://localhost:5000/api/payment/status/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const status = data.isPaid ? 'Đã thanh toán' : 'Chưa thanh toán';
+                        const badgeClass = data.isPaid ? 'bg-success' : 'bg-warning';
+
+                        document.getElementById('statusResult').innerHTML = `
+                            <div class="alert alert-success">
+                                <h6><i class="bi bi-check-circle-fill me-2"></i>Tìm thấy đơn hàng!</h6>
+                                <p><strong>Mã đơn:</strong> ${data.orderId}</p>
+                                <p><strong>Trạng thái:</strong> <span class="badge ${badgeClass}">${status}</span></p>
+                                <p><strong>Phương thức:</strong> ${data.paymentMethod}</p>
+                                <p><strong>Số tiền:</strong> ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(data.amount)}</p>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('statusResult').innerHTML = `
+                            <div class="alert alert-danger">
+                                <i class="bi bi-x-circle-fill me-2"></i>
+                                <strong>Lỗi:</strong> ${data.message}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('statusResult').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-x-circle-fill me-2"></i>
+                            <strong>Lỗi kết nối:</strong> Không thể kết nối đến server
+                        </div>
+                    `;
+                });
+        }
+
+        function goToPaymentStatus() {
+            const orderId = document.getElementById('orderIdInput').value.trim();
+            if (!orderId) {
+                alert('Vui lòng nhập mã đơn hàng');
+                return;
+            }
+
+            window.open(`http://localhost:3000/payment-status.html?orderId=${orderId}`, '_blank');
+        }
+
+        // Auto-fill with current timestamp for testing  
+        document.getElementById('orderIdInput').value = Date.now().toString();
+    </script>
+</body>
+
+</html>

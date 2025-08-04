@@ -507,7 +507,7 @@ exports.addSampleRatings = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Kiểm tra sản phẩm có tồn tại không
         const product = await Product.findById(id);
         if (!product) {
@@ -519,20 +519,20 @@ exports.deleteProduct = async (req, res) => {
 
         // Kiểm tra sản phẩm có trong đơn hàng nào không
         const Bill = require('../models/Bill/BillUser');
-        
+
         // Debug: Hiển thị query được sử dụng
         console.log(`🔍 Searching for orders with query: { 'danh_sach_san_pham.san_pham_id': '${id}' }`);
-        
+
         const hasOrders = await Bill.findOne({
             'danh_sach_san_pham.san_pham_id': id
         });
 
         console.log(`🔍 Checking product ${id} in orders:`, hasOrders ? 'FOUND' : 'NOT FOUND');
-        
+
         if (hasOrders) {
             console.log(`❌ Found order for product:`, hasOrders.orderId);
             console.log(`❌ Cannot delete product ${id} - has orders`);
-            return res.status(400).json({ 
+            return res.status(400).json({
                 message: 'Không thể xóa sản phẩm này vì đã có đơn hàng được đặt',
                 canDelete: false,
                 hasOrders: true,
@@ -578,10 +578,10 @@ exports.deleteProduct = async (req, res) => {
         await Product.findByIdAndDelete(id);
         console.log(`✅ Successfully deleted product ${id}`);
 
-        res.json({ 
-            message: 'Xóa sản phẩm thành công', 
+        res.json({
+            message: 'Xóa sản phẩm thành công',
             canDelete: true,
-            deleted: true 
+            deleted: true
         });
     } catch (error) {
         console.error('Lỗi khi xóa sản phẩm:', error);
@@ -593,7 +593,7 @@ exports.deleteProduct = async (req, res) => {
 exports.deleteVariant = async (req, res) => {
     try {
         const { productId, variantId } = req.params;
-        
+
         // Kiểm tra sản phẩm có tồn tại không
         const product = await Product.findById(productId);
         if (!product) {
@@ -636,7 +636,7 @@ exports.deleteVariant = async (req, res) => {
                 hadOrders: true,
                 orderCount: orders.length
             });
-            
+
             console.log(`🗂️ Biến thể đã có ${orders.length} đơn hàng được lưu vào DeletedVariant collection: ${variant.attributes.color} - ${variant.attributes.size}`);
         }
 
@@ -658,7 +658,7 @@ exports.deleteVariant = async (req, res) => {
         product.variants.splice(variantIndex, 1);
         await product.save();
 
-        const message = hasOrders 
+        const message = hasOrders
             ? `Xóa biến thể thành công. Dữ liệu ${orders.length} đơn hàng cũ được giữ lại và lưu trữ an toàn.`
             : 'Xóa biến thể thành công';
 
@@ -674,14 +674,14 @@ exports.debugProductOrders = async (req, res) => {
     try {
         const { id } = req.params;
         const Bill = require('../models/Bill/BillUser');
-        
+
         // Tìm tất cả đơn hàng có chứa sản phẩm này
         const orders = await Bill.find({
             'danh_sach_san_pham.san_pham_id': id
         }).select('orderId danh_sach_san_pham trang_thai ngay_tao');
-        
+
         console.log(`📊 Found ${orders.length} orders for product ${id}`);
-        
+
         res.json({
             productId: id,
             orderCount: orders.length,

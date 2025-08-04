@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
     gender: { type: String, enum: ['Nam', 'Nữ', 'Khác'], required: false },
     dob: { type: Date, required: false },
     isActive: { type: Boolean, default: true }, // Add isActive field
+    resetPasswordToken: { type: String }, // Token for password reset
+    resetPasswordExpiry: { type: Date }, // Expiry time for reset token
 }, { timestamps: true })
 
 module.exports = mongoose.model('User', userSchema);

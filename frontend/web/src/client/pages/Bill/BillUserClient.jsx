@@ -558,7 +558,7 @@ const BillUserClient = () => {
                                                 </div>
                                                 <div className="order-actions">
                                                     <button className="shopee-btn shopee-btn-secondary" onClick={() => showBillDetail(bill)}>Xem Chi Tiết</button>
-                                                    {bill.trang_thai === 'chờ xác nhận' && (
+                                                    {(bill.trang_thai === 'chờ xác nhận' || bill.trang_thai === 'đã xác nhận') && (
                                                         <button className="shopee-btn shopee-btn-primary" onClick={() => handleCancelOrder(bill._id)}>Hủy Đơn</button>
                                                     )}
                                                     {/* Nút tiếp tục thanh toán chỉ cho VNPay chưa thanh toán và chưa bị hủy */}
