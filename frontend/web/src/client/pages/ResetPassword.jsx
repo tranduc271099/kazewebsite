@@ -57,7 +57,7 @@ const ResetPassword = () => {
                 setMessage(response.data.message);
                 setIsSuccess(true);
                 setFormData({ newPassword: '', confirmPassword: '' });
-                
+
                 // Redirect to login after 3 seconds
                 setTimeout(() => {
                     navigate('/login');

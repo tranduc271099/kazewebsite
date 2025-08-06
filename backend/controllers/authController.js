@@ -31,7 +31,7 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
-const upload = multer({ 
+const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
     limits: {
@@ -105,7 +105,7 @@ exports.googleLogin = async (req, res) => {
 exports.getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
-        
+
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -201,7 +201,7 @@ exports.updateProfile = [
             if (req.file && fs.existsSync(req.file.path)) {
                 fs.unlinkSync(req.file.path);
             }
-            
+
             res.status(500).json({
                 success: false,
                 message: 'Lỗi server',
@@ -235,11 +235,9 @@ exports.forgotPassword = async (req, res) => {
         // Tìm user với email
         const user = await User.findOne({ email });
         if (!user) {
-            // Vì lý do bảo mật, không tiết lộ email có tồn tại hay không
-            // Trả về thông báo success để tránh kẻ xấu dò tìm email
-            return res.json({
-                success: true,
-                message: 'Nếu email này tồn tại trong hệ thống, bạn sẽ nhận được email đặt lại mật khẩu trong vài phút tới.'
+            return res.status(404).json({
+                success: false,
+                message: 'Email không tồn tại trong hệ thống.'
             });
         }
 

@@ -13,7 +13,7 @@ exports.getRevenueStats = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
-            
+
             dateFilter = {
                 ngay_tao: {
                     $gte: start,
@@ -247,7 +247,7 @@ exports.getTopUsers = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
-            
+
             dateFilter = {
                 ngay_tao: {
                     $gte: start,
@@ -307,7 +307,7 @@ exports.getTopProducts = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
-            
+
             dateFilter = {
                 ngay_tao: {
                     $gte: start,
@@ -441,7 +441,7 @@ exports.getLatestOrders = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
-            
+
             dateFilter = {
                 ngay_tao: {
                     $gte: start,
@@ -495,7 +495,7 @@ exports.getDashboardStats = async (req, res) => {
             const start = new Date(startDate);
             const end = new Date(endDate);
             end.setHours(23, 59, 59, 999); // Bao gồm toàn bộ ngày kết thúc
-            
+
             dateFilter = {
                 ngay_tao: {
                     $gte: start,

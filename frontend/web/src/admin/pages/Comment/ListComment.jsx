@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEdit, AiOutlineDelete, AiOutlineFlag } from 'rea
 import { FaReply, FaEye, FaEyeSlash, FaCheck, FaTimes, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import styles from '../../styles/ProductLayout.module.css';
 import '../../styles/CommentManagement.css';
+import '../../../styles/CommentManagement.custom.css';
 
 const ListComment = () => {
     const [comments, setComments] = useState([]);

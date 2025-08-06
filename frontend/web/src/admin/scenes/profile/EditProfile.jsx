@@ -23,7 +23,7 @@ import axios from 'axios';
 const EditProfile = () => {
   const theme = useTheme();
   const colors = tokens();
-  
+
   const [profileData, setProfileData] = useState({
     name: '',
     email: '',
@@ -31,7 +31,7 @@ const EditProfile = () => {
     address: '',
     avatar: ''
   });
-  
+
   const [originalData, setOriginalData] = useState({});
   const [loading, setLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState(null);
@@ -49,7 +49,7 @@ const EditProfile = () => {
       const response = await axios.get('http://localhost:5000/api/auth/profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       const data = response.data;
       setProfileData(data);
       setOriginalData(data);
@@ -65,7 +65,7 @@ const EditProfile = () => {
       ...prev,
       [field]: value
     }));
-    
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
@@ -83,15 +83,15 @@ const EditProfile = () => {
         toast.error('Vui lòng chọn file ảnh hợp lệ');
         return;
       }
-      
+
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast.error('Kích thước file không được vượt quá 5MB');
         return;
       }
-      
+
       setAvatarFile(file);
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -103,21 +103,21 @@ const EditProfile = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!profileData.name.trim()) {
       newErrors.name = 'Tên không được để trống';
     }
-    
+
     if (!profileData.email.trim()) {
       newErrors.email = 'Email không được để trống';
     } else if (!/\S+@\S+\.\S+/.test(profileData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
-    
+
     if (profileData.phone && !/^[0-9]{10,11}$/.test(profileData.phone.replace(/\s/g, ''))) {
       newErrors.phone = 'Số điện thoại không hợp lệ';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -147,18 +147,18 @@ const EditProfile = () => {
     try {
       const token = localStorage.getItem('token');
       const formData = new FormData();
-      
+
       formData.append('name', profileData.name);
       formData.append('email', profileData.email);
       formData.append('phone', profileData.phone);
       formData.append('address', profileData.address);
-      
+
       if (avatarFile) {
         formData.append('avatar', avatarFile);
       }
 
       const response = await axios.put('http://localhost:5000/api/auth/profile', formData, {
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
@@ -173,12 +173,12 @@ const EditProfile = () => {
       setOriginalData(profileData);
       setAvatarFile(null);
       toast.success('Cập nhật thông tin thành công!');
-      
+
       // Trigger a custom event to update sidebar
       window.dispatchEvent(new CustomEvent('profileUpdated', {
         detail: { name: profileData.name, avatar: response.data.avatar }
       }));
-      
+
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật thông tin');
@@ -209,10 +209,10 @@ const EditProfile = () => {
         Chỉnh sửa thông tin cá nhân
       </Typography>
 
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 4, 
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
           background: colors.primary[400],
           maxWidth: 800,
           mx: 'auto'
@@ -224,9 +224,9 @@ const EditProfile = () => {
             <Box display="flex" flexDirection="column" alignItems="center">
               <Avatar
                 src={avatarPreview}
-                sx={{ 
-                  width: 150, 
-                  height: 150, 
+                sx={{
+                  width: 150,
+                  height: 150,
                   mb: 2,
                   border: `3px solid ${colors.primary[300]}`
                 }}
@@ -239,11 +239,11 @@ const EditProfile = () => {
                 onChange={handleAvatarChange}
               />
               <label htmlFor="avatar-upload">
-                <IconButton 
-                  color="primary" 
-                  aria-label="upload avatar" 
+                <IconButton
+                  color="primary"
+                  aria-label="upload avatar"
                   component="span"
-                  sx={{ 
+                  sx={{
                     background: colors.primary[300],
                     '&:hover': { background: colors.primary[200] }
                   }}
@@ -271,7 +271,7 @@ const EditProfile = () => {
                   helperText={errors.name}
                   sx={{
                     '& .MuiInputLabel-root': { color: colors.grey[300] },
-                    '& .MuiOutlinedInput-root': { 
+                    '& .MuiOutlinedInput-root': {
                       color: colors.grey[100],
                       '& fieldset': { borderColor: colors.grey[600] },
                       '&:hover fieldset': { borderColor: colors.grey[400] },
@@ -280,7 +280,7 @@ const EditProfile = () => {
                   }}
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -292,7 +292,7 @@ const EditProfile = () => {
                   helperText={errors.email}
                   sx={{
                     '& .MuiInputLabel-root': { color: colors.grey[300] },
-                    '& .MuiOutlinedInput-root': { 
+                    '& .MuiOutlinedInput-root': {
                       color: colors.grey[100],
                       '& fieldset': { borderColor: colors.grey[600] },
                       '&:hover fieldset': { borderColor: colors.grey[400] },
@@ -301,7 +301,7 @@ const EditProfile = () => {
                   }}
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -312,7 +312,7 @@ const EditProfile = () => {
                   helperText={errors.phone}
                   sx={{
                     '& .MuiInputLabel-root': { color: colors.grey[300] },
-                    '& .MuiOutlinedInput-root': { 
+                    '& .MuiOutlinedInput-root': {
                       color: colors.grey[100],
                       '& fieldset': { borderColor: colors.grey[600] },
                       '&:hover fieldset': { borderColor: colors.grey[400] },
@@ -321,7 +321,7 @@ const EditProfile = () => {
                   }}
                 />
               </Grid>
-              
+
               <Grid item xs={12}>
                 <TextField
                   fullWidth
@@ -332,7 +332,7 @@ const EditProfile = () => {
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   sx={{
                     '& .MuiInputLabel-root': { color: colors.grey[300] },
-                    '& .MuiOutlinedInput-root': { 
+                    '& .MuiOutlinedInput-root': {
                       color: colors.grey[100],
                       '& fieldset': { borderColor: colors.grey[600] },
                       '&:hover fieldset': { borderColor: colors.grey[400] },

@@ -257,11 +257,11 @@ const Topbar = () => {
             </Button>
           </Box>
         </Popover>
-        
+
         <IconButton onClick={handleUserIconClick}>
           <PersonOutlinedIcon />
         </IconButton>
-        
+
         {/* User Dropdown Menu */}
         <Popover
           open={userDropdownOpen}
@@ -288,7 +288,7 @@ const Topbar = () => {
         >
           <ClickAwayListener onClickAway={handleUserDropdownClose}>
             <MenuList sx={{ py: 1 }}>
-              <MenuItem 
+              <MenuItem
                 onClick={handleUserLogout}
                 sx={{
                   color: colors.grey[100],

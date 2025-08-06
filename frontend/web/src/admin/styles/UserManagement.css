@@ -205,6 +205,52 @@
     justify-content: flex-start;
 }
 
+input,
+select,
+textarea {
+    color: #fff !important;
+    border: 1px solid #343a40;
+}
+
+/* CSS riêng cho input tìm kiếm nhân sự */
+.staff-search-input {
+    background-color: #1F2A40 !important;
+    color: #fff !important;
+    border: 1px solid #343a40 !important;
+    border-radius: 6px;
+    transition: border 0.2s, background 0.2s;
+}
+
+.staff-search-input::placeholder {
+    color: #bfc9da !important;
+    opacity: 1;
+}
+
+/* Override input tìm kiếm nhân sự dùng class ProductLayout_input__* */
+[class^="ProductLayout_input__"],
+[class*=" ProductLayout_input__"] {
+    background-color: #1F2A40 !important;
+    color: #fff !important;
+    border: 1px solid #343a40 !important;
+}
+
+/* Fix cứng input tìm kiếm nhân sự trong trang quản lý nhân sự */
+.user-management-header .form-control,
+.user-management-header input[type="text"],
+.user-management-header input[type="search"] {
+    background-color: #1F2A40 !important;
+    color: #fff !important;
+    border: 1px solid #343a40 !important;
+}
+
+/* Đảm bảo input tìm kiếm nhân sự có màu giống các ô input khác */
+input[placeholder="Tìm kiếm nhân sự…"],
+input[placeholder="Tìm kiếm nhân sự..."] {
+    background-color: #1F2A40 !important;
+    color: #fff !important;
+    border: 1px solid #343a40;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .user-management-container {
@@ -222,4 +268,4 @@
     .action-buttons {
         flex-wrap: wrap;
     }
-} 
+}

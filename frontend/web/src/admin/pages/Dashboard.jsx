@@ -566,98 +566,98 @@ const Dashboard = () => {
                 <div style={{ minHeight: 250, padding: '0 16px 24px 16px' }}>
                     {dashboardData.dailyStats.length > 0 ? (
                         <>
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'flex-end',
-                            gap: 30,
-                            height: 200,
-                            width: '100%',
-                            justifyContent: 'center',
-                            paddingBottom: 16,
-                        }}>
-                            {dashboardData.dailyStats.map((day, index) => {
-                                const maxRevenue = Math.max(...dashboardData.dailyStats.map(d => d.revenue));
-                                const revenueHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'flex-end',
+                                gap: 30,
+                                height: 200,
+                                width: '100%',
+                                justifyContent: 'center',
+                                paddingBottom: 16,
+                            }}>
+                                {dashboardData.dailyStats.map((day, index) => {
+                                    const maxRevenue = Math.max(...dashboardData.dailyStats.map(d => d.revenue));
+                                    const revenueHeight = maxRevenue > 0 ? (day.revenue / maxRevenue) * 140 + 10 : 10;
 
-                                return (
-                                    <div key={day._id} style={{
-                                        flex: '0 0 80px',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        minWidth: 80,
-                                    }}>
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'flex-end',
-                                            gap: 6,
-                                            marginBottom: 8,
-                                        }}>
-                                            {/* Thanh doanh thu */}
-                                            <div style={{
-                                                width: 48,
-                                                height: revenueHeight,
-                                                background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-                                                borderRadius: '6px 6px 0 0',
-                                                transition: 'all 0.3s ease',
-                                                boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
-                                            }}></div>
-                                        </div>
-                                        <div style={{
+                                    return (
+                                        <div key={day._id} style={{
+                                            flex: '0 0 80px',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
-                                            marginTop: 0,
-                                            marginBottom: 0,
+                                            minWidth: 80,
                                         }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'flex-end',
+                                                gap: 6,
+                                                marginBottom: 8,
+                                            }}>
+                                                {/* Thanh doanh thu */}
+                                                <div style={{
+                                                    width: 48,
+                                                    height: revenueHeight,
+                                                    background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+                                                    borderRadius: '6px 6px 0 0',
+                                                    transition: 'all 0.3s ease',
+                                                    boxShadow: '0 2px 8px rgba(66,165,245,0.12)'
+                                                }}></div>
+                                            </div>
                                             <div style={{
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 alignItems: 'center',
-                                                gap: 2,
+                                                marginTop: 0,
+                                                marginBottom: 0,
                                             }}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center',
+                                                    gap: 2,
+                                                }}>
+                                                    <span style={{
+                                                        color: theme.palette.text.primary,
+                                                        fontWeight: 600,
+                                                        fontSize: 12,
+                                                        lineHeight: 1.2,
+                                                        textAlign: 'center',
+                                                        display: 'block',
+                                                    }}>
+                                                        {day.revenue.toLocaleString('vi-VN')}₫
+                                                    </span>
+                                                </div>
                                                 <span style={{
-                                                    color: theme.palette.text.primary,
-                                                    fontWeight: 600,
-                                                    fontSize: 12,
-                                                    lineHeight: 1.2,
+                                                    marginTop: 4,
+                                                    color: theme.palette.text.secondary,
+                                                    fontSize: 13,
+                                                    fontWeight: 500,
                                                     textAlign: 'center',
                                                     display: 'block',
                                                 }}>
-                                                    {day.revenue.toLocaleString('vi-VN')}₫
+                                                    {formatDate(day._id)}
                                                 </span>
                                             </div>
-                                            <span style={{
-                                                marginTop: 4,
-                                                color: theme.palette.text.secondary,
-                                                fontSize: 13,
-                                                fontWeight: 500,
-                                                textAlign: 'center',
-                                                display: 'block',
-                                            }}>
-                                                {formatDate(day._id)}
-                                            </span>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        {/* Legend xuống dưới */}
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            marginTop: 16,
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <div style={{
-                                    width: 12,
-                                    height: 12,
-                                    background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-                                    borderRadius: 2
-                                }}></div>
-                                <span style={{ fontSize: 13, color: '#ffffff' }}>Doanh thu</span>
+                                    );
+                                })}
                             </div>
-                        </div>
+                            {/* Legend xuống dưới */}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                marginTop: 16,
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <div style={{
+                                        width: 12,
+                                        height: 12,
+                                        background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+                                        borderRadius: 2
+                                    }}></div>
+                                    <span style={{ fontSize: 13, color: '#ffffff' }}>Doanh thu</span>
+                                </div>
+                            </div>
                         </>
                     ) : (
                         <p style={{ color: theme.palette.text.secondary }}>Không có dữ liệu doanh thu</p>

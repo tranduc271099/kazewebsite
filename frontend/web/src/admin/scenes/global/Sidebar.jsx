@@ -199,13 +199,13 @@ const Sidebar = () => {
                   {role}
                 </Typography>
               </Box>
-              
+
               <Popper open={open} anchorEl={anchorEl} placement="bottom-start" style={{ zIndex: 1300 }}>
                 <ClickAwayListener onClickAway={handleClose}>
-                  <Paper 
-                    elevation={8} 
-                    style={{ 
-                      background: colors.primary[400], 
+                  <Paper
+                    elevation={8}
+                    style={{
+                      background: colors.primary[400],
                       border: `1px solid ${colors.grey[700]}`,
                       borderRadius: 8,
                       marginTop: 8

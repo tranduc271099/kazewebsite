@@ -54,8 +54,8 @@ const About = () => (
                 <div className="row mt-5">
                     <div className="col-lg-12" data-aos="zoom-in" data-aos-delay="200">
                         <div className="video-box">
-                            <img src="/assets/img/about/about-wide-1.webp" className="img-fluid" alt="Video Thumbnail" />
-                            <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" className="glightbox pulsating-play-btn"></a>
+                            <img src="https://caodang.fpt.edu.vn/wp-content/uploads/FPT_Polytechnic_Hanoi.jpg" className="img-fluid" alt="Video Thumbnail" />
+
                         </div>
                     </div>
                 </div>
@@ -67,10 +67,10 @@ const About = () => (
                 <div className="row align-items-center">
                     <div className="col-lg-4" data-aos="fade-up" data-aos-delay="200">
                         <div className="avatars d-flex align-items-center">
-                            <img src="/assets/img/person/person-m-2.webp" alt="Avatar 1" className="rounded-circle" loading="lazy" />
-                            <img src="/assets/img/person/person-m-3.webp" alt="Avatar 2" className="rounded-circle" loading="lazy" />
-                            <img src="/assets/img/person/person-f-5.webp" alt="Avatar 3" className="rounded-circle" loading="lazy" />
-                            <img src="/assets/img/person/person-m-5.webp" alt="Avatar 4" className="rounded-circle" loading="lazy" />
+                            <img src="https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-6/494269183_698422712571591_2429022437792924518_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeE_IiAgwuhhqEOGwuAU2SFahAf9VbiMzPCEB_1VuIzM8HWEJZ63obKwZIKGwrc29rrQwTTF8L6HWLZmZAiCux2r&_nc_ohc=ZZARozfUdxoQ7kNvwHFi_w9&_nc_oc=AdkTu6ICvbpskvwINHDS65FTElM3CZ8aPRqMKBQaogTTFokqLOThAZhqSt-zq8PtdCEdkXa75K9DHZiIkx7rKiJG&_nc_zt=23&_nc_ht=scontent.fhan14-3.fna&_nc_gid=2oyPoUQbnHhH3i2ONrC0pw&oh=00_AfXPPnov8Li-S33a38tYX5CrZasQRgX1f2gPwucfx7wz0g&oe=68992799" alt="Avatar 1" className="rounded-circle" loading="lazy" />
+                            <img src="https://scontent-hkg1-2.xx.fbcdn.net/v/t39.30808-6/485109838_1982356488956429_4899577137172592131_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHAUJKvmTUbVbQs1rD2WOpPfDo2xfve1418OjbF-97XjQ4tamqKYOEWOi__wPFMVeQ0ULrqbH0gXENJ8wo_65t_&_nc_ohc=U_DNnGB4NG4Q7kNvwHfxMov&_nc_oc=Adkv1lPEyLjuzl9Ps3x_3vqLScx42q2A4GIsXzuFR65EOH-H1vBZQM1ckBdlpDbvFmAC1DDpnWCdvIwLyw-BKNH-&_nc_zt=23&_nc_ht=scontent-hkg1-2.xx&_nc_gid=ttQG6TIAIcqQDZrHocOxpw&oh=00_AfXgq0n1xO-Vcqk4qSW0YOxmaZVaxelvsTuZLp1ZTnJD4w&oe=68993360" alt="Avatar 2" className="rounded-circle" loading="lazy" />
+                            <img src="https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/528299863_771405115273350_4393273247041755186_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeEyShyMhrK6OLMMX-a35pqve2anDtYjfgR7ZqcO1iN-BBzwbKVniIsNLBFZI47JL5d80JfUlqvKvBBmyXZlb-qh&_nc_ohc=MfWekOQOljAQ7kNvwE6NL45&_nc_oc=AdlPPGVr-uguwvUpPeLXWbcz1IynqTiX0X2yMsEjTv9a_xKmVtSIfUgoqgfWPeUCoiFqvR0xaj8v7sY3wL8X2b6U&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=FQld8bKZCyblody31Ze35Q&oh=00_AfXVMMwbfBZ4gTj7uwpfnu9cnmiPGUgJ-keYgEuFGUS17Q&oe=68994D1A" alt="Avatar 3" className="rounded-circle" loading="lazy" />
+                            <img src="https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/529633710_771411775272684_8079865008318487294_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGe8N2JW4-xg2muRCihrE7DecZlde2nT1Z5xmV17adPVpXJsZP9oAcO4i-EKdLx80c3exsS5uSiJcevPW1VWZ8j&_nc_ohc=Lv-wAkAJuH4Q7kNvwFrdytt&_nc_oc=AdnEbgga5gU1Y3r3ImpJppwdgh_uOn9LZwXrCd3igP_zeEY4cdSVZAJkU8cw2yoLs9Lh2jZqQG5mSxwEugchrnVO&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=jjyQi5FcscdM3NzXrDjLRQ&oh=00_AfUUoxnuC_42QZo6oJgW33JVrLqfxK0QOj7KLCCGp4Nmwg&oe=68993267" alt="Avatar 4" className="rounded-circle" loading="lazy" />
                         </div>
                     </div>
                     <div className="col-lg-8">
@@ -101,8 +101,8 @@ const About = () => (
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
                             <p>Việc áp dụng các chiến lược đổi mới đã cách mạng hóa cách tiếp cận của chúng tôi đối với các thách thức thị trường.</p>
                             <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-f-7.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>An Nhiên</h3><span className="position">Giám đốc chiến lược</span></div>
+                                <div className="client-image"><img src="https://scontent.fhan14-3.fna.fbcdn.net/v/t39.30808-6/494269183_698422712571591_2429022437792924518_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeE_IiAgwuhhqEOGwuAU2SFahAf9VbiMzPCEB_1VuIzM8HWEJZ63obKwZIKGwrc29rrQwTTF8L6HWLZmZAiCux2r&_nc_ohc=ZZARozfUdxoQ7kNvwHFi_w9&_nc_oc=AdkTu6ICvbpskvwINHDS65FTElM3CZ8aPRqMKBQaogTTFokqLOThAZhqSt-zq8PtdCEdkXa75K9DHZiIkx7rKiJG&_nc_zt=23&_nc_ht=scontent.fhan14-3.fna&_nc_gid=2oyPoUQbnHhH3i2ONrC0pw&oh=00_AfXPPnov8Li-S33a38tYX5CrZasQRgX1f2gPwucfx7wz0g&oe=68992799" alt="Client" /></div>
+                                <div className="client-details"><h3>Trần Minh Đức</h3><span className="position">ductmph46730@fpt.edu.vn</span></div>
                             </div>
                         </div>
                     </div>
@@ -111,8 +111,8 @@ const About = () => (
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
                             <p>Dịch vụ vượt trội và các giải pháp sáng tạo đã làm thay đổi hoạt động kinh doanh của chúng tôi, mang lại sự tăng trưởng đáng kể.</p>
                             <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-m-7.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Đức Minh</h3><span className="position">Giám đốc đổi mới</span></div>
+                                <div className="client-image"><img src="https://scontent-hkg1-2.xx.fbcdn.net/v/t39.30808-6/485109838_1982356488956429_4899577137172592131_n.jpg?_nc_cat=102&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHAUJKvmTUbVbQs1rD2WOpPfDo2xfve1418OjbF-97XjQ4tamqKYOEWOi__wPFMVeQ0ULrqbH0gXENJ8wo_65t_&_nc_ohc=U_DNnGB4NG4Q7kNvwHfxMov&_nc_oc=Adkv1lPEyLjuzl9Ps3x_3vqLScx42q2A4GIsXzuFR65EOH-H1vBZQM1ckBdlpDbvFmAC1DDpnWCdvIwLyw-BKNH-&_nc_zt=23&_nc_ht=scontent-hkg1-2.xx&_nc_gid=ttQG6TIAIcqQDZrHocOxpw&oh=00_AfXgq0n1xO-Vcqk4qSW0YOxmaZVaxelvsTuZLp1ZTnJD4w&oe=68993360" alt="Client" /></div>
+                                <div className="client-details"><h3>Bùi Đức Đạt</h3><span className="position">datbdph45586@fpt.edu.vn</span></div>
                             </div>
                         </div>
                     </div>
@@ -121,8 +121,8 @@ const About = () => (
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
                             <p>Quan hệ đối tác chiến lược đã cho phép chuyển đổi số liền mạch và hoạt động xuất sắc.</p>
                             <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-f-8.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Thu Trang</h3><span className="position">Trưởng phòng kỹ thuật số</span></div>
+                                <div className="client-image"><img src="https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/528299863_771405115273350_4393273247041755186_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeEyShyMhrK6OLMMX-a35pqve2anDtYjfgR7ZqcO1iN-BBzwbKVniIsNLBFZI47JL5d80JfUlqvKvBBmyXZlb-qh&_nc_ohc=MfWekOQOljAQ7kNvwE6NL45&_nc_oc=AdlPPGVr-uguwvUpPeLXWbcz1IynqTiX0X2yMsEjTv9a_xKmVtSIfUgoqgfWPeUCoiFqvR0xaj8v7sY3wL8X2b6U&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=FQld8bKZCyblody31Ze35Q&oh=00_AfXVMMwbfBZ4gTj7uwpfnu9cnmiPGUgJ-keYgEuFGUS17Q&oe=68994D1A" alt="Client" /></div>
+                                <div className="client-details"><h3>Nguyễn Văn Thành</h3><span className="position">thanhnvph46172@fpt.edu.vn</span></div>
                             </div>
                         </div>
                     </div>
@@ -131,31 +131,12 @@ const About = () => (
                             <div className="quote-pattern"><i className="bi bi-quote"></i></div>
                             <p>Chuyên môn và sự tận tâm đã cải thiện đáng kể tiến độ và chất lượng các dự án của chúng tôi.</p>
                             <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-m-8.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Quốc Hùng</h3><span className="position">Giám đốc kỹ thuật</span></div>
+                                <div className="client-image"><img src="https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/529633710_771411775272684_8079865008318487294_n.jpg?stp=dst-jpg_p526x296_tt6&_nc_cat=106&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGe8N2JW4-xg2muRCihrE7DecZlde2nT1Z5xmV17adPVpXJsZP9oAcO4i-EKdLx80c3exsS5uSiJcevPW1VWZ8j&_nc_ohc=Lv-wAkAJuH4Q7kNvwFrdytt&_nc_oc=AdnEbgga5gU1Y3r3ImpJppwdgh_uOn9LZwXrCd3igP_zeEY4cdSVZAJkU8cw2yoLs9Lh2jZqQG5mSxwEugchrnVO&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=jjyQi5FcscdM3NzXrDjLRQ&oh=00_AfUUoxnuC_42QZo6oJgW33JVrLqfxK0QOj7KLCCGp4Nmwg&oe=68993267" alt="Client" /></div>
+                                <div className="client-details"><h3>Nguyễn Trọng Đức Long</h3><span className="position">longntdph46774@fpt.edu.vn</span></div>
                             </div>
                         </div>
                     </div>
-                    <div className="testimonial-item highlight" data-aos="fade-up" data-aos-delay="400">
-                        <div className="testimonial-content">
-                            <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Cách tiếp cận hợp tác và chuyên môn trong ngành đã cách mạng hóa chu trình phát triển sản phẩm của chúng tôi.</p>
-                            <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-f-9.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Mai Phương</h3><span className="position">Quản lý sản phẩm</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="testimonial-item" data-aos="fade-up" data-aos-delay="500">
-                        <div className="testimonial-content">
-                            <div className="quote-pattern"><i className="bi bi-quote"></i></div>
-                            <p>Cách tiếp cận sáng tạo trong thiết kế trải nghiệm người dùng đã nâng cao đáng kể các chỉ số tương tác trên nền tảng của chúng tôi.</p>
-                            <div className="client-info">
-                                <div className="client-image"><img src="/assets/img/person/person-m-13.webp" alt="Client" /></div>
-                                <div className="client-details"><h3>Gia Bảo</h3><span className="position">Giám đốc UX</span></div>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
             </div>
         </section>

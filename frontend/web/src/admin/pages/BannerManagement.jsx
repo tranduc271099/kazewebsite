@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import BannerList from '../components/Banner/BannerList';
@@ -5,6 +6,7 @@ import BannerForm from '../components/Banner/BannerForm';
 import DeleteBannerModal from '../components/Banner/DeleteBannerModal';
 import { BiSearch } from 'react-icons/bi';
 import { AiOutlinePlus } from 'react-icons/ai';
+import { toast } from 'react-hot-toast';
 // @ts-ignore
 import styles from '../styles/ProductLayout.module.css';
 import '../styles/BannerManagement.css';
@@ -17,18 +19,21 @@ const BannerManagement = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [sortType, setSortType] = useState('newest');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         fetchBanners();
     }, []);
 
     const fetchBanners = async () => {
+        setLoading(true);
         try {
             const response = await axios.get('http://localhost:5000/api/banners');
-            console.log('API response for banners:', response.data); // Log response
             setBanners(response.data);
         } catch (error) {
-            console.error('Error fetching banners:', error.response ? error.response.data : error.message); // Log detailed error
+            toast.error('Lỗi khi tải danh sách banner');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -50,44 +55,42 @@ const BannerManagement = () => {
 
     const confirmDelete = async () => {
         try {
+            setLoading(true);
             await axios.delete(`http://localhost:5000/api/banners/${selectedBanner._id}`);
+            toast.success('Đã xóa banner thành công!');
             fetchBanners();
             setIsDeleteModalOpen(false);
         } catch (error) {
-            console.error('Error deleting banner:', error);
+            toast.error('Lỗi khi xóa banner');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleFormSubmit = async (formData) => {
         try {
-            console.log('=== FRONTEND BANNER SUBMIT ===');
-            console.log('FormData contents:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
-
+            setLoading(true);
             if (selectedBanner) {
-                console.log('Updating banner:', selectedBanner._id);
                 await axios.put(
                     `http://localhost:5000/api/banners/${selectedBanner._id}`,
                     formData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
+                toast.success('Cập nhật banner thành công!');
             } else {
-                console.log('Creating new banner');
-                const response = await axios.post(
+                await axios.post(
                     'http://localhost:5000/api/banners',
                     formData,
                     { headers: { 'Content-Type': 'multipart/form-data' } }
                 );
-                console.log('Banner creation response:', response.data);
+                toast.success('Thêm banner thành công!');
             }
             fetchBanners();
             setIsFormOpen(false);
         } catch (error) {
-            console.error('Lỗi khi lưu banner:', error);
-            console.error('Error response:', error.response?.data);
-            alert('Lỗi: ' + (error.response?.data?.message || error.message));
+            toast.error('Lỗi khi lưu banner');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -143,6 +146,8 @@ const BannerManagement = () => {
                     Thêm Banner mới
                 </button>
             </div>
+
+            {loading && <div style={{textAlign:'center',color:'#666',margin:'16px 0'}}>Đang xử lý...</div>}
 
             <div className={styles.card} style={{ marginTop: 16 }}>
                 <BannerList banners={sortedBanners} onEdit={handleEdit} onDelete={handleDelete} />
