@@ -73,9 +73,10 @@ const CommentController = {
       });
       if (!order) return res.status(403).json({ message: 'Bạn chưa mua sản phẩm này hoặc đơn hàng chưa hoàn thành' });
 
-      // 2. Kiểm tra đã bình luận chưa (theo từng orderId)
-      const existed = await Comment.findOne({ productId, userId, orderId });
-      if (existed) return res.status(400).json({ message: 'Bạn đã bình luận cho sản phẩm này trong đơn hàng này' });
+
+  // 2. Kiểm tra đã bình luận chưa (theo userId và productId, không phụ thuộc orderId)
+  const existed = await Comment.findOne({ productId, userId });
+  if (existed) return res.status(400).json({ message: 'Bạn đã đánh giá sản phẩm này rồi' });
 
       // 3. Tạo bình luận
       const comment = new Comment({ productId, userId, content, rating, orderId });

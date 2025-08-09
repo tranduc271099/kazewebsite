@@ -39,30 +39,39 @@ const BillUserClient = () => {
         setReviewSubmitting(true);
         try {
             const token = localStorage.getItem('token');
-        const reviews = Object.entries(reviewData).map(([productId, { rating, comment }]) => ({
-            productId,
-            rating,
-            content: comment,
-            orderId: reviewBillId
-        }));
-        // Call API to submit reviews for all products in the bill
-        await Promise.all(reviews.map(async (r) => {
-            await axios.post('http://localhost:5000/api/comments', {
-                productId: r.productId,
-                rating: r.rating,
-                content: r.content,
-                orderId: r.orderId
-            }, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-        }));
+            const reviews = Object.entries(reviewData).map(([productId, { rating, comment }]) => ({
+                productId,
+                rating,
+                content: comment,
+                orderId: reviewBillId
+            }));
+            // Call API to submit reviews for all products in the bill
+            await Promise.all(reviews.map(async (r) => {
+                try {
+                    await axios.post('http://localhost:5000/api/comments', {
+                        productId: r.productId,
+                        rating: r.rating,
+                        content: r.content,
+                        orderId: r.orderId
+                    }, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (err) {
+                    if (err.response && err.response.data && err.response.data.message === 'Bạn đã đánh giá sản phẩm này rồi') {
+                        toast.error('Bạn đã đánh giá sản phẩm này rồi.');
+                    } else {
+                        toast.error('Có lỗi khi gửi đánh giá.');
+                    }
+                    throw err;
+                }
+            }));
             toast.success('Đánh giá thành công!');
             // Optionally, mark bill as reviewed in UI
             setBills(bills.map(bill => bill._id === reviewBillId ? { ...bill, reviewed: true } : bill));
             setShowReviewModal(false);
             setReviewBillId(null);
         } catch (err) {
-            toast.error('Có lỗi khi gửi đánh giá.');
+            // Đã xử lý toast ở trên
         } finally {
             setReviewSubmitting(false);
         }
