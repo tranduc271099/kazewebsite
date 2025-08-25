@@ -357,9 +357,15 @@ const BillUserClient = () => {
                                 <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span style={{ color: '#000' }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 <div className="order-detail-section">
                                     <div className="order-detail-section-title">THÔNG TIN GIAO HÀNG</div>
-                                    <div><b style={{ color: '#000' }}>Tên người đặt:</b> <span style={{ color: '#000' }}>{selectedBill.nguoi_dung_id?.name || '---'}</span></div>
-                                    <div><b style={{ color: '#000' }}>Số điện thoại:</b> <span style={{ color: '#000' }}>{selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
-                                    <div><b style={{ color: '#000' }}>Địa chỉ:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Tên người đặt:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang?.ho_ten || selectedBill.nguoi_dung_id?.name || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Số điện thoại:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang?.so_dien_thoai || selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Email:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang?.email || selectedBill.nguoi_dung_id?.email || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Địa chỉ giao hàng:</b> <span style={{ color: '#000' }}>
+                                      {selectedBill.dia_chi_giao_hang?.dia_chi_chi_tiet && `${selectedBill.dia_chi_giao_hang.dia_chi_chi_tiet}, `}
+                                      {selectedBill.dia_chi_giao_hang?.phuong_xa && `${selectedBill.dia_chi_giao_hang.phuong_xa}, `}
+                                      {selectedBill.dia_chi_giao_hang?.quan_huyen && `${selectedBill.dia_chi_giao_hang.quan_huyen}, `}
+                                      {selectedBill.dia_chi_giao_hang?.tinh_thanh || '---'}
+                                    </span></div>
                                     {selectedBill.ghi_chu && (
                                         <div style={{ marginTop: 6 }}><b>Ghi chú:</b> {selectedBill.ghi_chu}</div>
                                     )}

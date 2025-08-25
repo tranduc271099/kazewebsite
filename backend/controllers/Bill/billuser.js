@@ -51,14 +51,21 @@ class BillController {
   async addBill(req, res) {
     try {
       const {
-        dia_chi_giao_hang,
         phuong_thuc_thanh_toan,
         ghi_chu,
         // shippingFee, // Không nhận từ client nữa
         danh_sach_san_pham: selectedItems,
         discount = 0,
         voucher = null,
-        orderId // vẫn nhận orderId nếu có
+        orderId, // vẫn nhận orderId nếu có
+        // Thông tin người đặt hàng từ checkout (theo cấu trúc mới)
+        ho_ten,
+        email,
+        so_dien_thoai,
+        dia_chi_chi_tiet,
+        phuong_xa,
+        quan_huyen,
+        tinh_thanh
       } = req.body;
       const nguoi_dung_id = req.user.id;
       // Nếu không có orderId từ client, tự sinh orderId
@@ -194,7 +201,17 @@ class BillController {
 
       const newBill = new Bill({
         nguoi_dung_id,
-        dia_chi_giao_hang,
+        dia_chi_giao_hang: {
+          // Thông tin người nhận hàng
+          ho_ten: ho_ten || req.user.name,
+          email: email || req.user.email,
+          so_dien_thoai: so_dien_thoai || req.user.phone,
+          // Địa chỉ chi tiết
+          dia_chi_chi_tiet: dia_chi_chi_tiet || '',
+          phuong_xa: phuong_xa || '',
+          quan_huyen: quan_huyen || '',
+          tinh_thanh: tinh_thanh || ''
+        },
         tong_tien,
         phuong_thuc_thanh_toan,
         ghi_chu,

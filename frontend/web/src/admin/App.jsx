@@ -8,6 +8,7 @@ import Invoices from "./scenes/invoices";
 import Contacts from "./scenes/contacts";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { useMode } from "./theme";
+import { Toaster } from "react-hot-toast";
 
 import React from "react";
 import User from "./pages/User";
@@ -44,6 +45,30 @@ function App() {
     <ThemeProvider theme={theme}>
       <UserProvider>
         <CssBaseline />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4ade80',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              duration: 4000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
         <div className="app">
           <Sidebar isSidebar={isSidebar} />
           <main className="content">

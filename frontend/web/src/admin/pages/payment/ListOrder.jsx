@@ -439,62 +439,97 @@ const ListOrder = () => {
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '2rem', cursor: 'pointer', color: 'var(--text-secondary)', lineHeight: 1 }}>×</button>
             </div>
             <div className={styles.detailModalContent}>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Khách hàng:</span>
-                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>SĐT:</span>
-                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Ngày đặt:</span>
-                <span className={styles.detailValue}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
-              </div>
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Trạng thái:</span>
-                <span className={styles.detailValue} style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: '0.9rem' }}>
-                  {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
-                </span>
-              </div>
-              {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
+              {/* Thông tin tài khoản */}
+              <div style={{ marginBottom: 20, padding: 15, borderRadius: 8, border: '1px solid #e9ecef' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#495057', fontSize: '1.1rem' }}>📋 Thông tin tài khoản</h4>
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel} style={{ color: '#d32f2f' }}>Lý do huỷ:</span>
-                  <span className={styles.detailValue} style={{ color: '#d32f2f' }}>{selectedOrder.ly_do_huy}</span>
+                  <span className={styles.detailLabel}>Tên tài khoản:</span>
+                  <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
                 </div>
-              )}
-              {selectedOrder.phuong_thuc_thanh_toan && (
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Phương thức thanh toán:</span>
-                  <span className={styles.detailValue} style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
+                  <span className={styles.detailLabel}>Email tài khoản:</span>
+                  <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.email || '---'}</span>
                 </div>
-              )}
-              {selectedOrder.shippingFee !== undefined && (
                 <div className={styles.detailRow}>
-                  <span className={styles.detailLabel}>Phí vận chuyển:</span>
-                  <span className={styles.detailValue}>{selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}</span>
+                  <span className={styles.detailLabel}>SĐT tài khoản:</span>
+                  <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
                 </div>
-              )}
-              <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Trạng thái thanh toán:</span>
-                <span className={styles.detailValue} style={{ background: (selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? '#10b981' : '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>
-                  {(selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? 'Đã thanh toán' : 'Chưa thanh toán'}
-                </span>
               </div>
-              <div className={styles.detailRow} style={{ alignItems: 'flex-start' }}>
-                <span className={styles.detailLabel}>Địa chỉ giao hàng:</span>
-                <span className={styles.detailValue}>
-                  {selectedOrder.dia_chi_giao_hang ? (
-                    <>
-                      {parseAddress(selectedOrder.dia_chi_giao_hang).street}<br />
-                      {parseAddress(selectedOrder.dia_chi_giao_hang).ward && <span>Xã/Phường: {parseAddress(selectedOrder.dia_chi_giao_hang).ward}<br /></span>}
-                      {parseAddress(selectedOrder.dia_chi_giao_hang).district && <span>Quận/Huyện: {parseAddress(selectedOrder.dia_chi_giao_hang).district}<br /></span>}
-                      {parseAddress(selectedOrder.dia_chi_giao_hang).city && <span>Tỉnh/TP: {parseAddress(selectedOrder.dia_chi_giao_hang).city}</span>}
-                    </>
-                  ) : (
-                    'Không có địa chỉ'
-                  )}
-                </span>
+
+              {/* Thông tin người nhận hàng */}
+              <div style={{ marginBottom: 20, padding: 15, borderRadius: 8, border: '1px solid #e9ecef' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#495057', fontSize: '1.1rem' }}>📦 Thông tin người nhận hàng</h4>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Tên người nhận:</span>
+                  <span className={styles.detailValue}>
+                    {selectedOrder.dia_chi_giao_hang?.ho_ten || selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}
+                  </span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Email liên hệ:</span>
+                  <span className={styles.detailValue}>
+                    {selectedOrder.dia_chi_giao_hang?.email || selectedOrder.nguoi_dung_id?.email || '---'}
+                  </span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>SĐT liên hệ:</span>
+                  <span className={styles.detailValue}>
+                    {selectedOrder.dia_chi_giao_hang?.so_dien_thoai || selectedOrder.nguoi_dung_id?.phone || '---'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Thông tin đơn hàng */}
+              <div style={{ marginBottom: 20, padding: 15, borderRadius: 8, border: '1px solid #e9ecef' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#495057', fontSize: '1.1rem' }}>📋 Thông tin đơn hàng</h4>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Ngày đặt:</span>
+                  <span className={styles.detailValue}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
+                </div>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Trạng thái:</span>
+                  <span className={styles.detailValue} style={{ background: getStatusColor(selectedOrder.trang_thai || 'chờ xác nhận'), color: '#fff', padding: '4px 10px', borderRadius: 4, marginLeft: 8, fontSize: '0.9rem' }}>
+                    {selectedOrder.trang_thai === 'đã hủy' ? 'Hủy đơn hàng' : getStatusDisplayForModal(selectedOrder.trang_thai || 'chờ xác nhận')}
+                  </span>
+                </div>
+                {selectedOrder.trang_thai === 'đã hủy' && selectedOrder.ly_do_huy && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel} style={{ color: '#d32f2f' }}>Lý do huỷ:</span>
+                    <span className={styles.detailValue} style={{ color: '#d32f2f' }}>{selectedOrder.ly_do_huy}</span>
+                  </div>
+                )}
+                {selectedOrder.phuong_thuc_thanh_toan && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Phương thức thanh toán:</span>
+                    <span className={styles.detailValue} style={{ background: '#e3f2fd', color: '#1976d2', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>{selectedOrder.phuong_thuc_thanh_toan}</span>
+                  </div>
+                )}
+                {selectedOrder.shippingFee !== undefined && (
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Phí vận chuyển:</span>
+                    <span className={styles.detailValue}>{selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}</span>
+                  </div>
+                )}
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Trạng thái thanh toán:</span>
+                  <span className={styles.detailValue} style={{ background: (selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? '#10b981' : '#f59e0b', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: '0.9rem' }}>
+                    {(selectedOrder.paymentStatus === 'paid' || selectedOrder.thanh_toan === 'đã thanh toán') ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Địa chỉ giao hàng */}
+              <div style={{ marginBottom: 20, padding: 15, borderRadius: 8, border: '1px solid #e9ecef' }}>
+                <h4 style={{ margin: '0 0 10px 0', color: '#495057', fontSize: '1.1rem' }}>📍 Địa chỉ giao hàng</h4>
+                <div className={styles.detailRow}>
+                  <span className={styles.detailLabel}>Địa chỉ:</span>
+                  <span className={styles.detailValue}>
+                    {selectedOrder.dia_chi_giao_hang?.dia_chi_chi_tiet && `${selectedOrder.dia_chi_giao_hang.dia_chi_chi_tiet}, `}
+                    {selectedOrder.dia_chi_giao_hang?.phuong_xa && `${selectedOrder.dia_chi_giao_hang.phuong_xa}, `}
+                    {selectedOrder.dia_chi_giao_hang?.quan_huyen && `${selectedOrder.dia_chi_giao_hang.quan_huyen}, `}
+                    {selectedOrder.dia_chi_giao_hang?.tinh_thanh || '---'}
+                  </span>
+                </div>
               </div>
               {selectedOrder.ghi_chu &&
                 <div className={styles.detailRow}>

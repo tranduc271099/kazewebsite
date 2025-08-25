@@ -57,12 +57,132 @@ const Checkout = () => {
           });
           const user = res.data;
           setUserData(user);
+          
+          // Parse địa chỉ từ user.address
+          const parseAddress = (addressString) => {
+            if (!addressString || addressString.trim() === '' || addressString === ', , , ') {
+              return { address: '', city: '', district: '', ward: '' };
+            }
+            
+            const parts = addressString.split(', ').map(part => part.trim());
+            if (parts.length < 4) {
+              return { address: addressString, city: '', district: '', ward: '' };
+            }
+            
+            return {
+              address: parts[0] || '',
+              ward: parts[1] || '',
+              district: parts[2] || '',
+              city: parts[3] || ''
+            };
+          };
+
+          // Tìm ID của tỉnh/thành phố, quận/huyện, phường/xã từ tên
+          const findCityId = (cityName) => {
+            if (!cityName) return '';
+            console.log('Finding city ID for:', cityName);
+            console.log('vietnamAddress structure:', Array.isArray(vietnamAddress) ? 'Array' : 'Object');
+            
+            if (Array.isArray(vietnamAddress)) {
+              const city = vietnamAddress.find(city => city.Name === cityName);
+              console.log('Found city:', city);
+              return city ? city.Id : '';
+            } else {
+              // Nếu là object, tìm theo key
+              const cityKey = Object.keys(vietnamAddress).find(key => 
+                vietnamAddress[key].Name === cityName
+              );
+              console.log('Found city key:', cityKey);
+              return cityKey || '';
+            }
+          };
+
+          const findDistrictId = (districtName) => {
+            if (!districtName) return '';
+            console.log('Finding district ID for:', districtName);
+            
+            if (Array.isArray(vietnamAddress)) {
+              for (const city of vietnamAddress) {
+                if (city.Districts) {
+                  const district = city.Districts.find(district => district.Name === districtName);
+                  if (district) {
+                    console.log('Found district:', district);
+                    return district.Id;
+                  }
+                }
+              }
+            } else {
+              // Nếu là object
+              for (const cityKey in vietnamAddress) {
+                const city = vietnamAddress[cityKey];
+                if (city.Districts) {
+                  const district = city.Districts.find(district => district.Name === districtName);
+                  if (district) {
+                    console.log('Found district:', district);
+                    return district.Id;
+                  }
+                }
+              }
+            }
+            return '';
+          };
+
+          const findWardId = (wardName) => {
+            if (!wardName) return '';
+            console.log('Finding ward ID for:', wardName);
+            
+            if (Array.isArray(vietnamAddress)) {
+              for (const city of vietnamAddress) {
+                if (city.Districts) {
+                  for (const district of city.Districts) {
+                    if (district.Wards) {
+                      const ward = district.Wards.find(ward => ward.Name === wardName);
+                      if (ward) {
+                        console.log('Found ward:', ward);
+                        return ward.Id;
+                      }
+                    }
+                  }
+                }
+              }
+            } else {
+              // Nếu là object
+              for (const cityKey in vietnamAddress) {
+                const city = vietnamAddress[cityKey];
+                if (city.Districts) {
+                  for (const district of city.Districts) {
+                    if (district.Wards) {
+                      const ward = district.Wards.find(ward => ward.Name === wardName);
+                      if (ward) {
+                        console.log('Found ward:', ward);
+                        return ward.Id;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            return '';
+          };
+
+          const parsedAddress = parseAddress(user.address);
+          console.log('Parsed address:', parsedAddress);
+          
+          const cityId = findCityId(parsedAddress.city);
+          const districtId = findDistrictId(parsedAddress.district);
+          const wardId = findWardId(parsedAddress.ward);
+          
+          console.log('Found IDs:', { cityId, districtId, wardId });
+
           setFormData((prev) => ({
             ...prev,
             fullName: user.name || "",
             email: user.email || "",
             phone: user.phone || "",
-            address: user.address || "",
+            address: parsedAddress.address || "",
+            city: cityId,
+            district: districtId,
+            ward: wardId,
           }));
         } catch (err) {
           console.error("Failed to fetch user profile for checkout", err);
@@ -81,14 +201,30 @@ const Checkout = () => {
 
 
   useEffect(() => {
-    if (formData.city && vietnamAddress[formData.city]) {
-      const districtsArray = vietnamAddress[formData.city].Districts || [];
-      const districtsObj = {};
-      districtsArray.forEach((d) => {
-        districtsObj[d.Id] = d;
-      });
-      setAvailableDistricts(districtsObj);
-      setFormData((prev) => ({ ...prev, district: "", ward: "" }));
+    if (formData.city) {
+      let cityData = null;
+      
+      if (Array.isArray(vietnamAddress)) {
+        cityData = vietnamAddress.find(city => city.Id === formData.city);
+      } else {
+        cityData = vietnamAddress[formData.city];
+      }
+      
+      if (cityData && cityData.Districts) {
+        const districtsArray = cityData.Districts || [];
+        const districtsObj = {};
+        districtsArray.forEach((d) => {
+          districtsObj[d.Id] = d;
+        });
+        setAvailableDistricts(districtsObj);
+        // Chỉ reset district và ward nếu user chọn city mới (không phải từ user data)
+        if (!formData.district) {
+          setFormData((prev) => ({ ...prev, district: "", ward: "" }));
+        }
+      } else {
+        setAvailableDistricts({});
+        setAvailableWards({});
+      }
     } else {
       setAvailableDistricts({});
       setAvailableWards({});
@@ -103,11 +239,46 @@ const Checkout = () => {
         wardsObj[w.Id] = w;
       });
       setAvailableWards(wardsObj);
-      setFormData((prev) => ({ ...prev, ward: "" }));
+      // Chỉ reset ward nếu user chọn district mới (không phải từ user data)
+      if (!formData.ward) {
+        setFormData((prev) => ({ ...prev, ward: "" }));
+      }
     } else {
       setAvailableWards({});
     }
   }, [formData.district, availableDistricts]);
+
+  // Thêm useEffect mới để đảm bảo district và ward được load đúng khi city thay đổi
+  useEffect(() => {
+    if (formData.city && formData.district) {
+      let cityData = null;
+      
+      if (Array.isArray(vietnamAddress)) {
+        cityData = vietnamAddress.find(city => city.Id === formData.city);
+      } else {
+        cityData = vietnamAddress[formData.city];
+      }
+      
+      if (cityData && cityData.Districts) {
+        const districtsArray = cityData.Districts || [];
+        const districtsObj = {};
+        districtsArray.forEach((d) => {
+          districtsObj[d.Id] = d;
+        });
+        setAvailableDistricts(districtsObj);
+        
+        // Nếu district đã có, load wards
+        if (districtsObj[formData.district] && formData.ward) {
+          const wardsArray = districtsObj[formData.district].Wards || [];
+          const wardsObj = {};
+          wardsArray.forEach((w) => {
+            wardsObj[w.Id] = w;
+          });
+          setAvailableWards(wardsObj);
+        }
+      }
+    }
+  }, [formData.city, formData.district, formData.ward]);
 
   useEffect(() => { }, [itemsToCheckout]);
 
@@ -211,25 +382,35 @@ const Checkout = () => {
     try {
       const token = localStorage.getItem("token");
 
-      // Cập nhật thông tin người dùng trước khi đặt hàng
-      await axios.put(
-        "http://localhost:5000/api/users/me",
-        {
-          name: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      // Không cập nhật thông tin user trong checkout để giữ nguyên thông tin tài khoản
+      // await axios.put(
+      //   "http://localhost:5000/api/users/me",
+      //   {
+      //     name: formData.fullName,
+      //     phone: formData.phone,
+      //     email: formData.email,
+      //   },
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   }
+      // );
 
       const fullAddress = `${formData.address}, ${availableWards[formData.ward]?.Name || formData.ward
         }, ${availableDistricts[formData.district]?.Name || formData.district}, ${vietnamAddress[formData.city]?.Name || formData.city
         }`;
 
       const billData = {
-        dia_chi_giao_hang: fullAddress,
+        // Thông tin người nhận hàng
+        ho_ten: formData.fullName,
+        email: formData.email,
+        so_dien_thoai: formData.phone,
+        // Địa chỉ chi tiết
+        dia_chi_chi_tiet: formData.address,
+        phuong_xa: availableWards[formData.ward]?.Name || '',
+        quan_huyen: availableDistricts[formData.district]?.Name || '',
+        tinh_thanh: Array.isArray(vietnamAddress) ? 
+          vietnamAddress.find(city => city.Id === formData.city)?.Name || '' :
+          vietnamAddress[formData.city]?.Name || '',
         phuong_thuc_thanh_toan: paymentMethod.toUpperCase(),
         ghi_chu: formData.note,
         shippingFee: shipping,
@@ -240,7 +421,7 @@ const Checkout = () => {
           quantity: item.quantity,
         })),
         discount,
-        voucher: voucherFromState,
+        voucher: voucherFromState
       };
 
       if (paymentMethod === "cod") {
@@ -521,13 +702,21 @@ const Checkout = () => {
                                 required
                               >
                                 <option value="">Chọn tỉnh/thành phố</option>
-                                {Object.entries(vietnamAddress || {}).map(
-                                  ([key, city]) => (
-                                    <option key={key} value={key}>
+                                {Array.isArray(vietnamAddress) ? 
+                                  vietnamAddress.map((city) => (
+                                    <option key={city.Id} value={city.Id}>
                                       {city.Name}
                                     </option>
+                                  ))
+                                  :
+                                  Object.entries(vietnamAddress || {}).map(
+                                    ([key, city]) => (
+                                      <option key={key} value={key}>
+                                        {city.Name}
+                                      </option>
+                                    )
                                   )
-                                )}
+                                }
                               </select>
                               {errors.city && (
                                 <div
