@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -6,58 +5,11 @@ import { vi } from 'date-fns/locale';
 import Swal from 'sweetalert2';
 import { BiSearch } from 'react-icons/bi';
 import { AiOutlineEye, AiOutlineEdit } from 'react-icons/ai';
-import { AiOutlinePlus } from 'react-icons/ai'; // Import for the plus icon
+import { AiOutlinePlus } from 'react-icons/ai';
 // @ts-ignore
 import styles from '../styles/ProductLayout.module.css';
 
 function Vouchers() {
-    // Submit handler for add/edit voucher
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        // Validate required fields
-        if (!formData.code || !formData.name || !formData.discountType || !formData.discountValue || !formData.quantity || !formData.startDate || !formData.endDate) {
-            setError("Vui lòng điền đầy đủ thông tin bắt buộc.");
-            return;
-        }
-        if (Number(formData.discountValue) < 0) {
-            setError("Giá trị giảm giá không được âm.");
-            return;
-        }
-        if (formData.discountType === "percent" && Number(formData.discountValue) > 100) {
-            setError("Phần trăm giảm giá không được vượt quá 100%.");
-            return;
-        }
-        if (new Date(formData.startDate) >= new Date(formData.endDate)) {
-            setError("Ngày bắt đầu phải trước ngày kết thúc.");
-            return;
-        }
-        setLoading(true);
-        try {
-            const token = localStorage.getItem("token");
-            const payload = {
-                ...formData,
-                discountValue: Number(formData.discountValue),
-                maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
-                minOrder: formData.minOrder ? Number(formData.minOrder) : undefined,
-                quantity: Number(formData.quantity),
-            };
-            if (isEditing && currentVoucherId) {
-                await axios.put(`http://localhost:5000/api/vouchers/${currentVoucherId}`, payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-            } else {
-                await axios.post("http://localhost:5000/api/vouchers", payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-            }
-            fetchVouchers();
-            handleCloseModal();
-        } catch (err) {
-            setError(err.response?.data?.message || "Không thể lưu voucher.");
-        }
-        setLoading(false);
-    };
     // State
     const [vouchers, setVouchers] = useState([]);
     const [searchText, setSearchText] = useState("");
@@ -82,6 +34,60 @@ function Vouchers() {
     });
     const [appliedOrders, setAppliedOrders] = useState([]);
     const [selectedVoucherCode, setSelectedVoucherCode] = useState("");
+
+    // Submit handler for add/edit voucher
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        // Validate required fields
+        if (!formData.name || !formData.discountType || !formData.discountValue || !formData.quantity || !formData.startDate || !formData.endDate) {
+            setError("Vui lòng điền đầy đủ thông tin bắt buộc.");
+            return;
+        }
+        // Nếu code rỗng thì tự sinh mã random
+        let code = formData.code;
+        if (!code) {
+            code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        }
+        if (Number(formData.discountValue) < 0) {
+            setError("Giá trị giảm giá không được âm.");
+            return;
+        }
+        if (formData.discountType === "percent" && Number(formData.discountValue) > 100) {
+            setError("Phần trăm giảm giá không được vượt quá 100%.");
+            return;
+        }
+        if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+            setError("Ngày bắt đầu phải trước ngày kết thúc.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const payload = {
+                ...formData,
+                code,
+                discountValue: Number(formData.discountValue),
+                maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
+                minOrder: formData.minOrder ? Number(formData.minOrder) : undefined,
+                quantity: Number(formData.quantity),
+            };
+            if (isEditing && currentVoucherId) {
+                await axios.put(`http://localhost:5000/api/vouchers/${currentVoucherId}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post("http://localhost:5000/api/vouchers", payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+            fetchVouchers();
+            handleCloseModal();
+        } catch (err) {
+            setError(err.response?.data?.message || "Không thể lưu voucher.");
+        }
+        setLoading(false);
+    };
 
     // Fetch vouchers
     const fetchVouchers = async () => {
@@ -175,8 +181,6 @@ function Vouchers() {
         }));
     };
 
-    // ...existing code...
-
     const handleDelete = async (id) => {
         Swal.fire({
             title: 'Bạn có chắc muốn xóa voucher này?',
@@ -243,6 +247,46 @@ function Vouchers() {
 
     return (
         <div className={styles.container}>
+            {/* Hiển thị box báo lỗi validate nổi bật */}
+            {error && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.35)',
+                    zIndex: 9999,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <div style={{
+                        background: '#fff',
+                        color: '#d32f2f',
+                        padding: '32px 40px',
+                        borderRadius: 12,
+                        fontSize: 20,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 32px rgba(0,0,0,0.18)',
+                        minWidth: 320,
+                        textAlign: 'center',
+                        position: 'relative',
+                    }}>
+                        {error}
+                        <button onClick={() => setError("")} style={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 16,
+                            background: 'none',
+                            border: 'none',
+                            fontSize: 24,
+                            color: '#888',
+                            cursor: 'pointer',
+                        }}>&times;</button>
+                    </div>
+                </div>
+            )}
             <h1 className={styles.title}>Mã giảm giá</h1>
 
             <div className={styles.filterBar} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
@@ -346,7 +390,7 @@ function Vouchers() {
                             })}
                             {filteredVouchers.length === 0 && (
                                 <tr>
-                                    <td colSpan={10} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>Không có voucher nào phù hợp</td>
+                                    <td colSpan={14} style={{ textAlign: 'center', padding: 24, color: 'var(--text-secondary)' }}>Không có voucher nào phù hợp</td>
                                 </tr>
                             )}
                         </tbody>
@@ -356,13 +400,20 @@ function Vouchers() {
 
             {isModalOpen && (
                 <div className={styles.modalBackdrop}>
-                    <div className={styles.modalContent} style={{ maxWidth: 500, minWidth: 320, width: '95vw', padding: 20, borderRadius: 12, position: 'relative' }}>
+                    <div className={styles.modalContent} style={{ maxWidth: 900, minWidth: 700, width: '95vw', padding: 20, borderRadius: 12, position: 'relative' }}>
                         <button type="button" onClick={handleCloseModal} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#fff', cursor: 'pointer', zIndex: 2 }}>&times;</button>
                         <h3 className={styles.modalTitle} style={{ marginBottom: 18 }}>
                             {isEditing ? 'Cập nhật Voucher' : 'Thêm Voucher Mới'}
                         </h3>
                         <form onSubmit={handleSubmit}>
-                            <div className={`${styles.formGrid} ${styles.gridCol2}`}>
+                            {/* Custom 4-column grid */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '15px',
+                                marginBottom: '20px'
+                            }}>
+                                {/* Row 1: Mã Voucher, Tên Voucher, Loại Giảm Giá, Giá Trị Giảm Giá */}
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>Mã Voucher:</label>
                                     <input
@@ -371,7 +422,6 @@ function Vouchers() {
                                         value={formData.code}
                                         onChange={handleChange}
                                         readOnly={isEditing}
-                                        required
                                         className={styles.input}
                                         placeholder="Mã voucher sẽ được tạo tự động"
                                     />
@@ -386,18 +436,8 @@ function Vouchers() {
                                         onChange={handleChange}
                                         required
                                         className={styles.input}
+                                        placeholder="Nhập tên voucher"
                                     />
-                                </div>
-
-                                <div className={`${styles.formGroup} ${styles.span2}`}> {/* Mô tả spans two columns */}
-                                    <label className={styles.label}>Mô tả:</label>
-                                    <textarea
-                                        name="description"
-                                        value={formData.description}
-                                        onChange={handleChange}
-                                        className={styles.textarea}
-                                        rows="3"
-                                    ></textarea>
                                 </div>
 
                                 <div className={styles.formGroup}>
@@ -428,22 +468,23 @@ function Vouchers() {
                                     />
                                     <small style={{
                                         color: '#666',
-                                        fontSize: '12px',
-                                        marginTop: '4px',
-                                        display: 'block'
+                                        fontSize: '11px',
+                                        marginTop: '2px',
+                                        display: 'block',
+                                        lineHeight: '1.2'
                                     }}>
                                         {formData.discountType === 'percent' ? (
                                             <>
-                                                Tối đa 100%. <strong>Khuyến nghị ≤ 90%</strong> để tránh lỗ
+                                                Tối đa 100%. <strong>Khuyến nghị ≤ 90%</strong>
                                                 {formData.discountValue > 90 && (
                                                     <span style={{ color: '#ef4444', display: 'block' }}>
-                                                        ⚠️ Cảnh báo: Giảm giá quá cao có thể dẫn đến lỗ!
+                                                        ⚠️ Giảm giá quá cao!
                                                     </span>
                                                 )}
                                             </>
                                         ) : (
                                             <>
-                                                Số tiền giảm giá (VND). <strong>Khuyến nghị ≤ 90% đơn hàng tối thiểu</strong>
+                                                <strong>Khuyến nghị ≤ 90% đơn tối thiểu</strong>
                                                 {formData.minOrder > 0 && formData.discountValue > 0 && (
                                                     <span style={{
                                                         color: formData.discountValue > formData.minOrder * 0.9 ? '#ef4444' : '#10b981',
@@ -451,16 +492,23 @@ function Vouchers() {
                                                         fontWeight: 'bold'
                                                     }}>
                                                         {formData.discountValue > formData.minOrder * 0.9 && '⚠️ '}
-                                                        Chiếm {((formData.discountValue / formData.minOrder) * 100).toFixed(1)}% đơn hàng tối thiểu
+                                                        {((formData.discountValue / formData.minOrder) * 100).toFixed(1)}% đơn hàng
                                                     </span>
                                                 )}
                                             </>
                                         )}
                                     </small>
                                 </div>
+                            </div>
 
-                                {/* Giảm giá tối đa */}
-                                {formData.discountType === 'percent' && (
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '15px',
+                                marginBottom: '20px'
+                            }}>
+                                {/* Row 2: Giảm giá tối đa, Đơn Hàng Tối Thiểu, Số lượng voucher, Trạng thái */}
+                                {formData.discountType === 'percent' ? (
                                     <div className={styles.formGroup}>
                                         <label className={styles.label}>Giảm giá tối đa (VND):</label>
                                         <input
@@ -470,12 +518,14 @@ function Vouchers() {
                                             onChange={handleChange}
                                             min="0"
                                             className={styles.input}
-                                            placeholder="Nhập số tiền giảm tối đa (nếu có)"
+                                            placeholder="Nhập số tiền giảm tối đa"
                                         />
-                                        <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                                            Nếu để trống, không giới hạn số tiền giảm tối đa.
+                                        <small style={{ color: '#666', fontSize: '11px', marginTop: '2px', display: 'block' }}>
+                                            Để trống = không giới hạn
                                         </small>
                                     </div>
+                                ) : (
+                                    <div></div> // Empty div to maintain grid structure
                                 )}
 
                                 <div className={styles.formGroup}>
@@ -491,11 +541,11 @@ function Vouchers() {
                                     />
                                     <small style={{
                                         color: '#666',
-                                        fontSize: '12px',
-                                        marginTop: '4px',
+                                        fontSize: '11px',
+                                        marginTop: '2px',
                                         display: 'block'
                                     }}>
-                                        Giá trị đơn hàng tối thiểu để áp dụng voucher (VND)
+                                        Giá trị đơn hàng tối thiểu (VND)
                                     </small>
                                 </div>
 
@@ -508,10 +558,43 @@ function Vouchers() {
                                         onChange={handleChange}
                                         required
                                         className={styles.input}
-                                        min="1" // Ensure quantity is at least 1
+                                        min="1"
                                     />
                                 </div>
 
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Trạng thái:</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id="isActive"
+                                            name="isActive"
+                                            checked={formData.isActive}
+                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                                            style={{ width: '16px', height: '16px' }}
+                                        />
+                                        <label htmlFor="isActive" style={{ margin: 0, cursor: 'pointer', fontSize: '14px' }}>
+                                            Kích hoạt voucher
+                                        </label>
+                                    </div>
+                                    <small style={{
+                                        color: '#666',
+                                        fontSize: '11px',
+                                        marginTop: '2px',
+                                        display: 'block'
+                                    }}>
+                                        Bỏ chọn để vô hiệu hóa
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(4, 1fr)',
+                                gap: '15px',
+                                marginBottom: '20px'
+                            }}>
+                                {/* Row 3: Ngày Bắt Đầu, Ngày Kết Thúc, and 2 empty columns for description */}
                                 <div className={styles.formGroup}>
                                     <label className={styles.label}>Ngày Bắt Đầu:</label>
                                     <input
@@ -536,31 +619,24 @@ function Vouchers() {
                                     />
                                 </div>
 
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Trạng thái:</label>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <input
-                                            type="checkbox"
-                                            id="isActive"
-                                            name="isActive"
-                                            checked={formData.isActive}
-                                            onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                                            style={{ width: '16px', height: '16px' }}
-                                        />
-                                        <label htmlFor="isActive" style={{ margin: 0, cursor: 'pointer' }}>
-                                            Kích hoạt voucher
-                                        </label>
-                                    </div>
-                                    <small style={{
-                                        color: '#666',
-                                        fontSize: '12px',
-                                        marginTop: '4px',
-                                        display: 'block'
-                                    }}>
-                                        Bỏ chọn để vô hiệu hóa voucher này
-                                    </small>
+                                <div className={styles.formGroup} style={{ gridColumn: 'span 2' }}>
+                                    <label className={styles.label}>Mô tả:</label>
+                                    <textarea
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        className={styles.textarea}
+                                        rows="3"
+                                        style={{ resize: 'vertical' }}
+                                    ></textarea>
                                 </div>
                             </div>
+
+                            {error && (
+                                <div style={{ color: '#ef4444', marginTop: '10px', padding: '8px', backgroundColor: '#fee', borderRadius: '4px' }}>
+                                    {error}
+                                </div>
+                            )}
 
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
                                 <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleCloseModal}>Hủy</button>
@@ -569,7 +645,7 @@ function Vouchers() {
                                 </button>
                             </div>
                         </form>
-                        {/* Đơn hàng đã áp dụng voucher */}
+
                         {selectedVoucherCode && (
                             <div style={{ marginTop: 18, background: '#181c22', borderRadius: 8, padding: 12, maxHeight: 120, overflowY: 'auto' }}>
                                 <b>Đơn hàng đã áp dụng voucher:</b>
@@ -590,4 +666,5 @@ function Vouchers() {
         </div>
     );
 }
+
 export default Vouchers;

@@ -86,9 +86,9 @@ exports.createPaymentUrl = async (req, res) => {
       const newBill = new BillUser({
         orderId: orderId,
         nguoi_dung_id: userId, // Sử dụng userId đã validate
-        ho_va_ten: req.user?.name || 'Khách hàng',
-        so_dien_thoai: req.user?.phone || '0000000000',
-        email: req.user?.email || 'customer@example.com',
+        receiver_name: req.body.receiver_name || req.user?.name || 'Khách hàng',
+        receiver_phone: req.body.receiver_phone || req.user?.phone || '0000000000',
+        receiver_email: req.body.receiver_email || req.user?.email || 'customer@example.com',
         dia_chi_giao_hang: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
         phuong_thuc_thanh_toan: 'VNPAY',
         trang_thai: 'chờ xác nhận', // BẮT ĐẦU TỪ CHỜ XÁC NHẬN
@@ -299,7 +299,7 @@ exports.handleVnpayReturn = async (vnp_Params) => {
       const orderId = vnp_Params['vnp_TxnRef'];
       const responseCode = vnp_Params['vnp_ResponseCode'];
       const transactionNo = vnp_Params['vnp_TransactionNo'];
-      const amount = vnp_Params['vnp_Amount'] / 100;
+  const amount = vnp_Params['vnp_Amount'] ? Number(vnp_Params['vnp_Amount']) / 100 : 0;
 
       if (responseCode === '00') {
         // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG TRONG DATABASE

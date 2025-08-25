@@ -743,7 +743,7 @@ const BillUserClient = () => {
                                 </div>
                                 <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Phí vận chuyển</span>
-                                    <span>{formatPrice(selectedBill.shippingFee || 0)}</span>
+                                    <span>{formatPrice((selectedBill.phi_van_chuyen !== undefined ? selectedBill.phi_van_chuyen : selectedBill.shippingFee) || 0)}</span>
                                 </div>
                                 <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Giảm giá</span>
@@ -759,9 +759,9 @@ const BillUserClient = () => {
                                 <div className="order-detail-status">TRẠNG THÁI ĐƠN HÀNG<br /><span style={{ color: '#000' }}>{getStatusDisplay(selectedBill.trang_thai)}</span></div>
                                 <div className="order-detail-section">
                                     <div className="order-detail-section-title">THÔNG TIN GIAO HÀNG</div>
-                                    <div><b style={{ color: '#000' }}>Tên người đặt:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_name || selectedBill.nguoi_dung_id?.name || '---'}</span></div>
-                                    <div><b style={{ color: '#000' }}>Số điện thoại:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_phone || selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
-                                    <div><b style={{ color: '#000' }}>Email:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_email || selectedBill.nguoi_dung_id?.email || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Tên người đặt:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_name || selectedBill.customer_name || selectedBill.nguoi_dung_id?.name || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Số điện thoại:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_phone || selectedBill.customer_phone || selectedBill.nguoi_dung_id?.phone || '---'}</span></div>
+                                    <div><b style={{ color: '#000' }}>Email:</b> <span style={{ color: '#000' }}>{selectedBill.receiver_email || selectedBill.customer_email || selectedBill.nguoi_dung_id?.email || '---'}</span></div>
                                     <div><b style={{ color: '#000' }}>Địa chỉ:</b> <span style={{ color: '#000' }}>{selectedBill.dia_chi_giao_hang || '---'}</span></div>
                                     {selectedBill.ghi_chu && (
                                         <div style={{ marginTop: 6 }}><b>Ghi chú:</b> {selectedBill.ghi_chu}</div>

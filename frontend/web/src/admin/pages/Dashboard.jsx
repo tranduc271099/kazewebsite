@@ -911,15 +911,18 @@ const Dashboard = () => {
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                                 <div style={{ fontSize: 24, color: '#222', fontWeight: 700 }}>
-                                    Mã hóa đơn #{selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A'}
+                                    Mã hóa đơn #{selectedOrder.orderId || (selectedOrder._id ? selectedOrder._id.slice(-8).toUpperCase() : 'N/A')}
                                 </div>
                                 <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: 32, cursor: 'pointer', color: '#888', lineHeight: 1 }}>×</button>
                             </div>
                             <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-                                <strong>Khách hàng:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
+                                <strong>Khách hàng:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.receiver_name || selectedOrder.customer_name || selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
                             </div>
                             <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
-                                <strong>SĐT:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+                                <strong>SĐT:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.receiver_phone || selectedOrder.customer_phone || selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+                            </div>
+                            <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
+                                <strong>Email:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.receiver_email || selectedOrder.customer_email || selectedOrder.nguoi_dung_id?.email || '---'}</span>
                             </div>
                             <div style={{ marginBottom: 18, color: '#222', textAlign: 'left', fontSize: 18 }}>
                                 <strong>Ngày đặt:</strong> <span style={{ fontWeight: 500 }}>{selectedOrder.ngay_tao ? formatDateTime(selectedOrder.ngay_tao) : '---'}</span>
@@ -939,7 +942,7 @@ const Dashboard = () => {
                             )}
                             {selectedOrder.shippingFee !== undefined && (
                                 <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>
-                                    <strong>Phương thức vận chuyển:</strong> {selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}
+                                    <strong>Phương thức vận chuyển:</strong> {(selectedOrder.phi_van_chuyen !== undefined ? (selectedOrder.phi_van_chuyen === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.phi_van_chuyen === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.phi_van_chuyen === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`) : (selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`))}
                                 </div>
                             )}
                             <div style={{ marginBottom: 14, color: '#222', textAlign: 'left' }}>

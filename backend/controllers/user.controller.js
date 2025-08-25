@@ -180,27 +180,27 @@ exports.updateProfile = async (req, res) => {
                 return res.status(500).json({ message: 'Lỗi upload ảnh', error: error.message });
             }
         }
-                await user.save();
-                // Lưu lịch sử chỉnh sửa
-                await UserHistory.create({
-                        userId: user._id,
-                        updatedBy: req.user.id,
-                        changes: {
-                                name: user.name,
-                                email: user.email,
-                                role: user.role,
-                                gender: user.gender, // Add gender to history
-                                dob: user.dob,       // Add dob to history
-                        },
-                        updatedAt: new Date()
-                });
-                        // Nếu không upload ảnh mới, chỉ trả về image là URL Cloudinary (nếu có), không bao giờ trả về đường dẫn cục bộ
-                        let userObj = user.toObject();
-                        if (userObj.image && !userObj.image.startsWith('http')) {
-                            // Nếu image không phải URL Cloudinary, xóa trường image để frontend dùng ảnh mặc định
-                            userObj.image = '';
-                        }
-                        res.json({ message: 'Cập nhật thành công', ...userObj });
+        await user.save();
+        // Lưu lịch sử chỉnh sửa
+        await UserHistory.create({
+            userId: user._id,
+            updatedBy: req.user.id,
+            changes: {
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                gender: user.gender, // Add gender to history
+                dob: user.dob,       // Add dob to history
+            },
+            updatedAt: new Date()
+        });
+        // Nếu không upload ảnh mới, chỉ trả về image là URL Cloudinary (nếu có), không bao giờ trả về đường dẫn cục bộ
+        let userObj = user.toObject();
+        if (userObj.image && !userObj.image.startsWith('http')) {
+            // Nếu image không phải URL Cloudinary, xóa trường image để frontend dùng ảnh mặc định
+            userObj.image = '';
+        }
+        res.json({ message: 'Cập nhật thành công', ...userObj });
     } catch (err) {
         res.status(500).json({ message: 'Cập nhật thất bại', error: err.message });
     }

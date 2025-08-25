@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Toaster } from 'react-hot-toast';
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -45,6 +46,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <UserProvider>
         <CssBaseline />
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         <div className="app">
           <Sidebar isSidebar={isSidebar} />
           <main className="content">

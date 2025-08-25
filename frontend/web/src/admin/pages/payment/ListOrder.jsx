@@ -625,11 +625,15 @@ const ListOrder = () => {
             <div className={styles.detailModalContent}>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Khách hàng:</span>
-                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
+                <span className={styles.detailValue}>{selectedOrder.receiver_name || selectedOrder.customer_name || selectedOrder.nguoi_dung_id?.name || 'Không có thông tin'}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>SĐT:</span>
-                <span className={styles.detailValue}>{selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+                <span className={styles.detailValue}>{selectedOrder.receiver_phone || selectedOrder.customer_phone || selectedOrder.nguoi_dung_id?.phone || '---'}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Email:</span>
+                <span className={styles.detailValue}>{selectedOrder.receiver_email || selectedOrder.customer_email || selectedOrder.nguoi_dung_id?.email || '---'}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Ngày đặt:</span>
@@ -656,7 +660,7 @@ const ListOrder = () => {
               {selectedOrder.shippingFee !== undefined && (
                 <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Phí vận chuyển:</span>
-                  <span className={styles.detailValue}>{selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`}</span>
+                  <span className={styles.detailValue}>{(selectedOrder.phi_van_chuyen !== undefined ? (selectedOrder.phi_van_chuyen === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.phi_van_chuyen === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.phi_van_chuyen === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`) : (selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`))}</span>
                 </div>
               )}
               <div className={styles.detailRow}>

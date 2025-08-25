@@ -1,3 +1,4 @@
+// ...existing code...
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -248,6 +249,12 @@ io.on('connection', (socket) => {
 // Start server
 server.listen(process.env.PORT, () => {
   console.log(`🚀 Server running on http://localhost:${process.env.PORT}`);
+});
+
+// Hỗ trợ redirect VNPay return URL nếu trả về sai path (đặt sau khi đã khai báo app, routes và server.listen)
+app.get('/vnpay_return', (req, res) => {
+  const query = Object.keys(req.query).map(key => `${key}=${encodeURIComponent(req.query[key])}`).join('&');
+  res.redirect(`/api/payment/vnpay_return${query ? '?' + query : ''}`);
 });
 
 // Auto cancel VNPAY orders after 5 minutes

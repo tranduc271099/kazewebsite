@@ -231,7 +231,7 @@
             detailsContainer.innerHTML = `
                 ${orderId ? `<div class="detail-row"><span class="label">Mã đơn hàng:</span><span class="value">${orderId}</span></div>` : ''}
                 ${transactionNo ? `<div class="detail-row"><span class="label">Mã giao dịch:</span><span class="value">${transactionNo}</span></div>` : ''}
-                ${amount ? `<div class="detail-row"><span class="label">Số tiền:</span><span class="value">${formatCurrency(amount / 100)} VND</span></div>` : ''}
+                ${amount ? `<div class="detail-row"><span class="label">Số tiền:</span><span class="value">${formatCurrency(amount)} VND</span></div>` : ''}
                 <div class="detail-row"><span class="label">Thời gian:</span><span class="value">${new Date().toLocaleString('vi-VN')}</span></div>
                 <div class="detail-row"><span class="label">Phương thức:</span><span class="value">VNPay</span></div>
             `;
