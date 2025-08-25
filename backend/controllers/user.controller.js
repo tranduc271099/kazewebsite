@@ -10,7 +10,7 @@ const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifi
 // Đăng ký
 exports.register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, phone, address } = req.body;
 
         // Kiểm tra email đã tồn tại
         let user = await User.findOne({ email });
@@ -23,6 +23,8 @@ exports.register = async (req, res) => {
             name,
             email,
             password,
+            phone: phone || '',
+            address: address || '',
             image: ""
         });
 
@@ -98,6 +100,8 @@ exports.login = async (req, res) => {
                         id: user.id,
                         name: user.name,
                         email: user.email,
+                        phone: user.phone || '',
+                        address: user.address || '',
                         role: user.role,
                         image: user.image || null
                     }
