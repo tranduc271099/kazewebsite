@@ -61,22 +61,36 @@ const Sidebar = () => {
   const [chatNotifications, setChatNotifications] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
-  let user = null;
-  try {
-    user = JSON.parse(localStorage.getItem("user"));
-  } catch { }
-  let avatar = "/assets/img/person/person-m-1.webp";
-  if (user?.image) {
-    if (user.image.startsWith("http")) {
-      avatar = user.image;
-    } else if (user.image.startsWith("/")) {
-      avatar = `http://localhost:5000${user.image}`;
-    } else {
-      avatar = `http://localhost:5000/${user.image}`;
+  const [avatar, setAvatar] = useState(() => {
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch { }
+    if (user?.image) {
+      if (user.image.startsWith("http")) {
+        return user.image;
+      } else if (user.image.startsWith("/")) {
+        return `http://localhost:5000${user.image}`;
+      } else {
+        return `http://localhost:5000/${user.image}`;
+      }
     }
-  }
-  const name = user?.name || "Tên người dùng";
-  const role = user?.role || "user";
+    return "/assets/img/person/person-m-1.webp";
+  });
+  const [name, setName] = useState(() => {
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch { }
+    return user?.name || "Tên người dùng";
+  });
+  const [role] = useState(() => {
+    let user = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user"));
+    } catch { }
+    return user?.role || "user";
+  });
 
   useEffect(() => {
     socket.on('new_chat_session', () => {
@@ -86,10 +100,16 @@ const Sidebar = () => {
     // Lắng nghe sự kiện cập nhật profile
     const handleProfileUpdate = (event) => {
       const { name: newName, avatar: newAvatar } = event.detail;
-      // Reload user data from localStorage
-      const updatedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      // Force re-render by updating the component key or trigger state update
-      window.location.reload();
+      setName(newName || "Tên người dùng");
+      if (newAvatar) {
+        if (newAvatar.startsWith("http")) {
+          setAvatar(newAvatar);
+        } else if (newAvatar.startsWith("/")) {
+          setAvatar(`http://localhost:5000${newAvatar}`);
+        } else {
+          setAvatar(`http://localhost:5000/${newAvatar}`);
+        }
+      }
     };
 
     window.addEventListener('profileUpdated', handleProfileUpdate);

@@ -28,7 +28,6 @@ const EditProfile = () => {
     name: '',
     email: '',
     phone: '',
-    address: '',
     avatar: ''
   });
 
@@ -127,7 +126,7 @@ const EditProfile = () => {
       profileData.name !== originalData.name ||
       profileData.email !== originalData.email ||
       profileData.phone !== originalData.phone ||
-      profileData.address !== originalData.address ||
+  // Đã bỏ address
       avatarFile !== null
     );
   };
@@ -151,7 +150,7 @@ const EditProfile = () => {
       formData.append('name', profileData.name);
       formData.append('email', profileData.email);
       formData.append('phone', profileData.phone);
-      formData.append('address', profileData.address);
+  // Đã bỏ address
 
       if (avatarFile) {
         formData.append('avatar', avatarFile);
@@ -173,6 +172,7 @@ const EditProfile = () => {
       setOriginalData(profileData);
       setAvatarFile(null);
       toast.success('Cập nhật thông tin thành công!');
+      alert('Cập nhật thông tin thành công!');
 
       // Trigger a custom event to update sidebar
       window.dispatchEvent(new CustomEvent('profileUpdated', {
@@ -322,25 +322,7 @@ const EditProfile = () => {
                 />
               </Grid>
 
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Địa chỉ"
-                  multiline
-                  rows={3}
-                  value={profileData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  sx={{
-                    '& .MuiInputLabel-root': { color: colors.grey[300] },
-                    '& .MuiOutlinedInput-root': {
-                      color: colors.grey[100],
-                      '& fieldset': { borderColor: colors.grey[600] },
-                      '&:hover fieldset': { borderColor: colors.grey[400] },
-                      '&.Mui-focused fieldset': { borderColor: colors.primary[200] }
-                    }
-                  }}
-                />
-              </Grid>
+              {/* Đã bỏ phần địa chỉ */}
             </Grid>
           </Grid>
 

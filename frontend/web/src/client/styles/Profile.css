@@ -5,19 +5,13 @@ textarea::placeholder {
 }
 
 /* Đảm bảo input, select, textarea hiển thị rõ trên nền tối */
-input,
-select,
-textarea {
-    color: #fff !important;
 
-    border-color: #3a4664 !important;
-}
+
 
 input:disabled,
 select:disabled,
 textarea:disabled {
     color: #8a8a8a !important;
-    background: #232b3b !important;
     opacity: 1 !important;
 }
 

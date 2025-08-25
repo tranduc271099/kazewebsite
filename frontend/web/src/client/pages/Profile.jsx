@@ -12,7 +12,6 @@ const Profile = () => {
         name: '',
         email: '',
         phone: '',
-        address: '',
         image: '',
         imageFile: null,
         role: '',
@@ -43,7 +42,6 @@ const Profile = () => {
                 name: res.data.name || '',
                 email: res.data.email || '',
                 phone: res.data.phone || '',
-                address: res.data.address || '',
                 image: res.data.image || '',
                 imageFile: null,
                 role: res.data.role || '',
@@ -103,7 +101,7 @@ const Profile = () => {
             const form = new FormData();
             form.append('name', formData.name);
             form.append('phone', formData.phone);
-            form.append('address', formData.address);
+            // Đã bỏ address
             form.append('gender', formData.gender); // Append gender
             form.append('dob', formData.dob);       // Append dob
             if (formData.imageFile) {
@@ -116,6 +114,7 @@ const Profile = () => {
                 }
             });
             setSuccess('Cập nhật thông tin thành công!');
+            alert('Cập nhật thông tin thành công!');
             localStorage.setItem('userName', formData.name);
             // Lấy lại profile mới nhất từ backend (Cloudinary URL)
             const res = await axios.get('http://localhost:5000/api/users/me', {
@@ -164,26 +163,21 @@ const Profile = () => {
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Tên</label>
                             <input type="text" value={formData.name} onChange={handleChange} name="name"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} required />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#111', background: '#fff' }} required />
                         </div>
                         {/* Email */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Email</label>
                             <input type="email" value={formData.email} disabled
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#232b3b', color: '#fff' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#fff', color: '#111', opacity: 1 }} />
                         </div>
                         {/* Phone */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Số điện thoại</label>
                             <input type="tel" value={formData.phone} onChange={handleChange} name="phone"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#111', background: '#fff' }} />
                         </div>
-                        {/* Address */}
-                        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-                            <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Địa chỉ</label>
-                            <input type="text" value={formData.address} onChange={handleChange} name="address"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
-                        </div>
+                        {/* Đã bỏ phần địa chỉ */}
                         {/* Gender */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Giới tính</label>
@@ -191,7 +185,7 @@ const Profile = () => {
                                 value={formData.gender}
                                 onChange={handleChange}
                                 name="gender"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }}
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#111', background: '#fff' }}
                             >
                                 <option value="">Chọn giới tính</option>
                                 <option value="Nam">Nam</option>
@@ -203,13 +197,13 @@ const Profile = () => {
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Ngày sinh</label>
                             <input type="date" value={formData.dob} onChange={handleChange} name="dob"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#111', background: '#fff' }} />
                         </div>
                         {/* Role (readonly) */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Vai trò</label>
                             <input type="text" value={formData.role || ''} disabled
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#232b3b', color: '#fff' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#fff', color: '#111', opacity: 1 }} />
                         </div>
                         {/* Nút lưu */}
                         <div style={{ marginLeft: 120 }}>
