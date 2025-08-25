@@ -126,7 +126,7 @@ const EditProfile = () => {
       profileData.name !== originalData.name ||
       profileData.email !== originalData.email ||
       profileData.phone !== originalData.phone ||
-  // Đã bỏ address
+      // Đã bỏ address
       avatarFile !== null
     );
   };
@@ -150,7 +150,7 @@ const EditProfile = () => {
       formData.append('name', profileData.name);
       formData.append('email', profileData.email);
       formData.append('phone', profileData.phone);
-  // Đã bỏ address
+      // Đã bỏ address
 
       if (avatarFile) {
         formData.append('avatar', avatarFile);

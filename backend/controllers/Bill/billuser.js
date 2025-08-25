@@ -56,6 +56,9 @@ class BillController {
         dia_chi_giao_hang,
         phuong_thuc_thanh_toan,
         ghi_chu,
+        receiver_name,
+        receiver_phone,
+        receiver_email,
         // shippingFee, // Không nhận từ client nữa
         danh_sach_san_pham: selectedItems,
         discount = 0,
@@ -146,6 +149,10 @@ class BillController {
         const Voucher = require('../../models/Voucher');
         voucherDoc = await Voucher.findOne({ code: voucher.code, isActive: true });
         if (voucherDoc) {
+          // Kiểm tra số lượng còn lại
+          if (voucherDoc.usedCount >= voucherDoc.quantity) {
+            return res.status(400).json({ message: 'Voucher đã hết lượt sử dụng.' });
+          }
           if (voucherDoc.discountType === 'percent') {
             discountAmount = Math.round(subtotal * voucherDoc.discountValue / 100);
             if (voucherDoc.maxDiscount && discountAmount > voucherDoc.maxDiscount) {
@@ -154,6 +161,8 @@ class BillController {
           } else if (voucherDoc.discountType === 'amount') {
             discountAmount = voucherDoc.discountValue;
           }
+        } else {
+          return res.status(400).json({ message: 'Voucher không hợp lệ.' });
         }
       }
       // Tính phí vận chuyển luôn là 30,000 cho mỗi đơn hàng
@@ -214,16 +223,23 @@ class BillController {
       const newBill = new Bill({
         nguoi_dung_id,
         dia_chi_giao_hang,
+        receiver_name,
+        receiver_phone,
+        receiver_email,
         tong_tien,
         phuong_thuc_thanh_toan,
         ghi_chu,
         danh_sach_san_pham,
         shippingFee, // Lưu shippingFee đã tính
         discount: discountAmount,
-        voucher: voucherDoc,
+        voucher: voucherDoc ? { ...voucherDoc.toObject(), code: voucherDoc.code } : undefined,
         orderId: finalOrderId
       });
       await newBill.save();
+      // Nếu có voucher, tăng usedCount
+      if (voucherDoc) {
+        await voucherDoc.updateOne({ $inc: { usedCount: 1 } });
+      }
       // Xóa các sản phẩm đã đặt khỏi giỏ hàng, giữ lại sản phẩm chưa đặt
       if (selectedItems && Array.isArray(selectedItems) && selectedItems.length > 0) {
         cart.items = cart.items.filter(item =>
@@ -253,8 +269,9 @@ class BillController {
         }
 
         const orderEmailData = {
-          customerName: user.name || user.username || 'Khách hàng',
-          customerEmail: user.email,
+          customerName: receiver_name || user.name || user.username || 'Khách hàng',
+          customerEmail: receiver_email || user.email,
+          customerPhone: receiver_phone || user.phone,
           orderId: finalOrderId,
           orderDate: new Date(),
           shippingAddress: dia_chi_giao_hang,
@@ -691,7 +708,10 @@ class BillController {
       const { id } = req.params;
       const { status, adminNotes, adminImages } = req.body;
 
-      if (!status || !['processing', 'approved', 'rejected'].includes(status)) {
+      // Hỗ trợ cả tiếng Việt và tiếng Anh cho trạng thái từ chối
+      let normalizedStatus = status;
+      if (status.toLowerCase().includes('từ chối')) normalizedStatus = 'rejected';
+      if (!normalizedStatus || !['processing', 'approved', 'rejected'].includes(normalizedStatus)) {
         return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
       }
 
@@ -703,7 +723,7 @@ class BillController {
       }
 
       // Cập nhật trạng thái yêu cầu trả hàng
-      bill.returnRequest.status = status;
+      bill.returnRequest.status = normalizedStatus;
       if (adminNotes) {
         bill.returnRequest.adminNotes = adminNotes;
       }
@@ -712,9 +732,9 @@ class BillController {
       }
 
       // Cập nhật trạng thái đơn hàng dựa trên trạng thái yêu cầu
-      if (status === 'processing') {
+      if (normalizedStatus === 'processing') {
         bill.trang_thai = 'đang xử lý trả hàng';
-      } else if (status === 'approved') {
+      } else if (normalizedStatus === 'approved') {
         bill.trang_thai = 'đã hoàn tiền';
 
         // --- BẮT ĐẦU: HOÀN KHO KHI HOÀN TIỀN (Atomic) ---
@@ -760,9 +780,9 @@ class BillController {
           }
         }
         // --- KẾT THÚC: HOÀN KHO KHI HOÀN TIỀN ---
-      } else if (status === 'rejected') {
-        // Nếu từ chối, đơn hàng trở về trạng thái đã giao hàng
-        bill.trang_thai = 'đã giao hàng';
+      } else if (normalizedStatus === 'rejected') {
+        // Nếu từ chối hoàn tiền, đơn hàng chuyển sang trạng thái 'từ chối hoàn tiền'
+        bill.trang_thai = 'từ chối hoàn tiền';
       }
 
       await bill.save();

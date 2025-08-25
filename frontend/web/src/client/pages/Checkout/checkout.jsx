@@ -271,19 +271,7 @@ const Checkout = () => {
         return;
       }
 
-      // BƯỚC 2: Cập nhật thông tin người dùng sau khi kiểm tra tồn kho thành công
-      await axios.put(
-        "http://localhost:5000/api/users/me",
-        {
-          name: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          timeout: 10000 // 10 giây timeout
-        }
-      );
+      // BỎ QUA cập nhật thông tin người dùng, chỉ lưu thông tin giao hàng vào đơn hàng
 
       const fullAddress = `${formData.address}, ${availableWards[formData.ward]?.Name || formData.ward
         }, ${availableDistricts[formData.district]?.Name || formData.district}, ${vietnamAddress[formData.city]?.Name || formData.city
@@ -293,6 +281,9 @@ const Checkout = () => {
         dia_chi_giao_hang: fullAddress,
         phuong_thuc_thanh_toan: paymentMethod.toUpperCase(),
         ghi_chu: formData.note,
+        receiver_name: formData.fullName,
+        receiver_phone: formData.phone,
+        receiver_email: formData.email,
         shippingFee: shipping,
         danh_sach_san_pham: itemsToCheckout.map((item) => ({
           id: item.id,

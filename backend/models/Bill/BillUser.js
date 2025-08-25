@@ -1,6 +1,18 @@
 const mongoose = require('mongoose');
 
 const billSchema = new mongoose.Schema({
+  receiver_name: {
+    type: String,
+    required: true
+  },
+  receiver_phone: {
+    type: String,
+    required: true
+  },
+  receiver_email: {
+    type: String,
+    required: true
+  },
   nguoi_dung_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -35,7 +47,8 @@ const billSchema = new mongoose.Schema({
       'đã hủy',
       'yêu cầu trả hàng',
       'đang xử lý trả hàng',
-      'đã hoàn tiền'
+      'đã hoàn tiền',
+      'từ chối hoàn tiền'
     ],
     default: 'chờ xác nhận'
   },

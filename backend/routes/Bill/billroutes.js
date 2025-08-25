@@ -1,3 +1,4 @@
+
 const express = require('express');
 const BillController = require('../../controllers/Bill/billuser');
 const billRouter = express.Router();
@@ -22,5 +23,16 @@ billRouter.put('/:id/confirm-received', auth, (req, res) => billControl.confirmR
 billRouter.post('/:id/return-request', auth, (req, res) => billControl.createReturnRequest(req, res));
 billRouter.put('/:id/return-request/status', auth, isAdmin, (req, res) => billControl.updateReturnRequestStatus(req, res));
 billRouter.get('/order/:orderId', auth, (req, res) => billControl.getByOrderId(req, res));
+
+// Lấy danh sách đơn hàng đã áp dụng voucher theo code
+billRouter.get('/applied-voucher/:code', async (req, res) => {
+  try {
+    const code = req.params.code;
+    const bills = await Bill.find({ 'voucher.code': code }, { orderId: 1, _id: 0 });
+    res.json({ orders: bills.map(b => b.orderId) });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi server', error: err.message });
+  }
+});
 
 module.exports = billRouter;

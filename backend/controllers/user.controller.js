@@ -157,7 +157,7 @@ exports.updateProfile = async (req, res) => {
 
             try {
                 const result = await uploadToCloudinary(req.file.buffer);
-                user.image = result.secure_url;
+                user.image = result.secure_url; // Chỉ lưu URL Cloudinary
                 await user.save();
                 // Lưu lịch sử chỉnh sửa
                 await UserHistory.create({
@@ -174,28 +174,33 @@ exports.updateProfile = async (req, res) => {
                 });
                 // Đảm bảo trả về user mới nhất với image là Cloudinary URL
                 const updatedUser = await User.findById(user._id).select('-password');
-                console.log('API updateProfile trả về:', updatedUser.image);
                 return res.json({ message: 'Cập nhật thành công', ...updatedUser.toObject() });
             } catch (error) {
                 console.error('Lỗi upload ảnh:', error);
                 return res.status(500).json({ message: 'Lỗi upload ảnh', error: error.message });
             }
         }
-        await user.save();
-        // Lưu lịch sử chỉnh sửa
-        await UserHistory.create({
-            userId: user._id,
-            updatedBy: req.user.id,
-            changes: {
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                gender: user.gender, // Add gender to history
-                dob: user.dob,       // Add dob to history
-            },
-            updatedAt: new Date()
-        });
-        res.json({ message: 'Cập nhật thành công', ...user.toObject() });
+                await user.save();
+                // Lưu lịch sử chỉnh sửa
+                await UserHistory.create({
+                        userId: user._id,
+                        updatedBy: req.user.id,
+                        changes: {
+                                name: user.name,
+                                email: user.email,
+                                role: user.role,
+                                gender: user.gender, // Add gender to history
+                                dob: user.dob,       // Add dob to history
+                        },
+                        updatedAt: new Date()
+                });
+                        // Nếu không upload ảnh mới, chỉ trả về image là URL Cloudinary (nếu có), không bao giờ trả về đường dẫn cục bộ
+                        let userObj = user.toObject();
+                        if (userObj.image && !userObj.image.startsWith('http')) {
+                            // Nếu image không phải URL Cloudinary, xóa trường image để frontend dùng ảnh mặc định
+                            userObj.image = '';
+                        }
+                        res.json({ message: 'Cập nhật thành công', ...userObj });
     } catch (err) {
         res.status(500).json({ message: 'Cập nhật thất bại', error: err.message });
     }

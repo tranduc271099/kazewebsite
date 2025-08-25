@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -9,323 +10,172 @@ import { AiOutlinePlus } from 'react-icons/ai'; // Import for the plus icon
 // @ts-ignore
 import styles from '../styles/ProductLayout.module.css';
 
-const initialFormState = {
-    code: '', // Sẽ được tạo trong component
-    name: '',
-    description: '',
-    minOrder: '',  // Keep as string for form input consistency
-    discountType: 'percent',
-    discountValue: '',
-    maxDiscount: '',
-    startDate: '',
-    endDate: '',
-    quantity: '',
-    isActive: true,
-};
-
-function generateVoucherCode(length = 8) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-const Vouchers = () => {
+function Vouchers() {
+    // Submit handler for add/edit voucher
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError("");
+        // Validate required fields
+        if (!formData.code || !formData.name || !formData.discountType || !formData.discountValue || !formData.quantity || !formData.startDate || !formData.endDate) {
+            setError("Vui lòng điền đầy đủ thông tin bắt buộc.");
+            return;
+        }
+        if (Number(formData.discountValue) < 0) {
+            setError("Giá trị giảm giá không được âm.");
+            return;
+        }
+        if (formData.discountType === "percent" && Number(formData.discountValue) > 100) {
+            setError("Phần trăm giảm giá không được vượt quá 100%.");
+            return;
+        }
+        if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+            setError("Ngày bắt đầu phải trước ngày kết thúc.");
+            return;
+        }
+        setLoading(true);
+        try {
+            const token = localStorage.getItem("token");
+            const payload = {
+                ...formData,
+                discountValue: Number(formData.discountValue),
+                maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : undefined,
+                minOrder: formData.minOrder ? Number(formData.minOrder) : undefined,
+                quantity: Number(formData.quantity),
+            };
+            if (isEditing && currentVoucherId) {
+                await axios.put(`http://localhost:5000/api/vouchers/${currentVoucherId}`, payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await axios.post("http://localhost:5000/api/vouchers", payload, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+            fetchVouchers();
+            handleCloseModal();
+        } catch (err) {
+            setError(err.response?.data?.message || "Không thể lưu voucher.");
+        }
+        setLoading(false);
+    };
+    // State
     const [vouchers, setVouchers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [searchText, setSearchText] = useState("");
+    const [sortType, setSortType] = useState("newest");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [formData, setFormData] = useState({ ...initialFormState, code: generateVoucherCode() }); // Tạo mã voucher ban đầu
     const [isEditing, setIsEditing] = useState(false);
     const [currentVoucherId, setCurrentVoucherId] = useState(null);
-    const [searchText, setSearchText] = useState('');
-    const [sortType, setSortType] = useState('newest'); // Add sortType state
+    const [formData, setFormData] = useState({
+        code: "",
+        name: "",
+        description: "",
+        discountType: "percent",
+        discountValue: "",
+        maxDiscount: "",
+        minOrder: "",
+        quantity: "",
+        startDate: "",
+        endDate: "",
+        isActive: true,
+    });
+    const [appliedOrders, setAppliedOrders] = useState([]);
+    const [selectedVoucherCode, setSelectedVoucherCode] = useState("");
+
+    // Fetch vouchers
+    const fetchVouchers = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get("http://localhost:5000/api/vouchers", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setVouchers(res.data);
+        } catch (err) {
+            setError("Không thể tải danh sách voucher.");
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
         fetchVouchers();
     }, []);
 
-    const fetchVouchers = async () => {
-        setLoading(true);
+    // Fetch applied orders for a voucher code
+    const fetchAppliedOrders = async (code) => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/vouchers', {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`http://localhost:5000/api/bill/applied-voucher/${code}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setVouchers(response.data);
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching vouchers:', err);
-            setError('Failed to fetch vouchers.');
-            setVouchers([]);
-        } finally {
-            setLoading(false);
+            return Array.isArray(res.data) ? res.data : [];
+        } catch {
+            return [];
         }
     };
 
+    // Modal handlers
     const handleOpenAddModal = () => {
+        setFormData({
+            code: "",
+            name: "",
+            description: "",
+            discountType: "percent",
+            discountValue: "",
+            maxDiscount: "",
+            minOrder: "",
+            quantity: "",
+            startDate: "",
+            endDate: "",
+            isActive: true,
+        });
         setIsEditing(false);
-        setCurrentVoucherId(null);
-        const newCode = generateVoucherCode();
-        setFormData({ ...initialFormState, code: newCode });
         setIsModalOpen(true);
+        setSelectedVoucherCode("");
+        setAppliedOrders([]);
     };
 
     const handleOpenEditModal = (voucher) => {
-        setIsEditing(true);
-        setCurrentVoucherId(voucher._id);
-        const formattedStartDate = voucher.startDate && !isNaN(new Date(voucher.startDate).getTime())
-            ? format(new Date(voucher.startDate), 'yyyy-MM-dd')
-            : '';
-        const formattedEndDate = voucher.endDate && !isNaN(new Date(voucher.endDate).getTime())
-            ? format(new Date(voucher.endDate), 'yyyy-MM-dd')
-            : '';
-
         setFormData({
-            code: voucher.code || '',
-            name: voucher.name || '',
-            description: voucher.description || '',
-            minOrder: voucher.minOrder?.toString() || '',
-            discountType: voucher.discountType || 'percent',
-            discountValue: voucher.discountValue?.toString() || '',
-            maxDiscount: voucher.maxDiscount?.toString() || '',
-            startDate: formattedStartDate,
-            endDate: formattedEndDate,
-            quantity: voucher.quantity?.toString() || '',
-            isActive: voucher.isActive !== undefined ? voucher.isActive : true
+            code: voucher.code || "",
+            name: voucher.name || "",
+            description: voucher.description || "",
+            discountType: voucher.discountType || "percent",
+            discountValue: voucher.discountValue || "",
+            maxDiscount: voucher.maxDiscount || "",
+            minOrder: voucher.minOrder || "",
+            quantity: voucher.quantity || "",
+            startDate: voucher.startDate ? voucher.startDate.slice(0, 10) : "",
+            endDate: voucher.endDate ? voucher.endDate.slice(0, 10) : "",
+            isActive: voucher.isActive !== undefined ? voucher.isActive : true,
         });
+        setIsEditing(true);
         setIsModalOpen(true);
-    };
-
-    // Keep the old function for backward compatibility
-    const handleOpenModal = (voucher = null) => {
-        if (voucher) {
-            handleOpenEditModal(voucher);
-        } else {
-            handleOpenAddModal();
-        }
+        setCurrentVoucherId(voucher._id);
+        setSelectedVoucherCode(voucher.code);
+        fetchAppliedOrders(voucher.code).then(setAppliedOrders);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setCurrentVoucherId(null);
-        setFormData({ ...initialFormState, code: generateVoucherCode() });
+        setSelectedVoucherCode("");
+        setAppliedOrders([]);
     };
 
-    const handleChange = async (e) => {
-        const { name, value } = e.target;
-
-        // Validation khi nhập giá trị giảm giá
-        if (name === 'discountValue') {
-            const numValue = Number(value);
-
-            // Kiểm tra phần trăm không vượt quá 100%
-            if (formData.discountType === 'percent' && numValue > 100) {
-                Swal.fire('Lỗi!', 'Giá trị giảm phần trăm không được vượt quá 100%', 'error');
-                return;
-            }
-
-            // Kiểm tra phần trăm không vượt quá 90% để tránh lỗ (giữ lại 10% lợi nhuận tối thiểu)
-            if (formData.discountType === 'percent' && numValue > 90) {
-                const result = await Swal.fire({
-                    title: 'Cảnh báo!',
-                    text: 'Giảm giá trên 90% có thể dẫn đến lỗ. Bạn có chắc muốn tiếp tục?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Vẫn tiếp tục',
-                    cancelButtonText: 'Hủy bỏ'
-                });
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-            }
-
-            // Kiểm tra số tiền giảm không âm
-            if (formData.discountType === 'amount' && numValue < 0) {
-                Swal.fire('Lỗi!', 'Số tiền giảm giá không được âm', 'error');
-                return;
-            }
-
-            // Cảnh báo nếu số tiền giảm quá lớn so với đơn hàng tối thiểu
-            if (formData.discountType === 'amount' && formData.minOrder > 0 && numValue > formData.minOrder * 0.9) {
-                const result = await Swal.fire({
-                    title: 'Cảnh báo!',
-                    text: 'Số tiền giảm giá lớn (trên 90% giá trị đơn hàng tối thiểu) có thể dẫn đến lỗ. Bạn có chắc muốn tiếp tục?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Vẫn tiếp tục',
-                    cancelButtonText: 'Hủy bỏ'
-                });
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-            }
-        }
-
-        // Validation cho đơn hàng tối thiểu
-        if (name === 'minOrder') {
-            const numValue = Number(value);
-            if (numValue < 0) {
-                Swal.fire('Lỗi!', 'Giá trị đơn hàng tối thiểu không được âm', 'error');
-                return;
-            }
-
-            // Kiểm tra lại nếu có giá trị giảm giá dạng amount
-            if (formData.discountType === 'amount' && formData.discountValue > 0 && formData.discountValue > numValue * 0.9) {
-                Swal.fire('Cảnh báo!', 'Số tiền giảm giá hiện tại có thể quá lớn so với đơn hàng tối thiểu mới', 'warning');
-            }
-        }
-
-        setFormData((prev) => ({ ...prev, [name]: value }));
+    // Form change handler
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: type === "checkbox" ? checked : value,
+        }));
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        // Create payload with only the specific fields we need to avoid circular structure
-        const payload = {
-            code: formData.code,
-            name: formData.name,
-            description: formData.description,
-            discountType: formData.discountType,
-            discountValue: Number(formData.discountValue),
-            maxDiscount: formData.maxDiscount ? Number(formData.maxDiscount) : null,
-            minOrder: Number(formData.minOrder),
-            quantity: Number(formData.quantity),
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            isActive: formData.isActive,
-        };
-        {/* Giảm giá tối đa */ }
-        {
-            formData.discountType === 'percent' && (
-                <div className={styles.formGroup}>
-                    <label className={styles.label}>Giảm giá tối đa (VND):</label>
-                    <input
-                        type="number"
-                        name="maxDiscount"
-                        value={formData.maxDiscount}
-                        onChange={handleChange}
-                        min="0"
-                        className={styles.input}
-                        placeholder="Nhập số tiền giảm tối đa (nếu có)"
-                    />
-                    <small style={{ color: '#666', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                        Nếu để trống, không giới hạn số tiền giảm tối đa.
-                    </small>
-                </div>
-            )
-        }
-
-        // Validation comprehensive trước khi submit
-
-        // 1. Kiểm tra giá trị giảm giá không được âm
-        if (payload.discountValue < 0) {
-            Swal.fire('Lỗi!', 'Giá trị giảm giá không được âm.', 'error');
-            return;
-        }
-
-        // 2. Validation cho discountType === 'percent'
-        if (payload.discountType === 'percent') {
-            if (payload.discountValue > 100) {
-                Swal.fire('Lỗi!', 'Giá trị giảm phần trăm không được vượt quá 100%.', 'error');
-                return;
-            }
-
-            if (payload.discountValue > 95) {
-                const result = await Swal.fire({
-                    title: 'Cảnh báo!',
-                    text: `Giảm giá ${payload.discountValue}% có thể dẫn đến lỗ nghiêm trọng. Bạn có chắc chắn muốn tiếp tục?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Vẫn tiếp tục',
-                    cancelButtonText: 'Hủy bỏ'
-                });
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-            }
-        }
-
-        // 3. Validation cho discountType === 'amount'
-        if (payload.discountType === 'amount') {
-            // Kiểm tra số tiền giảm không vượt quá đơn hàng tối thiểu
-            if (payload.minOrder > 0 && payload.discountValue >= payload.minOrder) {
-                Swal.fire('Lỗi!', 'Số tiền giảm giá không được bằng hoặc vượt quá giá trị đơn hàng tối thiểu.', 'error');
-                return;
-            }
-
-            // Cảnh báo nếu giảm quá nhiều (trên 90% đơn hàng tối thiểu)
-            if (payload.minOrder > 0 && payload.discountValue > payload.minOrder * 0.9) {
-                const result = await Swal.fire({
-                    title: 'Cảnh báo!',
-                    text: `Số tiền giảm giá ${payload.discountValue.toLocaleString('vi-VN')}₫ chiếm ${((payload.discountValue / payload.minOrder) * 100).toFixed(1)}% giá trị đơn hàng tối thiểu. Điều này có thể dẫn đến lỗ. Bạn có chắc chắn muốn tiếp tục?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Vẫn tiếp tục',
-                    cancelButtonText: 'Hủy bỏ'
-                });
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-            }
-        }
-
-        // 4. Kiểm tra ngày bắt đầu và kết thúc
-        if (new Date(payload.startDate) >= new Date(payload.endDate)) {
-            Swal.fire('Lỗi!', 'Ngày bắt đầu phải trước ngày kết thúc.', 'error');
-            return;
-        }
-
-        // 5. Kiểm tra số lượng voucher
-        if (payload.quantity <= 0) {
-            Swal.fire('Lỗi!', 'Số lượng voucher phải lớn hơn 0.', 'error');
-            return;
-        }
-
-        Swal.fire({
-            title: isEditing ? 'Cập nhật voucher' : 'Thêm voucher mới',
-            text: isEditing ? 'Đang cập nhật voucher...' : 'Đang thêm voucher...',
-            icon: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-        });
-
-        try {
-            const token = localStorage.getItem('token');
-            if (isEditing) {
-                await axios.put(`http://localhost:5000/api/vouchers/${currentVoucherId}`, payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                Swal.fire('Thành công!', 'Voucher đã được cập nhật.', 'success');
-            } else {
-                await axios.post('http://localhost:5000/api/vouchers', payload, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                Swal.fire('Thành công!', 'Voucher mới đã được thêm.', 'success');
-            }
-            fetchVouchers();
-            handleCloseModal();
-        } catch (err) {
-            console.error('Error saving voucher:', err);
-            Swal.fire('Lỗi!', err.response?.data?.message || 'Không thể lưu voucher.', 'error');
-        }
-    };
+    // ...existing code...
 
     const handleDelete = async (id) => {
         Swal.fire({
@@ -376,6 +226,20 @@ const Vouchers = () => {
         }
         return 0;
     });
+
+    // Lấy realtime applied orders khi mở modal edit
+    useEffect(() => {
+        if (isModalOpen && formData.code) {
+            fetchAppliedOrders(formData.code).then(setAppliedOrders);
+        }
+    }, [isModalOpen, formData.code]);
+
+    // Cập nhật realtime số lượng đã dùng khi modal đóng hoặc mở
+    useEffect(() => {
+        if (!isModalOpen) {
+            fetchVouchers();
+        }
+    }, [isModalOpen]);
 
     return (
         <div className={styles.container}>
@@ -430,8 +294,9 @@ const Vouchers = () => {
                                 <th style={{ textAlign: 'right' }}>Giảm tối đa</th>
                                 <th style={{ textAlign: 'center' }}>Ngày áp dụng</th>
                                 <th style={{ textAlign: 'center' }}>Ngày kết thúc</th>
+                                <th style={{ textAlign: 'center' }}>Số lượng voucher</th>
+                                <th style={{ textAlign: 'center' }}>Số lượng đã áp dụng</th>
                                 <th style={{ textAlign: 'center' }}>Số lượng còn lại</th>
-                                <th style={{ textAlign: 'center' }}>Số lượng đã dùng</th>
                                 <th style={{ textAlign: 'center' }}>Trạng thái</th>
                                 <th style={{ textAlign: 'center' }}>Thao tác</th>
                             </tr>
@@ -457,8 +322,9 @@ const Vouchers = () => {
                                         </td>
                                         <td style={{ textAlign: 'center' }}>{new Date(v.startDate).toLocaleDateString('vi-VN')}</td>
                                         <td style={{ textAlign: 'center' }}>{new Date(v.endDate).toLocaleDateString('vi-VN')}</td>
-                                        <td style={{ textAlign: 'center' }}>{(v.quantity - v.usedCount) > 0 ? (v.quantity - v.usedCount) : 0}</td>
+                                        <td style={{ textAlign: 'center' }}>{v.quantity}</td>
                                         <td style={{ textAlign: 'center' }}>{v.usedCount}</td>
+                                        <td style={{ textAlign: 'center' }}>{(v.quantity - v.usedCount) > 0 ? (v.quantity - v.usedCount) : 0}</td>
                                         <td style={{ textAlign: 'center' }}>
                                             <span className={styles.status} style={{ backgroundColor: statusColor, color: 'white' }}>
                                                 {statusText}
@@ -490,8 +356,9 @@ const Vouchers = () => {
 
             {isModalOpen && (
                 <div className={styles.modalBackdrop}>
-                    <div className={styles.modalContent}>
-                        <h3 className={styles.modalTitle}>
+                    <div className={styles.modalContent} style={{ maxWidth: 500, minWidth: 320, width: '95vw', padding: 20, borderRadius: 12, position: 'relative' }}>
+                        <button type="button" onClick={handleCloseModal} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#fff', cursor: 'pointer', zIndex: 2 }}>&times;</button>
+                        <h3 className={styles.modalTitle} style={{ marginBottom: 18 }}>
                             {isEditing ? 'Cập nhật Voucher' : 'Thêm Voucher Mới'}
                         </h3>
                         <form onSubmit={handleSubmit}>
@@ -702,11 +569,25 @@ const Vouchers = () => {
                                 </button>
                             </div>
                         </form>
+                        {/* Đơn hàng đã áp dụng voucher */}
+                        {selectedVoucherCode && (
+                            <div style={{ marginTop: 18, background: '#181c22', borderRadius: 8, padding: 12, maxHeight: 120, overflowY: 'auto' }}>
+                                <b>Đơn hàng đã áp dụng voucher:</b>
+                                {(!Array.isArray(appliedOrders) || appliedOrders.length === 0) ? (
+                                    <div style={{ color: '#aaa', fontSize: 14 }}>Chưa có đơn hàng nào áp dụng voucher này.</div>
+                                ) : (
+                                    <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                        {appliedOrders.map(orderId => (
+                                            <li key={orderId} style={{ background: '#2c313a', borderRadius: 4, padding: '4px 10px', fontSize: 15, color: '#fff' }}>{orderId}</li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
         </div>
     );
-};
-
+}
 export default Vouchers;

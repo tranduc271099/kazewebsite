@@ -5,7 +5,7 @@ import { FaTicketAlt } from 'react-icons/fa';
 import { FaCaretUp } from 'react-icons/fa';
 import Modal from 'react-modal';
 
-const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
+const ApplyVoucher = ({ cartTotal, onDiscountApplied, onRemoveVoucher }) => {
   const [discount, setDiscount] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -39,16 +39,14 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
       return;
     }
     let discountAmount = 0;
+    const maxDiscount = Number(voucher.maxDiscount) > 0 ? Number(voucher.maxDiscount) : null;
     if (voucher.discountType === 'amount') {
-      discountAmount = voucher.discountValue;
-      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
-        discountAmount = voucher.maxDiscount;
-      }
+      discountAmount = Number(voucher.discountValue) || 0;
     } else if (voucher.discountType === 'percent') {
-      discountAmount = Math.floor((cartTotal * voucher.discountValue) / 100);
-      if (typeof voucher.maxDiscount === 'number' && voucher.maxDiscount > 0 && discountAmount > voucher.maxDiscount) {
-        discountAmount = voucher.maxDiscount;
-      }
+      discountAmount = Math.floor((cartTotal * Number(voucher.discountValue)) / 100);
+    }
+    if (maxDiscount && discountAmount > maxDiscount) {
+      discountAmount = maxDiscount;
     }
     setDiscount(discountAmount);
     setSuccess(`Áp dụng thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ`);
@@ -107,6 +105,7 @@ const ApplyVoucher = ({ cartTotal, onDiscountApplied }) => {
     setError('');
     setVoucherCode('');
     setSelectedVoucher(null);
+    if (onRemoveVoucher) onRemoveVoucher();
   };
 
   return (

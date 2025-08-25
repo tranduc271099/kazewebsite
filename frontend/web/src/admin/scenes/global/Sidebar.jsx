@@ -61,22 +61,24 @@ const Sidebar = () => {
   const [chatNotifications, setChatNotifications] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [open, setOpen] = useState(false);
-  const [avatar, setAvatar] = useState(() => {
+  const [avatar, setAvatar] = useState("/assets/img/person/person-m-1.webp");
+  useEffect(() => {
     let user = null;
     try {
       user = JSON.parse(localStorage.getItem("user"));
     } catch { }
     if (user?.image) {
       if (user.image.startsWith("http")) {
-        return user.image;
+        setAvatar(user.image);
       } else if (user.image.startsWith("/")) {
-        return `http://localhost:5000${user.image}`;
+        setAvatar(`http://localhost:5000${user.image}`);
       } else {
-        return `http://localhost:5000/${user.image}`;
+        setAvatar(`http://localhost:5000/${user.image}`);
       }
+    } else {
+      setAvatar("/assets/img/person/person-m-1.webp");
     }
-    return "/assets/img/person/person-m-1.webp";
-  });
+  }, []);
   const [name, setName] = useState(() => {
     let user = null;
     try {

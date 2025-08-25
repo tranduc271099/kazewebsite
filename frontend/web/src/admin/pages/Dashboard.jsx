@@ -53,24 +53,25 @@ const Dashboard = () => {
             });
         });
 
-        // Listen for stock updates from client cart operations
+
+        // Listen for realtime updates to refresh top 3 products and users
+        const refreshTop3 = () => {
+            fetchDashboardData();
+            fetchLatestOrders();
+        };
+
         socket.on('client_cart_update', (data) => {
             toast(`${data.username} đã ${data.action} sản phẩm: ${data.productName}`, {
                 icon: 'ℹ️',
             });
-            // Refresh dashboard data to get updated stock
-            fetchDashboardData();
+            refreshTop3();
         });
 
-        // Listen for order creation
         socket.on('order_created', (data) => {
             toast.success(`${data.username} đã tạo đơn hàng #${data.orderId} - ${data.productCount} sản phẩm - ${data.totalAmount.toLocaleString('vi-VN')}₫`);
-            // Refresh dashboard data to get updated stats
-            fetchDashboardData();
-            fetchLatestOrders();
+            refreshTop3();
         });
 
-        // Listen for order completion (customer confirmed received)
         socket.on('order_completed', (data) => {
             toast.success(`🎉 ${data.message}`, {
                 position: "top-right",
@@ -80,18 +81,14 @@ const Dashboard = () => {
                 pauseOnHover: true,
                 draggable: true,
             });
-            // Refresh dashboard data to get updated stats
-            fetchDashboardData();
-            fetchLatestOrders();
+            refreshTop3();
         });
 
-        // Listen for stock reduction from orders
         socket.on('stock_reduced', (data) => {
             toast(`${data.username} đã giảm tồn kho: ${data.productName} (${data.color} - ${data.size}) -${data.quantity}`, {
                 icon: '📦',
             });
-            // Refresh dashboard data to get updated stock
-            fetchDashboardData();
+            refreshTop3();
         });
 
         // Listen for stock updates

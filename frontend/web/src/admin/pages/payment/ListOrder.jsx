@@ -19,6 +19,7 @@ const statusOptions = [
   'yêu cầu trả hàng',
   'đang xử lý trả hàng',
   'đã hoàn tiền',
+  'từ chối hoàn tiền',
   'đã hủy',
 ];
 
@@ -72,6 +73,8 @@ const ListOrder = () => {
       case 'đã giao hàng': return 'Đã giao';
       case 'đã nhận hàng': return 'Đã nhận';
       case 'hoàn thành': return 'Hoàn thành';
+      case 'đã hoàn tiền': return 'Đã hoàn tiền';
+      case 'từ chối hoàn tiền': return 'Từ chối hoàn tiền';
       case 'đã hủy': return 'Đã hủy';
       default: return status;
     }
@@ -156,9 +159,10 @@ const ListOrder = () => {
       await axios.put(`http://localhost:5000/api/bill/${orderId}/status`, { trang_thai: newStatus }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchOrders(page);
       setShowModal(false);
       toast.success(`Đơn hàng đã được cập nhật thành "${getStatusDisplay(newStatus)}".`);
+      // Reload danh sách đơn hàng bất đồng bộ, không block UI
+      setTimeout(() => fetchOrders(page), 100);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     }
@@ -319,10 +323,13 @@ const ListOrder = () => {
       });
 
       const token = localStorage.getItem('token');
+      // Nếu chọn Từ chối, gửi status là 'rejected' về backend
+      let statusToSend = returnRequestData.status;
+      if (statusToSend.toLowerCase().includes('từ chối')) statusToSend = 'rejected';
       const response = await axios.put(
         `http://localhost:5000/api/bill/${selectedOrder._id}/return-request/status`,
         {
-          status: returnRequestData.status,
+          status: statusToSend,
           adminNotes: returnRequestData.adminNotes.trim(),
           adminImages: imageUrls
         },
@@ -409,6 +416,7 @@ const ListOrder = () => {
       case 'yêu cầu trả hàng': return '#9333ea';
       case 'đang xử lý trả hàng': return '#9333ea';
       case 'đã hoàn tiền': return '#0284c7';
+      case 'từ chối hoàn tiền': return '#ef4444';
       case 'đã hủy': return '#ef4444';
       default: return '#6b7280';
     }

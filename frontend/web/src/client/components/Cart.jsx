@@ -526,6 +526,7 @@ function Cart() {
                                                     setDiscount(discountAmount);
                                                     setSelectedVoucher(voucher);
                                                 }}
+                                                onRemoveVoucher={handleRemoveVoucher}
                                             />
                                             <div>
                                                 <button className="btn btn-outline-primary me-2" type="button">Cập nhật</button>
