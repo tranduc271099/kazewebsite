@@ -86,15 +86,15 @@ exports.createPaymentUrl = async (req, res) => {
       const newBill = new BillUser({
         orderId: orderId,
         nguoi_dung_id: userId, // Sử dụng userId đã validate
-        receiver_name: req.body.receiver_name || req.user?.name || 'Khách hàng',
-        receiver_phone: req.body.receiver_phone || req.user?.phone || '0000000000',
-        receiver_email: req.body.receiver_email || req.user?.email || 'customer@example.com',
+        receiver_name: req.user?.name || 'Khách hàng',
+        receiver_phone: req.user?.phone || '0000000000',
+        receiver_email: req.user?.email || 'customer@example.com',
         dia_chi_giao_hang: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
         phuong_thuc_thanh_toan: 'VNPAY',
         trang_thai: 'chờ xác nhận', // BẮT ĐẦU TỪ CHỜ XÁC NHẬN
         thanh_toan: 'chưa thanh toán',
         ghi_chu: req.body.ghi_chu || '',
-        phi_van_chuyen: Number(req.body.shippingFee) || 0,
+  phi_van_chuyen: Number(req.body.shippingFee) || 30000,
         giam_gia: Number(req.body.discount) || 0,
         voucher_id: req.body.voucher?._id || null,
         danh_sach_san_pham: processedProducts,
