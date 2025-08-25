@@ -158,9 +158,18 @@
 }
 
 #you .message-content {
+    align-self: flex-end;
     background-color: #007bff;
     color: white;
-    border-radius: 15px 15px 0 15px;
+    border-radius: 18px;
+    max-width: 66%;
+    display: inline-block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 14px 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
 }
 
 #other {
@@ -168,15 +177,23 @@
 }
 
 #other .message-content {
+    align-self: flex-start;
     background-color: #e9e9eb;
     color: black;
-    border-radius: 15px 15px 15px 0;
+    border-radius: 18px;
+    max-width: 66%;
+    display: inline-block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 14px 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 10px;
 }
 
 .message-content {
-    max-width: 70%;
     padding: 10px 15px;
-    word-wrap: break-word;
+    /* max-width, min-width, word-break đã chuyển vào từng loại bubble */
 }
 
 .message-meta {
