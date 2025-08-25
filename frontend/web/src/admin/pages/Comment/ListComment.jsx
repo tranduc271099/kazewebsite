@@ -17,7 +17,7 @@ const ListComment = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit] = useState(10);
-    
+
     // Modal states
     const [selectedComment, setSelectedComment] = useState(null);
     const [showReplyModal, setShowReplyModal] = useState(false);
@@ -60,7 +60,7 @@ const ListComment = () => {
     const handleStatusUpdate = async (commentId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.patch(`http://localhost:5000/api/comments/admin/${commentId}/status`, 
+            await axios.patch(`http://localhost:5000/api/comments/admin/${commentId}/status`,
                 { status: newStatus },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -183,7 +183,7 @@ const ListComment = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={{ flexGrow: 1, minWidth: '200px' }}
                 />
-                
+
                 <select
                     className={styles.select}
                     value={statusFilter}
@@ -239,12 +239,12 @@ const ListComment = () => {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             {/* Ảnh sản phẩm */}
                                             <div style={{ width: '50px', height: '50px', flexShrink: 0 }}>
-                                                <img 
-                                                    src={comment.productId?.images && comment.productId.images[0] ? 
-                                                         (comment.productId.images[0].startsWith('http') ? 
-                                                          comment.productId.images[0] : 
-                                                          `http://localhost:5000${comment.productId.images[0]}`) : 
-                                                         'https://via.placeholder.com/50x50/cccccc/666666?text=No+Image'} 
+                                                <img
+                                                    src={comment.productId?.images && comment.productId.images[0] ?
+                                                        (comment.productId.images[0].startsWith('http') ?
+                                                            comment.productId.images[0] :
+                                                            `http://localhost:5000${comment.productId.images[0]}`) :
+                                                        'https://via.placeholder.com/50x50/cccccc/666666?text=No+Image'}
                                                     alt="Product"
                                                     style={{
                                                         width: '100%',
@@ -493,7 +493,7 @@ const ListComment = () => {
                         overflow: 'auto'
                     }}>
                         <h4>Chi tiết bình luận</h4>
-                        
+
                         <div className="row">
                             <div className="col-md-6">
                                 <strong>Người dùng:</strong> {selectedComment.userId?.name}
@@ -502,7 +502,7 @@ const ListComment = () => {
                                 <strong>Email:</strong> {selectedComment.userId?.email}
                             </div>
                         </div>
-                        
+
                         <div className="row mt-2">
                             <div className="col-md-6">
                                 <strong>Sản phẩm:</strong> {selectedComment.productId?.ten_san_pham}
@@ -511,14 +511,14 @@ const ListComment = () => {
                                 <strong>Đánh giá:</strong> {renderStars(selectedComment.rating)} ({selectedComment.rating}/5)
                             </div>
                         </div>
-                        
+
                         <div className="mt-3">
                             <strong>Nội dung:</strong>
                             <div className="p-3 bg-light rounded mt-1">
                                 {selectedComment.content}
                             </div>
                         </div>
-                        
+
                         {selectedComment.adminReply && (
                             <div className="mt-3">
                                 <strong>Phản hồi của admin:</strong>
@@ -529,7 +529,7 @@ const ListComment = () => {
                                 </div>
                             </div>
                         )}
-                        
+
                         {selectedComment.reports && selectedComment.reports.length > 0 && (
                             <div className="mt-3">
                                 <strong>Báo cáo ({selectedComment.reports.length}):</strong>
@@ -544,7 +544,7 @@ const ListComment = () => {
                                 ))}
                             </div>
                         )}
-                        
+
                         <div className="row mt-3">
                             <div className="col-md-6">
                                 <strong>Trạng thái:</strong> {getStatusText(selectedComment.status)}
@@ -553,7 +553,7 @@ const ListComment = () => {
                                 <strong>Ngày tạo:</strong> {formatDate(selectedComment.createdAt)}
                             </div>
                         </div>
-                        
+
                         <div className="d-flex justify-content-end mt-3">
                             <button
                                 className="btn btn-secondary"

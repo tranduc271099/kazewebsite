@@ -8,13 +8,14 @@ const ProfileSidebar = ({ activePage }) => {
     // Avatar handling
     let avatar = '';
     if (user?.image) {
-        if (user.image.startsWith('http')) avatar = user.image;
-        else if (user.image.startsWith('/uploads/')) avatar = `http://localhost:5000${user.image}`;
-        else if (user.image.startsWith('/api/uploads/')) avatar = `http://localhost:5000${user.image.replace('/api', '')}`;
-        else avatar = `http://localhost:5000/${user.image}`;
+        if (user.image.startsWith('blob:')) avatar = user.image;
+        else if (user.image.startsWith('http')) avatar = user.image;
+        else avatar = '/default-avatar.png';
     } else {
         avatar = '/default-avatar.png';
     }
+    // Đảm bảo <img> re-render khi đổi ảnh (blob hoặc url)
+    const avatarKey = user?.image || 'default';
 
     const getLinkStyle = (page) => ({
         color: activePage === page ? '#2563eb' : '#333',
@@ -44,6 +45,7 @@ const ProfileSidebar = ({ activePage }) => {
                     width: 72, height: 72, borderRadius: '50%', background: '#eee', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36, color: '#bbb', overflow: 'hidden'
                 }}>
                     <img
+                        key={avatarKey}
                         src={avatar}
                         alt="Avatar"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}

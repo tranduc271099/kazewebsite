@@ -176,7 +176,7 @@ function Cart() {
             }
 
             console.log("🔍 Bắt đầu kiểm tra tồn kho...");
-            toast.info("Đang kiểm tra tồn kho...", { autoClose: 2000 });
+            toast("Đang kiểm tra tồn kho...", { autoClose: 2000 });
 
             const stockCheckItems = selectedCartItems.map((item) => ({
                 id: item.id,

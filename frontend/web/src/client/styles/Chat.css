@@ -30,7 +30,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     transition: all 0.3s ease-in-out;
 }
@@ -92,7 +92,8 @@
     background: #007bff;
     color: white;
     display: flex;
-    justify-content: space-between; /* Căn chỉnh các item */
+    justify-content: space-between;
+    /* Căn chỉnh các item */
     align-items: center;
     padding: 0 1em;
     border-top-left-radius: 9px;
@@ -297,6 +298,11 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

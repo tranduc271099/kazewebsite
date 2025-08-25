@@ -65,25 +65,30 @@ const Profile = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+
     const handleImageChange = e => {
         const file = e.target.files[0];
         if (file) {
+            const previewUrl = URL.createObjectURL(file);
             setFormData(f => ({
                 ...f,
                 imageFile: file,
-                image: URL.createObjectURL(file)
+                image: previewUrl
             }));
+            // Cập nhật user context để sidebar đổi ảnh ngay
+            setUser(u => u ? { ...u, image: previewUrl } : u);
         }
     };
 
     let avatar = '';
     if (formData.image && formData.image.startsWith('blob:')) {
         avatar = formData.image;
+    } else if (formData.image && formData.image.startsWith('http')) {
+        avatar = formData.image;
     } else if (user?.image) {
-        if (user.image.startsWith('http')) avatar = user.image;
-        else if (user.image.startsWith('/uploads/')) avatar = `http://localhost:5000${user.image}`;
-        else if (user.image.startsWith('/api/uploads/')) avatar = `http://localhost:5000${user.image.replace('/api', '')}`;
-        else avatar = `http://localhost:5000/${user.image}`;
+        if (user.image.startsWith('blob:')) avatar = user.image;
+        else if (user.image.startsWith('http')) avatar = user.image;
+        else avatar = '/default-avatar.png';
     } else {
         avatar = '/default-avatar.png';
     }
@@ -111,13 +116,15 @@ const Profile = () => {
                 }
             });
             setSuccess('Cập nhật thông tin thành công!');
-            window.location.reload();
             localStorage.setItem('userName', formData.name);
+            // Lấy lại profile mới nhất từ backend (Cloudinary URL)
             const res = await axios.get('http://localhost:5000/api/users/me', {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log('Profile after update:', res.data); // Kiểm tra giá trị user.image trả về
             setUser(res.data);
-            setFormData(f => ({ ...f, image: res.data.image || '' }));
+            localStorage.setItem('user', JSON.stringify(res.data));
+            setFormData(f => ({ ...f, image: res.data.image || '', imageFile: null }));
         } catch (err) {
             setError('Cập nhật thất bại!');
             if (err.response?.status === 401) {
@@ -157,25 +164,25 @@ const Profile = () => {
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Tên</label>
                             <input type="text" value={formData.name} onChange={handleChange} name="name"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} required />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} required />
                         </div>
                         {/* Email */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Email</label>
                             <input type="email" value={formData.email} disabled
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#232b3b', color: '#fff' }} />
                         </div>
                         {/* Phone */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Số điện thoại</label>
                             <input type="tel" value={formData.phone} onChange={handleChange} name="phone"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
                         </div>
                         {/* Address */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Địa chỉ</label>
                             <input type="text" value={formData.address} onChange={handleChange} name="address"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
                         </div>
                         {/* Gender */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
@@ -184,7 +191,7 @@ const Profile = () => {
                                 value={formData.gender}
                                 onChange={handleChange}
                                 name="gender"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }}
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }}
                             >
                                 <option value="">Chọn giới tính</option>
                                 <option value="Nam">Nam</option>
@@ -196,13 +203,13 @@ const Profile = () => {
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Ngày sinh</label>
                             <input type="date" value={formData.dob} onChange={handleChange} name="dob"
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ddd', color: '#fff', background: '#232b3b' }} />
                         </div>
                         {/* Role (readonly) */}
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
                             <label style={{ width: 140, color: '#555', textAlign: 'right', marginRight: 16 }}>Vai trò</label>
                             <input type="text" value={formData.role || ''} disabled
-                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#f5f5f5' }} />
+                                style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #eee', background: '#232b3b', color: '#fff' }} />
                         </div>
                         {/* Nút lưu */}
                         <div style={{ marginLeft: 120 }}>

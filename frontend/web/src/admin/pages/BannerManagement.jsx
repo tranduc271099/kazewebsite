@@ -147,7 +147,7 @@ const BannerManagement = () => {
                 </button>
             </div>
 
-            {loading && <div style={{textAlign:'center',color:'#666',margin:'16px 0'}}>Đang xử lý...</div>}
+            {loading && <div style={{ textAlign: 'center', color: '#666', margin: '16px 0' }}>Đang xử lý...</div>}
 
             <div className={styles.card} style={{ marginTop: 16 }}>
                 <BannerList banners={sortedBanners} onEdit={handleEdit} onDelete={handleDelete} />

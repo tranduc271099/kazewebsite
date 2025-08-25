@@ -139,7 +139,7 @@ const EditProfile = () => {
     }
 
     if (!hasChanges()) {
-      toast.info('Không có thay đổi nào để lưu');
+      toast('Không có thay đổi nào để lưu');
       return;
     }
 
@@ -200,7 +200,7 @@ const EditProfile = () => {
     setAvatarPreview(originalData.avatar || '');
     setErrors({});
     setShowConfirmDialog(false);
-    toast.info('Đã hủy các thay đổi');
+    toast('Đã hủy các thay đổi');
   };
 
   return (

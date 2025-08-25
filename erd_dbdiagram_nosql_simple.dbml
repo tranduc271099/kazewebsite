@@ -1,0 +1,137 @@
+// ERD chỉ chứa tên bảng và trường, không có kiểu dữ liệu
+
+Table User {
+  _id
+  name
+  email
+  password
+  phone
+  role
+  address
+  image
+  vouchers
+  gender
+  dob
+  isActive
+  resetPasswordToken
+  resetPasswordExpiry
+}
+
+Table Product {
+  _id
+  name
+  slug
+  description
+  brand
+  category
+  attributes
+  variants
+  images
+  price
+  costPrice
+  stock
+  isActive
+  rating
+  reviewCount
+  reviews
+}
+
+Table Category {
+  _id
+  name
+  image
+  parentId
+}
+
+Table DanhMuc {
+  _id
+  ten
+  moTa
+}
+
+Table Cart {
+  _id
+  userId
+  items
+}
+
+Table Bill {
+  _id
+  nguoi_dung_id
+  dia_chi_giao_hang
+  tong_tien
+  phuong_thuc_thanh_toan
+  ghi_chu
+  trang_thai
+  thanh_toan
+  ly_do_huy
+  nguoi_huy
+  ngay_tao
+  ngay_cap_nhat
+  danh_sach_san_pham
+}
+
+Table CommentUser {
+  _id
+  productId
+  userId
+  content
+  rating
+  orderId
+  status
+  adminReply
+  reports
+  isHidden
+}
+
+Table Voucher {
+  _id
+  name
+  code
+  description
+  minOrder
+  discountType
+  discountValue
+  maxDiscount
+  startDate
+  endDate
+  isActive
+  quantity
+  usedCount
+}
+
+Table UserHistory {
+  _id
+  userId
+  updatedBy
+  updatedAt
+  changes
+}
+
+Table DeletedVariant {
+  _id
+  originalProductId
+  originalVariantId
+  variantData
+  productName
+  deletedAt
+  hadOrders
+  orderCount
+}
+
+Table Chat {
+  _id
+  roomId
+  clientUsername
+  status
+  messages
+  adminUsername
+}
+
+Table Banner {
+  _id
+  title
+  imageUrl
+  category
+  isActive
+}

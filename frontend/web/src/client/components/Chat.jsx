@@ -6,11 +6,14 @@ const socket = io('http://localhost:5000');
 
 function Chat() {
     const [isOpen, setIsOpen] = useState(false);
-    const [room, setRoom] = useState('');
+    const [room, setRoom] = useState(() => localStorage.getItem('chat_room') || '');
     const [message, setMessage] = useState('');
-    const [messageList, setMessageList] = useState([]);
-    const [username, setUsername] = useState('');
-    const [isChatting, setIsChatting] = useState(false);
+    const [messageList, setMessageList] = useState(() => {
+        const saved = localStorage.getItem('chat_messageList');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [username, setUsername] = useState(() => localStorage.getItem('chat_username') || '');
+    const [isChatting, setIsChatting] = useState(() => localStorage.getItem('chat_isChatting') === 'true');
     const [chatEnded, setChatEnded] = useState(false);
     const [isResetting, setIsResetting] = useState(false);
     const chatBodyRef = useRef(null);
@@ -25,6 +28,9 @@ function Chat() {
         if (username.trim() !== '') {
             const newRoomId = `user_${Date.now()}`;
             setRoom(newRoomId);
+            localStorage.setItem('chat_room', newRoomId);
+            localStorage.setItem('chat_username', username);
+            localStorage.setItem('chat_isChatting', 'true');
             // Gửi cả roomId và username, isAdmin = false
             socket.emit('join_room', { room: newRoomId, username: username, isAdmin: false });
             setIsChatting(true);
@@ -42,6 +48,11 @@ function Chat() {
                 endedBy: 'client',
                 username: username
             });
+            // Xóa localStorage khi kết thúc chat
+            localStorage.removeItem('chat_room');
+            localStorage.removeItem('chat_username');
+            localStorage.removeItem('chat_isChatting');
+            localStorage.removeItem('chat_messageList');
             // Reset ngay lập tức để có thể bắt đầu chat mới
             resetChatState();
         }
@@ -50,7 +61,6 @@ function Chat() {
     // Hàm reset trạng thái chat về ban đầu
     const resetChatState = () => {
         setIsResetting(true);
-        
         // Hiển thị thông báo reset trong 1.5 giây
         setTimeout(() => {
             setIsChatting(false);
@@ -60,7 +70,6 @@ function Chat() {
             setRoom('');
             setUsername('');
             setIsResetting(false);
-            
             // Focus vào input tên sau khi reset
             setTimeout(() => {
                 if (usernameInputRef.current) {
@@ -78,8 +87,6 @@ function Chat() {
                 time: new Date(Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             };
             await socket.emit('send_message', messageData);
-            // Tin nhắn sẽ được thêm vào messageList khi nhận được từ server
-            // thông qua socket.on('receive_message')
             setMessage('');
         }
     };
@@ -88,41 +95,52 @@ function Chat() {
         if (chatBodyRef.current) {
             chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
         }
+        // Lưu messageList vào localStorage mỗi khi thay đổi
+        localStorage.setItem('chat_messageList', JSON.stringify(messageList));
     }, [messageList]);
 
     useEffect(() => {
         const handleReceiveMessage = (data) => {
-            setMessageList((list) => [...list, data]);
+            setMessageList((list) => {
+                const newList = [...list, data];
+                localStorage.setItem('chat_messageList', JSON.stringify(newList));
+                return newList;
+            });
         };
 
         const handleChatEnded = (data) => {
             if (typeof data === 'string') {
-                // Backward compatibility
                 alert(data);
             } else {
-                // New format với thông tin chi tiết
                 const endedBy = data.endedBy === 'admin' ? 'admin' : 'bạn';
                 alert(`Cuộc trò chuyện đã được ${endedBy} kết thúc.\nThời gian: ${new Date(data.timestamp).toLocaleString('vi-VN')}`);
             }
-            
-            // Reset chat state sau 2 giây để có thể bắt đầu chat mới
+            // Xóa localStorage khi chat kết thúc
+            localStorage.removeItem('chat_room');
+            localStorage.removeItem('chat_username');
+            localStorage.removeItem('chat_isChatting');
+            localStorage.removeItem('chat_messageList');
             setTimeout(() => {
                 resetChatState();
             }, 1000);
         };
 
         const handleAdminJoined = (data) => {
-            // Thêm system message khi admin tham gia
-            setMessageList((list) => [...list, {
-                author: 'System',
-                message: data.message,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                isSystemMessage: true
-            }]);
+            setMessageList((list) => {
+                const newList = [...list, {
+                    author: 'System',
+                    message: data.message,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    isSystemMessage: true
+                }];
+                localStorage.setItem('chat_messageList', JSON.stringify(newList));
+                return newList;
+            });
         };
 
         const handleChatHistory = (history) => {
             setMessageList(history);
+            localStorage.setItem('chat_messageList', JSON.stringify(history));
         };
 
         socket.on('receive_message', handleReceiveMessage);

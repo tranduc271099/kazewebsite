@@ -245,7 +245,7 @@ const BillUserClient = () => {
                 return;
             }
 
-            toast.info('Đang tạo link thanh toán...', { autoClose: 3000 });
+            toast('Đang tạo link thanh toán...', { autoClose: 3000 });
 
             // Đảm bảo orderId có giá trị hợp lệ
             const orderIdToUse = bill.orderId || bill._id || Date.now().toString();
@@ -655,45 +655,45 @@ const BillUserClient = () => {
                                                     )}
                                                 </div>
                                             </div>
-            {/* Review Modal */}
-            {showReviewModal && reviewBillId && (
-                <div className="review-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="review-modal-content" style={{ background: '#fff', borderRadius: 8, padding: 32, minWidth: 400, maxWidth: 500, boxShadow: '0 2px 16px rgba(0,0,0,0.15)' }}>
-                        <h3 style={{ marginBottom: 16 }}>Đánh giá sản phẩm</h3>
-                        {bills.find(b => b._id === reviewBillId)?.danh_sach_san_pham.map(item => (
-                            <div key={item.san_pham_id?._id} style={{ marginBottom: 24, borderBottom: '1px solid #eee', paddingBottom: 12 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <img src={item.san_pham_id?.images?.[0] || 'https://via.placeholder.com/60'} alt={item.san_pham_id?.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
-                                    <div>
-                                        <div style={{ fontWeight: 600 }}>{item.san_pham_id?.name}</div>
-                                        <div style={{ fontSize: 13, color: '#666' }}>Phân loại: {item.kich_thuoc} - {item.mau_sac}</div>
-                                    </div>
-                                </div>
-                                <div style={{ marginTop: 8 }}>
-                                    <span>Đánh giá: </span>
-                                    {[1,2,3,4,5].map(star => (
-                                        <span key={star} style={{ cursor: 'pointer', color: (reviewData[item.san_pham_id?._id]?.rating || 5) >= star ? '#ffc107' : '#ccc', fontSize: 20 }}
-                                            onClick={() => handleReviewChange(item.san_pham_id?._id, 'rating', star)}>&#9733;</span>
-                                    ))}
-                                </div>
-                                <textarea
-                                    style={{ width: '100%', marginTop: 8, borderRadius: 4, border: '1px solid #ddd', padding: 8, fontSize: 14 }}
-                                    rows={3}
-                                    placeholder="Nhận xét của bạn về sản phẩm này..."
-                                    value={reviewData[item.san_pham_id?._id]?.comment || ''}
-                                    onChange={e => handleReviewChange(item.san_pham_id?._id, 'comment', e.target.value)}
-                                />
-                            </div>
-                        ))}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                            <button className="shopee-btn shopee-btn-secondary" onClick={() => setShowReviewModal(false)} disabled={reviewSubmitting}>Hủy</button>
-                            <button className="shopee-btn shopee-btn-primary" onClick={handleSubmitReview} disabled={reviewSubmitting}>
-                                {reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                                            {/* Review Modal */}
+                                            {showReviewModal && reviewBillId && (
+                                                <div className="review-modal" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.3)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <div className="review-modal-content" style={{ background: '#fff', borderRadius: 8, padding: 32, minWidth: 400, maxWidth: 500, boxShadow: '0 2px 16px rgba(0,0,0,0.15)' }}>
+                                                        <h3 style={{ marginBottom: 16 }}>Đánh giá sản phẩm</h3>
+                                                        {bills.find(b => b._id === reviewBillId)?.danh_sach_san_pham.map(item => (
+                                                            <div key={item.san_pham_id?._id} style={{ marginBottom: 24, borderBottom: '1px solid #eee', paddingBottom: 12 }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                                    <img src={item.san_pham_id?.images?.[0] || 'https://via.placeholder.com/60'} alt={item.san_pham_id?.name} style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 6 }} />
+                                                                    <div>
+                                                                        <div style={{ fontWeight: 600 }}>{item.san_pham_id?.name}</div>
+                                                                        <div style={{ fontSize: 13, color: '#666' }}>Phân loại: {item.kich_thuoc} - {item.mau_sac}</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div style={{ marginTop: 8 }}>
+                                                                    <span>Đánh giá: </span>
+                                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                                        <span key={star} style={{ cursor: 'pointer', color: (reviewData[item.san_pham_id?._id]?.rating || 5) >= star ? '#ffc107' : '#ccc', fontSize: 20 }}
+                                                                            onClick={() => handleReviewChange(item.san_pham_id?._id, 'rating', star)}>&#9733;</span>
+                                                                    ))}
+                                                                </div>
+                                                                <textarea
+                                                                    style={{ width: '100%', marginTop: 8, borderRadius: 4, border: '1px solid #ddd', padding: 8, fontSize: 14 }}
+                                                                    rows={3}
+                                                                    placeholder="Nhận xét của bạn về sản phẩm này..."
+                                                                    value={reviewData[item.san_pham_id?._id]?.comment || ''}
+                                                                    onChange={e => handleReviewChange(item.san_pham_id?._id, 'comment', e.target.value)}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                                                            <button className="shopee-btn shopee-btn-secondary" onClick={() => setShowReviewModal(false)} disabled={reviewSubmitting}>Hủy</button>
+                                                            <button className="shopee-btn shopee-btn-primary" onClick={handleSubmitReview} disabled={reviewSubmitting}>
+                                                                {reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>

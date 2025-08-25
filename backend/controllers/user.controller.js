@@ -10,7 +10,7 @@ const { notifyClientDataUpdate, EVENT_TYPES } = require('../utils/realTimeNotifi
 // Đăng ký
 exports.register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, phone } = req.body;
 
         // Kiểm tra email đã tồn tại
         let user = await User.findOne({ email });
@@ -23,6 +23,7 @@ exports.register = async (req, res) => {
             name,
             email,
             password,
+            phone,
             image: ""
         });
 
@@ -171,7 +172,10 @@ exports.updateProfile = async (req, res) => {
                     },
                     updatedAt: new Date()
                 });
-                return res.json({ message: 'Cập nhật thành công', ...user.toObject() });
+                // Đảm bảo trả về user mới nhất với image là Cloudinary URL
+                const updatedUser = await User.findById(user._id).select('-password');
+                console.log('API updateProfile trả về:', updatedUser.image);
+                return res.json({ message: 'Cập nhật thành công', ...updatedUser.toObject() });
             } catch (error) {
                 console.error('Lỗi upload ảnh:', error);
                 return res.status(500).json({ message: 'Lỗi upload ảnh', error: error.message });

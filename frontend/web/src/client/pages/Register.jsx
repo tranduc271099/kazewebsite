@@ -9,8 +9,7 @@ const Register = () => {
         name: '',
         email: '',
         password: '',
-        phone: '',
-        address: ''
+        phone: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -25,7 +24,10 @@ const Register = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:5000/api/users/register', formData);
+            // Chỉ gửi các trường cần thiết (không gửi address)
+            const { name, email, password, phone } = formData;
+            const response = await axios.post('http://localhost:5000/api/users/register', { name, email, password, phone });
+            alert('Đăng ký thành công! Vui lòng đăng nhập.');
             navigate('/login');
         } catch (err) {
             setError(err.response?.data?.message || 'Đăng ký không thành công. Vui lòng thử lại.');
@@ -102,21 +104,7 @@ const Register = () => {
                                 />
                             </div>
                         </div>
-                        <div className="form-row">
-                            <div className="form-group form-col-1">
-                                <label htmlFor="address">Địa chỉ</label>
-                                <textarea
-                                    id="address"
-                                    name="address"
-                                    value={formData.address}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Nhập địa chỉ"
-                                    rows="3"
-                                    style={{ color: '#222', backgroundColor: '#fafbfc' }}
-                                />
-                            </div>
-                        </div>
+                        {/* Đã bỏ phần nhập địa chỉ */}
                         <div className="auth-actions">
                             <button type="submit" className="btn-primary" disabled={loading}>
                                 {loading ? 'Đang xử lý...' : 'Đăng ký'}

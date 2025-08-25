@@ -1,10 +1,16 @@
-.modal-content, .modal-content * {
+.modal-content,
+.modal-content * {
   color: #111 !important;
 }
-.modal-content h4, .modal-content strong, .modal-content label, .modal-content .form-label {
+
+.modal-content h4,
+.modal-content strong,
+.modal-content label,
+.modal-content .form-label {
   color: #111 !important;
   font-weight: 700 !important;
 }
+
 .modal-content textarea.form-control {
   color: #111 !important;
   background: #fff !important;
@@ -12,12 +18,14 @@
   font-size: 1rem !important;
   opacity: 1 !important;
 }
+
 .modal-content .form-label,
 .modal-content label.form-label {
   color: #111 !important;
   font-weight: 700 !important;
   opacity: 1 !important;
 }
+
 .modal-content textarea.form-control::placeholder {
   color: #444 !important;
   opacity: 1 !important;

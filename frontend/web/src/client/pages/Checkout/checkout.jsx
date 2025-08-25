@@ -220,7 +220,7 @@ const Checkout = () => {
       const token = localStorage.getItem("token");
 
       // BƯỚC 1: Kiểm tra tồn kho trước khi làm gì khác
-      toast.info("Đang kiểm tra tồn kho...", { autoClose: 2000 });
+      toast("Đang kiểm tra tồn kho...", { autoClose: 2000 });
 
       const stockCheckItems = itemsToCheckout.map((item) => ({
         id: item.id,
@@ -336,7 +336,7 @@ const Checkout = () => {
       } else if (paymentMethod === "vnpay") {
         try {
           setIsSubmitting(true);
-          toast.info("Đang tạo thanh toán VNPay...", { autoClose: 3000 });
+          toast("Đang tạo thanh toán VNPay...", { autoClose: 3000 });
 
           // Gọi API VNPay tích hợp sẵn tạo bill và payment URL
           const vnpayRes = await axios.post("http://localhost:5000/api/payment/vnpay", {

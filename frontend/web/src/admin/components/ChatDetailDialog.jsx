@@ -25,7 +25,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
   const colors = tokens(theme.palette.mode);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  
+
   // Lấy tên admin thực tế từ localStorage
   const getAdminUsername = () => {
     try {
@@ -35,7 +35,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
       return 'Admin';
     }
   };
-  
+
   const [adminUsername] = useState(getAdminUsername());
   const messagesEndRef = useRef(null);
 
@@ -71,7 +71,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
         onClose();
       }, 1500);
     };
-    
+
     // Đăng ký các listeners
     socket.on('receive_message', handleReceiveMessage);
     socket.on('chat_history', handleChatHistory);
@@ -135,7 +135,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
         endedBy: 'admin',
         username: adminUsername
       });
-      
+
       // Cập nhật trạng thái trong database
       onUpdateStatus(chatData.roomId, 'đã kết thúc');
       onClose();
@@ -159,8 +159,8 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
         }
       }}
     >
-      <DialogTitle sx={{ 
-        backgroundColor: colors.blueAccent[700], 
+      <DialogTitle sx={{
+        backgroundColor: colors.blueAccent[700],
         color: colors.grey[100],
         display: 'flex',
         justifyContent: 'space-between',
@@ -170,11 +170,11 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
           <Typography variant="h6">
             Chat với {chatData.clientUsername}
           </Typography>
-          <Chip 
+          <Chip
             label={chatData.status}
             color={
               chatData.status === 'mới' ? 'error' :
-              chatData.status === 'đang diễn ra' ? 'warning' : 'success'
+                chatData.status === 'đang diễn ra' ? 'warning' : 'success'
             }
             size="small"
           />
@@ -206,9 +206,9 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
         </Box>
       </DialogTitle>
 
-      <DialogContent sx={{ 
-        flex: 1, 
-        display: 'flex', 
+      <DialogContent sx={{
+        flex: 1,
+        display: 'flex',
         flexDirection: 'column',
         padding: 0
       }}>
@@ -230,17 +230,17 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
         <Divider />
 
         {/* Khung chat */}
-        <Box 
-          flex={1} 
-          p="15px" 
-          sx={{ 
+        <Box
+          flex={1}
+          p="15px"
+          sx={{
             overflowY: 'auto',
             maxHeight: 'calc(80vh - 200px)'
           }}
         >
           {messages.length === 0 ? (
-            <Typography 
-              textAlign="center" 
+            <Typography
+              textAlign="center"
               color={colors.grey[300]}
               mt="50px"
             >
@@ -299,7 +299,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
                     >
                       {msg.author === adminUsername ? <AdminPanelSettingsIcon /> : <PersonIcon />}
                     </Avatar>
-                    
+
                     <Paper
                       elevation={1}
                       sx={{
@@ -309,7 +309,7 @@ const ChatDetailDialog = ({ open, onClose, chatData, onUpdateStatus, socket }) =
                         borderRadius: '18px'
                       }}
                     >
-                      <Typography variant="body2">{msg.message}</Typography>
+                      <Typography variant="body2" sx={{ whiteSpace: 'pre-line', wordBreak: 'break-word' }}>{msg.message}</Typography>
                       <Typography
                         variant="caption"
                         color={colors.grey[300]}
