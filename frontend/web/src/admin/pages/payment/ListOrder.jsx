@@ -660,7 +660,11 @@ const ListOrder = () => {
               {selectedOrder.shippingFee !== undefined && (
                 <div className={styles.detailRow}>
                   <span className={styles.detailLabel}>Phí vận chuyển:</span>
-                  <span className={styles.detailValue}>{(selectedOrder.phi_van_chuyen !== undefined ? (selectedOrder.phi_van_chuyen === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.phi_van_chuyen === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.phi_van_chuyen === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`) : (selectedOrder.shippingFee === 0 ? 'Miễn phí (Đơn trên 300k)' : selectedOrder.shippingFee === 4990 ? 'Tiêu chuẩn (3-5 ngày)' : selectedOrder.shippingFee === 12990 ? 'Nhanh (1-2 ngày)' : `${selectedOrder.shippingFee?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`))}</span>
+                  <span className={styles.detailValue}>{
+                    (selectedOrder.phi_van_chuyen && selectedOrder.phi_van_chuyen > 0)
+                      ? `${selectedOrder.phi_van_chuyen.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}`
+                      : '30.000 ₫'
+                  }</span>
                 </div>
               )}
               <div className={styles.detailRow}>

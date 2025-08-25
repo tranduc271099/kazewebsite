@@ -743,7 +743,7 @@ const BillUserClient = () => {
                                 </div>
                                 <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Phí vận chuyển</span>
-                                    <span>{formatPrice((selectedBill.phi_van_chuyen !== undefined ? selectedBill.phi_van_chuyen : selectedBill.shippingFee) || 0)}</span>
+                                    <span>{formatPrice((selectedBill.phi_van_chuyen && selectedBill.phi_van_chuyen > 0) ? selectedBill.phi_van_chuyen : 30000)}</span>
                                 </div>
                                 <div className="order-detail-summary-row" style={{ color: '#333', fontWeight: '500' }}>
                                     <span>Giảm giá</span>
