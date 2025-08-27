@@ -199,6 +199,7 @@ const ProductAdd = () => {
                 ...prev,
                 variants: updatedVariants
             }));
+            toast.success('Cập nhật biến thể thành công!');
         } else {
             const newVariant = {
                 ...currentVariant,
@@ -210,6 +211,7 @@ const ProductAdd = () => {
                 ...prev,
                 variants: [...prev.variants, newVariant]
             }));
+            toast.success('Thêm biến thể thành công!');
         }
         cancelEditVariant();
     };
