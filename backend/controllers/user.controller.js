@@ -100,7 +100,8 @@ exports.login = async (req, res) => {
                         name: user.name,
                         email: user.email,
                         role: user.role,
-                        image: user.image || null
+                        image: user.image || null,
+                        isLocked: user.isLocked // Đảm bảo trả về trạng thái khóa
                     }
                 });
             }
@@ -327,5 +328,37 @@ exports.getUserHistory = async (req, res) => {
     } catch (err) {
         console.error('Lỗi getUserHistory:', err);
         res.status(500).json({ message: 'Không thể lấy lịch sử chỉnh sửa', error: err.message });
+    }
+};
+
+// Khóa/mở khóa tài khoản user (chỉ admin)
+exports.lockOrUnlockUser = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Chỉ admin mới được phép!' });
+        }
+        const { userId } = req.params;
+        const { lock } = req.body; // true: khóa, false: mở khóa
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ message: 'ID người dùng không hợp lệ' });
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+        }
+        user.isLocked = lock;
+        await user.save();
+        // Lưu lịch sử thao tác
+        await UserHistory.create({
+            userId: user._id,
+            updatedBy: req.user.id,
+            changes: {
+                isLocked: lock
+            },
+            updatedAt: new Date()
+        });
+        res.json({ message: lock ? 'Đã khóa tài khoản' : 'Đã mở khóa tài khoản', isLocked: lock });
+    } catch (err) {
+        res.status(500).json({ message: 'Lỗi thao tác khóa/mở khóa', error: err.message });
     }
 };

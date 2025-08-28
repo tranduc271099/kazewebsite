@@ -490,12 +490,6 @@ function ProductDetail() {
                                     >
                                         <i className="bi bi-cart-plus"></i> Thêm vào giỏ
                                     </button>
-                                    <button
-                                        className="btn btn-outline-primary buy-now-btn"
-                                        disabled={!selectedVariant || selectedVariant.stock <= 0}
-                                    >
-                                        <i className="bi bi-lightning-fill"></i> Mua ngay
-                                    </button>
                                 </div>
 
                                 {/* Additional Info */}

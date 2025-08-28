@@ -49,6 +49,13 @@ const Login = () => {
             const token = response.data.token;
             const user = response.data.user;
 
+            // Chặn đăng nhập nếu user bị khóa
+            if (user.isLocked) {
+                setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+                setLoading(false);
+                return;
+            }
+
             // Lưu token và user vào localStorage
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
@@ -77,6 +84,12 @@ const Login = () => {
 
             const token = response.data.token;
             const user = response.data.user;
+
+            // Chặn đăng nhập nếu user bị khóa
+            if (user.isLocked) {
+                setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để biết thêm chi tiết.');
+                return;
+            }
 
             // Lưu token và user vào localStorage
             localStorage.setItem('token', token);
@@ -177,4 +190,4 @@ const Login = () => {
     );
 };
 
-export default Login; 
+export default Login;

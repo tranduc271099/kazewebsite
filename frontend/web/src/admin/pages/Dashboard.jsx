@@ -677,14 +677,6 @@ const Dashboard = () => {
                                         <div style={{ display: 'flex', gap: 15, fontSize: 12, color: '#e2e8f0' }}>
                                             <span>{product.totalQuantity} sản phẩm</span>
                                             <span style={{ color: '#90cdf4', fontWeight: 600 }}>{formatCurrency(product.totalRevenue)}</span>
-                                            <span style={{
-                                                color: product.stock > 10 ? '#68d391' :
-                                                    product.stock > 0 ? '#f6e05e' :
-                                                        '#fc8181',
-                                                fontWeight: 600
-                                            }}>
-                                                Tồn kho: {product.stock || 0}
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -708,7 +700,6 @@ const Dashboard = () => {
                                         <div style={{ display: 'flex', gap: 15, fontSize: 12, color: '#e2e8f0' }}>
                                             <span>{user.orderCount} đơn hàng</span>
                                             <span style={{ color: '#90cdf4', fontWeight: 600 }}>{formatCurrency(user.totalSpent)}</span>
-                                            <span>Giá trị TB: {formatCurrency(user.averageOrderValue)}</span>
                                             <span style={{ color: '#f6e05e', fontWeight: 600 }}>
                                                 SĐT: {user.userPhone || 'Không có'}
                                             </span>

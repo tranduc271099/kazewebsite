@@ -46,8 +46,23 @@ const ListCustomer = () => {
     };
 
     const handleViewDetail = (userId) => {
-        // Assuming a detail page for user exists or will be created
         navigate(`/admin/users/view/${userId}`);
+    } 
+
+    // Khóa/mở khóa user
+    const handleLockToggle = async (userId, isLocked) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.put(
+                `http://localhost:5000/api/users/lock/${userId}`,
+                { lock: !isLocked },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            toast.success(response.data.message);
+            fetchCustomers();
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Lỗi thao tác khóa/mở khóa');
+        }
     };
 
     const formatCurrency = (amount) => {
@@ -117,8 +132,8 @@ const ListCustomer = () => {
                                     <td style={{ textAlign: 'center' }}>{customer.gender || '---'}</td>
                                     <td style={{ textAlign: 'center' }}>{formatDate(customer.dob)}</td>
                                     <td style={{ textAlign: 'center' }}>
-                                        <span className={styles.status} style={{ backgroundColor: customer.isActive ? '#10b981' : '#ef4444', color: 'white' }}>
-                                            {customer.isActive ? 'Hoạt động' : 'Bị khóa'}
+                                        <span className={styles.status} style={{ backgroundColor: customer.isLocked ? '#ef4444' : '#10b981', color: 'white', display: 'inline-block' }}>
+                                            {customer.isLocked ? 'Đã khóa' : 'Hoạt động'}
                                         </span>
                                     </td>
                                     <td style={{ textAlign: 'center' }}>
@@ -129,6 +144,14 @@ const ListCustomer = () => {
                                                 title="Xem chi tiết"
                                             >
                                                 <AiOutlineEye size={20} />
+                                            </button>
+                                            <button
+                                                className={`${styles.actionBtn} ${styles.iconBtn}`}
+                                                style={{ backgroundColor: customer.isLocked ? '#10b981' : '#ef4444', color: 'white' }}
+                                                onClick={() => handleLockToggle(customer._id, customer.isLocked)}
+                                                title={customer.isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
+                                            >
+                                                {customer.isLocked ? 'Mở khóa' : 'Khóa'}
                                             </button>
                                         </div>
                                     </td>

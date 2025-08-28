@@ -123,11 +123,11 @@ const UserDetail = () => {
                         <span
                             className={styles.status}
                             style={{
-                                backgroundColor: user.isActive ? '#10b981' : '#ef4444',
+                                backgroundColor: user.isLocked ? '#ef4444' : '#10b981',
                                 color: 'white',
                             }}
                         >
-                            {user.isActive ? 'Hoạt động' : 'Bị khóa'}
+                            {user.isLocked ? 'Đã khóa' : 'Hoạt động'}
                         </span>
                         <Typography variant="body1" style={{ color: 'var(--text-primary)' }}>
                             Trạng thái tài khoản
@@ -142,4 +142,4 @@ const UserDetail = () => {
     );
 };
 
-export default UserDetail; 
+export default UserDetail;

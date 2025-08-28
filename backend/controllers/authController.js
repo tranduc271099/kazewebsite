@@ -89,7 +89,8 @@ exports.googleLogin = async (req, res) => {
                 email: user.email,
                 name: user.name,
                 role: user.role,
-                picture
+                picture,
+                isLocked: user.isLocked // Đảm bảo trả về trạng thái khóa
             }
         });
     } catch (error) {
