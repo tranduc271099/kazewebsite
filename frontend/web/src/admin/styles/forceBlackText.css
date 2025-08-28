@@ -1,0 +1,6 @@
+.force-black-text {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    text-shadow: 0 0 0 #000 !important;
+    font-weight: 500;
+}

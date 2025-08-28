@@ -1,3 +1,5 @@
+
+
 const nodemailer = require('nodemailer');
 
 class EmailService {
@@ -10,6 +12,37 @@ class EmailService {
         pass: process.env.EMAIL_PASS  // App password của Gmail
       }
     });
+  }
+
+  // Gửi email cảm ơn khi đơn hàng hoàn thành
+  async sendThankYouEmail({ customerName, customerEmail, orderId }) {
+    try {
+      const mailOptions = {
+        from: {
+          name: 'KazeWebsite',
+          address: process.env.EMAIL_USER
+        },
+        to: customerEmail,
+        subject: `🎉 Cảm ơn bạn đã mua hàng tại KazeWebsite!`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #28a745;">Cảm ơn bạn đã tin tưởng và mua sắm tại KazeWebsite!</h2>
+            <p>Xin chào <strong>${customerName}</strong>,</p>
+            <p>Đơn hàng <strong>#${orderId}</strong> của bạn đã hoàn thành. Chúng tôi rất cảm kích sự ủng hộ của bạn.</p>
+            <p>Hy vọng bạn hài lòng với sản phẩm và dịch vụ của chúng tôi. Nếu có bất kỳ góp ý hoặc đánh giá nào, hãy phản hồi để chúng tôi phục vụ bạn tốt hơn!</p>
+            <p style="margin-top: 30px;">Chúc bạn một ngày tốt lành!<br><strong>KazeWebsite Team</strong></p>
+            <hr style="margin: 32px 0;">
+            <p style="font-size: 13px; color: #888;">Email này được gửi tự động, vui lòng không trả lời.</p>
+          </div>
+        `
+      };
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('Email cảm ơn đã được gửi:', result.messageId);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('Lỗi khi gửi email cảm ơn:', error);
+      return { success: false, error: error.message };
+    }
   }
 
   // Template HTML cho email xác nhận đơn hàng

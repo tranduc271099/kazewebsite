@@ -38,12 +38,10 @@ exports.createPaymentUrl = async (req, res) => {
       });
     }
 
-    // TẠO ĐỚN HÀNG TRONG DATABASE TRƯỚC KHI TẠO VNPAY URL
+    // KIỂM TRA ĐƠN HÀNG ĐÃ TỒN TẠI VỚI orderId VÀ CHƯA THANH TOÁN
     try {
       const BillUser = require('../models/Bill/BillUser');
       const Product = require('../models/Product');
-
-      // Validate user ID
       const userId = req.user?.id || req.user?.userId;
       if (!userId) {
         return res.status(401).json({
@@ -52,122 +50,119 @@ exports.createPaymentUrl = async (req, res) => {
         });
       }
 
-      // Xử lý danh sách sản phẩm
-      const processedProducts = [];
-      if (req.body.danh_sach_san_pham && req.body.danh_sach_san_pham.length > 0) {
-        for (const item of req.body.danh_sach_san_pham) {
-          const product = await Product.findById(item.id);
-          if (product) {
-            // Tìm variant hoặc lấy giá từ product
-            let itemPrice = product.price;
-            if (product.variants && product.variants.length > 0) {
-              const variant = product.variants.find(v =>
-                v.attributes.color === item.color && v.attributes.size === item.size
-              );
-              if (variant) {
-                itemPrice = variant.price;
-              }
-            }
-
-            processedProducts.push({
-              san_pham_id: item.id,
-              ten_san_pham: product.name,
-              gia: itemPrice,
-              so_luong: item.quantity,
-              mau_sac: item.color || '',
-              kich_thuoc: item.size || '',
-              thanh_tien: itemPrice * item.quantity
-            });
-          }
-        }
-      }
-
-      // Tạo bill mới
-      const newBill = new BillUser({
-        orderId: orderId,
-        nguoi_dung_id: userId, // Sử dụng userId đã validate
-  receiver_name: req.body.receiver_name || 'Khách hàng',
-  receiver_phone: req.body.receiver_phone || '0000000000',
-  receiver_email: req.body.receiver_email || 'customer@example.com',
-        dia_chi_giao_hang: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
-        phuong_thuc_thanh_toan: 'VNPAY',
-        trang_thai: 'chờ xác nhận', // BẮT ĐẦU TỪ CHỜ XÁC NHẬN
-        thanh_toan: 'chưa thanh toán',
-        ghi_chu: req.body.ghi_chu || '',
-  phi_van_chuyen: 30000,
-        giam_gia: Number(req.body.discount) || 0,
-        voucher_id: req.body.voucher?._id || null,
-        danh_sach_san_pham: processedProducts,
-        tong_tien: Number(amount),
-        ngay_tao: new Date(),
-        ngay_cap_nhat: new Date()
-      });
-
-      await newBill.save();
-
-      // TRỪ STOCK NGAY KHI TẠO ĐỚN HÀNG
-      for (const item of processedProducts) {
-        try {
-          const updateResult = await Product.updateOne(
-            {
-              _id: item.san_pham_id,
-              "variants": {
-                $elemMatch: {
-                  "attributes.color": item.mau_sac,
-                  "attributes.size": item.kich_thuoc
+      let bill = await BillUser.findOne({ orderId: orderId, thanh_toan: 'chưa thanh toán' });
+      let processedProducts = [];
+      if (!bill) {
+        // Nếu chưa có đơn hàng chưa thanh toán, tạo mới
+        if (req.body.danh_sach_san_pham && req.body.danh_sach_san_pham.length > 0) {
+          for (const item of req.body.danh_sach_san_pham) {
+            const product = await Product.findById(item.id);
+            if (product) {
+              let itemPrice = product.price;
+              if (product.variants && product.variants.length > 0) {
+                const variant = product.variants.find(v =>
+                  v.attributes.color === item.color && v.attributes.size === item.size
+                );
+                if (variant) {
+                  itemPrice = variant.price;
                 }
               }
-            },
-            {
-              $inc: { "variants.$.stock": -item.so_luong }
+              processedProducts.push({
+                san_pham_id: item.id,
+                ten_san_pham: product.name,
+                gia: itemPrice,
+                so_luong: item.quantity,
+                mau_sac: item.color || '',
+                kich_thuoc: item.size || '',
+                thanh_tien: itemPrice * item.quantity
+              });
             }
-          );
+          }
+        }
+        bill = new BillUser({
+          orderId: orderId,
+          nguoi_dung_id: userId,
+          receiver_name: req.body.receiver_name || 'Khách hàng',
+          receiver_phone: req.body.receiver_phone || '0000000000',
+          receiver_email: req.body.receiver_email || 'customer@example.com',
+          dia_chi_giao_hang: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
+          phuong_thuc_thanh_toan: 'VNPAY',
+          trang_thai: 'chờ xác nhận',
+          thanh_toan: 'chưa thanh toán',
+          ghi_chu: req.body.ghi_chu || '',
+          phi_van_chuyen: 30000,
+          giam_gia: Number(req.body.discount) || 0,
+          voucher_id: req.body.voucher?._id || null,
+          danh_sach_san_pham: processedProducts,
+          tong_tien: Number(amount),
+          ngay_tao: new Date(),
+          ngay_cap_nhat: new Date()
+        });
+        await bill.save();
 
-          if (updateResult.modifiedCount === 0) {
-            console.log('Variant not found, trying to update main product stock');
-            const fallbackUpdateResult = await Product.updateOne(
+        // TRỪ STOCK NGAY KHI TẠO ĐƠN HÀNG
+        for (const item of processedProducts) {
+          try {
+            const updateResult = await Product.updateOne(
               {
                 _id: item.san_pham_id,
-                $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+                "variants": {
+                  $elemMatch: {
+                    "attributes.color": item.mau_sac,
+                    "attributes.size": item.kich_thuoc
+                  }
+                }
               },
               {
-                $inc: { stock: -item.so_luong }
+                $inc: { "variants.$.stock": -item.so_luong }
               }
             );
+            if (updateResult.modifiedCount === 0) {
+              await Product.updateOne(
+                {
+                  _id: item.san_pham_id,
+                  $or: [{ variants: { $exists: false } }, { variants: { $size: 0 } }]
+                },
+                {
+                  $inc: { stock: -item.so_luong }
+                }
+              );
+            }
+          } catch (stockError) {
+            console.error('Error reducing stock:', stockError);
           }
-        } catch (stockError) {
-          console.error('Error reducing stock:', stockError);
         }
+
+        // GỬI EMAIL XÁC NHẬN ĐƠN HÀNG
+        try {
+          const emailService = require('../services/emailService');
+          const emailData = {
+            customerName: req.body.receiver_name || req.user?.name || 'Khách hàng',
+            customerEmail: req.body.receiver_email || req.user?.email || 'customer@example.com',
+            orderId: orderId,
+            orderDate: new Date(),
+            shippingAddress: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
+            paymentMethod: 'VNPay',
+            products: processedProducts,
+            subtotal: amount / 100,
+            shippingFee: 30000,
+            discount: Number(req.body.discount) || 0,
+            totalAmount: amount / 100,
+            voucher: req.body.voucher || null
+          };
+          await emailService.sendOrderConfirmation(emailData);
+        } catch (emailError) {
+          console.error('Lỗi gửi email xác nhận đơn hàng:', emailError);
+        }
+      } else {
+        // Nếu đã có đơn hàng chưa thanh toán, dùng lại đơn đó, không tạo mới
+        processedProducts = bill.danh_sach_san_pham || [];
       }
-
-      // GỬI EMAIL XÁC NHẬN ĐƠN HÀNG
-      try {
-        const emailService = require('../services/emailService');
-        const emailData = {
-          customerName: req.user?.name || 'Khách hàng',
-          customerEmail: req.user?.email || 'customer@example.com',
-          orderId: orderId,
-          orderDate: new Date(),
-          shippingAddress: req.body.dia_chi_giao_hang || 'Địa chỉ mặc định',
-          paymentMethod: 'VNPay',
-          products: processedProducts,
-          subtotal: amount / 100,
-          shippingFee: 30000,
-          discount: Number(req.body.discount) || 0,
-          totalAmount: amount / 100,
-          voucher: req.body.voucher || null
-        };
-
-        await emailService.sendOrderConfirmation(emailData);
-      } catch (emailError) {
-        console.error('Lỗi gửi email xác nhận đơn hàng:', emailError);
-      }
-
     } catch (billError) {
-      console.error('Error creating bill:', billError);
+      console.error('Error creating or finding bill:', billError);
       return res.status(500).json({
         success: false,
-        message: 'Lỗi tạo đơn hàng: ' + billError.message
+        message: 'Lỗi tạo/tìm đơn hàng: ' + billError.message
       });
     }
 
@@ -299,7 +294,7 @@ exports.handleVnpayReturn = async (vnp_Params) => {
       const orderId = vnp_Params['vnp_TxnRef'];
       const responseCode = vnp_Params['vnp_ResponseCode'];
       const transactionNo = vnp_Params['vnp_TransactionNo'];
-  const amount = vnp_Params['vnp_Amount'] ? Number(vnp_Params['vnp_Amount']) / 100 : 0;
+      const amount = vnp_Params['vnp_Amount'] ? Number(vnp_Params['vnp_Amount']) / 100 : 0;
 
       if (responseCode === '00') {
         // CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG TRONG DATABASE

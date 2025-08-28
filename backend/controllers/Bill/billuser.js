@@ -575,6 +575,7 @@ class BillController {
         cancelReason: ly_do_huy || null
       });
 
+
       // Gửi email thông báo thay đổi trạng thái
       try {
         const populatedBill = await Bill.findById(bill._id).populate('nguoi_dung_id', 'name email');
@@ -586,12 +587,21 @@ class BillController {
             oldStatus: oldStatus,
             newStatus: trang_thai
           };
-
           await emailService.sendOrderStatusUpdate(emailData);
           console.log(`Email thông báo trạng thái đã được gửi tới: ${populatedBill.nguoi_dung_id.email}`);
+
+          // Nếu trạng thái là hoàn thành, gửi thêm email cảm ơn
+          if (trang_thai === 'hoàn thành') {
+            await emailService.sendThankYouEmail({
+              customerName: populatedBill.nguoi_dung_id.name || 'Khách hàng',
+              customerEmail: populatedBill.nguoi_dung_id.email,
+              orderId: bill.orderId || bill._id.toString().slice(-8)
+            });
+            console.log(`Email cảm ơn đã được gửi tới: ${populatedBill.nguoi_dung_id.email}`);
+          }
         }
       } catch (emailError) {
-        console.error('Lỗi khi gửi email thông báo trạng thái:', emailError);
+        console.error('Lỗi khi gửi email thông báo trạng thái hoặc cảm ơn:', emailError);
         // Không throw error để không ảnh hưởng đến việc cập nhật trạng thái
       }
 

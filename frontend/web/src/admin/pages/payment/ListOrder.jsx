@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import io from 'socket.io-client';
 // @ts-ignore
 import styles from '../../styles/ProductLayout.module.css';
+import '../../styles/forceBlackText.css';
 import { BiSearch } from 'react-icons/bi'; // Import icon tìm kiếm
 import { FaFileExcel } from 'react-icons/fa'; // Import icon Excel
 import { FiRefreshCcw } from 'react-icons/fi'; // Import icon Refresh
@@ -716,11 +717,12 @@ const ListOrder = () => {
               {/* Return Request Information */}
               {(selectedOrder.trang_thai === 'yêu cầu trả hàng' || selectedOrder.trang_thai === 'đang xử lý trả hàng' || selectedOrder.trang_thai === 'đã hoàn tiền') && selectedOrder.returnRequest && (
                 <div style={{ marginTop: 20, padding: 15, background: '#f8f9fa', borderRadius: 8, border: '1px solid #e9ecef' }}>
-                  <h4 style={{ marginBottom: 12, fontSize: '1.1rem', color: '#495057', fontWeight: 600 }}>THÔNG TIN YÊU CẦU TRẢ HÀNG</h4>
+                  <h4 className="force-black-text" style={{ marginBottom: 12, fontSize: '1.1rem', color: '#000 !important', fontWeight: 600 }}>THÔNG TIN YÊU CẦU TRẢ HÀNG</h4>
+                  <h4 style={{ marginBottom: 12, fontSize: '1.1rem', color: '#000', fontWeight: 600 }}>THÔNG TIN YÊU CẦU TRẢ HÀNG</h4>
 
-                  <div style={{ marginBottom: 8 }}>
-                    <strong style={{ color: '#6c757d' }}>Trạng thái:</strong>
-                    <span style={{
+                  <div className="force-black-text" style={{ marginBottom: 8 }}>
+                    <strong className="force-black-text" style={{ color: '#000 !important' }}>Trạng thái:</strong>
+                    <span className="force-black-text" style={{
                       marginLeft: 8,
                       padding: '2px 8px',
                       borderRadius: 4,
@@ -730,10 +732,7 @@ const ListOrder = () => {
                         selectedOrder.returnRequest.status === 'processing' ? '#cce5ff' :
                           selectedOrder.returnRequest.status === 'approved' ? '#d4edda' :
                             selectedOrder.returnRequest.status === 'rejected' ? '#f8d7da' : '#f8f9fa',
-                      color: selectedOrder.returnRequest.status === 'pending' ? '#856404' :
-                        selectedOrder.returnRequest.status === 'processing' ? '#004085' :
-                          selectedOrder.returnRequest.status === 'approved' ? '#155724' :
-                            selectedOrder.returnRequest.status === 'rejected' ? '#721c24' : '#6c757d'
+                      color: '#000 !important'
                     }}>
                       {selectedOrder.returnRequest.status === 'pending' ? 'Chờ xử lý' :
                         selectedOrder.returnRequest.status === 'processing' ? 'Đang xử lý' :
@@ -742,23 +741,23 @@ const ListOrder = () => {
                     </span>
                   </div>
 
-                  <div style={{ marginBottom: 8 }}>
-                    <strong style={{ color: '#6c757d' }}>Ngày yêu cầu:</strong>
-                    <span style={{ marginLeft: 8, color: '#495057' }}>
+                  <div className="force-black-text" style={{ marginBottom: 8 }}>
+                    <strong className="force-black-text" style={{ color: '#000 !important' }}>Ngày yêu cầu:</strong>
+                    <span className="force-black-text" style={{ marginLeft: 8, color: '#000 !important' }}>
                       {selectedOrder.returnRequest.requestDate ? formatDateTime(selectedOrder.returnRequest.requestDate) : '---'}
                     </span>
                   </div>
 
-                  <div style={{ marginBottom: 8 }}>
-                    <strong style={{ color: '#6c757d' }}>Lý do:</strong>
-                    <div style={{
+                  <div className="force-black-text" style={{ marginBottom: 8 }}>
+                    <strong className="force-black-text" style={{ color: '#000 !important' }}>Lý do:</strong>
+                    <div className="force-black-text" style={{
                       marginTop: 4,
                       padding: '8px',
                       background: '#fff',
                       borderRadius: 4,
                       border: '1px solid #dee2e6',
                       fontSize: '0.9rem',
-                      color: '#495057',
+                      color: '#000 !important',
                       maxHeight: '60px',
                       overflow: 'auto'
                     }}>
@@ -766,38 +765,38 @@ const ListOrder = () => {
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: 8 }}>
-                    <strong style={{ color: '#6c757d' }}>Thông tin hoàn tiền:</strong>
+                  <div className="force-black-text" style={{ marginBottom: 8 }}>
+                    <strong className="force-black-text" style={{ color: '#000 !important' }}>Thông tin hoàn tiền:</strong>
                     {selectedOrder.returnRequest.bankInfo ? (
-                      <div style={{ marginTop: 4, padding: '8px', background: '#fff', borderRadius: 4, border: '1px solid #dee2e6', fontSize: '0.85rem' }}>
-                        <div style={{ marginBottom: 4 }}>
-                          <strong style={{ color: '#495057' }}>Ngân hàng:</strong>
+                      <div className="force-black-text" style={{ marginTop: 4, padding: '8px', background: '#fff', borderRadius: 4, border: '1px solid #dee2e6', fontSize: '0.85rem', color: '#000 !important' }}>
+                        <div className="force-black-text" style={{ marginBottom: 4 }}>
+                          <strong className="force-black-text" style={{ color: '#000 !important' }}>Ngân hàng:</strong>
                           <span style={{ marginLeft: 8, color: '#007bff', fontWeight: '500' }}>
                             {selectedOrder.returnRequest.bankInfo.bankName || '---'}
                           </span>
                         </div>
-                        <div style={{ marginBottom: 4 }}>
-                          <strong style={{ color: '#495057' }}>Số tài khoản:</strong>
+                        <div className="force-black-text" style={{ marginBottom: 4 }}>
+                          <strong className="force-black-text" style={{ color: '#000 !important' }}>Số tài khoản:</strong>
                           <span style={{ marginLeft: 8, color: '#28a745', fontWeight: '600', fontFamily: 'monospace' }}>
                             {selectedOrder.returnRequest.bankInfo.accountNumber || '---'}
                           </span>
                         </div>
-                        <div>
-                          <strong style={{ color: '#495057' }}>Tên chủ tài khoản:</strong>
-                          <span style={{ marginLeft: 8, color: '#6c757d', fontWeight: '500' }}>
+                        <div className="force-black-text">
+                          <strong className="force-black-text" style={{ color: '#000 !important' }}>Tên chủ tài khoản:</strong>
+                          <span style={{ marginLeft: 8, color: '#000 !important', fontWeight: '500' }}>
                             {selectedOrder.returnRequest.bankInfo.accountName || '---'}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <div style={{
+                      <div className="force-black-text" style={{
                         marginTop: 4,
                         padding: '8px',
                         background: '#f8f9fa',
                         borderRadius: 4,
                         border: '1px solid #dee2e6',
                         fontSize: '0.85rem',
-                        color: '#6c757d',
+                        color: '#000 !important',
                         fontStyle: 'italic'
                       }}>
                         Khách hàng chưa cung cấp thông tin hoàn tiền
@@ -806,8 +805,8 @@ const ListOrder = () => {
                   </div>
 
                   {selectedOrder.returnRequest.images && selectedOrder.returnRequest.images.length > 0 && (
-                    <div style={{ marginBottom: 8 }}>
-                      <strong style={{ color: '#6c757d' }}>Hình ảnh từ khách hàng:</strong>
+                    <div className="force-black-text" style={{ marginBottom: 8 }}>
+                      <strong className="force-black-text" style={{ color: '#000 !important' }}>Hình ảnh từ khách hàng:</strong>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                         {selectedOrder.returnRequest.images.map((img, idx) => (
                           <a href={img} target="_blank" rel="noopener noreferrer" key={idx}>
